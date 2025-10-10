@@ -47,5 +47,12 @@ public class AdaptivePlatformUiPlugin: NSObject, FlutterPlugin {
             ios26PopupMenuButtonFactory,
             withId: "adaptive_platform_ui/ios26_popup_menu_button"
         )
+
+        // Register iOS 26 TabBar platform view factory
+        let ios26TabBarFactory = iOS26TabBarViewFactory(messenger: registrar.messenger())
+        registrar.register(
+            ios26TabBarFactory,
+            withId: "adaptive_platform_ui/ios26_tab_bar"
+        )
     }
 }
