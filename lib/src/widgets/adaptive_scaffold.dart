@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import '../platform/platform_info.dart';
-import '../style/sf_symbol.dart';
 import 'adaptive_app_bar_action.dart';
 import 'ios26/ios26_scaffold.dart';
 
@@ -47,10 +46,10 @@ enum TabBarMinimizeBehavior {
 class AdaptiveScaffold extends StatelessWidget {
   const AdaptiveScaffold({
     super.key,
-    required this.destinations,
-    required this.selectedIndex,
-    required this.onDestinationSelected,
-    required this.children,
+    this.destinations,
+    this.selectedIndex,
+    this.onDestinationSelected,
+    this.child,
     this.title,
     this.actions,
     this.leading,
@@ -60,16 +59,19 @@ class AdaptiveScaffold extends StatelessWidget {
   });
 
   /// Navigation destinations for bottom navigation bar
-  final List<AdaptiveNavigationDestination> destinations;
+  /// If null, no bottom navigation will be shown
+  final List<AdaptiveNavigationDestination>? destinations;
 
   /// Currently selected destination index
-  final int selectedIndex;
+  /// If null, no destination will be selected
+  final int? selectedIndex;
 
   /// Called when a destination is selected
-  final ValueChanged<int> onDestinationSelected;
+  /// If null, navigation will not be interactive
+  final ValueChanged<int>? onDestinationSelected;
 
-  /// Child widgets for each destination (indexed by selectedIndex)
-  final List<Widget> children;
+  /// Child widget
+  final Widget? child;
 
   /// Title for the navigation bar
   final String? title;
@@ -96,130 +98,91 @@ class AdaptiveScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // iOS 26+ - Use native iOS 26 tab bar and navigation bar
+    // iOS 26+ - Always use native iOS 26 toolbar
     if (PlatformInfo.isIOS26OrHigher()) {
+      // If destinations are provided but only one child, replicate child for each destination
+      List<Widget> childrenList;
+      if (destinations != null && destinations!.isNotEmpty) {
+        // Tab-based navigation: replicate single child for all tabs
+        childrenList = List.generate(
+          destinations!.length,
+          (index) => child ?? const SizedBox.shrink(),
+        );
+      } else {
+        // Single page: just one child
+        childrenList = [child ?? const SizedBox.shrink()];
+      }
+
       return iOS26Scaffold(
-        destinations: destinations,
-        selectedIndex: selectedIndex,
-        onDestinationSelected: onDestinationSelected,
+        destinations: destinations ?? [],
+        selectedIndex: selectedIndex ?? 0,
+        onDestinationSelected: onDestinationSelected ?? (_) {},
         title: title,
         actions: actions,
         leading: leading,
         minimizeBehavior: minimizeBehavior,
         enableBlur: enableBlur,
-        children: children,
+        children: childrenList,
       );
     }
 
-    // iOS <26 - Use CupertinoTabScaffold
+    // iOS <26 - Use CupertinoPageScaffold
     if (PlatformInfo.isIOS) {
-      return _CupertinoScaffold(
-        destinations: destinations,
-        selectedIndex: selectedIndex,
-        onDestinationSelected: onDestinationSelected,
-        title: title,
-        actions: actions,
-        leading: leading,
-        children: children,
+      return CupertinoPageScaffold(
+        navigationBar: CupertinoNavigationBar(
+          middle: title != null ? Text(title!) : null,
+          trailing: actions != null && actions!.isNotEmpty
+              ? Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: actions!.map((action) {
+                    Widget actionChild;
+                    if (action.title != null) {
+                      actionChild = Text(action.title!);
+                    } else if (action.iosSymbol != null) {
+                      actionChild = Icon(
+                        _sfSymbolToCupertinoIcon(action.iosSymbol!),
+                      );
+                    } else {
+                      actionChild = const Icon(CupertinoIcons.circle);
+                    }
+
+                    return CupertinoButton(
+                      padding: EdgeInsets.zero,
+                      onPressed: action.onPressed,
+                      child: actionChild,
+                    );
+                  }).toList(),
+                )
+              : null,
+          leading: leading,
+        ),
+        child: child ?? const SizedBox.shrink(),
       );
     }
 
-    // Android - Use Material Scaffold with NavigationBar
-    return _MaterialScaffold(
-      destinations: destinations,
-      selectedIndex: selectedIndex,
-      onDestinationSelected: onDestinationSelected,
-      title: title,
-      actions: actions,
-      leading: leading,
-      floatingActionButton: floatingActionButton,
-      children: children,
-    );
-  }
-}
-
-/// Cupertino implementation for iOS <26
-class _CupertinoScaffold extends StatelessWidget {
-  const _CupertinoScaffold({
-    required this.destinations,
-    required this.selectedIndex,
-    required this.onDestinationSelected,
-    this.title,
-    this.actions,
-    this.leading,
-    required this.children,
-  });
-
-  final List<AdaptiveNavigationDestination> destinations;
-  final int selectedIndex;
-  final ValueChanged<int> onDestinationSelected;
-  final String? title;
-  final List<AdaptiveAppBarAction>? actions;
-  final Widget? leading;
-  final List<Widget> children;
-
-  @override
-  Widget build(BuildContext context) {
-    return CupertinoTabScaffold(
-      tabBar: CupertinoTabBar(
-        currentIndex: selectedIndex,
-        onTap: onDestinationSelected,
-        items: destinations.map((dest) {
-          return BottomNavigationBarItem(
-            icon: _getIcon(dest.icon),
-            activeIcon: dest.selectedIcon != null
-                ? _getIcon(dest.selectedIcon!)
-                : _getIcon(dest.icon),
-            label: dest.label,
+    // Android/Material platform
+    return Scaffold(
+      appBar: AppBar(
+        title: title != null ? Text(title!) : null,
+        actions: actions?.map((action) {
+          if (action.title != null) {
+            return TextButton(
+              onPressed: action.onPressed,
+              child: Text(action.title!),
+            );
+          }
+          return IconButton(
+            icon: action.androidIcon != null
+                ? Icon(action.androidIcon!)
+                : const Icon(Icons.circle),
+            onPressed: action.onPressed,
           );
         }).toList(),
+        leading: leading,
       ),
-      tabBuilder: (context, index) {
-        return CupertinoTabView(
-          builder: (context) {
-            return CupertinoPageScaffold(
-              navigationBar: CupertinoNavigationBar(
-                middle: title != null ? Text(title!) : null,
-                trailing: actions != null && actions!.isNotEmpty
-                    ? Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: actions!.map((action) {
-                          Widget child;
-                          if (action.title != null) {
-                            child = Text(action.title!);
-                          } else if (action.iosSymbol != null) {
-                            // Map SF Symbol to CupertinoIcon for iOS < 26
-                            child = Icon(_sfSymbolToCupertinoIcon(action.iosSymbol!));
-                          } else {
-                            child = const Icon(CupertinoIcons.circle);
-                          }
-
-                          return CupertinoButton(
-                            padding: EdgeInsets.zero,
-                            onPressed: action.onPressed,
-                            child: child,
-                          );
-                        }).toList(),
-                      )
-                    : null,
-                leading: leading,
-              ),
-              child: SafeArea(child: children[index]),
-            );
-          },
-        );
-      },
+      body: child ?? const SizedBox.shrink(),
+      floatingActionButton: floatingActionButton,
     );
-  }
-
-  Widget _getIcon(dynamic icon) {
-    if (icon is IconData) {
-      return Icon(icon);
-    } else if (icon is String) {
-      // Try to map SF Symbol to Cupertino icon
-      return Icon(_sfSymbolToCupertinoIcon(icon));
-    }
-    return Icon(CupertinoIcons.circle);
   }
 
   IconData _sfSymbolToCupertinoIcon(String sfSymbol) {
@@ -246,102 +209,5 @@ class _CupertinoScaffold extends StatelessWidget {
       'checkmark.circle': CupertinoIcons.checkmark_circle,
     };
     return iconMap[sfSymbol] ?? CupertinoIcons.circle;
-  }
-}
-
-/// Material implementation for Android
-class _MaterialScaffold extends StatelessWidget {
-  const _MaterialScaffold({
-    required this.destinations,
-    required this.selectedIndex,
-    required this.onDestinationSelected,
-    this.title,
-    this.actions,
-    this.leading,
-    this.floatingActionButton,
-    required this.children,
-  });
-
-  final List<AdaptiveNavigationDestination> destinations;
-  final int selectedIndex;
-  final ValueChanged<int> onDestinationSelected;
-  final String? title;
-  final List<AdaptiveAppBarAction>? actions;
-  final Widget? leading;
-  final Widget? floatingActionButton;
-  final List<Widget> children;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: title != null ? Text(title!) : null,
-        actions: actions?.map((action) {
-          if (action.title != null) {
-            return TextButton(
-              onPressed: action.onPressed,
-              child: Text(action.title!),
-            );
-          }
-          return IconButton(
-            icon: action.androidIcon != null
-                ? Icon(action.androidIcon!)
-                : const Icon(Icons.circle),
-            onPressed: action.onPressed,
-          );
-        }).toList(),
-        leading: leading,
-      ),
-      body: IndexedStack(
-        index: selectedIndex,
-        children: children,
-      ),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: selectedIndex,
-        onDestinationSelected: onDestinationSelected,
-        destinations: destinations.map((dest) {
-          return NavigationDestination(
-            icon: _getIcon(dest.icon),
-            selectedIcon: dest.selectedIcon != null
-                ? _getIcon(dest.selectedIcon!)
-                : _getIcon(dest.icon),
-            label: dest.label,
-          );
-        }).toList(),
-      ),
-      floatingActionButton: floatingActionButton,
-    );
-  }
-
-  Widget _getIcon(dynamic icon) {
-    if (icon is IconData) {
-      return Icon(icon);
-    } else if (icon is String) {
-      // Try to map SF Symbol to Material icon
-      return Icon(_sfSymbolToMaterialIcon(icon));
-    }
-    return const Icon(Icons.circle);
-  }
-
-  IconData _sfSymbolToMaterialIcon(String sfSymbol) {
-    const iconMap = {
-      'house': Icons.home_outlined,
-      'house.fill': Icons.home,
-      'magnifyingglass': Icons.search,
-      'heart': Icons.favorite_border,
-      'heart.fill': Icons.favorite,
-      'person': Icons.person_outline,
-      'person.fill': Icons.person,
-      'gear': Icons.settings_outlined,
-      'star': Icons.star_border,
-      'star.fill': Icons.star,
-      'bell': Icons.notifications_outlined,
-      'bell.fill': Icons.notifications,
-      'bag': Icons.shopping_bag_outlined,
-      'bag.fill': Icons.shopping_bag,
-      'bookmark': Icons.bookmark_border,
-      'bookmark.fill': Icons.bookmark,
-    };
-    return iconMap[sfSymbol] ?? Icons.circle;
   }
 }

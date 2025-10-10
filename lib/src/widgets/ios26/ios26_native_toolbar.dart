@@ -1,5 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import '../adaptive_app_bar_action.dart';
 
@@ -31,32 +33,64 @@ class iOS26NativeToolbar extends StatefulWidget {
 
 class _iOS26NativeToolbarState extends State<iOS26NativeToolbar> {
   MethodChannel? _channel;
+  String? _lastTitle;
+  String? _lastLeadingText;
+  List<AdaptiveAppBarAction>? _lastActions;
+  late final Key _persistentKey;
+
+  @override
+  void initState() {
+    super.initState();
+    // Create a persistent key that won't change across rebuilds
+    _persistentKey = UniqueKey();
+  }
 
   @override
   void didUpdateWidget(iOS26NativeToolbar oldWidget) {
     super.didUpdateWidget(oldWidget);
-
-    // Update toolbar if title, leading, or actions changed
-    if (oldWidget.title != widget.title ||
-        oldWidget.leading != widget.leading ||
-        oldWidget.leadingText != widget.leadingText ||
-        oldWidget.actions != widget.actions) {
-      _updateToolbar();
-    }
+    _syncPropsToNativeIfNeeded();
   }
 
-  void _updateToolbar() {
-    if (_channel == null) return;
+  Future<void> _syncPropsToNativeIfNeeded() async {
+    final ch = _channel;
+    if (ch == null) return;
 
-    final params = <String, dynamic>{
-      if (widget.title != null) 'title': widget.title!,
-      if (widget.leadingText != null) 'leading': widget.leadingText!,
-      if (widget.leading != null) 'leading': '',
-      if (widget.actions != null && widget.actions!.isNotEmpty)
-        'actions': widget.actions!.map((action) => action.toNativeMap()).toList(),
-    };
+    bool needsUpdate = false;
+    final params = <String, dynamic>{};
 
-    _channel!.invokeMethod('updateToolbar', params);
+    // Check title
+    if (_lastTitle != widget.title) {
+      params['title'] = widget.title ?? '';
+      _lastTitle = widget.title;
+      needsUpdate = true;
+    }
+
+    // Check leading text - send null/empty explicitly when removed
+    if (_lastLeadingText != widget.leadingText) {
+      if (widget.leadingText != null) {
+        params['leading'] = widget.leadingText!;
+      } else {
+        // Explicitly send null to clear the leading button
+        params['clearLeading'] = true;
+      }
+      _lastLeadingText = widget.leadingText;
+      needsUpdate = true;
+    }
+
+    // Check actions (compare by reference or serialize)
+    if (_lastActions != widget.actions) {
+      if (widget.actions != null && widget.actions!.isNotEmpty) {
+        params['actions'] = widget.actions!.map((action) => action.toNativeMap()).toList();
+      } else {
+        params['actions'] = [];
+      }
+      _lastActions = widget.actions;
+      needsUpdate = true;
+    }
+
+    if (needsUpdate) {
+      await ch.invokeMethod('updateToolbar', params);
+    }
   }
 
   @override
@@ -77,10 +111,14 @@ class _iOS26NativeToolbarState extends State<iOS26NativeToolbar> {
     return SizedBox(
       height: widget.height + MediaQuery.of(context).padding.top,
       child: UiKitView(
+        key: _persistentKey,
         viewType: 'adaptive_platform_ui/ios26_toolbar',
         creationParams: creationParams,
         creationParamsCodec: const StandardMessageCodec(),
         onPlatformViewCreated: _onPlatformViewCreated,
+        hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+        // Enable Hybrid Composition mode for better layer integration
+        gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
       ),
     );
   }
@@ -88,6 +126,11 @@ class _iOS26NativeToolbarState extends State<iOS26NativeToolbar> {
   void _onPlatformViewCreated(int id) {
     _channel = MethodChannel('adaptive_platform_ui/ios26_toolbar_$id');
     _channel!.setMethodCallHandler(_handleMethodCall);
+
+    // Cache initial values to prevent unnecessary updates
+    _lastTitle = widget.title;
+    _lastLeadingText = widget.leadingText;
+    _lastActions = widget.actions;
   }
 
   Future<dynamic> _handleMethodCall(MethodCall call) async {

@@ -35,6 +35,11 @@ class iOS26ToolbarPlatformView: NSObject, FlutterPlatformView {
     private var _viewId: Int64
     private var _channel: FlutterMethodChannel
 
+    // Cache current state
+    private var _currentTitle: String?
+    private var _currentLeading: String?
+    private var _currentActions: [[String: Any]]?
+
     init(
         frame: CGRect,
         viewIdentifier viewId: Int64,
@@ -105,36 +110,57 @@ class iOS26ToolbarPlatformView: NSObject, FlutterPlatformView {
     }
 
     private func configureToolbar(_ params: [String: Any]) {
+        // Update cached state with new values
+        if params.keys.contains("title") {
+            if let title = params["title"] as? String {
+                _currentTitle = title.isEmpty ? nil : title
+            }
+        }
+
+        // Handle leading - check for clearLeading flag
+        if params.keys.contains("clearLeading") {
+            _currentLeading = nil
+        } else if params.keys.contains("leading") {
+            if let leading = params["leading"] as? String {
+                // Keep empty string for back button, only set nil if truly absent
+                _currentLeading = leading
+            }
+        }
+
+        if params.keys.contains("actions") {
+            if let actions = params["actions"] as? [[String: Any]] {
+                _currentActions = actions.isEmpty ? nil : actions
+            }
+        }
+
+        // Rebuild toolbar with current state
         var items: [UIBarButtonItem] = []
 
-        // Leading button
-        if let leadingTitle = params["leading"] as? String {
-            let leadingButton: UIBarButtonItem
-            if leadingTitle.isEmpty {
-                // Empty string = show back chevron icon
-                leadingButton = UIBarButtonItem(
-                    image: UIImage(systemName: "chevron.left"),
-                    style: .plain,
-                    target: self,
-                    action: #selector(leadingTapped)
-                )
-            } else {
-                // Show text
-                leadingButton = UIBarButtonItem(
-                    title: leadingTitle,
-                    style: .plain,
-                    target: self,
-                    action: #selector(leadingTapped)
-                )
-            }
+        // Leading button (if exists)
+        if let leadingTitle = _currentLeading, !leadingTitle.isEmpty {
+            let leadingButton = UIBarButtonItem(
+                title: leadingTitle,
+                style: .plain,
+                target: self,
+                action: #selector(leadingTapped)
+            )
+            items.append(leadingButton)
+        } else if _currentLeading != nil && _currentLeading!.isEmpty {
+            // Empty string = show back chevron icon
+            let leadingButton = UIBarButtonItem(
+                image: UIImage(systemName: "chevron.left"),
+                style: .plain,
+                target: self,
+                action: #selector(leadingTapped)
+            )
             items.append(leadingButton)
         }
 
         // Flexible space before title
         items.append(UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil))
 
-        // Title (center)
-        if let title = params["title"] as? String {
+        // Title (center) - always add if exists
+        if let title = _currentTitle, !title.isEmpty {
             let titleLabel = UILabel()
             titleLabel.text = title
             titleLabel.font = UIFont.systemFont(ofSize: 17, weight: .semibold)
@@ -149,7 +175,7 @@ class iOS26ToolbarPlatformView: NSObject, FlutterPlatformView {
         items.append(UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil))
 
         // Trailing buttons (actions)
-        if let actions = params["actions"] as? [[String: Any]] {
+        if let actions = _currentActions {
             for (index, action) in actions.enumerated() {
                 if let actionTitle = action["title"] as? String {
                     let actionButton = UIBarButtonItem(
@@ -158,7 +184,7 @@ class iOS26ToolbarPlatformView: NSObject, FlutterPlatformView {
                         target: self,
                         action: #selector(actionTapped(_:))
                     )
-                    actionButton.tag = index  // Set tag to action index
+                    actionButton.tag = index
                     items.append(actionButton)
                 } else if let actionIcon = action["icon"] as? String {
                     let iconButton = UIBarButtonItem(
@@ -167,7 +193,7 @@ class iOS26ToolbarPlatformView: NSObject, FlutterPlatformView {
                         target: self,
                         action: #selector(actionTapped(_:))
                     )
-                    iconButton.tag = index  // Set tag to action index
+                    iconButton.tag = index
                     items.append(iconButton)
                 }
             }

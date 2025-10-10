@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import '../adaptive_app_bar_action.dart';
 import '../adaptive_scaffold.dart';
 import 'ios26_native_tab_bar.dart';
@@ -116,14 +117,16 @@ class _iOS26ScaffoldState extends State<iOS26Scaffold>
       leadingCallback = () => Navigator.of(context).pop();
     }
 
+    // Wrap everything in Material to ensure proper layer ordering during transitions
     return CupertinoPageScaffold(
       child: NotificationListener<ScrollNotification>(
         onNotification: _handleScrollNotification,
         child: Stack(
           children: [
-            // Content - full screen
+            // Content - full screen - use KeepAlive to prevent rebuild
             IndexedStack(
               index: widget.selectedIndex,
+              sizing: StackFit.expand,
               children: widget.children,
             ),
             // Top toolbar - iOS 26 Liquid Glass style

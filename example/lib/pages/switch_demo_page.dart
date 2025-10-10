@@ -15,23 +15,26 @@ class _SwitchDemoPageState extends State<SwitchDemoPage> {
   bool _redSwitch = false;
   bool _greenSwitch = true;
   bool _purpleSwitch = false;
-  bool _disabledSwitch = true;
+  final bool _disabledSwitch = false;
 
   @override
   Widget build(BuildContext context) {
     return AdaptiveScaffold(
       title: 'AdaptiveSwitch Demo',
-      destinations: const [],
-      selectedIndex: 0,
-      onDestinationSelected: (_) {},
-      children: [SafeArea(child: _buildContent())],
+      child: _buildContent(),
     );
   }
 
   Widget _buildContent() {
     return ListView(
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.only(
+        left: 16.0,
+        bottom: 40,
+        right: 32.0,
+        top: 16.0,
+      ),
       children: [
+        SizedBox(height: 120),
         // Platform Information
         _buildSection(
           'Platform Information',

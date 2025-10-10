@@ -20,12 +20,7 @@ class _SliderDemoPageState extends State<SliderDemoPage> {
   Widget build(BuildContext context) {
     return AdaptiveScaffold(
       title: 'AdaptiveSlider Demo',
-      destinations: const [],
-      selectedIndex: 0,
-      onDestinationSelected: (_) {},
-      children: [
-        SafeArea(child: _buildContent()),
-      ],
+      child: _buildContent(),
     );
   }
 
@@ -33,6 +28,7 @@ class _SliderDemoPageState extends State<SliderDemoPage> {
     return ListView(
       padding: const EdgeInsets.all(16.0),
       children: [
+        SizedBox(height: 120),
         _buildSection(
           'Basic Slider',
           Column(

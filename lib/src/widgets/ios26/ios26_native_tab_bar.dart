@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:adaptive_platform_ui/src/widgets/adaptive_segmented_control.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -44,8 +45,10 @@ class _iOS26NativeTabBarState extends State<iOS26NativeTabBar> {
   List<String>? _lastSymbols;
   TabBarMinimizeBehavior? _lastMinimizeBehavior;
 
-  bool get _isDark => MediaQuery.platformBrightnessOf(context) == Brightness.dark;
-  Color? get _effectiveTint => widget.tint ?? CupertinoTheme.of(context).primaryColor;
+  bool get _isDark =>
+      MediaQuery.platformBrightnessOf(context) == Brightness.dark;
+  Color? get _effectiveTint =>
+      widget.tint ?? CupertinoTheme.of(context).primaryColor;
 
   @override
   void didUpdateWidget(covariant iOS26NativeTabBar oldWidget) {
@@ -115,7 +118,9 @@ class _iOS26NativeTabBarState extends State<iOS26NativeTabBar> {
     return SizedBox(
       height: widget.height ?? 50,
       child: Container(
-        color: widget.backgroundColor ?? CupertinoColors.systemBackground.resolveFrom(context),
+        color:
+            widget.backgroundColor ??
+            CupertinoColors.systemBackground.resolveFrom(context),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: List.generate(
@@ -156,7 +161,9 @@ class _iOS26NativeTabBarState extends State<iOS26NativeTabBar> {
     ch.setMethodCallHandler(_onMethodCall);
     _lastIndex = widget.selectedIndex;
     _lastTint = _effectiveTint != null ? _colorToARGB(_effectiveTint!) : null;
-    _lastBg = widget.backgroundColor != null ? _colorToARGB(widget.backgroundColor!) : null;
+    _lastBg = widget.backgroundColor != null
+        ? _colorToARGB(widget.backgroundColor!)
+        : null;
     _lastIsDark = _isDark;
     _lastMinimizeBehavior = widget.minimizeBehavior;
     _requestIntrinsicSize();
@@ -181,7 +188,9 @@ class _iOS26NativeTabBarState extends State<iOS26NativeTabBar> {
 
     final idx = widget.selectedIndex;
     final tint = _effectiveTint != null ? _colorToARGB(_effectiveTint!) : null;
-    final bg = widget.backgroundColor != null ? _colorToARGB(widget.backgroundColor!) : null;
+    final bg = widget.backgroundColor != null
+        ? _colorToARGB(widget.backgroundColor!)
+        : null;
 
     if (_lastIndex != idx) {
       await ch.invokeMethod('setSelectedIndex', {'index': idx});

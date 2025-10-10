@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 
+/// Demo page showcasing AdaptiveButton features
 class ButtonDemoPage extends StatefulWidget {
   const ButtonDemoPage({super.key});
 
@@ -10,329 +11,333 @@ class ButtonDemoPage extends StatefulWidget {
 }
 
 class _ButtonDemoPageState extends State<ButtonDemoPage> {
-  int _pressCount = 0;
-  AdaptiveButtonStyle _selectedStyle = AdaptiveButtonStyle.prominentGlass;
-  AdaptiveButtonSize _selectedSize = AdaptiveButtonSize.medium;
-
-  void _handlePress() => setState(() => _pressCount++);
-
   @override
   Widget build(BuildContext context) {
-    // Use AdaptiveScaffold with single content (no tabs)
-    return AdaptiveScaffold(
-      title: 'AdaptiveButton Demo',
-      destinations: const [],
-      selectedIndex: 0,
-      actions: [
-        AdaptiveAppBarAction(
-          iosSymbol: 'info.circle',
-          androidIcon: Icons.info_outline,
-          onPressed: () {
-            showAboutDialog(
-              context: context,
-              applicationName: 'Adaptive Platform UI',
-              applicationVersion: '1.0.0',
-              applicationLegalese: '© 2024 Your Company',
-            );
-          },
-        ),
-      ],
-      onDestinationSelected: (_) {},
-      children: [_buildContent()],
-    );
+    return AdaptiveScaffold(title: 'Button Demos', child: _buildBody(context));
   }
 
-  Widget _buildContent() {
+  Widget _buildBody(BuildContext context) {
+    final topPadding = PlatformInfo.isIOS ? 130.0 : 16.0;
+
     return ListView(
       padding: EdgeInsets.only(
         left: 16.0,
         right: 16.0,
-        top: 16.0 + MediaQuery.of(context).padding.top + 52, // Toolbar height
+        top: topPadding,
         bottom: 16.0,
       ),
       children: [
-        // Style Selector
         _buildSection(
-          'Button Style',
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: AdaptiveButtonStyle.values.map((style) {
-              return _buildChip(
-                _getStyleName(style),
-                _selectedStyle == style,
-                () => setState(() => _selectedStyle = style),
-              );
-            }).toList(),
-          ),
+          context,
+          title: 'iOS 26 Button Examples',
+          children: [
+            const Text(
+              'Default Button',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+            ),
+            const SizedBox(height: 8),
+            SizedBox(
+              width: double.infinity,
+              child: AdaptiveButton(
+                style: AdaptiveButtonStyle.prominentGlass,
+                textColor: Colors.white,
+                onPressed: () =>
+                    _showMessage(context, 'Default button pressed'),
+                label: 'Click Me',
+              ),
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'Button with Icon',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+            ),
+            const SizedBox(height: 8),
+            SizedBox(
+              width: double.infinity,
+              child: AdaptiveButton.sfSymbol(
+                style: AdaptiveButtonStyle.prominentGlass,
+                onPressed: () => _showMessage(context, 'Icon button pressed'),
+                sfSymbol: SFSymbol('heart.fill', size: 20),
+              ),
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'Disabled Button',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+            ),
+            const SizedBox(height: 8),
+            SizedBox(
+              width: double.infinity,
+              child: const AdaptiveButton(onPressed: null, label: 'Disabled'),
+            ),
+          ],
         ),
 
         const SizedBox(height: 24),
-
-        // Size Selector
         _buildSection(
-          'Button Size',
-          Wrap(
-            spacing: 8,
-            children: AdaptiveButtonSize.values.map((size) {
-              return _buildChip(
-                _getSizeName(size),
-                _selectedSize == size,
-                () => setState(() => _selectedSize = size),
-              );
-            }).toList(),
-          ),
+          context,
+          title: 'Basic Buttons',
+          children: [
+            const Text(
+              'Default Button',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+            ),
+            const SizedBox(height: 8),
+            AdaptiveButton(
+              onPressed: () => _showMessage(context, 'Default button pressed'),
+              label: 'Click Me',
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'Button with Icon',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+            ),
+            const SizedBox(height: 8),
+            AdaptiveButton.icon(
+              onPressed: () => _showMessage(context, 'Icon button pressed'),
+              icon: PlatformInfo.isIOS
+                  ? CupertinoIcons.heart_fill
+                  : Icons.favorite,
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'Disabled Buttson',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+            ),
+            const SizedBox(height: 8),
+            const AdaptiveButton(onPressed: null, label: 'Disabled'),
+          ],
         ),
-
-        const SizedBox(height: 32),
-
-        // Interactive Demo
-        Center(
-          child: Column(
-            children: [
-              AdaptiveButton(
-                onPressed: _handlePress,
-                style: _selectedStyle,
-                size: _selectedSize,
-                label: 'Press Me',
-                textColor: Colors.white,
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'Pressed $_pressCount times',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: PlatformInfo.isIOS
-                      ? CupertinoColors.secondaryLabel
-                      : Colors.black54,
-                ),
-              ),
-            ],
-          ),
-        ),
-
-        const SizedBox(height: 32),
-
-        // All Styles Showcase
+        const SizedBox(height: 24),
         _buildSection(
-          'All Button Styles',
-          Column(
-            children: [
-              _buildButtonRow('Filled', AdaptiveButtonStyle.filled),
-              const SizedBox(height: 12),
-              _buildButtonRow('Tinted', AdaptiveButtonStyle.tinted),
-              const SizedBox(height: 12),
-              _buildButtonRow('Gray', AdaptiveButtonStyle.gray),
-              const SizedBox(height: 12),
-              _buildButtonRow('Bordered', AdaptiveButtonStyle.bordered),
-              const SizedBox(height: 12),
-              _buildButtonRow('Plain', AdaptiveButtonStyle.plain),
-              const SizedBox(height: 12),
-              _buildButtonRow('Glass', AdaptiveButtonStyle.glass),
-              const SizedBox(height: 12),
-              _buildButtonRow(
-                'Prominent Glass',
-                AdaptiveButtonStyle.prominentGlass,
-              ),
-            ],
-          ),
+          context,
+          title: 'Button Styles',
+          children: [
+            const Text(
+              'Filled Button',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+            ),
+            const SizedBox(height: 8),
+            AdaptiveButton(
+              onPressed: () => _showMessage(context, 'Filled button'),
+              style: AdaptiveButtonStyle.filled,
+              label: 'Filled',
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'Tinted Button',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+            ),
+            const SizedBox(height: 8),
+            AdaptiveButton(
+              onPressed: () => _showMessage(context, 'Tinted button'),
+              style: AdaptiveButtonStyle.tinted,
+              label: 'Tinted',
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'Bordered Button',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+            ),
+            const SizedBox(height: 8),
+            AdaptiveButton(
+              onPressed: () => _showMessage(context, 'Bordered button'),
+              style: AdaptiveButtonStyle.bordered,
+              label: 'Bordered',
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'Plain Button',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+            ),
+            const SizedBox(height: 8),
+            AdaptiveButton(
+              onPressed: () => _showMessage(context, 'Plain button'),
+              style: AdaptiveButtonStyle.plain,
+              label: 'Plain',
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'Gray Button',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+            ),
+            const SizedBox(height: 8),
+            AdaptiveButton(
+              onPressed: () => _showMessage(context, 'Gray button'),
+              style: AdaptiveButtonStyle.gray,
+              label: 'Gray',
+            ),
+          ],
         ),
-
-        const SizedBox(height: 32),
-
-        // Child Mode Example
+        const SizedBox(height: 24),
         _buildSection(
-          'Child Mode',
-          Column(
-            children: [
-              AdaptiveButton.child(
-                onPressed: _handlePress,
-                style: AdaptiveButtonStyle.prominentGlass,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: const [
-                    Text('⭐', style: TextStyle(fontSize: 16)),
-                    SizedBox(width: 8),
-                    Text('Custom Widget'),
-                    SizedBox(width: 8),
-                    Text('⭐', style: TextStyle(fontSize: 16)),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 32),
-        _buildSection(
-          'Icon Mode',
-          Column(
-            children: [
-              AdaptiveButton.icon(
-                onPressed: _handlePress,
-                style: AdaptiveButtonStyle.prominentGlass,
-                icon: CupertinoIcons.add_circled_solid,
-              ),
-            ],
-          ),
-        ),
-
-        const SizedBox(height: 32),
-        _buildSection(
-          'SF Symbol Mode (iOS 26 Native)',
-          Wrap(
-            spacing: 12,
-            runSpacing: 12,
-            children: [
-              AdaptiveButton.sfSymbol(
-                onPressed: _handlePress,
-                style: AdaptiveButtonStyle.glass,
-                sfSymbol: const SFSymbol('star.fill', size: 13),
-              ),
-              AdaptiveButton.sfSymbol(
-                onPressed: _handlePress,
-                style: AdaptiveButtonStyle.prominentGlass,
-                sfSymbol: const SFSymbol('heart.fill', size: 14),
-              ),
-              AdaptiveButton.sfSymbol(
-                onPressed: _handlePress,
+          context,
+          title: 'Button Sizes',
+          children: [
+            const Text(
+              'Large Button',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+            ),
+            const SizedBox(height: 8),
+            SizedBox(
+              width: double.infinity,
+              child: AdaptiveButton(
+                onPressed: () => _showMessage(context, 'Large button'),
                 style: AdaptiveButtonStyle.filled,
-                sfSymbol: const SFSymbol('plus.app.fill', size: 13),
+                size: AdaptiveButtonSize.large,
+                label: 'Full Width',
               ),
-              AdaptiveButton.sfSymbol(
-                onPressed: _handlePress,
-                style: AdaptiveButtonStyle.tinted,
-                sfSymbol: const SFSymbol('trash.fill', size: 21),
-              ),
-              AdaptiveButton.sfSymbol(
-                onPressed: _handlePress,
-                style: AdaptiveButtonStyle.bordered,
-                sfSymbol: const SFSymbol('square.and.arrow.up', size: 24),
-              ),
-            ],
-          ),
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'Compact Buttons',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  child: AdaptiveButton(
+                    onPressed: () => _showMessage(context, 'Yes'),
+                    style: AdaptiveButtonStyle.filled,
+                    label: 'Yes',
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: AdaptiveButton(
+                    onPressed: () => _showMessage(context, 'No'),
+                    style: AdaptiveButtonStyle.bordered,
+                    label: 'No',
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
-
-        const SizedBox(height: 32),
-
-        // Disabled State
+        const SizedBox(height: 24),
         _buildSection(
-          'Disabled State',
-          Center(
-            child: AdaptiveButton(
-              onPressed: null,
-              style: _selectedStyle,
-              size: _selectedSize,
-              label: 'Disabled',
+          context,
+          title: 'Icon-Only Buttons',
+          children: [
+            const Text(
+              'Action Buttons',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
             ),
-          ),
+            const SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _buildIconButton(
+                  context,
+                  icon: PlatformInfo.isIOS
+                      ? CupertinoIcons.heart
+                      : Icons.favorite_border,
+                  label: 'Like',
+                ),
+                _buildIconButton(
+                  context,
+                  icon: PlatformInfo.isIOS ? CupertinoIcons.share : Icons.share,
+                  label: 'Share',
+                ),
+                _buildIconButton(
+                  context,
+                  icon: PlatformInfo.isIOS
+                      ? CupertinoIcons.bookmark
+                      : Icons.bookmark_border,
+                  label: 'Save',
+                ),
+                _buildIconButton(
+                  context,
+                  icon: PlatformInfo.isIOS
+                      ? CupertinoIcons.ellipsis
+                      : Icons.more_horiz,
+                  label: 'More',
+                ),
+              ],
+            ),
+          ],
         ),
       ],
     );
   }
 
-  Widget _buildSection(String title, Widget content) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: PlatformInfo.isIOS ? CupertinoColors.label : Colors.black87,
-          ),
+  Widget _buildSection(
+    BuildContext context, {
+    required String title,
+    required List<Widget> children,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: PlatformInfo.isIOS
+            ? CupertinoColors.systemBackground
+            : Theme.of(context).colorScheme.surface,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: PlatformInfo.isIOS
+              ? CupertinoColors.separator
+              : Theme.of(context).dividerColor,
+          width: 0.5,
         ),
-        const SizedBox(height: 12),
-        content,
-      ],
-    );
-  }
-
-  Widget _buildChip(String label, bool selected, VoidCallback onTap) {
-    if (PlatformInfo.isIOS) {
-      return GestureDetector(
-        onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          decoration: BoxDecoration(
-            color: selected
-                ? CupertinoColors.systemBlue
-                : CupertinoColors.systemGrey5,
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Text(
-            label,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
             style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-              color: selected ? CupertinoColors.white : CupertinoColors.label,
-            ),
-          ),
-        ),
-      );
-    }
-
-    return FilterChip(
-      label: Text(label),
-      selected: selected,
-      onSelected: (_) => onTap(),
-    );
-  }
-
-  Widget _buildButtonRow(String label, AdaptiveButtonStyle style) {
-    return Row(
-      children: [
-        SizedBox(
-          width: 120,
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: 14,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
               color: PlatformInfo.isIOS
-                  ? CupertinoColors.secondaryLabel
-                  : Colors.black54,
+                  ? CupertinoColors.label
+                  : Theme.of(context).colorScheme.onSurface,
             ),
           ),
+          const SizedBox(height: 16),
+          ...children,
+        ],
+      ),
+    );
+  }
+
+  Widget _buildIconButton(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+  }) {
+    return Column(
+      children: [
+        AdaptiveButton.icon(
+          onPressed: () => _showMessage(context, '$label pressed'),
+          style: AdaptiveButtonStyle.bordered,
+          icon: icon,
         ),
-        Expanded(
-          child: AdaptiveButton(
-            onPressed: _handlePress,
-            style: style,
-            size: AdaptiveButtonSize.medium,
-            label: label,
+        const SizedBox(height: 4),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            color: PlatformInfo.isIOS
+                ? CupertinoColors.secondaryLabel
+                : Theme.of(context).colorScheme.onSurfaceVariant,
           ),
         ),
       ],
     );
   }
 
-  String _getStyleName(AdaptiveButtonStyle style) {
-    switch (style) {
-      case AdaptiveButtonStyle.filled:
-        return 'Filled';
-      case AdaptiveButtonStyle.tinted:
-        return 'Tinted';
-      case AdaptiveButtonStyle.gray:
-        return 'Gray';
-      case AdaptiveButtonStyle.bordered:
-        return 'Bordered';
-      case AdaptiveButtonStyle.plain:
-        return 'Plain';
-      case AdaptiveButtonStyle.glass:
-        return 'Glass';
-      case AdaptiveButtonStyle.prominentGlass:
-        return 'Prominent Glass';
-    }
-  }
-
-  String _getSizeName(AdaptiveButtonSize size) {
-    switch (size) {
-      case AdaptiveButtonSize.small:
-        return 'Small';
-      case AdaptiveButtonSize.medium:
-        return 'Medium';
-      case AdaptiveButtonSize.large:
-        return 'Large';
-    }
+  void _showMessage(BuildContext context, String message) {
+    AdaptiveAlertDialog.show(
+      context: context,
+      title: message,
+      actions: [
+        AlertAction(
+          title: 'OK',
+          onPressed: () {},
+          style: AlertActionStyle.defaultAction,
+        ),
+      ],
+    );
   }
 }
