@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import '../adaptive_app_bar_action.dart';
 
 /// Native iOS 26 UIToolbar widget using platform views
 /// Implements Liquid Glass design with blur effects
@@ -19,7 +20,7 @@ class iOS26NativeToolbar extends StatefulWidget {
   final String? title;
   final Widget? leading;
   final String? leadingText;
-  final List<Widget>? actions;
+  final List<AdaptiveAppBarAction>? actions;
   final VoidCallback? onLeadingTap;
   final ValueChanged<int>? onActionTap;
   final double height;
@@ -50,9 +51,9 @@ class _iOS26NativeToolbarState extends State<iOS26NativeToolbar> {
     final params = <String, dynamic>{
       if (widget.title != null) 'title': widget.title!,
       if (widget.leadingText != null) 'leading': widget.leadingText!,
-      if (widget.leading != null) 'leading': _extractText(widget.leading!),
+      if (widget.leading != null) 'leading': '',
       if (widget.actions != null && widget.actions!.isNotEmpty)
-        'actions': widget.actions!.map((action) => _extractButtonInfo(action)).toList(),
+        'actions': widget.actions!.map((action) => action.toNativeMap()).toList(),
     };
 
     _channel!.invokeMethod('updateToolbar', params);
@@ -68,9 +69,9 @@ class _iOS26NativeToolbarState extends State<iOS26NativeToolbar> {
     final creationParams = <String, dynamic>{
       if (widget.title != null) 'title': widget.title!,
       if (widget.leadingText != null) 'leading': widget.leadingText!,
-      if (widget.leading != null) 'leading': _extractText(widget.leading!),
+      if (widget.leading != null) 'leading': '',
       if (widget.actions != null && widget.actions!.isNotEmpty)
-        'actions': widget.actions!.map((action) => _extractButtonInfo(action)).toList(),
+        'actions': widget.actions!.map((action) => action.toNativeMap()).toList(),
     };
 
     return SizedBox(
@@ -106,39 +107,6 @@ class _iOS26NativeToolbarState extends State<iOS26NativeToolbar> {
     }
   }
 
-  Map<String, dynamic> _extractButtonInfo(Widget widget) {
-    // Try to extract from Text widget
-    if (widget is Text) {
-      if (widget.data != null) {
-        return {'title': widget.data!};
-      }
-    }
-
-    // Try to extract from CupertinoButton
-    if (widget is CupertinoButton) {
-      final child = widget.child;
-      if (child is Icon) {
-        // Extract icon name from IconData
-        return {'icon': 'info.circle'}; // Default SF Symbol
-      }
-      if (child is Text && child.data != null) {
-        return {'title': child.data!};
-      }
-      if (child is Row) {
-        // For back button with icon + text
-        return {'title': 'Back'};
-      }
-    }
-
-    // Default: return empty
-    return {};
-  }
-
-  String _extractText(Widget widget) {
-    final info = _extractButtonInfo(widget);
-    return info['title'] ?? '';
-  }
-
   /// Fallback toolbar for non-iOS platforms or older iOS versions
   Widget _buildFallbackToolbar() {
     return Container(
@@ -170,7 +138,15 @@ class _iOS26NativeToolbarState extends State<iOS26NativeToolbar> {
           if (widget.actions != null && widget.actions!.isNotEmpty)
             Row(
               mainAxisSize: MainAxisSize.min,
-              children: widget.actions!,
+              children: widget.actions!.map((action) {
+                return CupertinoButton(
+                  padding: EdgeInsets.zero,
+                  onPressed: action.onPressed,
+                  child: action.title != null
+                      ? Text(action.title!)
+                      : const Icon(CupertinoIcons.circle),
+                );
+              }).toList(),
             ),
         ],
       ),

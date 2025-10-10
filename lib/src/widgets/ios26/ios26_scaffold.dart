@@ -1,8 +1,6 @@
-import 'dart:ui';
 import 'package:flutter/cupertino.dart';
-import '../../style/sf_symbol.dart';
+import '../adaptive_app_bar_action.dart';
 import '../adaptive_scaffold.dart';
-import 'ios26_button.dart';
 import 'ios26_native_tab_bar.dart';
 import 'ios26_native_toolbar.dart';
 
@@ -25,7 +23,7 @@ class iOS26Scaffold extends StatefulWidget {
   final int selectedIndex;
   final ValueChanged<int> onDestinationSelected;
   final String? title;
-  final List<Widget>? actions;
+  final List<AdaptiveAppBarAction>? actions;
   final Widget? leading;
   final TabBarMinimizeBehavior minimizeBehavior;
   final bool enableBlur;
@@ -135,11 +133,20 @@ class _iOS26ScaffoldState extends State<iOS26Scaffold>
               top: 0,
               child: Stack(
                 children: [
-                  // Native toolbar with title and leading
+                  // Native toolbar with title, leading, and actions
                   iOS26NativeToolbar(
                     title: widget.title,
                     leadingText: leadingText,
+                    actions: widget.actions,
                     onLeadingTap: leadingCallback,
+                    onActionTap: (index) {
+                      // Call the appropriate action callback
+                      if (widget.actions != null &&
+                          index >= 0 &&
+                          index < widget.actions!.length) {
+                        widget.actions![index].onPressed();
+                      }
+                    },
                   ),
                   // Custom leading widget overlay (if provided by user)
                   if (widget.leading != null)
@@ -147,19 +154,6 @@ class _iOS26ScaffoldState extends State<iOS26Scaffold>
                       left: 8,
                       top: MediaQuery.of(context).padding.top + 8,
                       child: SizedBox(height: 36, child: widget.leading!),
-                    ),
-                  // Actions overlay (Flutter widgets on top of native toolbar)
-                  if (widget.actions != null && widget.actions!.isNotEmpty)
-                    Positioned(
-                      right: 16,
-                      top: MediaQuery.of(context).padding.top + 8,
-                      child: SizedBox(
-                        height: 36,
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: widget.actions!,
-                        ),
-                      ),
                     ),
                 ],
               ),

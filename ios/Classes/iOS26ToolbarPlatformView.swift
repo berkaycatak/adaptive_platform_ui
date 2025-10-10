@@ -150,7 +150,7 @@ class iOS26ToolbarPlatformView: NSObject, FlutterPlatformView {
 
         // Trailing buttons (actions)
         if let actions = params["actions"] as? [[String: Any]] {
-            for action in actions {
+            for (index, action) in actions.enumerated() {
                 if let actionTitle = action["title"] as? String {
                     let actionButton = UIBarButtonItem(
                         title: actionTitle,
@@ -158,6 +158,7 @@ class iOS26ToolbarPlatformView: NSObject, FlutterPlatformView {
                         target: self,
                         action: #selector(actionTapped(_:))
                     )
+                    actionButton.tag = index  // Set tag to action index
                     items.append(actionButton)
                 } else if let actionIcon = action["icon"] as? String {
                     let iconButton = UIBarButtonItem(
@@ -166,6 +167,7 @@ class iOS26ToolbarPlatformView: NSObject, FlutterPlatformView {
                         target: self,
                         action: #selector(actionTapped(_:))
                     )
+                    iconButton.tag = index  // Set tag to action index
                     items.append(iconButton)
                 }
             }
@@ -179,10 +181,9 @@ class iOS26ToolbarPlatformView: NSObject, FlutterPlatformView {
     }
 
     @objc private func actionTapped(_ sender: UIBarButtonItem) {
-        if let items = _toolbar.items,
-           let index = items.firstIndex(of: sender) {
-            _channel.invokeMethod("onActionTapped", arguments: ["index": index])
-        }
+        // Use the tag to get the action index
+        let actionIndex = sender.tag
+        _channel.invokeMethod("onActionTapped", arguments: ["index": actionIndex])
     }
 
     private func handleMethodCall(_ call: FlutterMethodCall, result: @escaping FlutterResult) {

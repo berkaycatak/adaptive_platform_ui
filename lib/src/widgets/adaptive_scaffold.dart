@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import '../platform/platform_info.dart';
+import '../style/sf_symbol.dart';
+import 'adaptive_app_bar_action.dart';
 import 'ios26/ios26_scaffold.dart';
 
 /// Navigation destination for bottom navigation
@@ -73,7 +75,10 @@ class AdaptiveScaffold extends StatelessWidget {
   final String? title;
 
   /// Action buttons in the navigation bar
-  final List<Widget>? actions;
+  /// - iOS 26+: Rendered as native UIBarButtonItem in UIToolbar
+  /// - iOS < 26: Rendered as buttons in CupertinoNavigationBar
+  /// - Android: Rendered as IconButtons in Material AppBar
+  final List<AdaptiveAppBarAction>? actions;
 
   /// Leading widget in the navigation bar (e.g., back button)
   final Widget? leading;
@@ -149,7 +154,7 @@ class _CupertinoScaffold extends StatelessWidget {
   final int selectedIndex;
   final ValueChanged<int> onDestinationSelected;
   final String? title;
-  final List<Widget>? actions;
+  final List<AdaptiveAppBarAction>? actions;
   final Widget? leading;
   final List<Widget> children;
 
@@ -178,7 +183,23 @@ class _CupertinoScaffold extends StatelessWidget {
                 trailing: actions != null && actions!.isNotEmpty
                     ? Row(
                         mainAxisSize: MainAxisSize.min,
-                        children: actions!,
+                        children: actions!.map((action) {
+                          Widget child;
+                          if (action.title != null) {
+                            child = Text(action.title!);
+                          } else if (action.iosSymbol != null) {
+                            // Map SF Symbol to CupertinoIcon for iOS < 26
+                            child = Icon(_sfSymbolToCupertinoIcon(action.iosSymbol!));
+                          } else {
+                            child = const Icon(CupertinoIcons.circle);
+                          }
+
+                          return CupertinoButton(
+                            padding: EdgeInsets.zero,
+                            onPressed: action.onPressed,
+                            child: child,
+                          );
+                        }).toList(),
                       )
                     : null,
                 leading: leading,
@@ -219,6 +240,10 @@ class _CupertinoScaffold extends StatelessWidget {
       'bag.fill': CupertinoIcons.bag_fill,
       'bookmark': CupertinoIcons.bookmark,
       'bookmark.fill': CupertinoIcons.bookmark_fill,
+      'info.circle': CupertinoIcons.info_circle,
+      'plus.circle': CupertinoIcons.add_circled,
+      'plus': CupertinoIcons.add,
+      'checkmark.circle': CupertinoIcons.checkmark_circle,
     };
     return iconMap[sfSymbol] ?? CupertinoIcons.circle;
   }
@@ -241,7 +266,7 @@ class _MaterialScaffold extends StatelessWidget {
   final int selectedIndex;
   final ValueChanged<int> onDestinationSelected;
   final String? title;
-  final List<Widget>? actions;
+  final List<AdaptiveAppBarAction>? actions;
   final Widget? leading;
   final Widget? floatingActionButton;
   final List<Widget> children;
@@ -251,7 +276,20 @@ class _MaterialScaffold extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: title != null ? Text(title!) : null,
-        actions: actions,
+        actions: actions?.map((action) {
+          if (action.title != null) {
+            return TextButton(
+              onPressed: action.onPressed,
+              child: Text(action.title!),
+            );
+          }
+          return IconButton(
+            icon: action.androidIcon != null
+                ? Icon(action.androidIcon!)
+                : const Icon(Icons.circle),
+            onPressed: action.onPressed,
+          );
+        }).toList(),
         leading: leading,
       ),
       body: IndexedStack(

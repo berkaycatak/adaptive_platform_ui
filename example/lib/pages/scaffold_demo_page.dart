@@ -22,10 +22,7 @@ class _ScaffoldDemoPageState extends State<ScaffoldDemoPage> {
           selectedIcon: 'house.fill',
           label: 'Home',
         ),
-        AdaptiveNavigationDestination(
-          icon: 'magnifyingglass',
-          label: 'Search',
-        ),
+        AdaptiveNavigationDestination(icon: 'magnifyingglass', label: 'Search'),
         AdaptiveNavigationDestination(
           icon: 'heart',
           selectedIcon: 'heart.fill',
@@ -44,21 +41,13 @@ class _ScaffoldDemoPageState extends State<ScaffoldDemoPage> {
         });
       },
       actions: [
-        if (PlatformInfo.isIOS)
-          CupertinoButton(
-            padding: EdgeInsets.zero,
-            child: const Icon(CupertinoIcons.add),
-            onPressed: () {
-              _showAddDialog(context);
-            },
-          )
-        else
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: () {
-              _showAddDialog(context);
-            },
-          ),
+        AdaptiveAppBarAction(
+          iosSymbol: 'plus',
+          androidIcon: Icons.add,
+          onPressed: () {
+            _showAddDialog(context);
+          },
+        ),
       ],
       children: [
         _buildHomePage(),
@@ -111,9 +100,7 @@ class _ScaffoldDemoPageState extends State<ScaffoldDemoPage> {
         ),
         const SizedBox(height: 16),
         if (PlatformInfo.isIOS)
-          const CupertinoSearchTextField(
-            placeholder: 'Search...',
-          )
+          const CupertinoSearchTextField(placeholder: 'Search...')
         else
           const TextField(
             decoration: InputDecoration(
@@ -191,10 +178,7 @@ class _ScaffoldDemoPageState extends State<ScaffoldDemoPage> {
               const SizedBox(height: 16),
               const Text(
                 'John Doe',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
               Text(
@@ -344,43 +328,17 @@ class _ScaffoldDemoPageState extends State<ScaffoldDemoPage> {
   }
 
   void _showAddDialog(BuildContext context) {
-    if (PlatformInfo.isIOS) {
-      showCupertinoDialog(
-        context: context,
-        builder: (context) => CupertinoAlertDialog(
-          title: const Text('Add Item'),
-          content: const Text('This would show an add item dialog'),
-          actions: [
-            CupertinoDialogAction(
-              child: const Text('Cancel'),
-              onPressed: () => Navigator.pop(context),
-            ),
-            CupertinoDialogAction(
-              isDefaultAction: true,
-              child: const Text('Add'),
-              onPressed: () => Navigator.pop(context),
-            ),
-          ],
+    AdaptiveAlertDialog.show(
+      context: context,
+      title: 'Add Item',
+      actions: [
+        AlertAction(title: 'Cancel', onPressed: () => Navigator.pop(context)),
+        AlertAction(
+          title: 'Add',
+          style: AlertActionStyle.primary,
+          onPressed: () {},
         ),
-      );
-    } else {
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Add Item'),
-          content: const Text('This would show an add item dialog'),
-          actions: [
-            TextButton(
-              child: const Text('Cancel'),
-              onPressed: () => Navigator.pop(context),
-            ),
-            TextButton(
-              child: const Text('Add'),
-              onPressed: () => Navigator.pop(context),
-            ),
-          ],
-        ),
-      );
-    }
+      ],
+    );
   }
 }

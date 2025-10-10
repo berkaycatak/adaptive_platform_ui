@@ -23,14 +23,33 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
       title: 'AdaptiveButton Demo',
       destinations: const [],
       selectedIndex: 0,
+      actions: [
+        AdaptiveAppBarAction(
+          iosSymbol: 'info.circle',
+          androidIcon: Icons.info_outline,
+          onPressed: () {
+            showAboutDialog(
+              context: context,
+              applicationName: 'Adaptive Platform UI',
+              applicationVersion: '1.0.0',
+              applicationLegalese: '© 2024 Your Company',
+            );
+          },
+        ),
+      ],
       onDestinationSelected: (_) {},
-      children: [SafeArea(child: _buildContent())],
+      children: [_buildContent()],
     );
   }
 
   Widget _buildContent() {
     return ListView(
-      padding: const EdgeInsets.all(16.0),
+      padding: EdgeInsets.only(
+        left: 16.0,
+        right: 16.0,
+        top: 16.0 + MediaQuery.of(context).padding.top + 52, // Toolbar height
+        bottom: 16.0,
+      ),
       children: [
         // Style Selector
         _buildSection(

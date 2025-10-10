@@ -18,7 +18,7 @@ class _SplitTabBarDemoPageState extends State<SplitTabBarDemoPage> {
     if (!PlatformInfo.isIOS26OrHigher()) {
       // Show message for non-iOS 26 platforms
       return AdaptiveScaffold(
-        title: 'Tab Bar Minimize',
+        title: 'Tab Baasdsr Minimize',
         destinations: const [],
         selectedIndex: 0,
         onDestinationSelected: (_) {},
@@ -99,12 +99,10 @@ class _SplitTabBarDemoPageState extends State<SplitTabBarDemoPage> {
       // iOS 26+ Tab Bar Minimize Behavior
       minimizeBehavior: TabBarMinimizeBehavior.onScrollUp,
       actions: [
-        CupertinoButton(
-          padding: EdgeInsets.zero,
-          child: const Text(
-            'iOS 26+',
-            style: TextStyle(fontSize: 12, color: CupertinoColors.systemGreen),
-          ),
+        AdaptiveAppBarAction(
+          title: 'iOS 26+',
+          iosSymbol: 'checkmark.circle',
+          androidIcon: Icons.check_circle_outline,
           onPressed: () {},
         ),
       ],
@@ -121,6 +119,8 @@ class _SplitTabBarDemoPageState extends State<SplitTabBarDemoPage> {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
+        SizedBox(height: 110),
+
         _buildInfoCard(
           'Tab Bar Minimize',
           'iOS 26 Liquid Glass minimize behavior',

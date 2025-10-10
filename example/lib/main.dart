@@ -95,21 +95,17 @@ class _HomePageState extends State<HomePage> {
       // iOS 26+ Tab Bar with minimize behavior
       minimizeBehavior: TabBarMinimizeBehavior.automatic,
       actions: [
-        if (PlatformInfo.isIOS)
-          SizedBox(
-            width: 36,
-            height: 36,
-            child: AdaptiveButton.sfSymbol(
-              padding: EdgeInsets.zero,
-              sfSymbol: const SFSymbol('info.circle', size: 20),
-              onPressed: () => _showAboutDialog(context),
-            ),
-          )
-        else
-          IconButton(
-            icon: const Icon(Icons.info_outline),
-            onPressed: () => _showAboutDialog(context),
-          ),
+        AdaptiveAppBarAction(
+          iosSymbol: 'info.circle',
+          androidIcon: Icons.info_outline,
+          onPressed: () => _showAboutDialog(context),
+        ),
+
+        AdaptiveAppBarAction(
+          iosSymbol: 'heart',
+          androidIcon: Icons.favorite_border,
+          onPressed: () => _showAboutDialog(context),
+        ),
       ],
       children: [
         _buildComponentsTab(context),
@@ -124,6 +120,7 @@ class _HomePageState extends State<HomePage> {
     return ListView(
       padding: const EdgeInsets.all(16.0),
       children: [
+        SizedBox(height: 120),
         // Platform Info Card
         _buildInfoCard(),
         const SizedBox(height: 24),
