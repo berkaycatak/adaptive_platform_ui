@@ -22,7 +22,7 @@ class AdaptivePopupMenuButton<T> {
   }) {
     // iOS 26+ - Use native iOS 26 popup menu button
     if (PlatformInfo.isIOS26OrHigher()) {
-      return iOS26PopupMenuButton<T>(
+      return IOS26PopupMenuButton<T>(
         buttonLabel: label,
         items: items,
         onSelected: onSelected,
@@ -69,7 +69,7 @@ class AdaptivePopupMenuButton<T> {
   }) {
     // iOS 26+ - Use native iOS 26 popup menu button
     if (PlatformInfo.isIOS26OrHigher()) {
-      return iOS26PopupMenuButton<T>.icon(
+      return IOS26PopupMenuButton<T>.icon(
         buttonIcon: icon,
         items: items,
         onSelected: onSelected,

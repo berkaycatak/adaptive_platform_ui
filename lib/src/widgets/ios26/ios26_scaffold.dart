@@ -1,13 +1,12 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 import '../adaptive_app_bar_action.dart';
 import '../adaptive_scaffold.dart';
 import 'ios26_native_tab_bar.dart';
 import 'ios26_native_toolbar.dart';
 
 /// Native iOS 26 scaffold with UITabBar
-class iOS26Scaffold extends StatefulWidget {
-  const iOS26Scaffold({
+class IOS26Scaffold extends StatefulWidget {
+  const IOS26Scaffold({
     super.key,
     required this.destinations,
     required this.selectedIndex,
@@ -31,10 +30,10 @@ class iOS26Scaffold extends StatefulWidget {
   final List<Widget> children;
 
   @override
-  State<iOS26Scaffold> createState() => _iOS26ScaffoldState();
+  State<IOS26Scaffold> createState() => _IOS26ScaffoldState();
 }
 
-class _iOS26ScaffoldState extends State<iOS26Scaffold>
+class _IOS26ScaffoldState extends State<IOS26Scaffold>
     with SingleTickerProviderStateMixin {
   late AnimationController _tabBarController;
   late Animation<double> _tabBarAnimation;
@@ -138,7 +137,7 @@ class _iOS26ScaffoldState extends State<iOS26Scaffold>
               child: Stack(
                 children: [
                   // Native toolbar with title, leading, and actions
-                  iOS26NativeToolbar(
+                  IOS26NativeToolbar(
                     key: _toolbarKey,
                     title: widget.title,
                     leadingText: leadingText,
@@ -186,14 +185,14 @@ class _iOS26ScaffoldState extends State<iOS26Scaffold>
                     );
                   },
                   child: widget.enableBlur
-                      ? iOS26NativeTabBar(
+                      ? IOS26NativeTabBar(
                           destinations: widget.destinations,
                           selectedIndex: widget.selectedIndex,
                           onTap: widget.onDestinationSelected,
                           tint: CupertinoTheme.of(context).primaryColor,
                           minimizeBehavior: widget.minimizeBehavior,
                         )
-                      : iOS26NativeTabBar(
+                      : IOS26NativeTabBar(
                           destinations: widget.destinations,
                           selectedIndex: widget.selectedIndex,
                           onTap: widget.onDestinationSelected,

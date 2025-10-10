@@ -60,7 +60,7 @@ class AdaptiveSwitch extends StatelessWidget {
   Widget build(BuildContext context) {
     // iOS 26+ - Use native iOS 26 switch
     if (PlatformInfo.isIOS26OrHigher()) {
-      return iOS26Switch(
+      return IOS26Switch(
         value: value,
         onChanged: onChanged,
         activeColor: activeColor,

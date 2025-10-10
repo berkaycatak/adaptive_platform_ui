@@ -136,7 +136,7 @@ class AdaptiveButton extends StatelessWidget {
     if (PlatformInfo.isIOS26OrHigher()) {
       // SF Symbol mode - use native SF Symbol rendering
       if (sfSymbol != null) {
-        return iOS26Button.sfSymbol(
+        return IOS26Button.sfSymbol(
           onPressed: onPressed,
           sfSymbol: sfSymbol!,
           style: _mapToIOS26Style(style),
@@ -151,9 +151,8 @@ class AdaptiveButton extends StatelessWidget {
 
       // Child mode - overlay widget on native button
       if (child != null) {
-        return iOS26Button.child(
+        return IOS26Button.child(
           onPressed: onPressed,
-          child: child!,
           style: _mapToIOS26Style(style),
           size: _mapToIOS26Size(size),
           color: color,
@@ -161,18 +160,14 @@ class AdaptiveButton extends StatelessWidget {
           padding: padding,
           borderRadius: borderRadius,
           minSize: minSize,
+          child: child!,
         );
       }
 
       // Icon mode - use child mode with Icon widget
       if (icon != null) {
-        return iOS26Button.child(
+        return IOS26Button.child(
           onPressed: onPressed,
-          child: Icon(
-            icon,
-            color: textColor,
-            size: 24,
-          ),
           style: _mapToIOS26Style(style),
           size: _mapToIOS26Size(size),
           color: color,
@@ -180,11 +175,16 @@ class AdaptiveButton extends StatelessWidget {
           padding: padding,
           borderRadius: borderRadius,
           minSize: minSize,
+          child: Icon(
+            icon,
+            color: textColor,
+            size: 24,
+          ),
         );
       }
 
       // Label mode
-      return iOS26Button(
+      return IOS26Button(
         onPressed: onPressed,
         label: label!,
         textColor: textColor,
@@ -398,33 +398,33 @@ class AdaptiveButton extends StatelessWidget {
     }
   }
 
-  iOS26ButtonStyle _mapToIOS26Style(AdaptiveButtonStyle style) {
+  IOS26ButtonStyle _mapToIOS26Style(AdaptiveButtonStyle style) {
     switch (style) {
       case AdaptiveButtonStyle.filled:
-        return iOS26ButtonStyle.filled;
+        return IOS26ButtonStyle.filled;
       case AdaptiveButtonStyle.tinted:
-        return iOS26ButtonStyle.tinted;
+        return IOS26ButtonStyle.tinted;
       case AdaptiveButtonStyle.gray:
-        return iOS26ButtonStyle.gray;
+        return IOS26ButtonStyle.gray;
       case AdaptiveButtonStyle.bordered:
-        return iOS26ButtonStyle.bordered;
+        return IOS26ButtonStyle.bordered;
       case AdaptiveButtonStyle.plain:
-        return iOS26ButtonStyle.plain;
+        return IOS26ButtonStyle.plain;
       case AdaptiveButtonStyle.glass:
-        return iOS26ButtonStyle.glass;
+        return IOS26ButtonStyle.glass;
       case AdaptiveButtonStyle.prominentGlass:
-        return iOS26ButtonStyle.prominentGlass;
+        return IOS26ButtonStyle.prominentGlass;
     }
   }
 
-  iOS26ButtonSize _mapToIOS26Size(AdaptiveButtonSize size) {
+  IOS26ButtonSize _mapToIOS26Size(AdaptiveButtonSize size) {
     switch (size) {
       case AdaptiveButtonSize.small:
-        return iOS26ButtonSize.small;
+        return IOS26ButtonSize.small;
       case AdaptiveButtonSize.medium:
-        return iOS26ButtonSize.medium;
+        return IOS26ButtonSize.medium;
       case AdaptiveButtonSize.large:
-        return iOS26ButtonSize.large;
+        return IOS26ButtonSize.large;
     }
   }
 

@@ -14,9 +14,9 @@ import 'package:flutter/services.dart';
 /// - Haptic feedback
 /// - Native gesture handling (draggable)
 /// - Automatic light/dark mode support
-class iOS26Slider extends StatefulWidget {
+class IOS26Slider extends StatefulWidget {
   /// Creates an iOS 26 style slider
-  const iOS26Slider({
+  const IOS26Slider({
     super.key,
     required this.value,
     required this.onChanged,
@@ -53,10 +53,10 @@ class iOS26Slider extends StatefulWidget {
   final Color? thumbColor;
 
   @override
-  State<iOS26Slider> createState() => _iOS26SliderState();
+  State<IOS26Slider> createState() => _IOS26SliderState();
 }
 
-class _iOS26SliderState extends State<iOS26Slider> {
+class _IOS26SliderState extends State<IOS26Slider> {
   static int _nextId = 0;
   late final int _id;
   late final MethodChannel _channel;
@@ -99,7 +99,7 @@ class _iOS26SliderState extends State<iOS26Slider> {
   }
 
   @override
-  void didUpdateWidget(iOS26Slider oldWidget) {
+  void didUpdateWidget(IOS26Slider oldWidget) {
     super.didUpdateWidget(oldWidget);
 
     // Update native side if properties changed

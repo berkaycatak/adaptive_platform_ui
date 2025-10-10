@@ -86,7 +86,7 @@ class AdaptiveSlider extends StatelessWidget {
   Widget build(BuildContext context) {
     // iOS 26+ - Use native iOS 26 slider
     if (PlatformInfo.isIOS26OrHigher()) {
-      return iOS26Slider(
+      return IOS26Slider(
         value: value,
         onChanged: onChanged,
         onChangeStart: onChangeStart,

@@ -52,9 +52,9 @@ enum PopupButtonStyle {
 }
 
 /// Native iOS 26 popup menu button implementation using platform views
-class iOS26PopupMenuButton<T> extends StatefulWidget {
+class IOS26PopupMenuButton<T> extends StatefulWidget {
   /// Creates a text-labeled popup menu button
-  const iOS26PopupMenuButton({
+  const IOS26PopupMenuButton({
     super.key,
     required this.buttonLabel,
     required this.items,
@@ -68,7 +68,7 @@ class iOS26PopupMenuButton<T> extends StatefulWidget {
         round = false;
 
   /// Creates a round, icon-only popup menu button
-  const iOS26PopupMenuButton.icon({
+  const IOS26PopupMenuButton.icon({
     super.key,
     required this.buttonIcon,
     required this.items,
@@ -116,10 +116,10 @@ class iOS26PopupMenuButton<T> extends StatefulWidget {
   bool get isIconButton => buttonIcon != null;
 
   @override
-  State<iOS26PopupMenuButton<T>> createState() => _iOS26PopupMenuButtonState<T>();
+  State<IOS26PopupMenuButton<T>> createState() => _IOS26PopupMenuButtonState<T>();
 }
 
-class _iOS26PopupMenuButtonState<T> extends State<iOS26PopupMenuButton<T>> {
+class _IOS26PopupMenuButtonState<T> extends State<IOS26PopupMenuButton<T>> {
   MethodChannel? _channel;
   bool? _lastIsDark;
   int? _lastTint;
@@ -135,7 +135,7 @@ class _iOS26PopupMenuButtonState<T> extends State<iOS26PopupMenuButton<T>> {
   }
 
   @override
-  void didUpdateWidget(iOS26PopupMenuButton<T> oldWidget) {
+  void didUpdateWidget(IOS26PopupMenuButton<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
     // Sync any changes to brightness or tint
     _syncBrightnessIfNeeded();

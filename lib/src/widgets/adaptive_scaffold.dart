@@ -113,7 +113,7 @@ class AdaptiveScaffold extends StatelessWidget {
         childrenList = [child ?? const SizedBox.shrink()];
       }
 
-      return iOS26Scaffold(
+      return IOS26Scaffold(
         destinations: destinations ?? [],
         selectedIndex: selectedIndex ?? 0,
         onDestinationSelected: onDestinationSelected ?? (_) {},

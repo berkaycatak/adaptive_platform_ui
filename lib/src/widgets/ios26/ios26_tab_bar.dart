@@ -3,8 +3,8 @@ import 'package:flutter/cupertino.dart';
 import '../adaptive_scaffold.dart';
 
 /// iOS 26 styled tab bar with Liquid Glass effect
-class iOS26TabBar extends StatelessWidget implements PreferredSizeWidget {
-  const iOS26TabBar({
+class IOS26TabBar extends StatelessWidget implements PreferredSizeWidget {
+  const IOS26TabBar({
     super.key,
     required this.destinations,
     required this.selectedIndex,

@@ -5,8 +5,8 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 
 /// Native iOS 26 segmented control implementation using platform views
-class iOS26SegmentedControl extends StatefulWidget {
-  const iOS26SegmentedControl({
+class IOS26SegmentedControl extends StatefulWidget {
+  const IOS26SegmentedControl({
     super.key,
     required this.labels,
     required this.selectedIndex,
@@ -51,10 +51,10 @@ class iOS26SegmentedControl extends StatefulWidget {
   final Color? iconColor;
 
   @override
-  State<iOS26SegmentedControl> createState() => _iOS26SegmentedControlState();
+  State<IOS26SegmentedControl> createState() => _IOS26SegmentedControlState();
 }
 
-class _iOS26SegmentedControlState extends State<iOS26SegmentedControl> {
+class _IOS26SegmentedControlState extends State<IOS26SegmentedControl> {
   static int _nextId = 0;
   late final int _id;
   late final MethodChannel _channel;
@@ -87,7 +87,7 @@ class _iOS26SegmentedControlState extends State<iOS26SegmentedControl> {
   }
 
   @override
-  void didUpdateWidget(iOS26SegmentedControl oldWidget) {
+  void didUpdateWidget(IOS26SegmentedControl oldWidget) {
     super.didUpdateWidget(oldWidget);
 
     if (widget.selectedIndex != oldWidget.selectedIndex) {

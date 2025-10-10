@@ -5,7 +5,7 @@ import 'package:flutter/services.dart';
 import '../../style/sf_symbol.dart';
 
 /// iOS 26 native button styles (Liquid Glass design)
-enum iOS26ButtonStyle {
+enum IOS26ButtonStyle {
   /// Filled button with solid background (primary action)
   filled,
 
@@ -29,7 +29,7 @@ enum iOS26ButtonStyle {
 }
 
 /// iOS 26 button size presets matching native design
-enum iOS26ButtonSize {
+enum IOS26ButtonSize {
   /// Small button (height: 28)
   small,
 
@@ -54,14 +54,14 @@ enum iOS26ButtonSize {
 ///
 /// Note: For complex layouts with custom widgets, use the AdaptiveButton.child() constructor
 /// which will overlay the widget on top of the native iOS 26 button.
-class iOS26Button extends StatefulWidget {
+class IOS26Button extends StatefulWidget {
   /// Creates an iOS 26 style button with a text label
-  const iOS26Button({
+  const IOS26Button({
     super.key,
     required this.onPressed,
     required this.label,
-    this.style = iOS26ButtonStyle.filled,
-    this.size = iOS26ButtonSize.medium,
+    this.style = IOS26ButtonStyle.filled,
+    this.size = IOS26ButtonSize.medium,
     this.color,
     this.textColor,
     this.enabled = true,
@@ -74,12 +74,12 @@ class iOS26Button extends StatefulWidget {
 
   /// Creates an iOS 26 style button with a custom child widget
   /// The child will be overlaid on top of the native button background
-  const iOS26Button.child({
+  const IOS26Button.child({
     super.key,
     required this.onPressed,
     required this.child,
-    this.style = iOS26ButtonStyle.filled,
-    this.size = iOS26ButtonSize.medium,
+    this.style = IOS26ButtonStyle.filled,
+    this.size = IOS26ButtonSize.medium,
     this.color,
     this.enabled = true,
     this.padding,
@@ -91,12 +91,12 @@ class iOS26Button extends StatefulWidget {
         sfSymbol = null;
 
   /// Creates an iOS 26 style button with a native SF Symbol icon
-  const iOS26Button.sfSymbol({
+  const IOS26Button.sfSymbol({
     super.key,
     required this.onPressed,
     required this.sfSymbol,
-    this.style = iOS26ButtonStyle.glass,
-    this.size = iOS26ButtonSize.medium,
+    this.style = IOS26ButtonStyle.glass,
+    this.size = IOS26ButtonSize.medium,
     this.color,
     this.enabled = true,
     this.padding,
@@ -123,10 +123,10 @@ class iOS26Button extends StatefulWidget {
   final bool isChildMode;
 
   /// The visual style of the button
-  final iOS26ButtonStyle style;
+  final IOS26ButtonStyle style;
 
   /// The size preset for the button
-  final iOS26ButtonSize size;
+  final IOS26ButtonSize size;
 
   /// The color of the button (uses system blue if not specified)
   final Color? color;
@@ -147,10 +147,10 @@ class iOS26Button extends StatefulWidget {
   final Size? minSize;
 
   @override
-  State<iOS26Button> createState() => _iOS26ButtonState();
+  State<IOS26Button> createState() => _IOS26ButtonState();
 }
 
-class _iOS26ButtonState extends State<iOS26Button> {
+class _IOS26ButtonState extends State<IOS26Button> {
   static int _nextId = 0;
   late final int _id;
   late final MethodChannel _channel;
@@ -180,7 +180,7 @@ class _iOS26ButtonState extends State<iOS26Button> {
   }
 
   @override
-  void didUpdateWidget(iOS26Button oldWidget) {
+  void didUpdateWidget(IOS26Button oldWidget) {
     super.didUpdateWidget(oldWidget);
 
     // Update native side if properties changed
@@ -233,32 +233,32 @@ class _iOS26ButtonState extends State<iOS26Button> {
     };
   }
 
-  String _styleToString(iOS26ButtonStyle style) {
+  String _styleToString(IOS26ButtonStyle style) {
     switch (style) {
-      case iOS26ButtonStyle.filled:
+      case IOS26ButtonStyle.filled:
         return 'filled';
-      case iOS26ButtonStyle.tinted:
+      case IOS26ButtonStyle.tinted:
         return 'tinted';
-      case iOS26ButtonStyle.gray:
+      case IOS26ButtonStyle.gray:
         return 'gray';
-      case iOS26ButtonStyle.bordered:
+      case IOS26ButtonStyle.bordered:
         return 'bordered';
-      case iOS26ButtonStyle.plain:
+      case IOS26ButtonStyle.plain:
         return 'plain';
-      case iOS26ButtonStyle.glass:
+      case IOS26ButtonStyle.glass:
         return 'glass';
-      case iOS26ButtonStyle.prominentGlass:
+      case IOS26ButtonStyle.prominentGlass:
         return 'prominentGlass';
     }
   }
 
-  String _sizeToString(iOS26ButtonSize size) {
+  String _sizeToString(IOS26ButtonSize size) {
     switch (size) {
-      case iOS26ButtonSize.small:
+      case IOS26ButtonSize.small:
         return 'small';
-      case iOS26ButtonSize.medium:
+      case IOS26ButtonSize.medium:
         return 'medium';
-      case iOS26ButtonSize.large:
+      case IOS26ButtonSize.large:
         return 'large';
     }
   }
@@ -276,11 +276,11 @@ class _iOS26ButtonState extends State<iOS26Button> {
 
   double get _height {
     switch (widget.size) {
-      case iOS26ButtonSize.small:
+      case IOS26ButtonSize.small:
         return 28.0;
-      case iOS26ButtonSize.medium:
+      case IOS26ButtonSize.medium:
         return 36.0;
-      case iOS26ButtonSize.large:
+      case IOS26ButtonSize.large:
         return 44.0;
     }
   }
@@ -317,14 +317,14 @@ class _iOS26ButtonState extends State<iOS26Button> {
     final textStyle = TextStyle(color: widget.textColor ?? CupertinoColors.white);
 
     switch (widget.style) {
-      case iOS26ButtonStyle.filled:
+      case IOS26ButtonStyle.filled:
         return CupertinoButton.filled(
           onPressed: widget.enabled ? widget.onPressed : null,
           padding: widget.padding ?? const EdgeInsets.symmetric(horizontal: 16.0),
           child: Text(widget.label, style: textStyle),
         );
 
-      case iOS26ButtonStyle.plain:
+      case IOS26ButtonStyle.plain:
         return CupertinoButton(
           onPressed: widget.enabled ? widget.onPressed : null,
           padding: widget.padding ?? const EdgeInsets.symmetric(horizontal: 16.0),

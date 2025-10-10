@@ -61,7 +61,7 @@ class AdaptiveAlertDialog {
     if (PlatformInfo.isIOS26OrHigher()) {
       return showCupertinoDialog<void>(
         context: context,
-        builder: (context) => iOS26AlertDialog(
+        builder: (context) => IOS26AlertDialog(
           title: title,
           message: message,
           actions: actions,

@@ -14,9 +14,9 @@ import 'package:flutter/services.dart';
 /// - Haptic feedback
 /// - Native gesture handling
 /// - Automatic light/dark mode support
-class iOS26Switch extends StatefulWidget {
+class IOS26Switch extends StatefulWidget {
   /// Creates an iOS 26 style switch
-  const iOS26Switch({
+  const IOS26Switch({
     super.key,
     required this.value,
     required this.onChanged,
@@ -37,10 +37,10 @@ class iOS26Switch extends StatefulWidget {
   final Color? thumbColor;
 
   @override
-  State<iOS26Switch> createState() => _iOS26SwitchState();
+  State<IOS26Switch> createState() => _IOS26SwitchState();
 }
 
-class _iOS26SwitchState extends State<iOS26Switch> {
+class _IOS26SwitchState extends State<IOS26Switch> {
   static int _nextId = 0;
   late final int _id;
   late final MethodChannel _channel;
@@ -71,7 +71,7 @@ class _iOS26SwitchState extends State<iOS26Switch> {
   }
 
   @override
-  void didUpdateWidget(iOS26Switch oldWidget) {
+  void didUpdateWidget(IOS26Switch oldWidget) {
     super.didUpdateWidget(oldWidget);
 
     // Update native side if properties changed

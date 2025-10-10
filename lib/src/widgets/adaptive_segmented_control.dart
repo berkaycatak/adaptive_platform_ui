@@ -58,7 +58,7 @@ class AdaptiveSegmentedControl extends StatelessWidget {
   Widget build(BuildContext context) {
     // iOS 26+ - Use native iOS 26 segmented control
     if (PlatformInfo.isIOS26OrHigher()) {
-      return iOS26SegmentedControl(
+      return IOS26SegmentedControl(
         labels: labels,
         selectedIndex: selectedIndex,
         onValueChanged: onValueChanged,

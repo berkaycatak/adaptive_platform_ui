@@ -7,8 +7,8 @@ import '../adaptive_app_bar_action.dart';
 
 /// Native iOS 26 UIToolbar widget using platform views
 /// Implements Liquid Glass design with blur effects
-class iOS26NativeToolbar extends StatefulWidget {
-  const iOS26NativeToolbar({
+class IOS26NativeToolbar extends StatefulWidget {
+  const IOS26NativeToolbar({
     super.key,
     this.title,
     this.leading,
@@ -28,10 +28,10 @@ class iOS26NativeToolbar extends StatefulWidget {
   final double height;
 
   @override
-  State<iOS26NativeToolbar> createState() => _iOS26NativeToolbarState();
+  State<IOS26NativeToolbar> createState() => _IOS26NativeToolbarState();
 }
 
-class _iOS26NativeToolbarState extends State<iOS26NativeToolbar> {
+class _IOS26NativeToolbarState extends State<IOS26NativeToolbar> {
   MethodChannel? _channel;
 
   @override

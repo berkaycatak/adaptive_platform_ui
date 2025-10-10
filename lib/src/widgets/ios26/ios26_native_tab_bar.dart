@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'package:adaptive_platform_ui/src/widgets/adaptive_segmented_control.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -7,8 +6,8 @@ import 'package:flutter/services.dart';
 import '../adaptive_scaffold.dart';
 
 /// Native iOS 26 tab bar using UITabBar platform view
-class iOS26NativeTabBar extends StatefulWidget {
-  const iOS26NativeTabBar({
+class IOS26NativeTabBar extends StatefulWidget {
+  const IOS26NativeTabBar({
     super.key,
     required this.destinations,
     required this.selectedIndex,
@@ -31,10 +30,10 @@ class iOS26NativeTabBar extends StatefulWidget {
   final TabBarMinimizeBehavior minimizeBehavior;
 
   @override
-  State<iOS26NativeTabBar> createState() => _iOS26NativeTabBarState();
+  State<IOS26NativeTabBar> createState() => _IOS26NativeTabBarState();
 }
 
-class _iOS26NativeTabBarState extends State<iOS26NativeTabBar> {
+class _IOS26NativeTabBarState extends State<IOS26NativeTabBar> {
   MethodChannel? _channel;
   int? _lastIndex;
   int? _lastTint;
@@ -51,7 +50,7 @@ class _iOS26NativeTabBarState extends State<iOS26NativeTabBar> {
       widget.tint ?? CupertinoTheme.of(context).primaryColor;
 
   @override
-  void didUpdateWidget(covariant iOS26NativeTabBar oldWidget) {
+  void didUpdateWidget(covariant IOS26NativeTabBar oldWidget) {
     super.didUpdateWidget(oldWidget);
     _syncPropsToNativeIfNeeded();
   }
