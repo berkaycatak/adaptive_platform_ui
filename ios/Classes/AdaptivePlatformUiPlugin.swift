@@ -33,5 +33,12 @@ public class AdaptivePlatformUiPlugin: NSObject, FlutterPlugin {
             ios26SegmentedControlFactory,
             withId: "adaptive_platform_ui/ios26_segmented_control"
         )
+
+        // Register iOS 26 AlertDialog platform view factory
+        let ios26AlertDialogFactory = iOS26AlertDialogViewFactory(messenger: registrar.messenger())
+        registrar.register(
+            ios26AlertDialogFactory,
+            withId: "adaptive_platform_ui/ios26_alert_dialog"
+        )
     }
 }

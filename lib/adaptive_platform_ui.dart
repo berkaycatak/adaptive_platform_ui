@@ -38,9 +38,11 @@ export 'src/widgets/adaptive_button.dart';
 export 'src/widgets/adaptive_switch.dart';
 export 'src/widgets/adaptive_slider.dart';
 export 'src/widgets/adaptive_segmented_control.dart';
+export 'src/widgets/adaptive_alert_dialog.dart';
 
 // iOS 26 specific widgets (for advanced usage)
 export 'src/widgets/ios26/ios26_button.dart';
 export 'src/widgets/ios26/ios26_switch.dart';
 export 'src/widgets/ios26/ios26_slider.dart';
 export 'src/widgets/ios26/ios26_segmented_control.dart';
+export 'src/widgets/ios26/ios26_alert_dialog.dart';

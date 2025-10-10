@@ -5,6 +5,7 @@ import 'pages/button_demo_page.dart';
 import 'pages/switch_demo_page.dart';
 import 'pages/slider_demo_page.dart';
 import 'pages/segmented_control_demo_page.dart';
+import 'pages/alert_dialog_demo_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -129,6 +130,15 @@ class HomePage extends StatelessWidget {
           description: 'Native iOS 26 segmented control with Liquid Glass',
           icon: PlatformInfo.isIOS ? CupertinoIcons.square_split_2x2 : Icons.segment,
           onTap: () => _navigateToSegmentedControlDemo(context),
+        ),
+
+        const SizedBox(height: 12),
+        _buildComponentTile(
+          context,
+          title: 'AdaptiveAlertDialog',
+          description: 'Native iOS 26 alert dialog with Liquid Glass',
+          icon: PlatformInfo.isIOS ? CupertinoIcons.bell_fill : Icons.notifications,
+          onTap: () => _navigateToAlertDialogDemo(context),
         ),
 
         const SizedBox(height: 12),
@@ -324,6 +334,18 @@ class HomePage extends StatelessWidget {
       Navigator.of(
         context,
       ).push(MaterialPageRoute(builder: (_) => const SegmentedControlDemoPage()));
+    }
+  }
+
+  void _navigateToAlertDialogDemo(BuildContext context) {
+    if (PlatformInfo.isIOS) {
+      Navigator.of(
+        context,
+      ).push(CupertinoPageRoute(builder: (_) => const AlertDialogDemoPage()));
+    } else {
+      Navigator.of(
+        context,
+      ).push(MaterialPageRoute(builder: (_) => const AlertDialogDemoPage()));
     }
   }
 }
