@@ -5,8 +5,8 @@ A Flutter package that provides adaptive platform-specific widgets with native i
 ## iOS 26+ Native Toolbar & Tab Bar
 
 <p align="center">
-  <img src="img/appbar.gif" alt="iOS 26 Native Toolbar" width="300"/>
-  <img src="img/bottombar.gif" alt="iOS 26 Native Tab Bar" width="300"/>
+  <img src="https://github.com/berkaycatak/adaptive_platform_ui/raw/main/img/appbar.gif" alt="iOS 26 Native Toolbar" width="300"/>
+  <img src="https://github.com/berkaycatak/adaptive_platform_ui/raw/main/img/bottombar.gif" alt="iOS 26 Native Tab Bar" width="300"/>
 </p>
 
 Native iOS 26 UIToolbar and UITabBar with Liquid Glass blur effects, minimize behavior, and native gesture handling.
@@ -52,7 +52,7 @@ flutter pub get
 ### AdaptiveScaffold with Native Toolbar & Tab Bar
 
 <p align="center">
-  <img src="img/appbar.gif" alt="Native Toolbar" width="300"/>
+  <img src="https://github.com/berkaycatak/adaptive_platform_ui/raw/main/img/appbar.gif" alt="Native Toolbar" width="300"/>
 </p>
 
 ```dart
@@ -84,7 +84,7 @@ AdaptiveScaffold(
 ### AdaptiveButton
 
 <p align="center">
-  <img src="img/button.png" alt="Adaptive Buttons" width="400"/>
+  <img src="https://github.com/berkaycatak/adaptive_platform_ui/raw/main/img/button.png" alt="Adaptive Buttons" width="400"/>
 </p>
 
 ```dart
@@ -115,7 +115,7 @@ AdaptiveButton.icon(
 ### AdaptiveSegmentedControl
 
 <p align="center">
-  <img src="img/segmented_control.gif" alt="Segmented Control" width="300"/>
+  <img src="https://github.com/berkaycatak/adaptive_platform_ui/raw/main/img/segmented_control.gif" alt="Segmented Control" width="300"/>
 </p>
 
 ```dart
@@ -144,7 +144,7 @@ AdaptiveSegmentedControl(
 ### AdaptiveSwitch
 
 <p align="center">
-  <img src="img/switch.gif" alt="Adaptive Switch" width="300"/>
+  <img src="https://github.com/berkaycatak/adaptive_platform_ui/raw/main/img/switch.gif" alt="Adaptive Switch" width="300"/>
 </p>
 
 ```dart
@@ -159,7 +159,7 @@ AdaptiveSwitch(
 ### AdaptiveSlider
 
 <p align="center">
-  <img src="img/slider.gif" alt="Adaptive Slider" width="300"/>
+  <img src="https://github.com/berkaycatak/adaptive_platform_ui/raw/main/img/slider.gif" alt="Adaptive Slider" width="300"/>
 </p>
 
 ```dart
@@ -176,7 +176,7 @@ AdaptiveSlider(
 ### AdaptiveAlertDialog
 
 <p align="center">
-  <img src="img/alert.png" alt="Alert Dialog" width="300"/>
+  <img src="https://github.com/berkaycatak/adaptive_platform_ui/raw/main/img/alert.png" alt="Alert Dialog" width="300"/>
 </p>
 
 ```dart
@@ -206,7 +206,7 @@ showAdaptiveAlertDialog(
 ### AdaptivePopupMenuButton
 
 <p align="center">
-  <img src="img/pop-up-menu.png" alt="Popup Menu" width="300"/>
+  <img src="https://github.com/berkaycatak/adaptive_platform_ui/raw/main/img/pop-up-menu.png" alt="Popup Menu" width="300"/>
 </p>
 
 ```dart

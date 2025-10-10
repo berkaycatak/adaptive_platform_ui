@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.2
+
+* Fix image links in README.md to use GitHub raw URLs
+* Images now display correctly on pub.dev
+
 ## 0.1.1
 
 * Documentation improvements
