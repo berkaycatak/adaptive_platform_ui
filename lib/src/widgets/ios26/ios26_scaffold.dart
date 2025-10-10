@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 import '../adaptive_scaffold.dart';
 import 'ios26_native_tab_bar.dart';
@@ -13,6 +14,7 @@ class iOS26Scaffold extends StatefulWidget {
     this.actions,
     this.leading,
     this.minimizeBehavior = TabBarMinimizeBehavior.automatic,
+    this.enableBlur = true,
     required this.children,
   });
 
@@ -23,6 +25,7 @@ class iOS26Scaffold extends StatefulWidget {
   final List<Widget>? actions;
   final Widget? leading;
   final TabBarMinimizeBehavior minimizeBehavior;
+  final bool enableBlur;
   final List<Widget> children;
 
   @override
@@ -103,10 +106,7 @@ class _iOS26ScaffoldState extends State<iOS26Scaffold>
       navigationBar: CupertinoNavigationBar(
         middle: widget.title != null ? Text(widget.title!) : null,
         trailing: widget.actions != null && widget.actions!.isNotEmpty
-            ? Row(
-                mainAxisSize: MainAxisSize.min,
-                children: widget.actions!,
-              )
+            ? Row(mainAxisSize: MainAxisSize.min, children: widget.actions!)
             : null,
         leading: widget.leading,
         backgroundColor: CupertinoColors.systemBackground.resolveFrom(context),
@@ -126,7 +126,7 @@ class _iOS26ScaffoldState extends State<iOS26Scaffold>
               index: widget.selectedIndex,
               children: widget.children,
             ),
-            // Tab bar - overlay at bottom with transparent blur effect
+            // Tab bar - overlay at bottom with Liquid Glass blur effect
             Positioned(
               left: 0,
               right: 0,
@@ -136,25 +136,31 @@ class _iOS26ScaffoldState extends State<iOS26Scaffold>
                 builder: (context, child) {
                   // Calculate minimized state
                   final minimizeProgress = _tabBarAnimation.value;
-                  final scale = 1.0 - (minimizeProgress * 0.3); // Scale down to 70%
+                  final scale =
+                      1.0 - (minimizeProgress * 0.0); // Scale down to 70%
                   final opacity = 1.0 - (minimizeProgress * 0.5); // Fade to 50%
 
                   return Transform.scale(
                     scale: scale,
                     alignment: Alignment.bottomCenter,
-                    child: Opacity(
-                      opacity: opacity,
-                      child: child,
-                    ),
+                    child: Opacity(opacity: opacity, child: child),
                   );
                 },
-                child: iOS26NativeTabBar(
-                  destinations: widget.destinations,
-                  selectedIndex: widget.selectedIndex,
-                  onTap: widget.onDestinationSelected,
-                  tint: CupertinoTheme.of(context).primaryColor,
-                  minimizeBehavior: widget.minimizeBehavior,
-                ),
+                child: widget.enableBlur
+                    ? iOS26NativeTabBar(
+                        destinations: widget.destinations,
+                        selectedIndex: widget.selectedIndex,
+                        onTap: widget.onDestinationSelected,
+                        tint: CupertinoTheme.of(context).primaryColor,
+                        minimizeBehavior: widget.minimizeBehavior,
+                      )
+                    : iOS26NativeTabBar(
+                        destinations: widget.destinations,
+                        selectedIndex: widget.selectedIndex,
+                        onTap: widget.onDestinationSelected,
+                        tint: CupertinoTheme.of(context).primaryColor,
+                        minimizeBehavior: widget.minimizeBehavior,
+                      ),
               ),
             ),
           ],

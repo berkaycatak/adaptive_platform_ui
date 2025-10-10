@@ -54,6 +54,7 @@ class AdaptiveScaffold extends StatelessWidget {
     this.leading,
     this.floatingActionButton,
     this.minimizeBehavior = TabBarMinimizeBehavior.automatic,
+    this.enableBlur = true,
   });
 
   /// Navigation destinations for bottom navigation bar
@@ -84,6 +85,10 @@ class AdaptiveScaffold extends StatelessWidget {
   /// Controls how the tab bar minimizes when scrolling
   final TabBarMinimizeBehavior minimizeBehavior;
 
+  /// Enable Liquid Glass blur effect behind tab bar (iOS 26+ only)
+  /// When enabled, content behind the tab bar will be blurred
+  final bool enableBlur;
+
   @override
   Widget build(BuildContext context) {
     // iOS 26+ - Use native iOS 26 tab bar and navigation bar
@@ -96,6 +101,7 @@ class AdaptiveScaffold extends StatelessWidget {
         actions: actions,
         leading: leading,
         minimizeBehavior: minimizeBehavior,
+        enableBlur: enableBlur,
         children: children,
       );
     }

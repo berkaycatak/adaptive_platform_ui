@@ -44,17 +44,21 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
             container.overrideUserInterfaceStyle = isDark ? .dark : .light
         }
 
-        // iOS 26+ appearance configuration with transparent blur
+        // iOS 26+ appearance configuration - completely transparent for Flutter blur
         let appearance: UITabBarAppearance? = {
             if #available(iOS 13.0, *) {
                 let ap = UITabBarAppearance()
 
-                // Apply iOS 26+ Liquid Glass effect with transparent background
+                // Completely transparent - Flutter handles blur
+                ap.configureWithTransparentBackground()
+                ap.backgroundColor = .clear
+                ap.backgroundImage = nil
+                ap.shadowColor = .clear
+                ap.shadowImage = nil
+
+                // Remove all effects
                 if #available(iOS 26.0, *) {
-                    ap.configureWithTransparentBackground()
-                    ap.backgroundEffect = UIBlurEffect(style: isDark ? .systemUltraThinMaterialDark : .systemUltraThinMaterialLight)
-                } else {
-                    ap.configureWithDefaultBackground()
+                    ap.backgroundEffect = nil
                 }
 
                 return ap

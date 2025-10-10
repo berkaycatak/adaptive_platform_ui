@@ -53,6 +53,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return AdaptiveScaffold(
+      enableBlur: true,
       title: 'Adaptive Platform UI',
       destinations: const [
         AdaptiveNavigationDestination(
@@ -81,6 +82,7 @@ class _HomePageState extends State<HomePage> {
       },
       // iOS 26+ Tab Bar with minimize behavior
       minimizeBehavior: TabBarMinimizeBehavior.automatic,
+
       actions: [
         if (PlatformInfo.isIOS)
           CupertinoButton(
