@@ -39,6 +39,7 @@ class _iOS26ScaffoldState extends State<iOS26Scaffold>
   late AnimationController _tabBarController;
   late Animation<double> _tabBarAnimation;
   bool _isMinimized = false;
+  final GlobalKey _toolbarKey = GlobalKey();
 
   @override
   void initState() {
@@ -138,6 +139,7 @@ class _iOS26ScaffoldState extends State<iOS26Scaffold>
                 children: [
                   // Native toolbar with title, leading, and actions
                   iOS26NativeToolbar(
+                    key: _toolbarKey,
                     title: widget.title,
                     leadingText: leadingText,
                     actions: widget.actions,
