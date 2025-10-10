@@ -54,5 +54,12 @@ public class AdaptivePlatformUiPlugin: NSObject, FlutterPlugin {
             ios26TabBarFactory,
             withId: "adaptive_platform_ui/ios26_tab_bar"
         )
+
+        // Register iOS 26 Toolbar platform view factory
+        let ios26ToolbarFactory = iOS26ToolbarFactory(messenger: registrar.messenger())
+        registrar.register(
+            ios26ToolbarFactory,
+            withId: "adaptive_platform_ui/ios26_toolbar"
+        )
     }
 }

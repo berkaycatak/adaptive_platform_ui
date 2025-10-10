@@ -18,18 +18,13 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
 
   @override
   Widget build(BuildContext context) {
-    if (PlatformInfo.isIOS) {
-      return CupertinoPageScaffold(
-        navigationBar: const CupertinoNavigationBar(
-          middle: Text('AdaptiveButton Demo'),
-        ),
-        child: SafeArea(child: _buildContent()),
-      );
-    }
-
-    return Scaffold(
-      appBar: AppBar(title: const Text('AdaptiveButton Demo')),
-      body: SafeArea(child: _buildContent()),
+    // Use AdaptiveScaffold with single content (no tabs)
+    return AdaptiveScaffold(
+      title: 'AdaptiveButton Demo',
+      destinations: const [],
+      selectedIndex: 0,
+      onDestinationSelected: (_) {},
+      children: [SafeArea(child: _buildContent())],
     );
   }
 

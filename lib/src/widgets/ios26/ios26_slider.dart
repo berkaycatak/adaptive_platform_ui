@@ -108,19 +108,18 @@ class _iOS26SliderState extends State<iOS26Slider> {
     }
 
     if (oldWidget.min != widget.min || oldWidget.max != widget.max) {
-      _channel.invokeMethod('setRange', {
-        'min': widget.min,
-        'max': widget.max,
-      });
+      _channel.invokeMethod('setRange', {'min': widget.min, 'max': widget.max});
     }
 
-    if (oldWidget.activeColor != widget.activeColor && widget.activeColor != null) {
+    if (oldWidget.activeColor != widget.activeColor &&
+        widget.activeColor != null) {
       _channel.invokeMethod('setActiveColor', {
         'color': _colorToARGB(widget.activeColor!),
       });
     }
 
-    if (oldWidget.thumbColor != widget.thumbColor && widget.thumbColor != null) {
+    if (oldWidget.thumbColor != widget.thumbColor &&
+        widget.thumbColor != null) {
       _channel.invokeMethod('setThumbColor', {
         'color': _colorToARGB(widget.thumbColor!),
       });
@@ -128,7 +127,9 @@ class _iOS26SliderState extends State<iOS26Slider> {
 
     // Update enabled state
     if ((oldWidget.onChanged == null) != (widget.onChanged == null)) {
-      _channel.invokeMethod('setEnabled', {'enabled': widget.onChanged != null});
+      _channel.invokeMethod('setEnabled', {
+        'enabled': widget.onChanged != null,
+      });
     }
   }
 
@@ -139,8 +140,10 @@ class _iOS26SliderState extends State<iOS26Slider> {
       'min': widget.min,
       'max': widget.max,
       'enabled': widget.onChanged != null,
-      if (widget.activeColor != null) 'activeColor': _colorToARGB(widget.activeColor!),
-      if (widget.thumbColor != null) 'thumbColor': _colorToARGB(widget.thumbColor!),
+      if (widget.activeColor != null)
+        'activeColor': _colorToARGB(widget.activeColor!),
+      if (widget.thumbColor != null)
+        'thumbColor': _colorToARGB(widget.thumbColor!),
       'isDark': MediaQuery.platformBrightnessOf(context) == Brightness.dark,
     };
   }

@@ -17,79 +17,56 @@ class _SplitTabBarDemoPageState extends State<SplitTabBarDemoPage> {
   Widget build(BuildContext context) {
     if (!PlatformInfo.isIOS26OrHigher()) {
       // Show message for non-iOS 26 platforms
-      return PlatformInfo.isIOS
-          ? CupertinoPageScaffold(
-              navigationBar: const CupertinoNavigationBar(
-                middle: Text('Tab Bar Minimize'),
-              ),
-              child: Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(32.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(
-                        CupertinoIcons.info_circle,
-                        size: 64,
-                        color: CupertinoColors.systemGrey,
+      return AdaptiveScaffold(
+        title: 'Tab Bar Minimize',
+        destinations: const [],
+        selectedIndex: 0,
+        onDestinationSelected: (_) {},
+        children: [
+          SafeArea(
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(32.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      PlatformInfo.isIOS
+                          ? CupertinoIcons.info_circle
+                          : Icons.info_outline,
+                      size: 64,
+                      color: PlatformInfo.isIOS
+                          ? CupertinoColors.systemGrey
+                          : Colors.grey,
+                    ),
+                    const SizedBox(height: 24),
+                    const Text(
+                      'Tab Bar Minimize',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
                       ),
-                      const SizedBox(height: 24),
-                      const Text(
-                        'Tab Bar Minimize',
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      PlatformInfo.isIOS
+                          ? 'This feature requires iOS 26 or higher.\n\nTab bar minimize behavior is part of the Liquid Glass design system.'
+                          : 'Tab bar minimize behavior is only available on iOS 26+',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: PlatformInfo.isIOS
+                            ? CupertinoColors.systemGrey
+                            : Colors.grey.shade700,
                       ),
-                      const SizedBox(height: 12),
-                      const Text(
-                        'This feature requires iOS 26 or higher.\n\nTab bar minimize behavior is part of the Liquid Glass design system.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: CupertinoColors.systemGrey,
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
-            )
-          : Scaffold(
-              appBar: AppBar(title: const Text('Tab Bar Minimize')),
-              body: Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(32.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(
-                        Icons.info_outline,
-                        size: 64,
-                        color: Colors.grey,
-                      ),
-                      const SizedBox(height: 24),
-                      const Text(
-                        'Tab Bar Minimize',
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        'Tab bar minimize behavior is only available on iOS 26+',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.grey.shade700,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            );
+            ),
+          ),
+        ],
+      );
     }
 
     // iOS 26+ Tab Bar Minimize Demo using AdaptiveScaffold

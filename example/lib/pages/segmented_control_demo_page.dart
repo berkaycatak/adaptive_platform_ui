@@ -22,18 +22,14 @@ class _SegmentedControlDemoPageState extends State<SegmentedControlDemoPage> {
 
   @override
   Widget build(BuildContext context) {
-    if (PlatformInfo.isIOS) {
-      return CupertinoPageScaffold(
-        navigationBar: const CupertinoNavigationBar(
-          middle: Text('AdaptiveSegmentedControl Demo'),
-        ),
-        child: SafeArea(child: _buildContent()),
-      );
-    }
-
-    return Scaffold(
-      appBar: AppBar(title: const Text('AdaptiveSegmentedControl Demo')),
-      body: SafeArea(child: _buildContent()),
+    return AdaptiveScaffold(
+      title: 'AdaptiveSegmentedControl Demo',
+      destinations: const [],
+      selectedIndex: 0,
+      onDestinationSelected: (_) {},
+      children: [
+        SafeArea(child: _buildContent()),
+      ],
     );
   }
 

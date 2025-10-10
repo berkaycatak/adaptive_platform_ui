@@ -50,6 +50,19 @@ class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
   String _searchQuery = '';
 
+  void _showAboutDialog(BuildContext context) {
+    if (PlatformInfo.isIOS) {
+      AdaptiveAlertDialog.show(
+        context: context,
+        title: "Running on ${PlatformInfo.platformDescription}",
+        message: PlatformInfo.isIOS26OrHigher()
+            ? '✨ Using iOS 26 native Liquid Glass design'
+            : 'Using platform-native components',
+        actions: [AlertAction(title: "OK", onPressed: () => {})],
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return AdaptiveScaffold(
@@ -74,7 +87,6 @@ class _HomePageState extends State<HomePage> {
         AdaptiveNavigationDestination(icon: 'gear', label: 'Settings'),
       ],
       selectedIndex: _selectedIndex,
-
       onDestinationSelected: (index) {
         setState(() {
           _selectedIndex = index;
@@ -82,26 +94,21 @@ class _HomePageState extends State<HomePage> {
       },
       // iOS 26+ Tab Bar with minimize behavior
       minimizeBehavior: TabBarMinimizeBehavior.automatic,
-
       actions: [
         if (PlatformInfo.isIOS)
-          CupertinoButton(
-            padding: EdgeInsets.zero,
-            child: Text(
-              PlatformInfo.platformDescription,
-              style: const TextStyle(fontSize: 11),
+          SizedBox(
+            width: 36,
+            height: 36,
+            child: AdaptiveButton.sfSymbol(
+              padding: EdgeInsets.zero,
+              sfSymbol: const SFSymbol('info.circle', size: 20),
+              onPressed: () => _showAboutDialog(context),
             ),
-            onPressed: () {},
           )
         else
-          Center(
-            child: Padding(
-              padding: const EdgeInsets.only(right: 12.0),
-              child: Text(
-                PlatformInfo.platformDescription,
-                style: const TextStyle(fontSize: 11),
-              ),
-            ),
+          IconButton(
+            icon: const Icon(Icons.info_outline),
+            onPressed: () => _showAboutDialog(context),
           ),
       ],
       children: [
@@ -245,7 +252,7 @@ class _HomePageState extends State<HomePage> {
           const SizedBox(height: 8),
           Text(
             PlatformInfo.isIOS26OrHigher()
-                ? '✨ Using iOS 26 native designs with Liquid Glass'
+                ? '✨ Using iOS 26 Liquid Glass design with native UIToolbar and UITabBar'
                 : PlatformInfo.isIOS
                 ? 'Using Cupertino widgets'
                 : 'Using Material Design widgets',

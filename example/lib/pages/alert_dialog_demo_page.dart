@@ -7,18 +7,14 @@ class AlertDialogDemoPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (PlatformInfo.isIOS) {
-      return CupertinoPageScaffold(
-        navigationBar: const CupertinoNavigationBar(
-          middle: Text('AdaptiveAlertDialog Demo'),
-        ),
-        child: SafeArea(child: _buildContent(context)),
-      );
-    }
-
-    return Scaffold(
-      appBar: AppBar(title: const Text('AdaptiveAlertDialog Demo')),
-      body: SafeArea(child: _buildContent(context)),
+    return AdaptiveScaffold(
+      title: 'AdaptiveAlertDialog Demo',
+      destinations: const [],
+      selectedIndex: 0,
+      onDestinationSelected: (_) {},
+      children: [
+        SafeArea(child: _buildContent(context)),
+      ],
     );
   }
 

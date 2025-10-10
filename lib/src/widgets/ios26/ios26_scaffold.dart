@@ -1,7 +1,10 @@
 import 'dart:ui';
 import 'package:flutter/cupertino.dart';
+import '../../style/sf_symbol.dart';
 import '../adaptive_scaffold.dart';
+import 'ios26_button.dart';
 import 'ios26_native_tab_bar.dart';
+import 'ios26_native_toolbar.dart';
 
 /// Native iOS 26 scaffold with UITabBar
 class iOS26Scaffold extends StatefulWidget {
@@ -102,21 +105,20 @@ class _iOS26ScaffoldState extends State<iOS26Scaffold>
 
   @override
   Widget build(BuildContext context) {
+    // Check if we can pop (for automatic back button)
+    final canPop = Navigator.canPop(context);
+
+    // Determine leading text for native toolbar
+    String? leadingText;
+    VoidCallback? leadingCallback;
+
+    if (widget.leading == null && canPop) {
+      // Auto back button
+      leadingText = ''; // Empty string will show chevron icon
+      leadingCallback = () => Navigator.of(context).pop();
+    }
+
     return CupertinoPageScaffold(
-      navigationBar: CupertinoNavigationBar(
-        middle: widget.title != null ? Text(widget.title!) : null,
-        trailing: widget.actions != null && widget.actions!.isNotEmpty
-            ? Row(mainAxisSize: MainAxisSize.min, children: widget.actions!)
-            : null,
-        leading: widget.leading,
-        backgroundColor: CupertinoColors.systemBackground.resolveFrom(context),
-        border: Border(
-          bottom: BorderSide(
-            color: CupertinoColors.separator.resolveFrom(context),
-            width: 0.0,
-          ),
-        ),
-      ),
       child: NotificationListener<ScrollNotification>(
         onNotification: _handleScrollNotification,
         child: Stack(
@@ -126,43 +128,81 @@ class _iOS26ScaffoldState extends State<iOS26Scaffold>
               index: widget.selectedIndex,
               children: widget.children,
             ),
-            // Tab bar - overlay at bottom with Liquid Glass blur effect
+            // Top toolbar - iOS 26 Liquid Glass style
             Positioned(
               left: 0,
               right: 0,
-              bottom: 0,
-              child: AnimatedBuilder(
-                animation: _tabBarAnimation,
-                builder: (context, child) {
-                  // Calculate minimized state
-                  final minimizeProgress = _tabBarAnimation.value;
-                  final scale =
-                      1.0 - (minimizeProgress * 0.0); // Scale down to 70%
-                  final opacity = 1.0 - (minimizeProgress * 0.5); // Fade to 50%
-
-                  return Transform.scale(
-                    scale: scale,
-                    alignment: Alignment.bottomCenter,
-                    child: Opacity(opacity: opacity, child: child),
-                  );
-                },
-                child: widget.enableBlur
-                    ? iOS26NativeTabBar(
-                        destinations: widget.destinations,
-                        selectedIndex: widget.selectedIndex,
-                        onTap: widget.onDestinationSelected,
-                        tint: CupertinoTheme.of(context).primaryColor,
-                        minimizeBehavior: widget.minimizeBehavior,
-                      )
-                    : iOS26NativeTabBar(
-                        destinations: widget.destinations,
-                        selectedIndex: widget.selectedIndex,
-                        onTap: widget.onDestinationSelected,
-                        tint: CupertinoTheme.of(context).primaryColor,
-                        minimizeBehavior: widget.minimizeBehavior,
+              top: 0,
+              child: Stack(
+                children: [
+                  // Native toolbar with title and leading
+                  iOS26NativeToolbar(
+                    title: widget.title,
+                    leadingText: leadingText,
+                    onLeadingTap: leadingCallback,
+                  ),
+                  // Custom leading widget overlay (if provided by user)
+                  if (widget.leading != null)
+                    Positioned(
+                      left: 8,
+                      top: MediaQuery.of(context).padding.top + 8,
+                      child: SizedBox(height: 36, child: widget.leading!),
+                    ),
+                  // Actions overlay (Flutter widgets on top of native toolbar)
+                  if (widget.actions != null && widget.actions!.isNotEmpty)
+                    Positioned(
+                      right: 16,
+                      top: MediaQuery.of(context).padding.top + 8,
+                      child: SizedBox(
+                        height: 36,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: widget.actions!,
+                        ),
                       ),
+                    ),
+                ],
               ),
             ),
+            // Tab bar - only show if destinations exist
+            if (widget.destinations.isNotEmpty)
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: AnimatedBuilder(
+                  animation: _tabBarAnimation,
+                  builder: (context, child) {
+                    // Calculate minimized state
+                    final minimizeProgress = _tabBarAnimation.value;
+                    final scale =
+                        1.0 - (minimizeProgress * 0.0); // Scale down to 70%
+                    final opacity =
+                        1.0 - (minimizeProgress * 0.5); // Fade to 50%
+
+                    return Transform.scale(
+                      scale: scale,
+                      alignment: Alignment.bottomCenter,
+                      child: Opacity(opacity: opacity, child: child),
+                    );
+                  },
+                  child: widget.enableBlur
+                      ? iOS26NativeTabBar(
+                          destinations: widget.destinations,
+                          selectedIndex: widget.selectedIndex,
+                          onTap: widget.onDestinationSelected,
+                          tint: CupertinoTheme.of(context).primaryColor,
+                          minimizeBehavior: widget.minimizeBehavior,
+                        )
+                      : iOS26NativeTabBar(
+                          destinations: widget.destinations,
+                          selectedIndex: widget.selectedIndex,
+                          onTap: widget.onDestinationSelected,
+                          tint: CupertinoTheme.of(context).primaryColor,
+                          minimizeBehavior: widget.minimizeBehavior,
+                        ),
+                ),
+              ),
           ],
         ),
       ),

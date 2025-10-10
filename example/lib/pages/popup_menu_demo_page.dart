@@ -15,32 +15,19 @@ class _PopupMenuDemoPageState extends State<PopupMenuDemoPage> {
 
   @override
   Widget build(BuildContext context) {
-    // iOS - Use CupertinoPageScaffold
-    if (PlatformInfo.isIOS) {
-      return CupertinoPageScaffold(
-        navigationBar: const CupertinoNavigationBar(
-          middle: Text('Popup Menu Demo'),
-        ),
-        child: SafeArea(
+    return AdaptiveScaffold(
+      title: 'Popup Menu Demo',
+      destinations: const [],
+      selectedIndex: 0,
+      onDestinationSelected: (_) {},
+      children: [
+        SafeArea(
           child: ListView(
             padding: const EdgeInsets.all(16),
             children: _buildContent(),
           ),
         ),
-      );
-    }
-
-    // Android - Use Material Scaffold
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Popup Menu Demo'),
-      ),
-      body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: _buildContent(),
-        ),
-      ),
+      ],
     );
   }
 

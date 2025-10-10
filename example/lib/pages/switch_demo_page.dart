@@ -19,18 +19,14 @@ class _SwitchDemoPageState extends State<SwitchDemoPage> {
 
   @override
   Widget build(BuildContext context) {
-    if (PlatformInfo.isIOS) {
-      return CupertinoPageScaffold(
-        navigationBar: const CupertinoNavigationBar(
-          middle: Text('AdaptiveSwitch Demo'),
-        ),
-        child: SafeArea(child: _buildContent()),
-      );
-    }
-
-    return Scaffold(
-      appBar: AppBar(title: const Text('AdaptiveSwitch Demo')),
-      body: SafeArea(child: _buildContent()),
+    return AdaptiveScaffold(
+      title: 'AdaptiveSwitch Demo',
+      destinations: const [],
+      selectedIndex: 0,
+      onDestinationSelected: (_) {},
+      children: [
+        SafeArea(child: _buildContent()),
+      ],
     );
   }
 
