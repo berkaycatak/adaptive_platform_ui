@@ -109,7 +109,9 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
                     if i < symbols.count && !symbols[i].isEmpty {
                         image = UIImage(systemName: symbols[i])
                     }
-                    item = UITabBarItem(title: title, image: image, selectedImage: image)
+                    // Create item with title
+                    item = UITabBarItem(title: title ?? "Tab \(i+1)", image: image, selectedImage: image)
+                    item.tag = i
                 }
 
                 items.append(item)
@@ -208,7 +210,9 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
                         if i < symbols.count && !symbols[i].isEmpty {
                             image = UIImage(systemName: symbols[i])
                         }
-                        item = UITabBarItem(title: title, image: image, selectedImage: image)
+                        // Create item with title
+                        item = UITabBarItem(title: title ?? "Tab \(i+1)", image: image, selectedImage: image)
+                        item.tag = i
                     }
 
                     items.append(item)

@@ -5,33 +5,64 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 
 /// Native iOS 26 segmented control implementation using platform views
-class iOS26SegmentedControl<T extends Object> extends StatefulWidget {
+class iOS26SegmentedControl extends StatefulWidget {
   const iOS26SegmentedControl({
     super.key,
-    required this.children,
+    required this.labels,
+    required this.selectedIndex,
     required this.onValueChanged,
-    this.groupValue,
+    this.enabled = true,
+    this.color,
+    this.height = 32.0,
+    this.shrinkWrap = false,
+    this.sfSymbols,
+    this.iconSize,
+    this.iconColor,
   });
 
-  final Map<T, Widget> children;
-  final T? groupValue;
-  final ValueChanged<T> onValueChanged;
+  /// Segment labels to display, in order
+  final List<String> labels;
+
+  /// The index of the selected segment
+  final int selectedIndex;
+
+  /// Called when the user selects a segment
+  final ValueChanged<int> onValueChanged;
+
+  /// Whether the control is interactive
+  final bool enabled;
+
+  /// Tint color for the selected segment
+  final Color? color;
+
+  /// Height of the control
+  final double height;
+
+  /// Whether the control should shrink to fit content
+  final bool shrinkWrap;
+
+  /// Optional SF Symbol names for icons (iOS only)
+  final List<String>? sfSymbols;
+
+  /// Icon size (when using sfSymbols)
+  final double? iconSize;
+
+  /// Icon color (when using sfSymbols)
+  final Color? iconColor;
 
   @override
-  State<iOS26SegmentedControl<T>> createState() => _iOS26SegmentedControlState<T>();
+  State<iOS26SegmentedControl> createState() => _iOS26SegmentedControlState();
 }
 
-class _iOS26SegmentedControlState<T extends Object> extends State<iOS26SegmentedControl<T>> {
+class _iOS26SegmentedControlState extends State<iOS26SegmentedControl> {
   static int _nextId = 0;
   late final int _id;
   late final MethodChannel _channel;
-  late final List<T> _keys;
 
   @override
   void initState() {
     super.initState();
     _id = _nextId++;
-    _keys = widget.children.keys.toList();
     _channel = MethodChannel('adaptive_platform_ui/ios26_segmented_control_$_id');
     _channel.setMethodCallHandler(_handleMethod);
   }
@@ -45,66 +76,113 @@ class _iOS26SegmentedControlState<T extends Object> extends State<iOS26Segmented
   Future<dynamic> _handleMethod(MethodCall call) async {
     if (call.method == 'valueChanged') {
       final index = call.arguments['index'] as int;
-      if (index >= 0 && index < _keys.length) {
-        widget.onValueChanged(_keys[index]);
+      final itemCount = (widget.sfSymbols != null && widget.sfSymbols!.isNotEmpty)
+          ? widget.sfSymbols!.length
+          : widget.labels.length;
+
+      if (index >= 0 && index < itemCount && widget.enabled) {
+        widget.onValueChanged(index);
       }
     }
   }
 
   @override
-  void didUpdateWidget(iOS26SegmentedControl<T> oldWidget) {
+  void didUpdateWidget(iOS26SegmentedControl oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    final newIndex = widget.groupValue != null
-        ? _keys.indexOf(widget.groupValue as T)
-        : -1;
+    if (widget.selectedIndex != oldWidget.selectedIndex) {
+      _channel.invokeMethod('setSelectedIndex', {'index': widget.selectedIndex});
+    }
+  }
 
-    _channel.invokeMethod('setSelectedIndex', {'index': newIndex});
+  int _colorToARGB(Color color) {
+    return ((color.a * 255.0).round() & 0xff) << 24 |
+        ((color.r * 255.0).round() & 0xff) << 16 |
+        ((color.g * 255.0).round() & 0xff) << 8 |
+        ((color.b * 255.0).round() & 0xff);
   }
 
   Map<String, dynamic> _buildCreationParams() {
-    final segments = widget.children.entries.map((e) {
-      final child = e.value;
-      if (child is Text) {
-        return {'type': 'text', 'value': child.data ?? ''};
-      }
-      return {'type': 'text', 'value': 'Segment'};
-    }).toList();
+    final bool isDark = MediaQuery.platformBrightnessOf(context) == Brightness.dark;
 
-    final selectedIndex = widget.groupValue != null
-        ? _keys.indexOf(widget.groupValue as T)
-        : -1;
-
-    return {
+    final params = <String, dynamic>{
       'id': _id,
-      'segments': segments,
-      'selectedIndex': selectedIndex,
-      'isDark': MediaQuery.platformBrightnessOf(context) == Brightness.dark,
+      'labels': widget.labels,
+      'selectedIndex': widget.selectedIndex,
+      'enabled': widget.enabled,
+      'isDark': isDark,
     };
+
+    // Add SF symbols if provided
+    if (widget.sfSymbols != null && widget.sfSymbols!.isNotEmpty) {
+      params['sfSymbols'] = widget.sfSymbols!;
+    }
+
+    // Add color if provided
+    if (widget.color != null) {
+      params['tintColor'] = _colorToARGB(widget.color!);
+    }
+
+    // Add icon size if provided
+    if (widget.iconSize != null) {
+      params['iconSize'] = widget.iconSize!;
+    }
+
+    // Add icon color if provided
+    if (widget.iconColor != null) {
+      params['iconColor'] = _colorToARGB(widget.iconColor!);
+    }
+
+    return params;
   }
 
   @override
   Widget build(BuildContext context) {
     if (!kIsWeb && Platform.isIOS) {
-      return SizedBox(
-        height: 32,
-        child: UiKitView(
-          viewType: 'adaptive_platform_ui/ios26_segmented_control',
-          creationParams: _buildCreationParams(),
-          creationParamsCodec: const StandardMessageCodec(),
-          gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
-            Factory<TapGestureRecognizer>(() => TapGestureRecognizer()),
-            Factory<HorizontalDragGestureRecognizer>(() => HorizontalDragGestureRecognizer()),
-            Factory<PanGestureRecognizer>(() => PanGestureRecognizer()),
-          },
+      Widget control = UiKitView(
+        viewType: 'adaptive_platform_ui/ios26_segmented_control',
+        creationParams: _buildCreationParams(),
+        creationParamsCodec: const StandardMessageCodec(),
+        gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
+          Factory<TapGestureRecognizer>(() => TapGestureRecognizer()),
+          Factory<HorizontalDragGestureRecognizer>(() => HorizontalDragGestureRecognizer()),
+          Factory<PanGestureRecognizer>(() => PanGestureRecognizer()),
+        },
+      );
+
+      // Wrap in SizedBox for height
+      control = SizedBox(height: widget.height, child: control);
+
+      // Center if shrinkWrap is true (but don't use IntrinsicWidth with UiKitView)
+      if (widget.shrinkWrap) {
+        control = Center(child: control);
+      }
+
+      return control;
+    }
+
+    // Fallback for non-iOS (should not reach here in normal usage)
+    final Map<int, Widget> children = {};
+    for (int i = 0; i < widget.labels.length; i++) {
+      children[i] = Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        child: Text(
+          widget.labels[i],
+          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
         ),
       );
     }
 
-    return CupertinoSegmentedControl<T>(
-      children: widget.children,
-      groupValue: widget.groupValue,
-      onValueChanged: widget.onValueChanged,
+    Widget control = CupertinoSegmentedControl<int>(
+      children: children,
+      groupValue: widget.selectedIndex,
+      onValueChanged: widget.enabled ? widget.onValueChanged : (_) {},
     );
+
+    if (widget.shrinkWrap) {
+      control = Center(child: IntrinsicWidth(child: control));
+    }
+
+    return SizedBox(height: widget.height, child: control);
   }
 }

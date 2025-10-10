@@ -76,16 +76,63 @@ class iOS26SegmentedControlView: NSObject, FlutterPlatformView {
         _view.isUserInteractionEnabled = true
 
         if let config = args as? [String: Any] {
-            if let segments = config["segments"] as? [[String: Any]] {
-                for (index, segment) in segments.enumerated() {
-                    if let value = segment["value"] as? String {
-                        segmentedControl.insertSegment(withTitle: value, at: index, animated: false)
+            // Check for SF symbols first
+            if let sfSymbols = config["sfSymbols"] as? [String], !sfSymbols.isEmpty {
+                // Use SF symbols for segments
+                for (index, symbolName) in sfSymbols.enumerated() {
+                    if let image = UIImage(systemName: symbolName) {
+                        segmentedControl.insertSegment(with: image, at: index, animated: false)
+                    } else {
+                        // Fallback if symbol not found
+                        print("⚠️ SF Symbol not found: \(symbolName)")
                     }
+                }
+
+                // Apply icon size if provided
+                if let iconSizeNumber = config["iconSize"] as? NSNumber {
+                    let iconSize = CGFloat(iconSizeNumber.doubleValue)
+                    let configuration = UIImage.SymbolConfiguration(pointSize: iconSize)
+                    for i in 0..<segmentedControl.numberOfSegments {
+                        if let image = segmentedControl.imageForSegment(at: i) {
+                            segmentedControl.setImage(image.withConfiguration(configuration), forSegmentAt: i)
+                        }
+                    }
+                }
+
+                // Apply icon color if provided
+                if let iconColorValue = config["iconColor"] as? Int {
+                    let iconColor = colorFromARGB(iconColorValue)
+                    segmentedControl.setTitleTextAttributes([.foregroundColor: iconColor], for: .normal)
+                }
+            }
+            // Otherwise use labels
+            else if let labels = config["labels"] as? [String] {
+                for (index, label) in labels.enumerated() {
+                    segmentedControl.insertSegment(withTitle: label, at: index, animated: false)
                 }
             }
 
+            // Set enabled state
+            if let enabled = config["enabled"] as? Bool {
+                segmentedControl.isEnabled = enabled
+            }
+
+            // Set tint color if provided
+            if let tintColorValue = config["tintColor"] as? Int {
+                let tintColor = colorFromARGB(tintColorValue)
+                segmentedControl.selectedSegmentTintColor = tintColor
+            }
+
+            // Set selected index
             if let selectedIndex = config["selectedIndex"] as? Int, selectedIndex >= 0 {
                 segmentedControl.selectedSegmentIndex = selectedIndex
+            }
+
+            // Apply dark mode
+            if let isDark = config["isDark"] as? Bool {
+                if #available(iOS 13.0, *) {
+                    _view.overrideUserInterfaceStyle = isDark ? .dark : .light
+                }
             }
         }
 
@@ -98,6 +145,14 @@ class iOS26SegmentedControlView: NSObject, FlutterPlatformView {
         ])
 
         segmentedControl.addTarget(self, action: #selector(segmentChanged), for: .valueChanged)
+    }
+
+    private func colorFromARGB(_ argb: Int) -> UIColor {
+        let a = CGFloat((argb >> 24) & 0xFF) / 255.0
+        let r = CGFloat((argb >> 16) & 0xFF) / 255.0
+        let g = CGFloat((argb >> 8) & 0xFF) / 255.0
+        let b = CGFloat(argb & 0xFF) / 255.0
+        return UIColor(red: r, green: g, blue: b, alpha: a)
     }
 
     @objc private func segmentChanged() {

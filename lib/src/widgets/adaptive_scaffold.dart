@@ -126,8 +126,60 @@ class AdaptiveScaffold extends StatelessWidget {
       );
     }
 
-    // iOS <26 - Use CupertinoPageScaffold
+    // iOS <26 - Use CupertinoPageScaffold with CupertinoTabBar if destinations provided
     if (PlatformInfo.isIOS) {
+      if (destinations != null && destinations!.isNotEmpty &&
+          selectedIndex != null && onDestinationSelected != null) {
+        // Tab-based navigation
+        return CupertinoPageScaffold(
+          navigationBar: CupertinoNavigationBar(
+            middle: title != null ? Text(title!) : null,
+            trailing: actions != null && actions!.isNotEmpty
+                ? Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: actions!.map((action) {
+                      Widget actionChild;
+                      if (action.title != null) {
+                        actionChild = Text(action.title!);
+                      } else if (action.iosSymbol != null) {
+                        actionChild = Icon(_sfSymbolToCupertinoIcon(action.iosSymbol!));
+                      } else {
+                        actionChild = const Icon(CupertinoIcons.circle);
+                      }
+                      return CupertinoButton(
+                        padding: EdgeInsets.zero,
+                        onPressed: action.onPressed,
+                        child: actionChild,
+                      );
+                    }).toList(),
+                  )
+                : null,
+            leading: leading,
+          ),
+          child: Column(
+            children: [
+              Expanded(
+                child: SafeArea(child: child ?? const SizedBox.shrink()),
+              ),
+              CupertinoTabBar(
+                currentIndex: selectedIndex!,
+                onTap: onDestinationSelected!,
+                items: destinations!.map((dest) {
+                  return BottomNavigationBarItem(
+                    icon: _getIcon(dest.icon),
+                    activeIcon: dest.selectedIcon != null
+                        ? _getIcon(dest.selectedIcon!)
+                        : _getIcon(dest.icon),
+                    label: dest.label,
+                  );
+                }).toList(),
+              ),
+            ],
+          ),
+        );
+      }
+
+      // Simple page without tabs
       return CupertinoPageScaffold(
         navigationBar: CupertinoNavigationBar(
           middle: title != null ? Text(title!) : null,
@@ -139,13 +191,10 @@ class AdaptiveScaffold extends StatelessWidget {
                     if (action.title != null) {
                       actionChild = Text(action.title!);
                     } else if (action.iosSymbol != null) {
-                      actionChild = Icon(
-                        _sfSymbolToCupertinoIcon(action.iosSymbol!),
-                      );
+                      actionChild = Icon(_sfSymbolToCupertinoIcon(action.iosSymbol!));
                     } else {
                       actionChild = const Icon(CupertinoIcons.circle);
                     }
-
                     return CupertinoButton(
                       padding: EdgeInsets.zero,
                       onPressed: action.onPressed,
@@ -160,7 +209,48 @@ class AdaptiveScaffold extends StatelessWidget {
       );
     }
 
-    // Android/Material platform
+    // Android - Use NavigationBar if destinations provided
+    if (destinations != null && destinations!.isNotEmpty &&
+        selectedIndex != null && onDestinationSelected != null) {
+      // Tab-based navigation
+      return Scaffold(
+        appBar: AppBar(
+          title: title != null ? Text(title!) : null,
+          actions: actions?.map((action) {
+            if (action.title != null) {
+              return TextButton(
+                onPressed: action.onPressed,
+                child: Text(action.title!),
+              );
+            }
+            return IconButton(
+              icon: action.androidIcon != null
+                  ? Icon(action.androidIcon!)
+                  : const Icon(Icons.circle),
+              onPressed: action.onPressed,
+            );
+          }).toList(),
+          leading: leading,
+        ),
+        body: child ?? const SizedBox.shrink(),
+        bottomNavigationBar: NavigationBar(
+          selectedIndex: selectedIndex!,
+          onDestinationSelected: onDestinationSelected!,
+          destinations: destinations!.map((dest) {
+            return NavigationDestination(
+              icon: _getIcon(dest.icon),
+              selectedIcon: dest.selectedIcon != null
+                  ? _getIcon(dest.selectedIcon!)
+                  : _getIcon(dest.icon),
+              label: dest.label,
+            );
+          }).toList(),
+        ),
+        floatingActionButton: floatingActionButton,
+      );
+    }
+
+    // Simple page without tabs
     return Scaffold(
       appBar: AppBar(
         title: title != null ? Text(title!) : null,
@@ -183,6 +273,15 @@ class AdaptiveScaffold extends StatelessWidget {
       body: child ?? const SizedBox.shrink(),
       floatingActionButton: floatingActionButton,
     );
+  }
+
+  Widget _getIcon(dynamic icon) {
+    if (icon is IconData) {
+      return Icon(icon);
+    } else if (icon is String) {
+      return Icon(_sfSymbolToCupertinoIcon(icon));
+    }
+    return const Icon(CupertinoIcons.circle);
   }
 
   IconData _sfSymbolToCupertinoIcon(String sfSymbol) {

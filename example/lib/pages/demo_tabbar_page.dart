@@ -71,8 +71,6 @@ class _DemoTabbarPageState extends State<DemoTabbarPage> {
   }
 
   Widget _buildPageForIndex(int index) {
-    final topPadding = PlatformInfo.isIOS ? 130.0 : 16.0;
-
     String title;
     IconData icon;
 
@@ -94,39 +92,26 @@ class _DemoTabbarPageState extends State<DemoTabbarPage> {
         icon = Icons.error;
     }
 
-    return ListView(
-      padding: EdgeInsets.only(
-        left: 16.0,
-        right: 16.0,
-        top: topPadding,
-        bottom: 16.0,
-      ),
-      children: [
-        Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon, size: 80, color: CupertinoColors.systemBlue),
-              const SizedBox(height: 24),
-              Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'This is tab $index',
-                style: const TextStyle(
-                  fontSize: 16,
-                  color: CupertinoColors.systemGrey,
-                ),
-              ),
-            ],
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, size: 80, color: CupertinoColors.systemBlue),
+          const SizedBox(height: 24),
+          Text(
+            title,
+            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
           ),
-        ),
-      ],
+          const SizedBox(height: 16),
+          Text(
+            'This is tab $index',
+            style: const TextStyle(
+              fontSize: 16,
+              color: CupertinoColors.systemGrey,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
