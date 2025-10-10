@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.1
+
+* Documentation improvements
+* Added comprehensive README with images for all widgets
+* Added visual showcase for toolbar, tab bar, buttons, segmented controls, switches, sliders, alerts, and popup menus
+* Improved code examples and usage documentation
+
 ## 0.1.0
 
 * Initial release with iOS 26+ support
