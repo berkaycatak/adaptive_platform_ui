@@ -2,6 +2,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import 'pages/button_demo_page.dart';
+import 'pages/switch_demo_page.dart';
+import 'pages/slider_demo_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -93,8 +95,19 @@ class HomePage extends StatelessWidget {
           context,
           title: 'AdaptiveButton',
           description: 'iOS 26 Liquid Glass buttons with adaptive styles',
-          icon: PlatformInfo.isIOS ? CupertinoIcons.square_fill_on_square_fill : Icons.smart_button,
+          icon: PlatformInfo.isIOS
+              ? CupertinoIcons.square_fill_on_square_fill
+              : Icons.smart_button,
           onTap: () => _navigateToButtonDemo(context),
+        ),
+
+        const SizedBox(height: 12),
+        _buildComponentTile(
+          context,
+          title: 'AdaptiveSlider',
+          description: 'Native iOS 26 slider with drag support',
+          icon: PlatformInfo.isIOS ? CupertinoIcons.slider_horizontal_3 : Icons.tune,
+          onTap: () => _navigateToSliderDemo(context),
         ),
 
         const SizedBox(height: 12),
@@ -110,9 +123,11 @@ class HomePage extends StatelessWidget {
         _buildComponentTile(
           context,
           title: 'AdaptiveSwitch',
-          description: 'Coming soon...',
-          icon: PlatformInfo.isIOS ? CupertinoIcons.switch_camera : Icons.toggle_on,
-          onTap: null,
+          description: 'Native iOS 26 switch with adaptive styles',
+          icon: PlatformInfo.isIOS
+              ? CupertinoIcons.switch_camera_solid
+              : Icons.toggle_on,
+          onTap: () => _navigateToSwitchDemo(context),
         ),
       ],
     );
@@ -156,8 +171,8 @@ class HomePage extends StatelessWidget {
             PlatformInfo.isIOS26OrHigher()
                 ? '✨ Using iOS 26 native designs with Liquid Glass'
                 : PlatformInfo.isIOS
-                    ? 'Using Cupertino widgets'
-                    : 'Using Material Design widgets',
+                ? 'Using Cupertino widgets'
+                : 'Using Material Design widgets',
             style: TextStyle(
               fontSize: 14,
               color: PlatformInfo.isIOS
@@ -236,10 +251,7 @@ class HomePage extends StatelessWidget {
 
     return Card(
       child: ListTile(
-        leading: Icon(
-          icon,
-          color: isEnabled ? Colors.blue : Colors.grey,
-        ),
+        leading: Icon(icon, color: isEnabled ? Colors.blue : Colors.grey),
         title: Text(
           title,
           style: TextStyle(
@@ -259,13 +271,37 @@ class HomePage extends StatelessWidget {
 
   void _navigateToButtonDemo(BuildContext context) {
     if (PlatformInfo.isIOS) {
-      Navigator.of(context).push(
-        CupertinoPageRoute(builder: (_) => const ButtonDemoPage()),
-      );
+      Navigator.of(
+        context,
+      ).push(CupertinoPageRoute(builder: (_) => const ButtonDemoPage()));
     } else {
-      Navigator.of(context).push(
-        MaterialPageRoute(builder: (_) => const ButtonDemoPage()),
-      );
+      Navigator.of(
+        context,
+      ).push(MaterialPageRoute(builder: (_) => const ButtonDemoPage()));
+    }
+  }
+
+  void _navigateToSwitchDemo(BuildContext context) {
+    if (PlatformInfo.isIOS) {
+      Navigator.of(
+        context,
+      ).push(CupertinoPageRoute(builder: (_) => const SwitchDemoPage()));
+    } else {
+      Navigator.of(
+        context,
+      ).push(MaterialPageRoute(builder: (_) => const SwitchDemoPage()));
+    }
+  }
+
+  void _navigateToSliderDemo(BuildContext context) {
+    if (PlatformInfo.isIOS) {
+      Navigator.of(
+        context,
+      ).push(CupertinoPageRoute(builder: (_) => const SliderDemoPage()));
+    } else {
+      Navigator.of(
+        context,
+      ).push(MaterialPageRoute(builder: (_) => const SliderDemoPage()));
     }
   }
 }

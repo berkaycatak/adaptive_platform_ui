@@ -12,5 +12,19 @@ public class AdaptivePlatformUiPlugin: NSObject, FlutterPlugin {
             ios26ButtonFactory,
             withId: "adaptive_platform_ui/ios26_button"
         )
+
+        // Register iOS 26 Switch platform view factory
+        let ios26SwitchFactory = iOS26SwitchViewFactory(messenger: registrar.messenger())
+        registrar.register(
+            ios26SwitchFactory,
+            withId: "adaptive_platform_ui/ios26_switch"
+        )
+
+        // Register iOS 26 Slider platform view factory
+        let ios26SliderFactory = iOS26SliderViewFactory(messenger: registrar.messenger())
+        registrar.register(
+            ios26SliderFactory,
+            withId: "adaptive_platform_ui/ios26_slider"
+        )
     }
 }
