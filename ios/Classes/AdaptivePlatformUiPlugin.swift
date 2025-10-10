@@ -40,5 +40,12 @@ public class AdaptivePlatformUiPlugin: NSObject, FlutterPlugin {
             ios26AlertDialogFactory,
             withId: "adaptive_platform_ui/ios26_alert_dialog"
         )
+
+        // Register iOS 26 PopupMenuButton platform view factory
+        let ios26PopupMenuButtonFactory = iOS26PopupMenuButtonViewFactory(messenger: registrar.messenger())
+        registrar.register(
+            ios26PopupMenuButtonFactory,
+            withId: "adaptive_platform_ui/ios26_popup_menu_button"
+        )
     }
 }

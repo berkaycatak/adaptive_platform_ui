@@ -6,6 +6,7 @@ import 'pages/switch_demo_page.dart';
 import 'pages/slider_demo_page.dart';
 import 'pages/segmented_control_demo_page.dart';
 import 'pages/alert_dialog_demo_page.dart';
+import 'pages/popup_menu_demo_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -139,6 +140,15 @@ class HomePage extends StatelessWidget {
           description: 'Native iOS 26 alert dialog with Liquid Glass',
           icon: PlatformInfo.isIOS ? CupertinoIcons.bell_fill : Icons.notifications,
           onTap: () => _navigateToAlertDialogDemo(context),
+        ),
+
+        const SizedBox(height: 12),
+        _buildComponentTile(
+          context,
+          title: 'AdaptivePopupMenuButton',
+          description: 'Native iOS 26 popup menu with UIMenu support',
+          icon: PlatformInfo.isIOS ? CupertinoIcons.ellipsis_circle : Icons.more_vert,
+          onTap: () => _navigateToPopupMenuDemo(context),
         ),
 
         const SizedBox(height: 12),
@@ -346,6 +356,18 @@ class HomePage extends StatelessWidget {
       Navigator.of(
         context,
       ).push(MaterialPageRoute(builder: (_) => const AlertDialogDemoPage()));
+    }
+  }
+
+  void _navigateToPopupMenuDemo(BuildContext context) {
+    if (PlatformInfo.isIOS) {
+      Navigator.of(
+        context,
+      ).push(CupertinoPageRoute(builder: (_) => const PopupMenuDemoPage()));
+    } else {
+      Navigator.of(
+        context,
+      ).push(MaterialPageRoute(builder: (_) => const PopupMenuDemoPage()));
     }
   }
 }
