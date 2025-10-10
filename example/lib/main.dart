@@ -138,6 +138,19 @@ class _HomePageState extends State<HomePage> {
 
         _buildComponentTile(
           context,
+          title: 'Back appbar action',
+          description:
+              'AdaptiveAppBarAction for native iOS and Material app bars',
+          icon: PlatformInfo.isIOS
+              ? CupertinoIcons.square_fill_on_square_fill
+              : Icons.smart_button,
+          onTap: () => _navigateToBackAppBarActionDemo(context),
+        ),
+
+        SizedBox(height: 12),
+
+        _buildComponentTile(
+          context,
           title: 'AdaptiveButton',
           description: 'iOS 26 Liquid Glass buttons with adaptive styles',
           icon: PlatformInfo.isIOS
@@ -347,6 +360,18 @@ class _HomePageState extends State<HomePage> {
         enabled: isEnabled,
       ),
     );
+  }
+
+  void _navigateToBackAppBarActionDemo(BuildContext context) {
+    if (PlatformInfo.isIOS) {
+      Navigator.of(
+        context,
+      ).push(CupertinoPageRoute(builder: (_) => const HomePage()));
+    } else {
+      Navigator.of(
+        context,
+      ).push(MaterialPageRoute(builder: (_) => const HomePage()));
+    }
   }
 
   void _navigateToButtonDemo(BuildContext context) {

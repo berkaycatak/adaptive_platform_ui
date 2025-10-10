@@ -335,7 +335,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Acknowledgments
 
-- Inspired by [cupertino_native](https://github.com/berkaycatak/cupertino_native/)
+- Inspired by cupertino_native 
 - Design guidelines from Apple's Human Interface Guidelines
 - Material Design guidelines from Google
 
