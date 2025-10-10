@@ -1,7 +1,10 @@
+import 'dart:io';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
+import '../../style/sf_symbol.dart';
 
-/// iOS 26 native button styles
+/// iOS 26 native button styles (Liquid Glass design)
 enum iOS26ButtonStyle {
   /// Filled button with solid background (primary action)
   filled,
@@ -17,6 +20,12 @@ enum iOS26ButtonStyle {
 
   /// Plain text button without background
   plain,
+
+  /// Glass effect button with translucent blur
+  glass,
+
+  /// Prominent glass button with enhanced blur effect
+  prominentGlass,
 }
 
 /// iOS 26 button size presets matching native design
@@ -31,35 +40,87 @@ enum iOS26ButtonSize {
   large,
 }
 
-/// Native iOS 26 button implementation
+/// Native iOS 26 button implementation using platform views
 ///
-/// This button follows iOS 26 design guidelines with:
-/// - Modern corner radius (10pt for medium size)
-/// - Dynamic shadow system
-/// - Haptic feedback on press
-/// - Smooth spring animations
-/// - Native color system
-/// - Context-aware styling
+/// This button uses UIKit platform views to render native iOS 26 Liquid Glass
+/// designs. It communicates with the native iOS side via platform channels.
+///
+/// Features:
+/// - Native Liquid Glass visual effects
+/// - iOS 26 button styles and animations
+/// - Haptic feedback
+/// - Native gesture handling
+/// - Automatic light/dark mode support
+///
+/// Note: For complex layouts with custom widgets, use the AdaptiveButton.child() constructor
+/// which will overlay the widget on top of the native iOS 26 button.
 class iOS26Button extends StatefulWidget {
-  /// Creates an iOS 26 style button
+  /// Creates an iOS 26 style button with a text label
   const iOS26Button({
+    super.key,
+    required this.onPressed,
+    required this.label,
+    this.style = iOS26ButtonStyle.filled,
+    this.size = iOS26ButtonSize.medium,
+    this.color,
+    this.textColor,
+    this.enabled = true,
+    this.padding,
+    this.borderRadius,
+    this.minSize,
+  })  : child = null,
+        isChildMode = false,
+        sfSymbol = null;
+
+  /// Creates an iOS 26 style button with a custom child widget
+  /// The child will be overlaid on top of the native button background
+  const iOS26Button.child({
     super.key,
     required this.onPressed,
     required this.child,
     this.style = iOS26ButtonStyle.filled,
     this.size = iOS26ButtonSize.medium,
     this.color,
-    this.minSize,
+    this.enabled = true,
     this.padding,
     this.borderRadius,
-    this.alignment = Alignment.center,
-  });
+    this.minSize,
+  })  : label = '',
+        textColor = null,
+        isChildMode = true,
+        sfSymbol = null;
 
-  /// The callback that is called when the button is tapped or otherwise activated
+  /// Creates an iOS 26 style button with a native SF Symbol icon
+  const iOS26Button.sfSymbol({
+    super.key,
+    required this.onPressed,
+    required this.sfSymbol,
+    this.style = iOS26ButtonStyle.glass,
+    this.size = iOS26ButtonSize.medium,
+    this.color,
+    this.enabled = true,
+    this.padding,
+    this.borderRadius,
+    this.minSize,
+  })  : label = '',
+        textColor = null,
+        child = null,
+        isChildMode = false;
+
+  /// The callback that is called when the button is tapped
   final VoidCallback? onPressed;
 
-  /// The widget below this widget in the tree
-  final Widget child;
+  /// The text label of the button
+  final String label;
+
+  /// The custom child widget (used in .child() constructor)
+  final Widget? child;
+
+  /// The SF Symbol to display (used in .sfSymbol() constructor)
+  final SFSymbol? sfSymbol;
+
+  /// Whether this is child mode
+  final bool isChildMode;
 
   /// The visual style of the button
   final iOS26ButtonStyle style;
@@ -70,8 +131,11 @@ class iOS26Button extends StatefulWidget {
   /// The color of the button (uses system blue if not specified)
   final Color? color;
 
-  /// The minimum size of the button
-  final Size? minSize;
+  /// The color of the button text
+  final Color? textColor;
+
+  /// Whether the button is enabled
+  final bool enabled;
 
   /// The amount of space to surround the child inside the button
   final EdgeInsetsGeometry? padding;
@@ -79,59 +143,135 @@ class iOS26Button extends StatefulWidget {
   /// The border radius of the button
   final BorderRadius? borderRadius;
 
-  /// The alignment of the button's child
-  final AlignmentGeometry alignment;
+  /// The minimum size of the button
+  final Size? minSize;
 
   @override
   State<iOS26Button> createState() => _iOS26ButtonState();
 }
 
-class _iOS26ButtonState extends State<iOS26Button>
-    with SingleTickerProviderStateMixin {
-  bool _isPressed = false;
-  late AnimationController _animationController;
-  late Animation<double> _scaleAnimation;
+class _iOS26ButtonState extends State<iOS26Button> {
+  static int _nextId = 0;
+  late final int _id;
+  late final MethodChannel _channel;
 
   @override
   void initState() {
     super.initState();
-    _animationController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 100),
-    );
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.95).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: Curves.easeInOut,
-      ),
-    );
+    _id = _nextId++;
+    _channel = MethodChannel('adaptive_platform_ui/ios26_button_$_id');
+    _channel.setMethodCallHandler(_handleMethod);
   }
 
   @override
   void dispose() {
-    _animationController.dispose();
+    _channel.setMethodCallHandler(null);
     super.dispose();
   }
 
-  void _handleTapDown(TapDownDetails details) {
-    if (widget.onPressed != null) {
-      setState(() => _isPressed = true);
-      _animationController.forward();
+  Future<dynamic> _handleMethod(MethodCall call) async {
+    switch (call.method) {
+      case 'pressed':
+        if (widget.enabled && widget.onPressed != null) {
+          widget.onPressed!();
+        }
+        break;
     }
   }
 
-  void _handleTapUp(TapUpDetails details) {
-    if (_isPressed) {
-      setState(() => _isPressed = false);
-      _animationController.reverse();
+  @override
+  void didUpdateWidget(iOS26Button oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    // Update native side if properties changed
+    if (oldWidget.style != widget.style) {
+      _channel.invokeMethod('setStyle', {'style': _styleToString(widget.style)});
+    }
+
+    if (oldWidget.enabled != widget.enabled) {
+      _channel.invokeMethod('setEnabled', {'enabled': widget.enabled && widget.onPressed != null});
+    }
+
+    if (oldWidget.label != widget.label) {
+      _channel.invokeMethod('setLabel', {'label': widget.label});
+    }
+
+    if (oldWidget.color != widget.color) {
+      _channel.invokeMethod('setColor', {
+        'color': widget.color != null ? _colorToHex(widget.color!) : null,
+      });
+    }
+
+    // Update SF Symbol if changed
+    if (oldWidget.sfSymbol?.name != widget.sfSymbol?.name ||
+        oldWidget.sfSymbol?.size != widget.sfSymbol?.size ||
+        oldWidget.sfSymbol?.color != widget.sfSymbol?.color) {
+      if (widget.sfSymbol != null) {
+        _channel.invokeMethod('setIcon', {
+          'iconName': widget.sfSymbol!.name,
+          'iconSize': widget.sfSymbol!.size,
+          if (widget.sfSymbol!.color != null)
+            'iconColor': _colorToARGB(widget.sfSymbol!.color!),
+        });
+      }
     }
   }
 
-  void _handleTapCancel() {
-    if (_isPressed) {
-      setState(() => _isPressed = false);
-      _animationController.reverse();
+  Map<String, dynamic> _buildCreationParams() {
+    return {
+      'id': _id,
+      'label': widget.label,
+      'style': _styleToString(widget.style),
+      'size': _sizeToString(widget.size),
+      'enabled': widget.enabled && widget.onPressed != null,
+      'color': widget.color != null ? _colorToHex(widget.color!) : null,
+      'textColor': widget.textColor != null ? _colorToHex(widget.textColor!) : null,
+      'isDark': MediaQuery.platformBrightnessOf(context) == Brightness.dark,
+      if (widget.sfSymbol != null) 'iconName': widget.sfSymbol!.name,
+      if (widget.sfSymbol != null) 'iconSize': widget.sfSymbol!.size,
+      if (widget.sfSymbol?.color != null) 'iconColor': _colorToARGB(widget.sfSymbol!.color!),
+    };
+  }
+
+  String _styleToString(iOS26ButtonStyle style) {
+    switch (style) {
+      case iOS26ButtonStyle.filled:
+        return 'filled';
+      case iOS26ButtonStyle.tinted:
+        return 'tinted';
+      case iOS26ButtonStyle.gray:
+        return 'gray';
+      case iOS26ButtonStyle.bordered:
+        return 'bordered';
+      case iOS26ButtonStyle.plain:
+        return 'plain';
+      case iOS26ButtonStyle.glass:
+        return 'glass';
+      case iOS26ButtonStyle.prominentGlass:
+        return 'prominentGlass';
     }
+  }
+
+  String _sizeToString(iOS26ButtonSize size) {
+    switch (size) {
+      case iOS26ButtonSize.small:
+        return 'small';
+      case iOS26ButtonSize.medium:
+        return 'medium';
+      case iOS26ButtonSize.large:
+        return 'large';
+    }
+  }
+
+  String _colorToHex(Color color) {
+    return '#${color.toARGB32().toRadixString(16).padLeft(8, '0').substring(2)}';
+  }
+
+  int _colorToARGB(Color color) {
+    return (((color.a * 255.0).round() & 0xFF) << 24) |
+        (((color.r * 255.0).round() & 0xFF) << 16) |
+        (((color.g * 255.0).round() & 0xFF) << 8) |
+        ((color.b * 255.0).round() & 0xFF);
   }
 
   double get _height {
@@ -145,184 +285,62 @@ class _iOS26ButtonState extends State<iOS26Button>
     }
   }
 
-  double get _cornerRadius {
-    switch (widget.size) {
-      case iOS26ButtonSize.small:
-        return 8.0;
-      case iOS26ButtonSize.medium:
-        return 10.0;
-      case iOS26ButtonSize.large:
-        return 12.0;
-    }
-  }
-
-  EdgeInsetsGeometry get _defaultPadding {
-    switch (widget.size) {
-      case iOS26ButtonSize.small:
-        return const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0);
-      case iOS26ButtonSize.medium:
-        return const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0);
-      case iOS26ButtonSize.large:
-        return const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0);
-    }
-  }
-
-  Color _getBackgroundColor(BuildContext context) {
-    final bool isDark = CupertinoTheme.brightnessOf(context) == Brightness.dark;
-    final color = widget.color ?? CupertinoColors.systemBlue;
-    final isDisabled = widget.onPressed == null;
-
-    switch (widget.style) {
-      case iOS26ButtonStyle.filled:
-        if (isDisabled) {
-          return isDark
-              ? CupertinoColors.systemGrey.darkColor.withValues(alpha: 0.3)
-              : CupertinoColors.systemGrey.color.withValues(alpha: 0.3);
-        }
-        return _isPressed ? _darkenColor(color, 0.2) : color;
-
-      case iOS26ButtonStyle.tinted:
-        if (isDisabled) {
-          return isDark
-              ? CupertinoColors.systemGrey.darkColor.withValues(alpha: 0.1)
-              : CupertinoColors.systemGrey.color.withValues(alpha: 0.1);
-        }
-        return _isPressed
-            ? color.withValues(alpha: 0.25)
-            : color.withValues(alpha: 0.15);
-
-      case iOS26ButtonStyle.gray:
-        if (isDisabled) {
-          return isDark
-              ? CupertinoColors.systemGrey6.darkColor.withValues(alpha: 0.3)
-              : CupertinoColors.systemGrey6.color.withValues(alpha: 0.3);
-        }
-        return _isPressed
-            ? (isDark
-                ? CupertinoColors.systemGrey5.darkColor
-                : CupertinoColors.systemGrey5.color)
-            : (isDark
-                ? CupertinoColors.systemGrey6.darkColor
-                : CupertinoColors.systemGrey6.color);
-
-      case iOS26ButtonStyle.bordered:
-        if (_isPressed) {
-          return isDark
-              ? CupertinoColors.systemGrey6.darkColor.withValues(alpha: 0.5)
-              : CupertinoColors.systemGrey6.color.withValues(alpha: 0.5);
-        }
-        return Colors.transparent;
-
-      case iOS26ButtonStyle.plain:
-        return Colors.transparent;
-    }
-  }
-
-  Color _getForegroundColor(BuildContext context) {
-    final bool isDark = CupertinoTheme.brightnessOf(context) == Brightness.dark;
-    final color = widget.color ?? CupertinoColors.systemBlue;
-    final isDisabled = widget.onPressed == null;
-
-    if (isDisabled) {
-      return isDark
-          ? CupertinoColors.systemGrey.darkColor
-          : CupertinoColors.systemGrey.color;
-    }
-
-    switch (widget.style) {
-      case iOS26ButtonStyle.filled:
-        return CupertinoColors.white;
-      case iOS26ButtonStyle.tinted:
-      case iOS26ButtonStyle.gray:
-      case iOS26ButtonStyle.bordered:
-      case iOS26ButtonStyle.plain:
-        return color;
-    }
-  }
-
-  BoxBorder? _getBorder(BuildContext context) {
-    if (widget.style != iOS26ButtonStyle.bordered) return null;
-
-    final bool isDark = CupertinoTheme.brightnessOf(context) == Brightness.dark;
-    final color = widget.color ?? CupertinoColors.systemBlue;
-
-    return Border.all(
-      color: _isPressed
-          ? color.withOpacity(0.5)
-          : (isDark
-              ? CupertinoColors.systemGrey4.darkColor
-              : CupertinoColors.systemGrey4.color),
-      width: 1.0,
-    );
-  }
-
-  List<BoxShadow>? _getShadow(BuildContext context) {
-    // iOS 26 uses subtle shadows for filled buttons
-    if (widget.style == iOS26ButtonStyle.filled &&
-        widget.onPressed != null &&
-        !_isPressed) {
-      return [
-        BoxShadow(
-          color: Colors.black.withOpacity(0.12),
-          blurRadius: 8,
-          offset: const Offset(0, 2),
-        ),
-        BoxShadow(
-          color: Colors.black.withOpacity(0.08),
-          blurRadius: 4,
-          offset: const Offset(0, 1),
-        ),
-      ];
-    }
-    return null;
-  }
-
-  Color _darkenColor(Color color, double amount) {
-    final hsl = HSLColor.fromColor(color);
-    return hsl.withLightness((hsl.lightness - amount).clamp(0.0, 1.0)).toColor();
-  }
-
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTapDown: _handleTapDown,
-      onTapUp: _handleTapUp,
-      onTapCancel: _handleTapCancel,
-      onTap: widget.onPressed,
-      child: ScaleTransition(
-        scale: _scaleAnimation,
-        child: Container(
-          constraints: BoxConstraints(
-            minHeight: widget.minSize?.height ?? _height,
-            minWidth: widget.minSize?.width ?? 0,
+    // Only use native implementation on iOS
+    if (!kIsWeb && Platform.isIOS) {
+      final platformView = UiKitView(
+        viewType: 'adaptive_platform_ui/ios26_button',
+        creationParams: _buildCreationParams(),
+        creationParamsCodec: const StandardMessageCodec(),
+      );
+
+      return SizedBox(
+        height: _height,
+        child: widget.isChildMode
+            ? Stack(
+                children: [
+                  Positioned.fill(child: platformView),
+                  Center(child: widget.child!),
+                ],
+              )
+            : platformView,
+      );
+    }
+
+    // Fallback to CupertinoButton on other platforms
+    return _buildFallbackButton();
+  }
+
+  Widget _buildFallbackButton() {
+    final buttonColor = widget.color ?? CupertinoColors.systemBlue;
+    final textStyle = TextStyle(color: widget.textColor ?? CupertinoColors.white);
+
+    switch (widget.style) {
+      case iOS26ButtonStyle.filled:
+        return CupertinoButton.filled(
+          onPressed: widget.enabled ? widget.onPressed : null,
+          padding: widget.padding ?? const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Text(widget.label, style: textStyle),
+        );
+
+      case iOS26ButtonStyle.plain:
+        return CupertinoButton(
+          onPressed: widget.enabled ? widget.onPressed : null,
+          padding: widget.padding ?? const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Text(
+            widget.label,
+            style: TextStyle(color: widget.textColor ?? buttonColor),
           ),
-          decoration: BoxDecoration(
-            color: _getBackgroundColor(context),
-            borderRadius: widget.borderRadius ?? BorderRadius.circular(_cornerRadius),
-            border: _getBorder(context),
-            boxShadow: _getShadow(context),
-          ),
-          padding: widget.padding ?? _defaultPadding,
-          alignment: widget.alignment,
-          child: DefaultTextStyle(
-            style: TextStyle(
-              color: _getForegroundColor(context),
-              fontSize: widget.size == iOS26ButtonSize.small ? 13 :
-                        widget.size == iOS26ButtonSize.medium ? 15 : 17,
-              fontWeight: FontWeight.w600,
-              letterSpacing: -0.3,
-            ),
-            child: IconTheme(
-              data: IconThemeData(
-                color: _getForegroundColor(context),
-                size: widget.size == iOS26ButtonSize.small ? 16 :
-                      widget.size == iOS26ButtonSize.medium ? 18 : 20,
-              ),
-              child: widget.child,
-            ),
-          ),
-        ),
-      ),
-    );
+        );
+
+      default:
+        return CupertinoButton(
+          onPressed: widget.enabled ? widget.onPressed : null,
+          color: buttonColor,
+          padding: widget.padding ?? const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Text(widget.label, style: textStyle),
+        );
+    }
   }
 }
