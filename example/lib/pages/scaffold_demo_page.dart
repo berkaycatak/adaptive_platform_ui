@@ -124,20 +124,64 @@ class _ScaffoldDemoPageState extends State<ScaffoldDemoPage> {
         ),
         const SizedBox(height: 16),
         ...List.generate(5, (index) {
+          if (PlatformInfo.isIOS) {
+            return Container(
+              margin: const EdgeInsets.only(bottom: 12),
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: CupertinoColors.systemGrey6,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                children: [
+                  const Icon(
+                    CupertinoIcons.heart_fill,
+                    color: CupertinoColors.systemRed,
+                    size: 24,
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Favorite Item ${index + 1}',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        const Text(
+                          'Tap to view details',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: CupertinoColors.systemGrey,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Icon(
+                    CupertinoIcons.chevron_right,
+                    color: CupertinoColors.systemGrey,
+                    size: 20,
+                  ),
+                ],
+              ),
+            );
+          }
+
           return Card(
             margin: const EdgeInsets.only(bottom: 12),
             child: ListTile(
-              leading: Icon(
-                PlatformInfo.isIOS ? CupertinoIcons.heart_fill : Icons.favorite,
+              leading: const Icon(
+                Icons.favorite,
                 color: Colors.red,
               ),
               title: Text('Favorite Item ${index + 1}'),
               subtitle: const Text('Tap to view details'),
-              trailing: Icon(
-                PlatformInfo.isIOS
-                    ? CupertinoIcons.chevron_right
-                    : Icons.chevron_right,
-              ),
+              trailing: const Icon(Icons.chevron_right),
             ),
           );
         }),
@@ -260,9 +304,9 @@ class _ScaffoldDemoPageState extends State<ScaffoldDemoPage> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Row(
         children: [
@@ -306,22 +350,47 @@ class _ScaffoldDemoPageState extends State<ScaffoldDemoPage> {
   }
 
   Widget _buildSettingsTile(String title, IconData icon) {
+    if (PlatformInfo.isIOS) {
+      return Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: CupertinoColors.systemGrey6,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, size: 24),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+            const Icon(
+              CupertinoIcons.chevron_right,
+              color: CupertinoColors.systemGrey,
+              size: 20,
+            ),
+          ],
+        ),
+      );
+    }
+
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: PlatformInfo.isIOS
-            ? CupertinoColors.systemGrey6
-            : Colors.grey.shade200,
+        color: Colors.grey.shade200,
         borderRadius: BorderRadius.circular(12),
       ),
       child: ListTile(
         leading: Icon(icon),
         title: Text(title),
-        trailing: Icon(
-          PlatformInfo.isIOS
-              ? CupertinoIcons.chevron_right
-              : Icons.chevron_right,
-        ),
+        trailing: const Icon(Icons.chevron_right),
         onTap: () {},
       ),
     );

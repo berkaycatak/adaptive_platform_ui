@@ -24,9 +24,7 @@ class _SwitchDemoPageState extends State<SwitchDemoPage> {
       destinations: const [],
       selectedIndex: 0,
       onDestinationSelected: (_) {},
-      children: [
-        SafeArea(child: _buildContent()),
-      ],
+      children: [SafeArea(child: _buildContent())],
     );
   }
 
@@ -113,11 +111,7 @@ class _SwitchDemoPageState extends State<SwitchDemoPage> {
         // Disabled State
         _buildSection(
           'Disabled State',
-          _buildSwitchRow(
-            'Disabled (On)',
-            _disabledSwitch,
-            null,
-          ),
+          _buildSwitchRow('Disabled (On)', _disabledSwitch, null),
         ),
 
         const SizedBox(height: 32),
@@ -192,9 +186,7 @@ class _SwitchDemoPageState extends State<SwitchDemoPage> {
           label,
           style: TextStyle(
             fontSize: 16,
-            color: PlatformInfo.isIOS
-                ? CupertinoColors.label
-                : Colors.black87,
+            color: PlatformInfo.isIOS ? CupertinoColors.label : Colors.black87,
           ),
         ),
         AdaptiveSwitch(
@@ -219,10 +211,7 @@ class _SwitchDemoPageState extends State<SwitchDemoPage> {
                 : Colors.black54,
           ),
         ),
-        AdaptiveSwitch(
-          value: value,
-          onChanged: (v) {},
-        ),
+        AdaptiveSwitch(value: value, onChanged: (v) {}),
       ],
     );
   }

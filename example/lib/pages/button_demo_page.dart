@@ -95,6 +95,7 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
                 style: _selectedStyle,
                 size: _selectedSize,
                 label: 'Press Me',
+                textColor: Colors.white,
               ),
               const SizedBox(height: 16),
               Text(
