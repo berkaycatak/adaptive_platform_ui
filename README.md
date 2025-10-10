@@ -2,14 +2,27 @@
 
 A Flutter package that provides adaptive platform-specific widgets with native iOS 26+ designs, traditional Cupertino widgets for older iOS versions, and Material Design for Android.
 
+## iOS 26+ Native Toolbar & Tab Bar
+
+<p align="center">
+  <img src="img/appbar.gif" alt="iOS 26 Native Toolbar" width="300"/>
+  <img src="img/bottombar.gif" alt="iOS 26 Native Tab Bar" width="300"/>
+</p>
+
+Native iOS 26 UIToolbar and UITabBar with Liquid Glass blur effects, minimize behavior, and native gesture handling.
+
 ## Features
 
-✨ **iOS 26+ Native Designs** - Modern iOS 26 button styles with:
+✨ **iOS 26+ Native Designs** - Modern iOS 26 components with:
+- **Native UIToolbar** - Liquid Glass blur effects with native iOS 26 design
+- **Native UITabBar** - Tab bar with minimize behavior and smooth animations
+- **Native UIButton** - Button styles with spring animations and haptic feedback
+- **Native UISegmentedControl** - Segmented controls with SF Symbol support
+- **Native UISwitch & UISlider** - Switches and sliders with native animations
 - Native corner radius and shadows
 - Smooth spring animations
 - Dynamic color system (light/dark mode)
-- Multiple button styles (filled, tinted, gray, bordered, plain)
-- Three size presets (small, medium, large)
+- Multiple component styles
 
 🍎 **iOS Legacy Support** - Traditional Cupertino widgets for iOS 25 and below
 
@@ -34,25 +47,183 @@ Then run:
 flutter pub get
 ```
 
-## Usage
+## Widget Showcase
 
-### Basic Button
+### AdaptiveScaffold with Native Toolbar & Tab Bar
+
+<p align="center">
+  <img src="img/appbar.gif" alt="Native Toolbar" width="300"/>
+</p>
 
 ```dart
-import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
-
-AdaptiveButton(
-  onPressed: () {
-    print('Button pressed!');
-  },
-  child: Text('Click Me'),
+AdaptiveScaffold(
+  title: 'My App',
+  actions: [
+    AdaptiveAppBarAction(
+      onPressed: () {},
+      iosSymbol: 'gear',
+      androidIcon: Icons.settings,
+    ),
+  ],
+  destinations: [
+    AdaptiveNavigationDestination(
+      icon: 'house.fill',
+      label: 'Home',
+    ),
+    AdaptiveNavigationDestination(
+      icon: 'person.fill',
+      label: 'Profile',
+    ),
+  ],
+  selectedIndex: 0,
+  onDestinationSelected: (index) {},
+  child: YourContent(),
 )
 ```
 
-This will automatically render:
-- **iOS 26+**: Native iOS 26 filled button with modern styling
-- **iOS <26**: CupertinoButton.filled
-- **Android**: Material ElevatedButton
+### AdaptiveButton
+
+<p align="center">
+  <img src="img/button.png" alt="Adaptive Buttons" width="400"/>
+</p>
+
+```dart
+// Basic button with label
+AdaptiveButton(
+  onPressed: () {},
+  label: 'Click Me',
+)
+
+// Button with custom child
+AdaptiveButton.child(
+  onPressed: () {},
+  child: Row(
+    children: [
+      Icon(Icons.add),
+      Text('Add Item'),
+    ],
+  ),
+)
+
+// Icon button
+AdaptiveButton.icon(
+  onPressed: () {},
+  icon: Icons.favorite,
+)
+```
+
+### AdaptiveSegmentedControl
+
+<p align="center">
+  <img src="img/segmented_control.gif" alt="Segmented Control" width="300"/>
+</p>
+
+```dart
+AdaptiveSegmentedControl(
+  labels: ['One', 'Two', 'Three'],
+  selectedIndex: 0,
+  onValueChanged: (index) {
+    print('Selected: $index');
+  },
+)
+
+// With icons (SF Symbols on iOS)
+AdaptiveSegmentedControl(
+  labels: [],
+  sfSymbols: [
+    'house.fill',
+    'person.fill',
+    'gear',
+  ],
+  selectedIndex: 0,
+  onValueChanged: (index) {},
+  iconColor: CupertinoColors.systemBlue,
+)
+```
+
+### AdaptiveSwitch
+
+<p align="center">
+  <img src="img/switch.gif" alt="Adaptive Switch" width="300"/>
+</p>
+
+```dart
+AdaptiveSwitch(
+  value: true,
+  onChanged: (value) {
+    print('Switch: $value');
+  },
+)
+```
+
+### AdaptiveSlider
+
+<p align="center">
+  <img src="img/slider.gif" alt="Adaptive Slider" width="300"/>
+</p>
+
+```dart
+AdaptiveSlider(
+  value: 0.5,
+  onChanged: (value) {
+    print('Slider: $value');
+  },
+  min: 0.0,
+  max: 1.0,
+)
+```
+
+### AdaptiveAlertDialog
+
+<p align="center">
+  <img src="img/alert.png" alt="Alert Dialog" width="300"/>
+</p>
+
+```dart
+showAdaptiveAlertDialog(
+  context: context,
+  title: 'Confirm',
+  message: 'Are you sure?',
+  icon: 'checkmark.circle.fill',
+  actions: [
+    AlertAction(
+      title: 'Cancel',
+      style: AlertActionStyle.cancel,
+      onPressed: () => Navigator.pop(context),
+    ),
+    AlertAction(
+      title: 'Confirm',
+      style: AlertActionStyle.primary,
+      onPressed: () {
+        Navigator.pop(context);
+        // Do something
+      },
+    ),
+  ],
+);
+```
+
+### AdaptivePopupMenuButton
+
+<p align="center">
+  <img src="img/pop-up-menu.png" alt="Popup Menu" width="300"/>
+</p>
+
+```dart
+AdaptivePopupMenuButton<String>(
+  buttonLabel: 'Options',
+  items: [
+    PopupMenuItem(value: 'edit', label: 'Edit', icon: 'pencil'),
+    PopupMenuItem(value: 'delete', label: 'Delete', icon: 'trash', destructive: true),
+    PopupMenuItem(value: 'share', label: 'Share', icon: 'square.and.arrow.up'),
+  ],
+  onSelected: (value) {
+    print('Selected: $value');
+  },
+)
+```
+
+## Usage
 
 ### Button Styles
 
@@ -61,35 +232,35 @@ This will automatically render:
 AdaptiveButton(
   onPressed: () {},
   style: AdaptiveButtonStyle.filled,
-  child: Text('Filled'),
+  label: 'Filled',
 )
 
 // Tinted button (secondary action)
 AdaptiveButton(
   onPressed: () {},
   style: AdaptiveButtonStyle.tinted,
-  child: Text('Tinted'),
+  label: 'Tinted',
 )
 
 // Gray button (neutral action)
 AdaptiveButton(
   onPressed: () {},
   style: AdaptiveButtonStyle.gray,
-  child: Text('Gray'),
+  label: 'Gray',
 )
 
 // Bordered button
 AdaptiveButton(
   onPressed: () {},
   style: AdaptiveButtonStyle.bordered,
-  child: Text('Bordered'),
+  label: 'Bordered',
 )
 
 // Plain text button
 AdaptiveButton(
   onPressed: () {},
   style: AdaptiveButtonStyle.plain,
-  child: Text('Plain'),
+  label: 'Plain',
 )
 ```
 
@@ -100,21 +271,21 @@ AdaptiveButton(
 AdaptiveButton(
   onPressed: () {},
   size: AdaptiveButtonSize.small,
-  child: Text('Small'),
+  label: 'Small',
 )
 
 // Medium button (36pt height on iOS) - default
 AdaptiveButton(
   onPressed: () {},
   size: AdaptiveButtonSize.medium,
-  child: Text('Medium'),
+  label: 'Medium',
 )
 
 // Large button (44pt height on iOS)
 AdaptiveButton(
   onPressed: () {},
   size: AdaptiveButtonSize.large,
-  child: Text('Large'),
+  label: 'Large',
 )
 ```
 
@@ -123,11 +294,11 @@ AdaptiveButton(
 ```dart
 AdaptiveButton(
   onPressed: () {},
+  label: 'Custom Button',
   color: Colors.red,
   padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
   borderRadius: BorderRadius.circular(16),
   minSize: Size(200, 50),
-  child: Text('Custom Button'),
 )
 ```
 
@@ -135,8 +306,9 @@ AdaptiveButton(
 
 ```dart
 AdaptiveButton(
-  onPressed: null, // null = disabled
-  child: Text('Disabled'),
+  onPressed: () {},
+  label: 'Disabled',
+  enabled: false,
 )
 ```
 
@@ -177,100 +349,38 @@ if (PlatformInfo.isIOSVersionInRange(24, 26)) {
 String description = PlatformInfo.platformDescription; // e.g., "iOS 26"
 ```
 
-## iOS 26 Native Button Features
+## iOS 26 Native Features
 
-When running on iOS 26+, buttons automatically use **native UIKit platform views** with Liquid Glass design:
+When running on iOS 26+, widgets automatically use **native UIKit platform views** with Liquid Glass design:
 
 ### Platform Architecture
-- **Native UIKit Views**: Uses `UiKitView` to render actual iOS 26 UIButton components
+- **Native UIKit Views**: Uses `UiKitView` to render actual iOS 26 UIKit components
 - **Platform Channels**: Bidirectional communication between Flutter and native iOS code
 - **Liquid Glass Design**: Authentic iOS 26 visual effects rendered by UIKit
 - **Zero Overhead**: No custom painting or emulation - pure native rendering
 
 ### Visual Features
-- **Modern corner radius**: 10pt for medium, 8pt for small, 12pt for large
-- **Dynamic shadows**: Subtle multi-layer shadows for filled buttons
-- **Spring animations**: 0.95x scale on press with smooth spring damping
+- **Modern corner radius**: Native iOS 26 design language
+- **Dynamic shadows**: Subtle multi-layer shadows
+- **Spring animations**: Smooth spring damping with 0.95x scale on press
 - **Native color system**: Uses iOS system colors with proper light/dark mode support
 - **Liquid Glass effects**: Native iOS 26 translucency and blur effects
+- **SF Symbols**: Native SF Symbol rendering with hierarchical color support
 
 ### Interaction
-- **Press states**: Visual feedback with scale animation (0.95x on press)
-- **Gesture handling**: Native UIButton gesture recognizers
-- **Haptic feedback**: Medium impact feedback on button press
-- **Disabled states**: Proper opacity (0.5) and interaction blocking
+- **Press states**: Visual feedback with scale animation
+- **Gesture handling**: Native UIKit gesture recognizers
+- **Haptic feedback**: Medium impact feedback on interactions
+- **Disabled states**: Proper opacity and interaction blocking
 
 ### Typography
 - **SF Pro font**: Native iOS system font with proper weights
-- **Size-appropriate text**: 13pt (small), 15pt (medium), 17pt (large)
-- **Weight**: Medium for small/medium, Semibold for large
-
-## Technical Architecture
-
-### Native iOS 26 Implementation
-
-The iOS 26 button implementation uses Flutter's platform views to embed native UIKit components:
-
-#### Flutter Side (Dart)
-```dart
-// Creates a UiKitView that communicates with native iOS
-UiKitView(
-  viewType: 'adaptive_platform_ui/ios26_button',
-  creationParams: {
-    'style': 'filled',
-    'label': 'Button',
-    'enabled': true,
-    // ... other configuration
-  },
-  creationParamsCodec: const StandardMessageCodec(),
-)
-```
-
-#### Native iOS Side (Swift)
-```swift
-// iOS26ButtonView.swift - Creates actual UIButton with iOS 26 styling
-let button = UIButton(type: .system)
-button.layer.cornerRadius = 10
-button.backgroundColor = .systemBlue
-
-// Spring animation on press
-UIView.animate(withDuration: 0.2, usingSpringWithDamping: 0.7) {
-    self.button.transform = .identity
-}
-
-// Haptic feedback
-let impact = UIImpactFeedbackGenerator(style: .medium)
-impact.impactOccurred()
-```
-
-### Communication Flow
-1. **Flutter → Native**: Button configuration sent via creation parameters
-2. **Native → Flutter**: Button press events sent via method channel
-3. **Flutter → Native**: Dynamic updates (color, style, enabled state) via method calls
-
-## Advanced Usage
-
-### Using iOS 26 Button Directly
-
-For advanced use cases, you can use the iOS 26 button implementation directly:
-
-```dart
-import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
-
-iOS26Button(
-  onPressed: () {},
-  style: iOS26ButtonStyle.filled,
-  size: iOS26ButtonSize.medium,
-  color: CupertinoColors.systemBlue,
-  child: Text('iOS 26 Button'),
-)
-```
-
-**Note**: This will use native UIKit views on iOS 26+ and fall back to CupertinoButton on older versions.
+- **Dynamic Type**: Respects system font size settings
+- **Weight**: Appropriate font weights for each component
 
 ## Example App
 
-Run the example app to see all button styles and sizes in action:
+Run the example app to see all widgets in action:
 
 ```bash
 cd example
@@ -279,30 +389,22 @@ flutter run
 
 The example app includes:
 - Platform information display
-- Interactive button style selector
-- Size comparison
-- All button styles showcase
-- Disabled state examples
-- Press counter
+- All widget types showcase
+- Interactive demos
+- Style and size comparisons
+- Dark mode support
 
 ## Widget Catalog
 
 Currently available adaptive widgets:
 
-- ✅ **AdaptiveButton** - Adaptive button with iOS 26+ native designs
-
-Coming soon:
-- 🚧 AdaptiveTabBar
-- 🚧 AdaptiveSwitch
-- 🚧 AdaptiveSlider
-- 🚧 AdaptiveTextField
-- 🚧 AdaptiveAlertDialog
-- 🚧 AdaptiveNavigationBar
-- 🚧 AdaptiveActivityIndicator
-- 🚧 AdaptiveScaffold
-- 🚧 AdaptiveDatePicker
-- 🚧 AdaptiveContextMenu
-- 🚧 AdaptiveSearchBar
+- ✅ **AdaptiveScaffold** - Scaffold with native iOS 26 toolbar and tab bar
+- ✅ **AdaptiveButton** - Buttons with iOS 26+ native designs
+- ✅ **AdaptiveSegmentedControl** - Native segmented controls
+- ✅ **AdaptiveSwitch** - Native switches
+- ✅ **AdaptiveSlider** - Native sliders
+- ✅ **AdaptiveAlertDialog** - Native alert dialogs
+- ✅ **AdaptivePopupMenuButton** - Native popup menus
 
 ## Design Philosophy
 
@@ -335,7 +437,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Acknowledgments
 
-- Inspired by cupertino_native 
+- Inspired by cupertino_native
 - Design guidelines from Apple's Human Interface Guidelines
 - Material Design guidelines from Google
 
