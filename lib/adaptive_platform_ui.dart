@@ -37,8 +37,10 @@ export 'src/style/sf_symbol.dart';
 export 'src/widgets/adaptive_button.dart';
 export 'src/widgets/adaptive_switch.dart';
 export 'src/widgets/adaptive_slider.dart';
+export 'src/widgets/adaptive_segmented_control.dart';
 
 // iOS 26 specific widgets (for advanced usage)
 export 'src/widgets/ios26/ios26_button.dart';
 export 'src/widgets/ios26/ios26_switch.dart';
 export 'src/widgets/ios26/ios26_slider.dart';
+export 'src/widgets/ios26/ios26_segmented_control.dart';

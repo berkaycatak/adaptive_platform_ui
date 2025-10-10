@@ -4,6 +4,7 @@ import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import 'pages/button_demo_page.dart';
 import 'pages/switch_demo_page.dart';
 import 'pages/slider_demo_page.dart';
+import 'pages/segmented_control_demo_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -113,21 +114,30 @@ class HomePage extends StatelessWidget {
         const SizedBox(height: 12),
         _buildComponentTile(
           context,
-          title: 'AdaptiveTabBar',
-          description: 'Coming soon...',
-          icon: PlatformInfo.isIOS ? CupertinoIcons.square_grid_2x2 : Icons.tab,
-          onTap: null,
-        ),
-
-        const SizedBox(height: 12),
-        _buildComponentTile(
-          context,
           title: 'AdaptiveSwitch',
           description: 'Native iOS 26 switch with adaptive styles',
           icon: PlatformInfo.isIOS
               ? CupertinoIcons.switch_camera_solid
               : Icons.toggle_on,
           onTap: () => _navigateToSwitchDemo(context),
+        ),
+
+        const SizedBox(height: 12),
+        _buildComponentTile(
+          context,
+          title: 'AdaptiveSegmentedControl',
+          description: 'Native iOS 26 segmented control with Liquid Glass',
+          icon: PlatformInfo.isIOS ? CupertinoIcons.square_split_2x2 : Icons.segment,
+          onTap: () => _navigateToSegmentedControlDemo(context),
+        ),
+
+        const SizedBox(height: 12),
+        _buildComponentTile(
+          context,
+          title: 'AdaptiveTabBar',
+          description: 'Coming soon...',
+          icon: PlatformInfo.isIOS ? CupertinoIcons.square_grid_2x2 : Icons.tab,
+          onTap: null,
         ),
       ],
     );
@@ -302,6 +312,18 @@ class HomePage extends StatelessWidget {
       Navigator.of(
         context,
       ).push(MaterialPageRoute(builder: (_) => const SliderDemoPage()));
+    }
+  }
+
+  void _navigateToSegmentedControlDemo(BuildContext context) {
+    if (PlatformInfo.isIOS) {
+      Navigator.of(
+        context,
+      ).push(CupertinoPageRoute(builder: (_) => const SegmentedControlDemoPage()));
+    } else {
+      Navigator.of(
+        context,
+      ).push(MaterialPageRoute(builder: (_) => const SegmentedControlDemoPage()));
     }
   }
 }

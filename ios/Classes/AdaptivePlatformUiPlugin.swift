@@ -26,5 +26,12 @@ public class AdaptivePlatformUiPlugin: NSObject, FlutterPlugin {
             ios26SliderFactory,
             withId: "adaptive_platform_ui/ios26_slider"
         )
+
+        // Register iOS 26 SegmentedControl platform view factory
+        let ios26SegmentedControlFactory = iOS26SegmentedControlViewFactory(messenger: registrar.messenger())
+        registrar.register(
+            ios26SegmentedControlFactory,
+            withId: "adaptive_platform_ui/ios26_segmented_control"
+        )
     }
 }
