@@ -25,6 +25,8 @@ class _SliderDemoPageState extends State<SliderDemoPage> {
   }
 
   Widget _buildContent() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return ListView(
       padding: const EdgeInsets.all(16.0),
       children: [
@@ -42,8 +44,10 @@ class _SliderDemoPageState extends State<SliderDemoPage> {
                 'Value: ${_basicValue.toStringAsFixed(2)}',
                 style: TextStyle(
                   color: PlatformInfo.isIOS
-                      ? CupertinoColors.secondaryLabel
-                      : Colors.black54,
+                      ? (MediaQuery.platformBrightnessOf(context) == Brightness.dark
+                          ? CupertinoColors.systemGrey
+                          : CupertinoColors.systemGrey2)
+                      : (isDark ? Colors.grey[400] : Colors.grey[700]),
                 ),
               ),
             ],
@@ -91,8 +95,10 @@ class _SliderDemoPageState extends State<SliderDemoPage> {
                 'Value: ${_rangeValue.toStringAsFixed(0)}',
                 style: TextStyle(
                   color: PlatformInfo.isIOS
-                      ? CupertinoColors.secondaryLabel
-                      : Colors.black54,
+                      ? (MediaQuery.platformBrightnessOf(context) == Brightness.dark
+                          ? CupertinoColors.systemGrey
+                          : CupertinoColors.systemGrey2)
+                      : (isDark ? Colors.grey[400] : Colors.grey[700]),
                 ),
               ),
             ],
@@ -103,6 +109,8 @@ class _SliderDemoPageState extends State<SliderDemoPage> {
   }
 
   Widget _buildSection(String title, Widget content) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -111,7 +119,11 @@ class _SliderDemoPageState extends State<SliderDemoPage> {
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: PlatformInfo.isIOS ? CupertinoColors.label : Colors.black87,
+            color: PlatformInfo.isIOS
+                ? (MediaQuery.platformBrightnessOf(context) == Brightness.dark
+                    ? CupertinoColors.white
+                    : CupertinoColors.black)
+                : (isDark ? Colors.white : Colors.black87),
           ),
         ),
         const SizedBox(height: 12),

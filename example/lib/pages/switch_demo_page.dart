@@ -26,6 +26,8 @@ class _SwitchDemoPageState extends State<SwitchDemoPage> {
   }
 
   Widget _buildContent() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return ListView(
       padding: const EdgeInsets.only(
         left: 16.0,
@@ -43,7 +45,7 @@ class _SwitchDemoPageState extends State<SwitchDemoPage> {
             decoration: BoxDecoration(
               color: PlatformInfo.isIOS
                   ? CupertinoColors.systemGrey6
-                  : Colors.grey.shade200,
+                  : (isDark ? Colors.grey[850] : Colors.grey[200]),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Text(
@@ -52,8 +54,10 @@ class _SwitchDemoPageState extends State<SwitchDemoPage> {
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
                 color: PlatformInfo.isIOS
-                    ? CupertinoColors.label
-                    : Colors.black87,
+                    ? (MediaQuery.platformBrightnessOf(context) == Brightness.dark
+                        ? CupertinoColors.white
+                        : CupertinoColors.black)
+                    : (isDark ? Colors.white : Colors.black87),
               ),
             ),
           ),
@@ -149,8 +153,10 @@ class _SwitchDemoPageState extends State<SwitchDemoPage> {
               fontSize: 14,
               height: 1.5,
               color: PlatformInfo.isIOS
-                  ? CupertinoColors.secondaryLabel
-                  : Colors.black54,
+                  ? (MediaQuery.platformBrightnessOf(context) == Brightness.dark
+                      ? CupertinoColors.systemGrey
+                      : CupertinoColors.systemGrey2)
+                  : (isDark ? Colors.grey[400] : Colors.grey[700]),
             ),
           ),
         ),
@@ -159,6 +165,8 @@ class _SwitchDemoPageState extends State<SwitchDemoPage> {
   }
 
   Widget _buildSection(String title, Widget content) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -167,7 +175,9 @@ class _SwitchDemoPageState extends State<SwitchDemoPage> {
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: PlatformInfo.isIOS ? CupertinoColors.label : Colors.black87,
+            color: PlatformInfo.isIOS
+                ? CupertinoColors.label
+                : (isDark ? Colors.white : Colors.black87),
           ),
         ),
         const SizedBox(height: 12),
@@ -182,6 +192,8 @@ class _SwitchDemoPageState extends State<SwitchDemoPage> {
     ValueChanged<bool>? onChanged, {
     Color? activeColor,
   }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -189,7 +201,9 @@ class _SwitchDemoPageState extends State<SwitchDemoPage> {
           label,
           style: TextStyle(
             fontSize: 16,
-            color: PlatformInfo.isIOS ? CupertinoColors.label : Colors.black87,
+            color: PlatformInfo.isIOS
+                ? CupertinoColors.label
+                : (isDark ? Colors.white : Colors.black87),
           ),
         ),
         AdaptiveSwitch(
@@ -202,6 +216,8 @@ class _SwitchDemoPageState extends State<SwitchDemoPage> {
   }
 
   Widget _buildStateRow(String label, bool value) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -211,7 +227,7 @@ class _SwitchDemoPageState extends State<SwitchDemoPage> {
             fontSize: 14,
             color: PlatformInfo.isIOS
                 ? CupertinoColors.secondaryLabel
-                : Colors.black54,
+                : (isDark ? Colors.grey[400] : Colors.grey[700]),
           ),
         ),
         AdaptiveSwitch(value: value, onChanged: (v) {}),

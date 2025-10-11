@@ -33,7 +33,7 @@ class _PopupMenuDemoPageState extends State<PopupMenuDemoPage> {
         decoration: BoxDecoration(
           color: PlatformInfo.isIOS
               ? CupertinoColors.systemGrey6
-              : Colors.grey.shade200,
+              : Theme.of(context).colorScheme.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Column(
@@ -46,13 +46,21 @@ class _PopupMenuDemoPageState extends State<PopupMenuDemoPage> {
                 fontWeight: FontWeight.w600,
                 color: PlatformInfo.isIOS
                     ? CupertinoColors.systemGrey
-                    : Colors.grey.shade700,
+                    : Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
             const SizedBox(height: 4),
             Text(
               _selectedAction,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+                color: PlatformInfo.isIOS
+                    ? (MediaQuery.platformBrightnessOf(context) == Brightness.dark
+                        ? CupertinoColors.white
+                        : CupertinoColors.black)
+                    : Theme.of(context).colorScheme.onSurface,
+              ),
             ),
             if (_selectedValue.isNotEmpty) ...[
               const SizedBox(height: 4),
@@ -62,7 +70,7 @@ class _PopupMenuDemoPageState extends State<PopupMenuDemoPage> {
                   fontSize: 14,
                   color: PlatformInfo.isIOS
                       ? CupertinoColors.systemGrey
-                      : Colors.grey.shade700,
+                      : Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
             ],
@@ -181,7 +189,17 @@ class _PopupMenuDemoPageState extends State<PopupMenuDemoPage> {
                   buttonStyle: PopupButtonStyle.glass,
                 ),
                 const SizedBox(height: 8),
-                const Text('Glass', style: TextStyle(fontSize: 12)),
+                Text(
+                  'Glass',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: PlatformInfo.isIOS
+                        ? (MediaQuery.platformBrightnessOf(context) == Brightness.dark
+                            ? CupertinoColors.systemGrey
+                            : CupertinoColors.systemGrey2)
+                        : Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
               ],
             ),
             Column(
@@ -199,7 +217,17 @@ class _PopupMenuDemoPageState extends State<PopupMenuDemoPage> {
                   tint: CupertinoColors.systemBlue,
                 ),
                 const SizedBox(height: 8),
-                const Text('Tinted', style: TextStyle(fontSize: 12)),
+                Text(
+                  'Tinted',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: PlatformInfo.isIOS
+                        ? (MediaQuery.platformBrightnessOf(context) == Brightness.dark
+                            ? CupertinoColors.systemGrey
+                            : CupertinoColors.systemGrey2)
+                        : Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
               ],
             ),
             Column(
@@ -217,7 +245,17 @@ class _PopupMenuDemoPageState extends State<PopupMenuDemoPage> {
                   tint: CupertinoColors.systemPurple,
                 ),
                 const SizedBox(height: 8),
-                const Text('Filled', style: TextStyle(fontSize: 12)),
+                Text(
+                  'Filled',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: PlatformInfo.isIOS
+                        ? (MediaQuery.platformBrightnessOf(context) == Brightness.dark
+                            ? CupertinoColors.systemGrey
+                            : CupertinoColors.systemGrey2)
+                        : Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
               ],
             ),
             Column(
@@ -234,7 +272,17 @@ class _PopupMenuDemoPageState extends State<PopupMenuDemoPage> {
                   buttonStyle: PopupButtonStyle.prominentGlass,
                 ),
                 const SizedBox(height: 8),
-                const Text('Prominent', style: TextStyle(fontSize: 12)),
+                Text(
+                  'Prominent',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: PlatformInfo.isIOS
+                        ? (MediaQuery.platformBrightnessOf(context) == Brightness.dark
+                            ? CupertinoColors.systemGrey
+                            : CupertinoColors.systemGrey2)
+                        : Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
               ],
             ),
           ],
@@ -445,7 +493,13 @@ class _PopupMenuDemoPageState extends State<PopupMenuDemoPage> {
       children: [
         Text(
           title,
-          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: PlatformInfo.isIOS
+                ? CupertinoColors.label
+                : Theme.of(context).colorScheme.onSurface,
+          ),
         ),
         const SizedBox(height: 12),
         ...children,
@@ -460,7 +514,17 @@ class _PopupMenuDemoPageState extends State<PopupMenuDemoPage> {
         children: [
           SizedBox(
             width: 140,
-            child: Text(title, style: const TextStyle(fontSize: 15)),
+            child: Text(
+              title,
+              style: TextStyle(
+                fontSize: 15,
+                color: PlatformInfo.isIOS
+                    ? (MediaQuery.platformBrightnessOf(context) == Brightness.dark
+                        ? CupertinoColors.white
+                        : CupertinoColors.black)
+                    : Theme.of(context).colorScheme.onSurface,
+              ),
+            ),
           ),
           Flexible(child: widget),
         ],

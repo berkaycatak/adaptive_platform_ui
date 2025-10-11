@@ -104,18 +104,34 @@ class _DemoTabbarPageState extends State<DemoTabbarPage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, size: 80, color: CupertinoColors.systemBlue),
+          Icon(
+            icon,
+            size: 80,
+            color: PlatformInfo.isIOS
+                ? CupertinoColors.systemBlue
+                : Theme.of(context).colorScheme.primary,
+          ),
           const SizedBox(height: 24),
           Text(
             title,
-            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: PlatformInfo.isIOS
+                  ? (MediaQuery.platformBrightnessOf(context) == Brightness.dark
+                      ? CupertinoColors.white
+                      : CupertinoColors.black)
+                  : Theme.of(context).colorScheme.onSurface,
+            ),
           ),
           const SizedBox(height: 16),
           Text(
             'This is tab $index',
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 16,
-              color: CupertinoColors.systemGrey,
+              color: PlatformInfo.isIOS
+                  ? CupertinoColors.systemGrey
+                  : Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
         ],

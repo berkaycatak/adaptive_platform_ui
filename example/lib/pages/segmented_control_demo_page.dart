@@ -30,9 +30,29 @@ class _SegmentedControlDemoPageState extends State<SegmentedControlDemoPage> {
           children: [
             Row(
               children: [
-                const Text('Basic'),
+                Text(
+                  'Basic',
+                  style: TextStyle(
+                    color: PlatformInfo.isIOS
+                        ? (MediaQuery.platformBrightnessOf(context) ==
+                                Brightness.dark
+                            ? CupertinoColors.white
+                            : CupertinoColors.black)
+                        : null,
+                  ),
+                ),
                 const Spacer(),
-                Text('Selected: ${_basicSegmentedControlIndex + 1}'),
+                Text(
+                  'Selected: ${_basicSegmentedControlIndex + 1}',
+                  style: TextStyle(
+                    color: PlatformInfo.isIOS
+                        ? (MediaQuery.platformBrightnessOf(context) ==
+                                Brightness.dark
+                            ? CupertinoColors.white
+                            : CupertinoColors.black)
+                        : null,
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: 12),
@@ -47,9 +67,29 @@ class _SegmentedControlDemoPageState extends State<SegmentedControlDemoPage> {
 
             Row(
               children: [
-                const Text('Colored'),
+                Text(
+                  'Colored',
+                  style: TextStyle(
+                    color: PlatformInfo.isIOS
+                        ? (MediaQuery.platformBrightnessOf(context) ==
+                                Brightness.dark
+                            ? CupertinoColors.white
+                            : CupertinoColors.black)
+                        : null,
+                  ),
+                ),
                 const Spacer(),
-                Text('Selected: ${_shrinkWrappedSegmentedControlIndex + 1}'),
+                Text(
+                  'Selected: ${_shrinkWrappedSegmentedControlIndex + 1}',
+                  style: TextStyle(
+                    color: PlatformInfo.isIOS
+                        ? (MediaQuery.platformBrightnessOf(context) ==
+                                Brightness.dark
+                            ? CupertinoColors.white
+                            : CupertinoColors.black)
+                        : null,
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: 12),
@@ -65,9 +105,29 @@ class _SegmentedControlDemoPageState extends State<SegmentedControlDemoPage> {
 
             Row(
               children: [
-                const Text('Shrink wrap'),
+                Text(
+                  'Shrink wrap',
+                  style: TextStyle(
+                    color: PlatformInfo.isIOS
+                        ? (MediaQuery.platformBrightnessOf(context) ==
+                                Brightness.dark
+                            ? CupertinoColors.white
+                            : CupertinoColors.black)
+                        : null,
+                  ),
+                ),
                 const Spacer(),
-                Text('Selected: ${_coloredSegmentedControlIndex + 1}'),
+                Text(
+                  'Selected: ${_coloredSegmentedControlIndex + 1}',
+                  style: TextStyle(
+                    color: PlatformInfo.isIOS
+                        ? (MediaQuery.platformBrightnessOf(context) ==
+                                Brightness.dark
+                            ? CupertinoColors.white
+                            : CupertinoColors.black)
+                        : null,
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: 12),
@@ -83,9 +143,29 @@ class _SegmentedControlDemoPageState extends State<SegmentedControlDemoPage> {
 
             Row(
               children: [
-                const Text('Icons'),
+                Text(
+                  'Icons',
+                  style: TextStyle(
+                    color: PlatformInfo.isIOS
+                        ? (MediaQuery.platformBrightnessOf(context) ==
+                                Brightness.dark
+                            ? CupertinoColors.white
+                            : CupertinoColors.black)
+                        : null,
+                  ),
+                ),
                 const Spacer(),
-                Text('Selected: ${_iconSegmentedControlIndex + 1}'),
+                Text(
+                  'Selected: ${_iconSegmentedControlIndex + 1}',
+                  style: TextStyle(
+                    color: PlatformInfo.isIOS
+                        ? (MediaQuery.platformBrightnessOf(context) ==
+                                Brightness.dark
+                            ? CupertinoColors.white
+                            : CupertinoColors.black)
+                        : null,
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: 12),

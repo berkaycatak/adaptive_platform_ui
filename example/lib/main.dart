@@ -24,12 +24,20 @@ class AdaptivePlatformUIDemo extends StatelessWidget {
       cupertinoLightTheme: CupertinoThemeData(brightness: Brightness.light),
       cupertinoDarkTheme: CupertinoThemeData(brightness: Brightness.dark),
       materialLightTheme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.blue,
+          brightness: Brightness.light,
+        ),
         useMaterial3: true,
+        brightness: Brightness.light,
       ),
       materialDarkTheme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.blue,
+          brightness: Brightness.dark,
+        ),
         useMaterial3: true,
+        brightness: Brightness.dark,
       ),
 
       home: HomePage(),
@@ -195,6 +203,10 @@ class HomePage extends StatelessWidget {
     required String title,
     required List<_DemoItem> items,
   }) {
+    final isDark = PlatformInfo.isIOS
+        ? MediaQuery.platformBrightnessOf(context) == Brightness.dark
+        : Theme.of(context).brightness == Brightness.dark;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -206,7 +218,7 @@ class HomePage extends StatelessWidget {
               fontSize: 20,
               fontWeight: FontWeight.bold,
               color: PlatformInfo.isIOS
-                  ? CupertinoColors.label
+                  ? (isDark ? CupertinoColors.white : CupertinoColors.black)
                   : Theme.of(context).colorScheme.onSurface,
             ),
           ),
@@ -218,6 +230,8 @@ class HomePage extends StatelessWidget {
 
   Widget _buildDemoItem(BuildContext context, _DemoItem item) {
     if (PlatformInfo.isIOS) {
+      final isDark = MediaQuery.platformBrightnessOf(context) == Brightness.dark;
+
       return Container(
         margin: const EdgeInsets.only(bottom: 12),
         child: CupertinoButton(
@@ -226,9 +240,16 @@ class HomePage extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: CupertinoColors.systemBackground,
+              color: isDark
+                  ? CupertinoColors.darkBackgroundGray
+                  : CupertinoColors.white,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: CupertinoColors.separator, width: 0.5),
+              border: Border.all(
+                color: isDark
+                    ? CupertinoColors.systemGrey4
+                    : CupertinoColors.separator,
+                width: 0.5,
+              ),
             ),
             child: Row(
               children: [
@@ -252,24 +273,28 @@ class HomePage extends StatelessWidget {
                     children: [
                       Text(
                         item.title,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 17,
                           fontWeight: FontWeight.w600,
-                          color: CupertinoColors.label,
+                          color: isDark
+                              ? CupertinoColors.white
+                              : CupertinoColors.black,
                         ),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         item.description,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 14,
-                          color: CupertinoColors.secondaryLabel,
+                          color: isDark
+                              ? CupertinoColors.systemGrey
+                              : CupertinoColors.systemGrey2,
                         ),
                       ),
                     ],
                   ),
                 ),
-                const Icon(
+                Icon(
                   CupertinoIcons.chevron_right,
                   color: CupertinoColors.systemGrey,
                   size: 20,
@@ -337,13 +362,27 @@ class HomePage extends StatelessWidget {
   }
 
   Widget _buildInfoCard(BuildContext context) {
+    final isDark = PlatformInfo.isIOS
+        ? MediaQuery.platformBrightnessOf(context) == Brightness.dark
+        : Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: PlatformInfo.isIOS
-            ? CupertinoColors.systemGrey6
+            ? (isDark
+                ? CupertinoColors.darkBackgroundGray
+                : CupertinoColors.white)
             : Theme.of(context).colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(12),
+        border: PlatformInfo.isIOS
+            ? Border.all(
+                color: isDark
+                    ? CupertinoColors.systemGrey4
+                    : CupertinoColors.separator,
+                width: 0.5,
+              )
+            : null,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -366,7 +405,9 @@ class HomePage extends StatelessWidget {
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                   color: PlatformInfo.isIOS
-                      ? CupertinoColors.label
+                      ? (isDark
+                          ? CupertinoColors.white
+                          : CupertinoColors.black)
                       : Theme.of(context).colorScheme.onSurface,
                 ),
               ),
@@ -378,7 +419,9 @@ class HomePage extends StatelessWidget {
             style: TextStyle(
               fontSize: 14,
               color: PlatformInfo.isIOS
-                  ? CupertinoColors.secondaryLabel
+                  ? (isDark
+                      ? CupertinoColors.systemGrey
+                      : CupertinoColors.systemGrey2)
                   : Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
@@ -417,6 +460,10 @@ class HomePage extends StatelessWidget {
     required IconData icon,
     required String text,
   }) {
+    final isDark = PlatformInfo.isIOS
+        ? MediaQuery.platformBrightnessOf(context) == Brightness.dark
+        : Theme.of(context).brightness == Brightness.dark;
+
     return Row(
       children: [
         Icon(
@@ -433,7 +480,9 @@ class HomePage extends StatelessWidget {
             style: TextStyle(
               fontSize: 13,
               color: PlatformInfo.isIOS
-                  ? CupertinoColors.secondaryLabel
+                  ? (isDark
+                      ? CupertinoColors.systemGrey
+                      : CupertinoColors.systemGrey2)
                   : Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),

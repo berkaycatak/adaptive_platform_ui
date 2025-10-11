@@ -64,45 +64,16 @@ class CupertinoAppData {
 
 /// Platform detection for configuration callbacks
 enum PlatformTarget {
-  /// Android platform
   android,
-
-  /// iOS platform (any version)
   ios,
-
-  /// iOS 26 or higher
   ios26Plus,
-
-  /// iOS 18 or lower (pre-iOS 26)
   ios18OrLower,
-
-  /// Web platform
   web,
-
-  /// Desktop platforms (macOS, Windows, Linux)
   desktop,
-
-  /// Unknown or other platforms
   other,
 }
 
 /// An adaptive app that uses MaterialApp for Android and CupertinoApp for iOS
-///
-/// This widget automatically selects the appropriate app widget based on the
-/// current platform, providing a native look and feel.
-///
-/// Example:
-/// ```dart
-/// AdaptiveApp(
-///   title: 'My App',
-///   home: HomePage(),
-///   themeMode: ThemeMode.system,
-///   materialLightTheme: ThemeData.light(),
-///   materialDarkTheme: ThemeData.dark(),
-///   cupertinoLightTheme: CupertinoThemeData(brightness: Brightness.light),
-///   cupertinoDarkTheme: CupertinoThemeData(brightness: Brightness.dark),
-/// )
-/// ```
 class AdaptiveApp extends StatelessWidget {
   /// Creates an AdaptiveApp with navigation
   const AdaptiveApp({
@@ -226,79 +197,85 @@ class AdaptiveApp extends StatelessWidget {
       BuildContext context, PlatformTarget platform, bool isRouter) {
     final config = cupertino?.call(context, platform) ?? const CupertinoAppData();
 
-    // Determine theme based on themeMode
-    CupertinoThemeData? effectiveTheme;
-    if (themeMode == ThemeMode.dark) {
-      effectiveTheme = cupertinoDarkTheme;
-    } else if (themeMode == ThemeMode.light) {
-      effectiveTheme = cupertinoLightTheme;
-    } else {
-      // ThemeMode.system - let CupertinoApp handle it
-      final brightness = MediaQuery.platformBrightnessOf(context);
-      effectiveTheme = brightness == Brightness.dark
-          ? cupertinoDarkTheme
-          : cupertinoLightTheme;
-    }
+    // We need to wrap CupertinoApp in a builder to get system brightness
+    // CupertinoApp doesn't have themeMode like MaterialApp, so we manually
+    // detect brightness and apply the appropriate theme
+    return Builder(
+      builder: (context) {
+        // Get system brightness to determine which theme to use
+        final brightness = MediaQuery.platformBrightnessOf(context);
+        final isDark = themeMode == ThemeMode.dark ||
+                       (themeMode != ThemeMode.light && brightness == Brightness.dark);
 
-    if (isRouter) {
-      return CupertinoApp.router(
-        key: key,
-        routerConfig: routerConfig,
-        routeInformationProvider: routeInformationProvider,
-        routeInformationParser: routeInformationParser,
-        routerDelegate: routerDelegate,
-        backButtonDispatcher: backButtonDispatcher,
-        builder: builder,
-        title: title,
-        onGenerateTitle: onGenerateTitle,
-        color: config.color,
-        theme: effectiveTheme,
-        locale: locale,
-        localizationsDelegates: localizationsDelegates,
-        localeListResolutionCallback: localeListResolutionCallback,
-        localeResolutionCallback: localeResolutionCallback,
-        supportedLocales: supportedLocales,
-        showPerformanceOverlay: config.showPerformanceOverlay,
-        checkerboardRasterCacheImages: config.checkerboardRasterCacheImages,
-        checkerboardOffscreenLayers: config.checkerboardOffscreenLayers,
-        showSemanticsDebugger: config.showSemanticsDebugger,
-        debugShowCheckedModeBanner: config.debugShowCheckedModeBanner,
-        shortcuts: config.shortcuts,
-        actions: config.actions,
-        restorationScopeId: config.restorationScopeId,
-        scrollBehavior: config.scrollBehavior,
-      );
-    }
+        // Use dark theme if dark mode, otherwise light theme
+        final effectiveLightTheme = cupertinoLightTheme ??
+            const CupertinoThemeData(brightness: Brightness.light);
+        final effectiveDarkTheme = cupertinoDarkTheme ??
+            const CupertinoThemeData(brightness: Brightness.dark);
 
-    return CupertinoApp(
-      key: key,
-      navigatorKey: navigatorKey,
-      home: home,
-      routes: routes,
-      initialRoute: initialRoute,
-      onGenerateRoute: onGenerateRoute,
-      onGenerateInitialRoutes: onGenerateInitialRoutes,
-      onUnknownRoute: onUnknownRoute,
-      navigatorObservers: navigatorObservers,
-      builder: builder,
-      title: title,
-      onGenerateTitle: onGenerateTitle,
-      color: config.color,
-      theme: effectiveTheme,
-      locale: locale,
-      localizationsDelegates: localizationsDelegates,
-      localeListResolutionCallback: localeListResolutionCallback,
-      localeResolutionCallback: localeResolutionCallback,
-      supportedLocales: supportedLocales,
-      showPerformanceOverlay: config.showPerformanceOverlay,
-      checkerboardRasterCacheImages: config.checkerboardRasterCacheImages,
-      checkerboardOffscreenLayers: config.checkerboardOffscreenLayers,
-      showSemanticsDebugger: config.showSemanticsDebugger,
-      debugShowCheckedModeBanner: config.debugShowCheckedModeBanner,
-      shortcuts: config.shortcuts,
-      actions: config.actions,
-      restorationScopeId: config.restorationScopeId,
-      scrollBehavior: config.scrollBehavior,
+        final theme = isDark ? effectiveDarkTheme : effectiveLightTheme;
+
+        if (isRouter) {
+          return CupertinoApp.router(
+            key: key,
+            routerConfig: routerConfig,
+            routeInformationProvider: routeInformationProvider,
+            routeInformationParser: routeInformationParser,
+            routerDelegate: routerDelegate,
+            backButtonDispatcher: backButtonDispatcher,
+            builder: builder,
+            title: title,
+            onGenerateTitle: onGenerateTitle,
+            color: config.color,
+            theme: theme,
+            locale: locale,
+            localizationsDelegates: localizationsDelegates,
+            localeListResolutionCallback: localeListResolutionCallback,
+            localeResolutionCallback: localeResolutionCallback,
+            supportedLocales: supportedLocales,
+            showPerformanceOverlay: config.showPerformanceOverlay,
+            checkerboardRasterCacheImages: config.checkerboardRasterCacheImages,
+            checkerboardOffscreenLayers: config.checkerboardOffscreenLayers,
+            showSemanticsDebugger: config.showSemanticsDebugger,
+            debugShowCheckedModeBanner: config.debugShowCheckedModeBanner,
+            shortcuts: config.shortcuts,
+            actions: config.actions,
+            restorationScopeId: config.restorationScopeId,
+            scrollBehavior: config.scrollBehavior,
+          );
+        }
+
+        return CupertinoApp(
+          key: key,
+          navigatorKey: navigatorKey,
+          home: home,
+          routes: routes,
+          initialRoute: initialRoute,
+          onGenerateRoute: onGenerateRoute,
+          onGenerateInitialRoutes: onGenerateInitialRoutes,
+          onUnknownRoute: onUnknownRoute,
+          navigatorObservers: navigatorObservers,
+          builder: builder,
+          title: title,
+          onGenerateTitle: onGenerateTitle,
+          color: config.color,
+          theme: theme,
+          locale: locale,
+          localizationsDelegates: localizationsDelegates,
+          localeListResolutionCallback: localeListResolutionCallback,
+          localeResolutionCallback: localeResolutionCallback,
+          supportedLocales: supportedLocales,
+          showPerformanceOverlay: config.showPerformanceOverlay,
+          checkerboardRasterCacheImages: config.checkerboardRasterCacheImages,
+          checkerboardOffscreenLayers: config.checkerboardOffscreenLayers,
+          showSemanticsDebugger: config.showSemanticsDebugger,
+          debugShowCheckedModeBanner: config.debugShowCheckedModeBanner,
+          shortcuts: config.shortcuts,
+          actions: config.actions,
+          restorationScopeId: config.restorationScopeId,
+          scrollBehavior: config.scrollBehavior,
+        );
+      },
     );
   }
 
@@ -320,7 +297,7 @@ class AdaptiveApp extends StatelessWidget {
         color: config.color,
         theme: materialLightTheme,
         darkTheme: materialDarkTheme,
-        themeMode: themeMode,
+        themeMode: themeMode ?? ThemeMode.system,
         locale: locale,
         localizationsDelegates: localizationsDelegates,
         localeListResolutionCallback: localeListResolutionCallback,
@@ -357,7 +334,7 @@ class AdaptiveApp extends StatelessWidget {
       color: config.color,
       theme: materialLightTheme,
       darkTheme: materialDarkTheme,
-      themeMode: themeMode,
+      themeMode: themeMode ?? ThemeMode.system,
       locale: locale,
       localizationsDelegates: localizationsDelegates,
       localeListResolutionCallback: localeListResolutionCallback,
