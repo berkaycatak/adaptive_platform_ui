@@ -568,6 +568,94 @@ The example app includes:
 - Style and size comparisons
 - Dark mode support
 
+### IOS26NativeSearchTabBar (EXPERIMENTAL)
+
+⚠️ **WARNING: This is a highly experimental feature with significant limitations. Only use for prototyping and demos.**
+
+Native iOS 26+ search tab bar with UITabBarController that transforms the tab bar into a search bar when the search tab is selected.
+
+```dart
+import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
+
+// Enable native search tab bar
+await IOS26NativeSearchTabBar.enable(
+  tabs: [
+    const NativeTabConfig(
+      title: 'Home',
+      sfSymbol: 'house.fill',
+    ),
+    const NativeTabConfig(
+      title: 'Search',
+      sfSymbol: 'magnifyingglass',
+      isSearchTab: true, // This tab transforms into search
+    ),
+    const NativeTabConfig(
+      title: 'Profile',
+      sfSymbol: 'person.fill',
+    ),
+  ],
+  selectedIndex: 0,
+  onTabSelected: (index) {
+    print('Tab selected: $index');
+  },
+  onSearchQueryChanged: (query) {
+    print('Search query: $query');
+  },
+  onSearchSubmitted: (query) {
+    print('Search submitted: $query');
+  },
+  onSearchCancelled: () {
+    print('Search cancelled');
+  },
+);
+
+// Disable when done
+await IOS26NativeSearchTabBar.disable();
+
+// Programmatically show search
+await IOS26NativeSearchTabBar.showSearch();
+```
+
+**Features:**
+- ✨ Native UITabBarController integration
+- 🔍 Search tab transforms into UISearchController
+- 💎 iOS 26+ Liquid Glass effects
+- 🎯 Method channel communication
+- 📱 Native animations and gestures
+
+**Known Issues & Limitations:**
+
+This feature replaces Flutter's root view controller with a native UITabBarController, which creates fundamental architectural conflicts:
+
+1. **Widget Lifecycle**: `initState`, `dispose`, and other lifecycle methods may not work correctly
+2. **Navigation Stack**: `Navigator.pop()` and related methods become unreliable
+3. **State Management**: Provider, Riverpod, Bloc, etc. may lose state or behave unpredictably
+4. **Hot Reload**: Does not work properly - requires full app restart
+5. **Memory Leaks**: Potential memory management issues between Flutter and UIKit
+6. **Gesture Conflicts**: Native and Flutter gestures may interfere with each other
+7. **Frame Synchronization**: Potential visual stuttering during transitions
+
+**Why These Issues Occur:**
+
+The feature attempts to merge two incompatible architectural philosophies:
+- **Flutter**: Single-threaded, declarative, expects to own entire screen
+- **UIKit**: Multi-threaded, imperative, view controller-based
+
+When UITabBarController becomes root, Flutter engine still believes it owns the screen, creating a parent-child relationship neither framework was designed to handle.
+
+**Recommendation:**
+- ✅ Use for prototyping and concept validation
+- ✅ Use for demos and presentations
+- ❌ Do NOT use in production apps
+- ❌ Do NOT rely on Flutter navigation when active
+- ❌ Do NOT expect hot reload to work
+
+For production apps, use Flutter's built-in `TabBar` or implement search within the existing navigation structure.
+
+See the example app's Native Search Tab demo page for detailed technical explanation.
+
+---
+
 ## Widget Catalog
 
 Currently available adaptive widgets:
@@ -585,6 +673,7 @@ Currently available adaptive widgets:
 - ✅ **AdaptiveTooltip** - Platform-specific tooltips
 - ✅ **AdaptiveAlertDialog** - Native alert dialogs
 - ✅ **AdaptivePopupMenuButton** - Native popup menus
+- ⚠️ **IOS26NativeSearchTabBar** - EXPERIMENTAL native search tab bar (iOS 26+ only)
 
 ## Design Philosophy
 

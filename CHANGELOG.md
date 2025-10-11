@@ -22,6 +22,19 @@
   * iOS: Custom iOS-style checkbox with Cupertino design
   * Android: Material Design Checkbox
   * Support for tristate, custom colors, and dark/light mode
+* **EXPERIMENTAL**: Added `IOS26NativeSearchTabBar` for iOS 26+ native search tab bar
+  * App-level UITabBarController integration replacing Flutter's navigation
+  * Native search tab transformation with UISearchController
+  * Liquid Glass effects and native animations
+  * Method channel for Flutter ↔ Native communication
+  * Search query callbacks and tab selection handling
+  * ⚠️ **WARNING**: This feature is highly experimental and unstable:
+    - Replaces Flutter's root view controller
+    - Breaks widget lifecycle and state management
+    - Hot reload may not work properly
+    - Navigation stack becomes invalid
+    - Only recommended for prototyping and demos
+  * See demo page for detailed technical explanation of architectural conflicts
 * Added comprehensive demo pages for all new widgets
 
 ## 0.1.3
