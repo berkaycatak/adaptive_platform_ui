@@ -146,6 +146,7 @@ class HomePage extends StatelessWidget {
               title: 'Checkbox',
               description: 'Native checkboxes with adaptive styling',
               page: const CheckboxDemoPage(),
+              isNew: true,
             ),
             _DemoItem(
               icon: PlatformInfo.isIOS
@@ -154,6 +155,7 @@ class HomePage extends StatelessWidget {
               title: 'Radio',
               description: 'Radio button groups with adaptive styling',
               page: const RadioDemoPage(),
+              isNew: true,
             ),
             _DemoItem(
               icon: PlatformInfo.isIOS
@@ -162,6 +164,7 @@ class HomePage extends StatelessWidget {
               title: 'Card',
               description: 'Adaptive cards with platform-specific styling',
               page: const CardDemoPage(),
+              isNew: true,
             ),
             _DemoItem(
               icon: PlatformInfo.isIOS
@@ -170,6 +173,7 @@ class HomePage extends StatelessWidget {
               title: 'Badge',
               description: 'Notification badges with adaptive styling',
               page: const BadgeDemoPage(),
+              isNew: true,
             ),
             _DemoItem(
               icon: PlatformInfo.isIOS
@@ -178,6 +182,7 @@ class HomePage extends StatelessWidget {
               title: 'Tooltip',
               description: 'Platform-specific tooltips',
               page: const TooltipDemoPage(),
+              isNew: true,
             ),
             _DemoItem(
               icon: PlatformInfo.isIOS
@@ -198,9 +203,11 @@ class HomePage extends StatelessWidget {
               icon: PlatformInfo.isIOS
                   ? CupertinoIcons.search_circle_fill
                   : Icons.search,
-              title: 'Native Search Tab (iOS 26+)',
-              description: 'EXPERIMENTAL: Native tab bar with search transformation',
+              title: 'Native Search Tab',
+              description:
+                  'EXPERIMENTAL: Native tab bar with search transformation',
               page: const NativeSearchTabDemoPage(),
+              isCritical: true,
             ),
           ],
         ),
@@ -291,7 +298,8 @@ class HomePage extends StatelessWidget {
 
   Widget _buildDemoItem(BuildContext context, _DemoItem item) {
     if (PlatformInfo.isIOS) {
-      final isDark = MediaQuery.platformBrightnessOf(context) == Brightness.dark;
+      final isDark =
+          MediaQuery.platformBrightnessOf(context) == Brightness.dark;
 
       return Container(
         margin: const EdgeInsets.only(bottom: 12),
@@ -306,10 +314,14 @@ class HomePage extends StatelessWidget {
                   : CupertinoColors.white,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: isDark
-                    ? CupertinoColors.systemGrey4
-                    : CupertinoColors.separator,
-                width: 0.5,
+                color: item.isCritical
+                    ? CupertinoColors.systemYellow.withValues(alpha: 0.5)
+                    : item.isNew
+                    ? CupertinoColors.systemGreen.withValues(alpha: 0.5)
+                    : (isDark
+                          ? CupertinoColors.systemGrey4
+                          : CupertinoColors.separator),
+                width: (item.isCritical || item.isNew) ? 1.5 : 0.5,
               ),
             ),
             child: Row(
@@ -332,15 +344,75 @@ class HomePage extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        item.title,
-                        style: TextStyle(
-                          fontSize: 17,
-                          fontWeight: FontWeight.w600,
-                          color: isDark
-                              ? CupertinoColors.white
-                              : CupertinoColors.black,
-                        ),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              item.title,
+                              style: TextStyle(
+                                fontSize: 17,
+                                fontWeight: FontWeight.w600,
+                                color: isDark
+                                    ? CupertinoColors.white
+                                    : CupertinoColors.black,
+                              ),
+                            ),
+                          ),
+                          if (item.isNew) ...[
+                            const SizedBox(width: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: CupertinoColors.systemGreen.withValues(
+                                  alpha: 0.2,
+                                ),
+                                borderRadius: BorderRadius.circular(6),
+                                border: Border.all(
+                                  color: CupertinoColors.systemGreen,
+                                  width: 1,
+                                ),
+                              ),
+                              child: const Text(
+                                'NEW',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                  color: CupertinoColors.systemGreen,
+                                ),
+                              ),
+                            ),
+                          ],
+                          if (item.isCritical) ...[
+                            const SizedBox(width: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: CupertinoColors.systemYellow.withValues(
+                                  alpha: 0.2,
+                                ),
+                                borderRadius: BorderRadius.circular(6),
+                                border: Border.all(
+                                  color: CupertinoColors.systemYellow,
+                                  width: 1,
+                                ),
+                              ),
+                              child: const Text(
+                                'EXPERIMENTAL',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                  color: CupertinoColors.systemYellow,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ],
                       ),
                       const SizedBox(height: 4),
                       Text(
@@ -369,6 +441,14 @@ class HomePage extends StatelessWidget {
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: item.isCritical
+            ? BorderSide(color: Colors.orange.withValues(alpha: 0.5), width: 2)
+            : item.isNew
+            ? BorderSide(color: Colors.green.withValues(alpha: 0.5), width: 2)
+            : BorderSide.none,
+      ),
       child: InkWell(
         onTap: () => _navigateToPage(context, item.page),
         borderRadius: BorderRadius.circular(12),
@@ -396,12 +476,65 @@ class HomePage extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      item.title,
-                      style: const TextStyle(
-                        fontSize: 17,
-                        fontWeight: FontWeight.w600,
-                      ),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            item.title,
+                            style: const TextStyle(
+                              fontSize: 17,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                        if (item.isNew) ...[
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.green.withValues(alpha: 0.2),
+                              borderRadius: BorderRadius.circular(6),
+                              border: Border.all(color: Colors.green, width: 1),
+                            ),
+                            child: const Text(
+                              'NEW',
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.green,
+                              ),
+                            ),
+                          ),
+                        ],
+                        if (item.isCritical) ...[
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.orange.withValues(alpha: 0.2),
+                              borderRadius: BorderRadius.circular(6),
+                              border: Border.all(
+                                color: Colors.orange,
+                                width: 1,
+                              ),
+                            ),
+                            child: const Text(
+                              'EXPERIMENTAL',
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.orange,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
                     const SizedBox(height: 4),
                     Text(
@@ -432,8 +565,8 @@ class HomePage extends StatelessWidget {
       decoration: BoxDecoration(
         color: PlatformInfo.isIOS
             ? (isDark
-                ? CupertinoColors.darkBackgroundGray
-                : CupertinoColors.white)
+                  ? CupertinoColors.darkBackgroundGray
+                  : CupertinoColors.white)
             : Theme.of(context).colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(12),
         border: PlatformInfo.isIOS
@@ -466,9 +599,7 @@ class HomePage extends StatelessWidget {
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                   color: PlatformInfo.isIOS
-                      ? (isDark
-                          ? CupertinoColors.white
-                          : CupertinoColors.black)
+                      ? (isDark ? CupertinoColors.white : CupertinoColors.black)
                       : Theme.of(context).colorScheme.onSurface,
                 ),
               ),
@@ -481,8 +612,8 @@ class HomePage extends StatelessWidget {
               fontSize: 14,
               color: PlatformInfo.isIOS
                   ? (isDark
-                      ? CupertinoColors.systemGrey
-                      : CupertinoColors.systemGrey2)
+                        ? CupertinoColors.systemGrey
+                        : CupertinoColors.systemGrey2)
                   : Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
@@ -542,8 +673,8 @@ class HomePage extends StatelessWidget {
               fontSize: 13,
               color: PlatformInfo.isIOS
                   ? (isDark
-                      ? CupertinoColors.systemGrey
-                      : CupertinoColors.systemGrey2)
+                        ? CupertinoColors.systemGrey
+                        : CupertinoColors.systemGrey2)
                   : Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
@@ -568,11 +699,15 @@ class _DemoItem {
   final String title;
   final String description;
   final Widget page;
+  final bool isNew;
+  final bool isCritical;
 
   const _DemoItem({
     required this.icon,
     required this.title,
     required this.description,
     required this.page,
+    this.isNew = false,
+    this.isCritical = false,
   });
 }
