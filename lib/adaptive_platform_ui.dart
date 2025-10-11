@@ -38,6 +38,7 @@ export 'src/widgets/adaptive_app.dart';
 export 'src/widgets/adaptive_button.dart';
 export 'src/widgets/adaptive_switch.dart';
 export 'src/widgets/adaptive_checkbox.dart';
+export 'src/widgets/adaptive_card.dart';
 export 'src/widgets/adaptive_slider.dart';
 export 'src/widgets/adaptive_segmented_control.dart';
 export 'src/widgets/adaptive_alert_dialog.dart';
