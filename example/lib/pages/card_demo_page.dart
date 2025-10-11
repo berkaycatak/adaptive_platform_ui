@@ -12,10 +12,7 @@ class CardDemoPage extends StatefulWidget {
 class _CardDemoPageState extends State<CardDemoPage> {
   @override
   Widget build(BuildContext context) {
-    return AdaptiveScaffold(
-      title: 'AdaptiveCard Demo',
-      body: _buildContent(),
-    );
+    return AdaptiveScaffold(title: 'AdaptiveCard Demo', body: _buildContent());
   }
 
   Widget _buildContent() {
@@ -77,10 +74,7 @@ class _CardDemoPageState extends State<CardDemoPage> {
                 color: PlatformInfo.isIOS
                     ? CupertinoColors.systemBlue.withValues(alpha: 0.1)
                     : Colors.blue.withValues(alpha: 0.1),
-                child: Text(
-                  'Blue tinted card',
-                  style: _getTextStyle(context),
-                ),
+                child: Text('Blue tinted card', style: _getTextStyle(context)),
               ),
               AdaptiveCard(
                 margin: const EdgeInsets.only(bottom: 16),
@@ -88,10 +82,7 @@ class _CardDemoPageState extends State<CardDemoPage> {
                 color: PlatformInfo.isIOS
                     ? CupertinoColors.systemGreen.withValues(alpha: 0.1)
                     : Colors.green.withValues(alpha: 0.1),
-                child: Text(
-                  'Green tinted card',
-                  style: _getTextStyle(context),
-                ),
+                child: Text('Green tinted card', style: _getTextStyle(context)),
               ),
               AdaptiveCard(
                 margin: const EdgeInsets.only(bottom: 16),
@@ -160,10 +151,7 @@ class _CardDemoPageState extends State<CardDemoPage> {
                 margin: const EdgeInsets.only(bottom: 16),
                 padding: const EdgeInsets.all(16),
                 elevation: 0,
-                child: Text(
-                  'Elevation 0',
-                  style: _getTextStyle(context),
-                ),
+                child: Text('Elevation 0', style: _getTextStyle(context)),
               ),
               AdaptiveCard(
                 margin: const EdgeInsets.only(bottom: 16),
@@ -178,10 +166,7 @@ class _CardDemoPageState extends State<CardDemoPage> {
                 margin: const EdgeInsets.only(bottom: 16),
                 padding: const EdgeInsets.all(16),
                 elevation: 8,
-                child: Text(
-                  'Elevation 8',
-                  style: _getTextStyle(context),
-                ),
+                child: Text('Elevation 8', style: _getTextStyle(context)),
               ),
             ],
           ),
@@ -241,35 +226,30 @@ class _CardDemoPageState extends State<CardDemoPage> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: [
-                              if (PlatformInfo.isIOS)
-                                CupertinoButton(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 16,
-                                    vertical: 8,
+                              Expanded(
+                                child: SizedBox(
+                                  height: 38,
+                                  child: AdaptiveButton(
+                                    style: AdaptiveButtonStyle.plain,
+                                    label: 'Action',
+                                    onPressed: () {},
                                   ),
-                                  onPressed: () {},
-                                  child: const Text('Action'),
-                                )
-                              else
-                                TextButton(
-                                  onPressed: () {},
-                                  child: const Text('ACTION'),
                                 ),
+                              ),
                               const SizedBox(width: 8),
-                              if (PlatformInfo.isIOS)
-                                CupertinoButton(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 16,
-                                    vertical: 8,
+                              Expanded(
+                                child: SizedBox(
+                                  height: 38,
+                                  child: AdaptiveButton(
+                                    style: PlatformInfo.isIOS26OrHigher()
+                                        ? AdaptiveButtonStyle.prominentGlass
+                                        : AdaptiveButtonStyle.filled,
+                                    label: 'Share',
+                                    onPressed: () {},
+                                    textColor: Colors.white,
                                   ),
-                                  onPressed: () {},
-                                  child: const Text('Share'),
-                                )
-                              else
-                                FilledButton(
-                                  onPressed: () {},
-                                  child: const Text('SHARE'),
                                 ),
+                              ),
                             ],
                           ),
                         ],
@@ -357,8 +337,8 @@ class _CardDemoPageState extends State<CardDemoPage> {
             fontSize: 14,
             color: PlatformInfo.isIOS
                 ? (isDark
-                    ? CupertinoColors.systemGrey
-                    : CupertinoColors.systemGrey2)
+                      ? CupertinoColors.systemGrey
+                      : CupertinoColors.systemGrey2)
                 : Theme.of(context).colorScheme.onSurfaceVariant,
           ),
         ),

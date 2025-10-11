@@ -4,7 +4,10 @@ import 'package:adaptive_platform_ui_example/pages/segmented_control_demo_page.d
 import 'package:adaptive_platform_ui_example/pages/slider_demo_page.dart';
 import 'package:adaptive_platform_ui_example/pages/switch_demo_page.dart';
 import 'package:adaptive_platform_ui_example/pages/checkbox_demo_page.dart';
+import 'package:adaptive_platform_ui_example/pages/radio_demo_page.dart';
 import 'package:adaptive_platform_ui_example/pages/card_demo_page.dart';
+import 'package:adaptive_platform_ui_example/pages/badge_demo_page.dart';
+import 'package:adaptive_platform_ui_example/pages/tooltip_demo_page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
@@ -145,11 +148,35 @@ class HomePage extends StatelessWidget {
             ),
             _DemoItem(
               icon: PlatformInfo.isIOS
+                  ? CupertinoIcons.circle
+                  : Icons.radio_button_checked,
+              title: 'Radio',
+              description: 'Radio button groups with adaptive styling',
+              page: const RadioDemoPage(),
+            ),
+            _DemoItem(
+              icon: PlatformInfo.isIOS
                   ? CupertinoIcons.rectangle_on_rectangle
                   : Icons.credit_card,
               title: 'Card',
               description: 'Adaptive cards with platform-specific styling',
               page: const CardDemoPage(),
+            ),
+            _DemoItem(
+              icon: PlatformInfo.isIOS
+                  ? CupertinoIcons.number_circle_fill
+                  : Icons.notifications_active,
+              title: 'Badge',
+              description: 'Notification badges with adaptive styling',
+              page: const BadgeDemoPage(),
+            ),
+            _DemoItem(
+              icon: PlatformInfo.isIOS
+                  ? CupertinoIcons.info_circle
+                  : Icons.info_outline,
+              title: 'Tooltip',
+              description: 'Platform-specific tooltips',
+              page: const TooltipDemoPage(),
             ),
             _DemoItem(
               icon: PlatformInfo.isIOS

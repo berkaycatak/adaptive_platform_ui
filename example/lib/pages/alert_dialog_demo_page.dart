@@ -165,9 +165,8 @@ class AlertDialogDemoPage extends StatelessWidget {
 
       return Container(
         margin: const EdgeInsets.only(bottom: 12),
-        child: CupertinoButton(
-          padding: EdgeInsets.zero,
-          onPressed: item.onTap,
+        child: GestureDetector(
+          onTap: item.onTap,
           child: Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(

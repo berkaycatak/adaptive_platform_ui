@@ -40,23 +40,19 @@ class _SwitchDemoPageState extends State<SwitchDemoPage> {
         // Platform Information
         _buildSection(
           'Platform Information',
-          Container(
+          AdaptiveCard(
             padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: PlatformInfo.isIOS
-                  ? CupertinoColors.systemGrey6
-                  : (isDark ? Colors.grey[850] : Colors.grey[200]),
-              borderRadius: BorderRadius.circular(8),
-            ),
+
             child: Text(
               PlatformInfo.platformDescription,
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
                 color: PlatformInfo.isIOS
-                    ? (MediaQuery.platformBrightnessOf(context) == Brightness.dark
-                        ? CupertinoColors.white
-                        : CupertinoColors.black)
+                    ? (MediaQuery.platformBrightnessOf(context) ==
+                              Brightness.dark
+                          ? CupertinoColors.white
+                          : CupertinoColors.black)
                     : (isDark ? Colors.white : Colors.black87),
               ),
             ),
@@ -154,8 +150,8 @@ class _SwitchDemoPageState extends State<SwitchDemoPage> {
               height: 1.5,
               color: PlatformInfo.isIOS
                   ? (MediaQuery.platformBrightnessOf(context) == Brightness.dark
-                      ? CupertinoColors.systemGrey
-                      : CupertinoColors.systemGrey2)
+                        ? CupertinoColors.systemGrey
+                        : CupertinoColors.systemGrey2)
                   : (isDark ? Colors.grey[400] : Colors.grey[700]),
             ),
           ),
@@ -165,20 +161,12 @@ class _SwitchDemoPageState extends State<SwitchDemoPage> {
   }
 
   Widget _buildSection(String title, Widget content) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           title,
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: PlatformInfo.isIOS
-                ? CupertinoColors.label
-                : (isDark ? Colors.white : Colors.black87),
-          ),
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 12),
         content,
@@ -192,20 +180,10 @@ class _SwitchDemoPageState extends State<SwitchDemoPage> {
     ValueChanged<bool>? onChanged, {
     Color? activeColor,
   }) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 16,
-            color: PlatformInfo.isIOS
-                ? CupertinoColors.label
-                : (isDark ? Colors.white : Colors.black87),
-          ),
-        ),
+        Text(label, style: TextStyle(fontSize: 16)),
         AdaptiveSwitch(
           value: value,
           onChanged: onChanged,
