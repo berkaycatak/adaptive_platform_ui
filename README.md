@@ -2,6 +2,8 @@
 
 A Flutter package that provides adaptive platform-specific widgets with native iOS 26+ designs, traditional Cupertino widgets for older iOS versions, and Material Design for Android.
 
+  <img src="https://github.com/berkaycatak/adaptive_platform_ui/blob/main/img/highlight-img.png?raw=true" alt="iOS 26 Native Toolbar">
+
 ## iOS 26+ Native Toolbar & Tab Bar
 
 <p align="center">
@@ -9,17 +11,22 @@ A Flutter package that provides adaptive platform-specific widgets with native i
   <img src="https://github.com/berkaycatak/adaptive_platform_ui/raw/main/img/bottombar.gif" alt="iOS 26 Native Tab Bar" width="300"/>
 </p>
 
+  <img src="https://github.com/berkaycatak/adaptive_platform_ui/blob/main/img/bottom_nav2_p.png?raw=true" alt="iOS 26 Native Tab Bar">
+
+  <img src="https://github.com/berkaycatak/adaptive_platform_ui/blob/main/img/toolbar2_p.png?raw=true" alt="iOS 26 Native Tab Bar">
+
+
 Native iOS 26 UIToolbar and UITabBar with Liquid Glass blur effects, minimize behavior, and native gesture handling.
 
 ## Features
 
-🚀 **AdaptiveApp** - Unified app configuration for all platforms:
+**AdaptiveApp** - Unified app configuration for all platforms:
 - Separate themes for Material (Android) and Cupertino (iOS)
 - Full theme mode support (light, dark, system)
 - Router support via `AdaptiveApp.router()`
 - Zero configuration required
 
-✨ **iOS 26+ Native Designs** - Modern iOS 26 components with:
+**iOS 26+ Native Designs** - Modern iOS 26 components with:
 - **Native UIToolbar** - Liquid Glass blur effects with native iOS 26 design
 - **Native UITabBar** - Tab bar with minimize behavior and smooth animations
 - **Native UIButton** - Button styles with spring animations and haptic feedback
@@ -30,96 +37,20 @@ Native iOS 26 UIToolbar and UITabBar with Liquid Glass blur effects, minimize be
 - Dynamic color system (light/dark mode)
 - Multiple component styles
 
-🍎 **iOS Legacy Support** - Traditional Cupertino widgets for iOS 18 and below
+**iOS Legacy Support** - Traditional Cupertino widgets for iOS 18 and below
 
-🤖 **Material Design** - Full Material 3 support for Android
+**Material Design** - Full Material 3 support for Android
 
-🔍 **Automatic Platform Detection** - Zero configuration required
+**Automatic Platform Detection** - Zero configuration required
 
-📱 **Version-Aware Rendering** - Automatically selects appropriate widget based on iOS version
-
-## Installation
-
-Add this to your package's `pubspec.yaml` file:
-
-```yaml
-dependencies:
-  adaptive_platform_ui: ^0.1.0
-```
-
-Then run:
-
-```bash
-flutter pub get
-```
-
-## Quick Start
-
-### AdaptiveApp - Platform-Specific App Configuration
-
-Use `AdaptiveApp` to automatically configure your app for each platform:
-
-```dart
-import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
-
-void main() {
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return AdaptiveApp(
-      title: 'My App',
-      themeMode: ThemeMode.system,
-      materialLightTheme: ThemeData.light(),
-      materialDarkTheme: ThemeData.dark(),
-      cupertinoLightTheme: const CupertinoThemeData(
-        brightness: Brightness.light,
-      ),
-      cupertinoDarkTheme: const CupertinoThemeData(
-        brightness: Brightness.dark,
-      ),
-      home: const HomePage(),
-    );
-  }
-}
-```
-
-**With Router Support (GoRouter, etc.):**
-
-```dart
-AdaptiveApp.router(
-  routerConfig: router,
-  title: 'My App',
-  themeMode: ThemeMode.system,
-  materialLightTheme: ThemeData.light(),
-  materialDarkTheme: ThemeData.dark(),
-  cupertinoLightTheme: const CupertinoThemeData(
-    brightness: Brightness.light,
-  ),
-  cupertinoDarkTheme: const CupertinoThemeData(
-    brightness: Brightness.dark,
-  ),
-)
-```
-
-**Key Features:**
-- 🎨 Separate themes for Material (Android) and Cupertino (iOS)
-- 🌓 Full theme mode support (light, dark, system)
-- 🔄 Automatic platform detection
-- 🚀 Router support via `AdaptiveApp.router()`
-- 🛠️ Platform-specific callbacks for advanced configuration
+**Version-Aware Rendering** - Automatically selects appropriate widget based on iOS version
 
 ## Widget Showcase
 
 ### AdaptiveScaffold with Native Toolbar & Tab Bar
 
-<p align="center">
-  <img src="https://github.com/berkaycatak/adaptive_platform_ui/raw/main/img/appbar.gif" alt="Native Toolbar" width="300"/>
-</p>
+Adaptive Appbar:
+<img src="https://github.com/berkaycatak/adaptive_platform_ui/blob/main/img/toolbar_p.png?raw=true" alt="iOS 26 Native Toolbar">
 
 ```dart
 AdaptiveScaffold(
@@ -146,12 +77,16 @@ AdaptiveScaffold(
   body: YourContent(),
 )
 ```
+Adaptive Bottom Navigation Bar (Destinations):
+<p align="center">
+  <img src="https://i.ibb.co/3LBjfCK/Paragraf-metniniz.png" alt="Native Toolbar"/>
+</p>
+
 
 ### AdaptiveButton
 
-<p align="center">
-  <img src="https://github.com/berkaycatak/adaptive_platform_ui/raw/main/img/button.png" alt="Adaptive Buttons" width="400"/>
-</p>
+<img src="https://raw.githubusercontent.com/berkaycatak/adaptive_platform_ui/refs/heads/main/img/buttons_p.png" alt="iOS 26 Native Toolbar">
+
 
 ```dart
 // Basic button with label
@@ -175,6 +110,54 @@ AdaptiveButton.child(
 AdaptiveButton.icon(
   onPressed: () {},
   icon: Icons.favorite,
+)
+```
+
+### AdaptiveAlertDialog
+<img src="https://raw.githubusercontent.com/berkaycatak/adaptive_platform_ui/refs/heads/main/img/alert_p.png" alt="iOS 26 Native Toolbar">
+
+
+```dart
+showAdaptiveAlertDialog(
+  context: context,
+  title: 'Confirm',
+  message: 'Are you sure?',
+  icon: 'checkmark.circle.fill',
+  actions: [
+    AlertAction(
+      title: 'Cancel',
+      style: AlertActionStyle.cancel,
+      onPressed: () => Navigator.pop(context),
+    ),
+    AlertAction(
+      title: 'Confirm',
+      style: AlertActionStyle.primary,
+      onPressed: () {
+        Navigator.pop(context);
+        // Do something
+      },
+    ),
+  ],
+);
+```
+
+### AdaptivePopupMenuButton
+
+<p align="center">
+<img src="https://raw.githubusercontent.com/berkaycatak/adaptive_platform_ui/refs/heads/main/img/popup_p.png" alt="iOS 26 Native Popup">
+</p>
+
+```dart
+AdaptivePopupMenuButton<String>(
+  buttonLabel: 'Options',
+  items: [
+    PopupMenuItem(value: 'edit', label: 'Edit', icon: 'pencil'),
+    PopupMenuItem(value: 'delete', label: 'Delete', icon: 'trash', destructive: true),
+    PopupMenuItem(value: 'share', label: 'Share', icon: 'square.and.arrow.up'),
+  ],
+  onSelected: (value) {
+    print('Selected: $value');
+  },
 )
 ```
 
@@ -239,55 +222,7 @@ AdaptiveSlider(
 )
 ```
 
-### AdaptiveAlertDialog
 
-<p align="center">
-  <img src="https://github.com/berkaycatak/adaptive_platform_ui/raw/main/img/alert.png" alt="Alert Dialog" width="300"/>
-</p>
-
-```dart
-showAdaptiveAlertDialog(
-  context: context,
-  title: 'Confirm',
-  message: 'Are you sure?',
-  icon: 'checkmark.circle.fill',
-  actions: [
-    AlertAction(
-      title: 'Cancel',
-      style: AlertActionStyle.cancel,
-      onPressed: () => Navigator.pop(context),
-    ),
-    AlertAction(
-      title: 'Confirm',
-      style: AlertActionStyle.primary,
-      onPressed: () {
-        Navigator.pop(context);
-        // Do something
-      },
-    ),
-  ],
-);
-```
-
-### AdaptivePopupMenuButton
-
-<p align="center">
-  <img src="https://github.com/berkaycatak/adaptive_platform_ui/raw/main/img/pop-up-menu.png" alt="Popup Menu" width="300"/>
-</p>
-
-```dart
-AdaptivePopupMenuButton<String>(
-  buttonLabel: 'Options',
-  items: [
-    PopupMenuItem(value: 'edit', label: 'Edit', icon: 'pencil'),
-    PopupMenuItem(value: 'delete', label: 'Delete', icon: 'trash', destructive: true),
-    PopupMenuItem(value: 'share', label: 'Share', icon: 'square.and.arrow.up'),
-  ],
-  onSelected: (value) {
-    print('Selected: $value');
-  },
-)
-```
 
 ## Usage
 
@@ -414,6 +349,82 @@ if (PlatformInfo.isIOSVersionInRange(24, 26)) {
 // Get platform description
 String description = PlatformInfo.platformDescription; // e.g., "iOS 26"
 ```
+
+## Installation
+
+Add this to your package's `pubspec.yaml` file:
+
+```yaml
+dependencies:
+  adaptive_platform_ui: ^0.1.0
+```
+
+Then run:
+
+```bash
+flutter pub get
+```
+
+## Quick Start
+
+### AdaptiveApp - Platform-Specific App Configuration
+
+Use `AdaptiveApp` to automatically configure your app for each platform:
+
+```dart
+import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
+
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return AdaptiveApp(
+      title: 'My App',
+      themeMode: ThemeMode.system,
+      materialLightTheme: ThemeData.light(),
+      materialDarkTheme: ThemeData.dark(),
+      cupertinoLightTheme: const CupertinoThemeData(
+        brightness: Brightness.light,
+      ),
+      cupertinoDarkTheme: const CupertinoThemeData(
+        brightness: Brightness.dark,
+      ),
+      home: const HomePage(),
+    );
+  }
+}
+```
+
+**With Router Support (GoRouter, etc.):**
+
+```dart
+AdaptiveApp.router(
+  routerConfig: router,
+  title: 'My App',
+  themeMode: ThemeMode.system,
+  materialLightTheme: ThemeData.light(),
+  materialDarkTheme: ThemeData.dark(),
+  cupertinoLightTheme: const CupertinoThemeData(
+    brightness: Brightness.light,
+  ),
+  cupertinoDarkTheme: const CupertinoThemeData(
+    brightness: Brightness.dark,
+  ),
+)
+```
+
+**Key Features:**
+- 🎨 Separate themes for Material (Android) and Cupertino (iOS)
+- 🌓 Full theme mode support (light, dark, system)
+- 🔄 Automatic platform detection
+- 🚀 Router support via `AdaptiveApp.router()`
+- 🛠️ Platform-specific callbacks for advanced configuration
+
 
 ## iOS 26 Native Features
 
