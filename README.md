@@ -13,6 +13,12 @@ Native iOS 26 UIToolbar and UITabBar with Liquid Glass blur effects, minimize be
 
 ## Features
 
+🚀 **AdaptiveApp** - Unified app configuration for all platforms:
+- Separate themes for Material (Android) and Cupertino (iOS)
+- Full theme mode support (light, dark, system)
+- Router support via `AdaptiveApp.router()`
+- Zero configuration required
+
 ✨ **iOS 26+ Native Designs** - Modern iOS 26 components with:
 - **Native UIToolbar** - Liquid Glass blur effects with native iOS 26 design
 - **Native UITabBar** - Tab bar with minimize behavior and smooth animations
@@ -24,7 +30,7 @@ Native iOS 26 UIToolbar and UITabBar with Liquid Glass blur effects, minimize be
 - Dynamic color system (light/dark mode)
 - Multiple component styles
 
-🍎 **iOS Legacy Support** - Traditional Cupertino widgets for iOS 25 and below
+🍎 **iOS Legacy Support** - Traditional Cupertino widgets for iOS 18 and below
 
 🤖 **Material Design** - Full Material 3 support for Android
 
@@ -46,6 +52,66 @@ Then run:
 ```bash
 flutter pub get
 ```
+
+## Quick Start
+
+### AdaptiveApp - Platform-Specific App Configuration
+
+Use `AdaptiveApp` to automatically configure your app for each platform:
+
+```dart
+import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
+
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return AdaptiveApp(
+      title: 'My App',
+      themeMode: ThemeMode.system,
+      materialLightTheme: ThemeData.light(),
+      materialDarkTheme: ThemeData.dark(),
+      cupertinoLightTheme: const CupertinoThemeData(
+        brightness: Brightness.light,
+      ),
+      cupertinoDarkTheme: const CupertinoThemeData(
+        brightness: Brightness.dark,
+      ),
+      home: const HomePage(),
+    );
+  }
+}
+```
+
+**With Router Support (GoRouter, etc.):**
+
+```dart
+AdaptiveApp.router(
+  routerConfig: router,
+  title: 'My App',
+  themeMode: ThemeMode.system,
+  materialLightTheme: ThemeData.light(),
+  materialDarkTheme: ThemeData.dark(),
+  cupertinoLightTheme: const CupertinoThemeData(
+    brightness: Brightness.light,
+  ),
+  cupertinoDarkTheme: const CupertinoThemeData(
+    brightness: Brightness.dark,
+  ),
+)
+```
+
+**Key Features:**
+- 🎨 Separate themes for Material (Android) and Cupertino (iOS)
+- 🌓 Full theme mode support (light, dark, system)
+- 🔄 Automatic platform detection
+- 🚀 Router support via `AdaptiveApp.router()`
+- 🛠️ Platform-specific callbacks for advanced configuration
 
 ## Widget Showcase
 
@@ -77,7 +143,7 @@ AdaptiveScaffold(
   ],
   selectedIndex: 0,
   onDestinationSelected: (index) {},
-  child: YourContent(),
+  body: YourContent(),
 )
 ```
 
@@ -333,7 +399,7 @@ if (PlatformInfo.isIOS26OrHigher()) {
   print('Using iOS 26+ features');
 }
 
-if (PlatformInfo.isIOS25OrLower()) {
+if (PlatformInfo.isIOS18OrLower()) {
   print('Using legacy iOS widgets');
 }
 
@@ -398,6 +464,7 @@ The example app includes:
 
 Currently available adaptive widgets:
 
+- ✅ **AdaptiveApp** - Platform-specific app configuration with theme support and router
 - ✅ **AdaptiveScaffold** - Scaffold with native iOS 26 toolbar and tab bar
 - ✅ **AdaptiveButton** - Buttons with iOS 26+ native designs
 - ✅ **AdaptiveSegmentedControl** - Native segmented controls
@@ -419,7 +486,7 @@ This package follows Apple's Human Interface Guidelines for iOS and Material Des
 ## iOS Version Support
 
 - **iOS 26+**: Modern native iOS 26 designs
-- **iOS 25 and below**: Traditional Cupertino widgets
+- **iOS 18 and below**: Traditional Cupertino widgets
 - **Automatic fallback**: Seamless degradation for older versions
 
 ## Requirements

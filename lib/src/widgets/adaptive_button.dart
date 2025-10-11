@@ -7,7 +7,7 @@ import 'ios26/ios26_button.dart';
 /// An adaptive button that renders platform-specific button styles
 ///
 /// On iOS 26+: Uses native iOS 26 button design with modern styling
-/// On iOS <26: Uses CupertinoButton with traditional iOS styling
+/// On iOS <26 (iOS 18 and below): Uses CupertinoButton with traditional iOS styling
 /// On Android: Uses Material Design button (ElevatedButton or TextButton)
 ///
 /// Example:
@@ -198,7 +198,7 @@ class AdaptiveButton extends StatelessWidget {
       );
     }
 
-    // iOS 25 and below - Use traditional CupertinoButton
+    // iOS 18 and below - Use traditional CupertinoButton
     if (PlatformInfo.isIOS) {
       return _buildCupertinoButton(context);
     }

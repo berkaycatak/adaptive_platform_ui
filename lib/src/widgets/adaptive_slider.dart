@@ -6,7 +6,7 @@ import 'ios26/ios26_slider.dart';
 /// An adaptive slider that renders platform-specific slider styles
 ///
 /// On iOS 26+: Uses native iOS 26 UISlider with native animations
-/// On iOS <26: Uses CupertinoSlider with traditional iOS styling
+/// On iOS <26 (iOS 18 and below): Uses CupertinoSlider with traditional iOS styling
 /// On Android: Uses Material Design Slider
 ///
 /// Example:
@@ -98,7 +98,7 @@ class AdaptiveSlider extends StatelessWidget {
       );
     }
 
-    // iOS 25 and below - Use traditional CupertinoSlider
+    // iOS 18 and below - Use traditional CupertinoSlider
     if (PlatformInfo.isIOS) {
       return CupertinoSlider(
         value: value,

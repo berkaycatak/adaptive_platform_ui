@@ -44,7 +44,7 @@ class AdaptivePopupMenuButton<T> {
       );
     }
 
-    // iOS <26 - Use CupertinoButton with action sheet (iOS fallback)
+    // iOS <26 (iOS 18 and below) - Use CupertinoButton with action sheet (iOS fallback)
     return Builder(
       builder: (context) => SizedBox(
         height: height,
@@ -90,7 +90,7 @@ class AdaptivePopupMenuButton<T> {
       );
     }
 
-    // iOS <26 - Use icon button with action sheet (iOS fallback)
+    // iOS <26 (iOS 18 and below) - Use icon button with action sheet (iOS fallback)
     return Builder(
       builder: (context) => SizedBox(
         width: size,

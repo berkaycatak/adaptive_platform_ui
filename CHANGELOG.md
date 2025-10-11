@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.1.3
+
+* **BREAKING CHANGE**: Renamed `AdaptiveScaffold.child` parameter to `body` to match standard Scaffold API
+* **NEW**: Added `AdaptiveApp` widget for automatic platform-specific app configuration
+  * `AdaptiveApp()` - Constructor for normal navigation
+  * `AdaptiveApp.router()` - Constructor for router-based navigation (GoRouter, etc.)
+  * Direct theme parameters: `themeMode`, `materialLightTheme`, `materialDarkTheme`, `cupertinoLightTheme`, `cupertinoDarkTheme`
+  * Platform-specific callbacks: `material()` and `cupertino()` for advanced configuration
+  * Automatic platform detection (iOS uses CupertinoApp, Android uses MaterialApp)
+  * Full support for all MaterialApp and CupertinoApp properties
+* Debug banner now hidden by default (`debugShowCheckedModeBanner: false`)
+* Updated all example code to use new `body` parameter
+
 ## 0.1.2
 
 * Fix image links in README.md to use GitHub raw URLs
@@ -32,5 +45,5 @@
   * Automatic light/dark mode adaptation
 * Platform support:
   * iOS 26+ with native Liquid Glass designs
-  * iOS <26 with traditional Cupertino widgets
+  * iOS <26 (iOS 18 and below) with traditional Cupertino widgets
   * Android with Material Design 3

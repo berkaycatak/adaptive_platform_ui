@@ -27,6 +27,14 @@ class _DemoTabbarPageState extends State<DemoTabbarPage> {
           _selectedIndex = index;
         });
       },
+      actions: [
+        AdaptiveAppBarAction(onPressed: () {}, title: "Title"),
+        AdaptiveAppBarAction(
+          onPressed: () {},
+          androidIcon: Icons.info,
+          iosSymbol: "info.circle",
+        ),
+      ],
       destinations: [
         AdaptiveNavigationDestination(
           icon: PlatformInfo.isIOS26OrHigher()
@@ -64,9 +72,9 @@ class _DemoTabbarPageState extends State<DemoTabbarPage> {
           isSearch: true,
         ),
       ],
-      // child is automatically wrapped into a single-item children list for iOS26Scaffold
+      // body is automatically wrapped into a single-item children list for iOS26Scaffold
       // The scaffold handles showing the content based on selectedIndex
-      child: _buildPageForIndex(_selectedIndex),
+      body: _buildPageForIndex(_selectedIndex),
     );
   }
 

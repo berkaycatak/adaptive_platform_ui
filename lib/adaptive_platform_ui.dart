@@ -2,7 +2,7 @@
 ///
 /// This package automatically renders native-looking widgets based on the platform:
 /// - iOS 26+: Modern iOS 26 native designs with latest visual styles
-/// - iOS <26: Traditional Cupertino widgets
+/// - iOS <26 (iOS 18 and below): Traditional Cupertino widgets
 /// - Android: Material Design widgets
 ///
 /// ## Features
@@ -34,6 +34,7 @@ export 'src/platform/platform_info.dart';
 export 'src/style/sf_symbol.dart';
 
 // Widgets
+export 'src/widgets/adaptive_app.dart';
 export 'src/widgets/adaptive_button.dart';
 export 'src/widgets/adaptive_switch.dart';
 export 'src/widgets/adaptive_slider.dart';

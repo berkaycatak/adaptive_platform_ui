@@ -6,7 +6,7 @@ import 'ios26/ios26_segmented_control.dart';
 /// An adaptive segmented control that renders platform-specific styles
 ///
 /// On iOS 26+: Uses native iOS 26 UISegmentedControl with Liquid Glass
-/// On iOS <26: Uses CupertinoSegmentedControl
+/// On iOS <26 (iOS 18 and below): Uses CupertinoSegmentedControl
 /// On Android: Uses Material SegmentedButton
 class AdaptiveSegmentedControl extends StatelessWidget {
   /// Creates an adaptive segmented control
@@ -72,7 +72,7 @@ class AdaptiveSegmentedControl extends StatelessWidget {
       );
     }
 
-    // iOS <26 - Use traditional CupertinoSegmentedControl
+    // iOS <26 (iOS 18 and below) - Use traditional CupertinoSegmentedControl
     if (PlatformInfo.isIOS) {
       return _buildCupertinoSegmentedControl(context);
     }

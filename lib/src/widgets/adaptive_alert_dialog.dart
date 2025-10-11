@@ -41,7 +41,7 @@ IconData _getIconData(String sfSymbolName) {
 /// An adaptive alert dialog that renders platform-specific styles
 ///
 /// On iOS 26+: Uses native iOS 26 UIAlertController with Liquid Glass
-/// On iOS <26: Uses CupertinoAlertDialog
+/// On iOS <26 (iOS 18 and below): Uses CupertinoAlertDialog
 /// On Android: Uses Material AlertDialog
 class AdaptiveAlertDialog {
   AdaptiveAlertDialog._();
@@ -73,7 +73,7 @@ class AdaptiveAlertDialog {
       );
     }
 
-    // iOS 25 and below - Use CupertinoAlertDialog with custom content for OTP/icon
+    // iOS 18 and below - Use CupertinoAlertDialog with custom content for OTP/icon
     if (PlatformInfo.isIOS) {
       return showCupertinoDialog<void>(
         context: context,

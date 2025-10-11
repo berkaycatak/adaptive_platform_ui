@@ -18,21 +18,21 @@ class AdaptivePlatformUIDemo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (PlatformInfo.isIOS) {
-      return const CupertinoApp(
-        title: 'Adaptive Platform UI',
-        theme: CupertinoThemeData(brightness: Brightness.light),
-        home: HomePage(),
-      );
-    }
-
-    return MaterialApp(
+    return AdaptiveApp(
+      themeMode: ThemeMode.system,
       title: 'Adaptive Platform UI',
-      theme: ThemeData(
+      cupertinoLightTheme: CupertinoThemeData(brightness: Brightness.light),
+      cupertinoDarkTheme: CupertinoThemeData(brightness: Brightness.dark),
+      materialLightTheme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         useMaterial3: true,
       ),
-      home: const HomePage(),
+      materialDarkTheme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+        useMaterial3: true,
+      ),
+
+      home: HomePage(),
     );
   }
 }
@@ -51,7 +51,7 @@ class HomePage extends StatelessWidget {
           androidIcon: CupertinoIcons.info_circle,
         ),
       ],
-      child: _buildBody(context),
+      body: _buildBody(context),
     );
   }
 
@@ -182,7 +182,7 @@ class HomePage extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           const Text(
-            'Cross-platform Flutter widgets that adapt to iOS 26+, iOS <26, and Android',
+            'Cross-platform Flutter widgets that adapt to iOS 26+, iOS <26 (iOS 18 and below), and Android',
             style: TextStyle(color: Colors.white, fontSize: 14),
           ),
         ],
@@ -396,7 +396,8 @@ class HomePage extends StatelessWidget {
             icon: PlatformInfo.isIOS
                 ? CupertinoIcons.checkmark_circle_fill
                 : Icons.check_circle,
-            text: 'Traditional Cupertino widgets for iOS <26',
+            text:
+                'Traditional Cupertino widgets for iOS <26 (iOS 18 and below)',
           ),
           const SizedBox(height: 8),
           _buildFeatureRow(

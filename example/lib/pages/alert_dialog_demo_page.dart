@@ -13,7 +13,7 @@ class AlertDialogDemoPage extends StatelessWidget {
       destinations: [],
       selectedIndex: null,
       onDestinationSelected: (int value) {},
-      child: _buildBody(context),
+      body: _buildBody(context),
     );
   }
 

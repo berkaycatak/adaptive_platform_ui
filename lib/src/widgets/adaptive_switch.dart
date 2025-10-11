@@ -6,7 +6,7 @@ import 'ios26/ios26_switch.dart';
 /// An adaptive switch that renders platform-specific switch styles
 ///
 /// On iOS 26+: Uses native iOS 26 UISwitch with native animations
-/// On iOS <26: Uses CupertinoSwitch with traditional iOS styling
+/// On iOS <26 (iOS 18 and below): Uses CupertinoSwitch with traditional iOS styling
 /// On Android: Uses Material Design Switch
 ///
 /// Example:
@@ -68,7 +68,7 @@ class AdaptiveSwitch extends StatelessWidget {
       );
     }
 
-    // iOS 25 and below - Use traditional CupertinoSwitch
+    // iOS 18 and below - Use traditional CupertinoSwitch
     if (PlatformInfo.isIOS) {
       return CupertinoSwitch(
         value: value,

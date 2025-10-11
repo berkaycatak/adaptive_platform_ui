@@ -49,7 +49,7 @@ class AdaptiveScaffold extends StatelessWidget {
     this.destinations,
     this.selectedIndex,
     this.onDestinationSelected,
-    this.child,
+    this.body,
     this.title,
     this.actions,
     this.leading,
@@ -70,8 +70,8 @@ class AdaptiveScaffold extends StatelessWidget {
   /// If null, navigation will not be interactive
   final ValueChanged<int>? onDestinationSelected;
 
-  /// Child widget
-  final Widget? child;
+  /// Body widget
+  final Widget? body;
 
   /// Title for the navigation bar
   final String? title;
@@ -100,17 +100,17 @@ class AdaptiveScaffold extends StatelessWidget {
   Widget build(BuildContext context) {
     // iOS 26+ - Always use native iOS 26 toolbar
     if (PlatformInfo.isIOS26OrHigher()) {
-      // If destinations are provided but only one child, replicate child for each destination
+      // If destinations are provided but only one body, replicate body for each destination
       List<Widget> childrenList;
       if (destinations != null && destinations!.isNotEmpty) {
-        // Tab-based navigation: replicate single child for all tabs
+        // Tab-based navigation: replicate single body for all tabs
         childrenList = List.generate(
           destinations!.length,
-          (index) => child ?? const SizedBox.shrink(),
+          (index) => body ?? const SizedBox.shrink(),
         );
       } else {
-        // Single page: just one child
-        childrenList = [child ?? const SizedBox.shrink()];
+        // Single page: just one body
+        childrenList = [body ?? const SizedBox.shrink()];
       }
 
       return IOS26Scaffold(
@@ -126,10 +126,12 @@ class AdaptiveScaffold extends StatelessWidget {
       );
     }
 
-    // iOS <26 - Use CupertinoPageScaffold with CupertinoTabBar if destinations provided
+    // iOS <26 (iOS 18 and below) - Use CupertinoPageScaffold with CupertinoTabBar if destinations provided
     if (PlatformInfo.isIOS) {
-      if (destinations != null && destinations!.isNotEmpty &&
-          selectedIndex != null && onDestinationSelected != null) {
+      if (destinations != null &&
+          destinations!.isNotEmpty &&
+          selectedIndex != null &&
+          onDestinationSelected != null) {
         // Tab-based navigation
         return CupertinoPageScaffold(
           navigationBar: CupertinoNavigationBar(
@@ -142,7 +144,9 @@ class AdaptiveScaffold extends StatelessWidget {
                       if (action.title != null) {
                         actionChild = Text(action.title!);
                       } else if (action.iosSymbol != null) {
-                        actionChild = Icon(_sfSymbolToCupertinoIcon(action.iosSymbol!));
+                        actionChild = Icon(
+                          _sfSymbolToCupertinoIcon(action.iosSymbol!),
+                        );
                       } else {
                         actionChild = const Icon(CupertinoIcons.circle);
                       }
@@ -158,9 +162,7 @@ class AdaptiveScaffold extends StatelessWidget {
           ),
           child: Column(
             children: [
-              Expanded(
-                child: SafeArea(child: child ?? const SizedBox.shrink()),
-              ),
+              Expanded(child: SafeArea(child: body ?? const SizedBox.shrink())),
               CupertinoTabBar(
                 currentIndex: selectedIndex!,
                 onTap: onDestinationSelected!,
@@ -191,7 +193,9 @@ class AdaptiveScaffold extends StatelessWidget {
                     if (action.title != null) {
                       actionChild = Text(action.title!);
                     } else if (action.iosSymbol != null) {
-                      actionChild = Icon(_sfSymbolToCupertinoIcon(action.iosSymbol!));
+                      actionChild = Icon(
+                        _sfSymbolToCupertinoIcon(action.iosSymbol!),
+                      );
                     } else {
                       actionChild = const Icon(CupertinoIcons.circle);
                     }
@@ -205,13 +209,15 @@ class AdaptiveScaffold extends StatelessWidget {
               : null,
           leading: leading,
         ),
-        child: child ?? const SizedBox.shrink(),
+        child: body ?? const SizedBox.shrink(),
       );
     }
 
     // Android - Use NavigationBar if destinations provided
-    if (destinations != null && destinations!.isNotEmpty &&
-        selectedIndex != null && onDestinationSelected != null) {
+    if (destinations != null &&
+        destinations!.isNotEmpty &&
+        selectedIndex != null &&
+        onDestinationSelected != null) {
       // Tab-based navigation
       return Scaffold(
         appBar: AppBar(
@@ -232,7 +238,7 @@ class AdaptiveScaffold extends StatelessWidget {
           }).toList(),
           leading: leading,
         ),
-        body: child ?? const SizedBox.shrink(),
+        body: body ?? const SizedBox.shrink(),
         bottomNavigationBar: NavigationBar(
           selectedIndex: selectedIndex!,
           onDestinationSelected: onDestinationSelected!,
@@ -270,7 +276,7 @@ class AdaptiveScaffold extends StatelessWidget {
         }).toList(),
         leading: leading,
       ),
-      body: child ?? const SizedBox.shrink(),
+      body: body ?? const SizedBox.shrink(),
       floatingActionButton: floatingActionButton,
     );
   }

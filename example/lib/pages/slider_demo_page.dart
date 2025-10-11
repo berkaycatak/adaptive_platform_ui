@@ -20,7 +20,7 @@ class _SliderDemoPageState extends State<SliderDemoPage> {
   Widget build(BuildContext context) {
     return AdaptiveScaffold(
       title: 'AdaptiveSlider Demo',
-      child: _buildContent(),
+      body: _buildContent(),
     );
   }
 

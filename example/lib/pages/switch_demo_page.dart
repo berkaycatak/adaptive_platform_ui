@@ -21,7 +21,7 @@ class _SwitchDemoPageState extends State<SwitchDemoPage> {
   Widget build(BuildContext context) {
     return AdaptiveScaffold(
       title: 'AdaptiveSwitch Demo',
-      child: _buildContent(),
+      body: _buildContent(),
     );
   }
 
@@ -139,7 +139,7 @@ class _SwitchDemoPageState extends State<SwitchDemoPage> {
           Text(
             'The AdaptiveSwitch automatically uses:\n\n'
             '• Native iOS 26 UISwitch on iOS 26+\n'
-            '• CupertinoSwitch on iOS 25 and below\n'
+            '• CupertinoSwitch on iOS 18 and below\n'
             '• Material Switch on Android\n\n'
             'Features:\n'
             '• Native animations and haptic feedback\n'

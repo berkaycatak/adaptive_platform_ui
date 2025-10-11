@@ -13,7 +13,7 @@ class ButtonDemoPage extends StatefulWidget {
 class _ButtonDemoPageState extends State<ButtonDemoPage> {
   @override
   Widget build(BuildContext context) {
-    return AdaptiveScaffold(title: 'Button Demos', child: _buildBody(context));
+    return AdaptiveScaffold(title: 'Button Demos', body: _buildBody(context));
   }
 
   Widget _buildBody(BuildContext context) {
@@ -39,6 +39,7 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
             SizedBox(
               width: double.infinity,
               child: AdaptiveButton(
+                size: AdaptiveButtonSize.large,
                 style: AdaptiveButtonStyle.prominentGlass,
                 textColor: Colors.white,
                 onPressed: () =>
@@ -55,6 +56,7 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
             SizedBox(
               width: double.infinity,
               child: AdaptiveButton.sfSymbol(
+                size: AdaptiveButtonSize.large,
                 style: AdaptiveButtonStyle.prominentGlass,
                 onPressed: () => _showMessage(context, 'Icon button pressed'),
                 sfSymbol: SFSymbol('heart.fill', size: 20),
@@ -68,7 +70,11 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
             const SizedBox(height: 8),
             SizedBox(
               width: double.infinity,
-              child: const AdaptiveButton(onPressed: null, label: 'Disabled'),
+              child: const AdaptiveButton(
+                size: AdaptiveButtonSize.large,
+                onPressed: null,
+                label: 'Disabled',
+              ),
             ),
           ],
         ),
@@ -83,9 +89,13 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
               style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
             ),
             const SizedBox(height: 8),
-            AdaptiveButton(
-              onPressed: () => _showMessage(context, 'Default button pressed'),
-              label: 'Click Me',
+            SizedBox(
+              width: double.infinity,
+              child: AdaptiveButton(
+                onPressed: () =>
+                    _showMessage(context, 'Default button pressed'),
+                label: 'Click Me',
+              ),
             ),
             const SizedBox(height: 16),
             const Text(
@@ -93,11 +103,14 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
               style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
             ),
             const SizedBox(height: 8),
-            AdaptiveButton.icon(
-              onPressed: () => _showMessage(context, 'Icon button pressed'),
-              icon: PlatformInfo.isIOS
-                  ? CupertinoIcons.heart_fill
-                  : Icons.favorite,
+            SizedBox(
+              width: double.infinity,
+              child: AdaptiveButton.icon(
+                onPressed: () => _showMessage(context, 'Icon button pressed'),
+                icon: PlatformInfo.isIOS
+                    ? CupertinoIcons.heart_fill
+                    : Icons.favorite,
+              ),
             ),
             const SizedBox(height: 16),
             const Text(
@@ -105,7 +118,10 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
               style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
             ),
             const SizedBox(height: 8),
-            const AdaptiveButton(onPressed: null, label: 'Disabled'),
+            SizedBox(
+              width: double.infinity,
+              child: const AdaptiveButton(onPressed: null, label: 'Disabled'),
+            ),
           ],
         ),
         const SizedBox(height: 24),

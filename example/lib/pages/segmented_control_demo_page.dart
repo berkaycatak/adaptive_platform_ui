@@ -19,7 +19,7 @@ class _SegmentedControlDemoPageState extends State<SegmentedControlDemoPage> {
   Widget build(BuildContext context) {
     return AdaptiveScaffold(
       title: 'Segmented Control',
-      child: SafeArea(
+      body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.only(
             left: 24.0,

@@ -52,11 +52,11 @@ class PlatformInfo {
     return isIOS && iOSVersion >= 26;
   }
 
-  /// Returns true if iOS version is 25 or lower
+  /// Returns true if iOS version is 18 or lower (pre-iOS 26)
   ///
   /// This is used to determine if legacy Cupertino widgets should be used.
-  static bool isIOS25OrLower() {
-    return isIOS && iOSVersion > 0 && iOSVersion <= 25;
+  static bool isIOS18OrLower() {
+    return isIOS && iOSVersion > 0 && iOSVersion < 26;
   }
 
   /// Returns true if iOS version is in a specific range

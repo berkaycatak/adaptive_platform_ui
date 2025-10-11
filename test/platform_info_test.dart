@@ -21,16 +21,16 @@ void main() {
         final version = PlatformInfo.iOSVersion;
         if (version >= 26) {
           expect(PlatformInfo.isIOS26OrHigher(), isTrue);
-          expect(PlatformInfo.isIOS25OrLower(), isFalse);
-        } else if (version > 0 && version <= 25) {
+          expect(PlatformInfo.isIOS18OrLower(), isFalse);
+        } else if (version > 0 && version < 26) {
           expect(PlatformInfo.isIOS26OrHigher(), isFalse);
-          expect(PlatformInfo.isIOS25OrLower(), isTrue);
+          expect(PlatformInfo.isIOS18OrLower(), isTrue);
         }
       } else {
         // Non-iOS platforms should return 0 for iOS version
         expect(PlatformInfo.iOSVersion, equals(0));
         expect(PlatformInfo.isIOS26OrHigher(), isFalse);
-        expect(PlatformInfo.isIOS25OrLower(), isFalse);
+        expect(PlatformInfo.isIOS18OrLower(), isFalse);
       }
     });
 
