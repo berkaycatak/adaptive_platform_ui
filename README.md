@@ -79,7 +79,7 @@ AdaptiveScaffold(
 ```
 Adaptive Bottom Navigation Bar (Destinations):
 <p align="center">
-  <img src="https://i.ibb.co/3LBjfCK/Paragraf-metniniz.png" alt="Native Toolbar"/>
+  <img src="https://raw.githubusercontent.com/berkaycatak/adaptive_platform_ui/refs/heads/main/img/bottom_nav_p.png" alt="Native Toolbar"/>
 </p>
 
 
