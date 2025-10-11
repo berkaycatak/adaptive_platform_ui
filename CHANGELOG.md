@@ -1,5 +1,29 @@
 # Changelog
 
+## 0.1.4
+
+* **NEW**: Added `AdaptiveCard` widget for platform-specific card styling
+  * iOS: Custom iOS-style card with Cupertino design (border, subtle shadow, rounded corners)
+  * Android: Material Design Card with elevation support
+  * Support for custom colors, border radius, padding, margin, and clip behavior
+* **NEW**: Added `AdaptiveRadio` widget for radio button groups
+  * iOS: Custom iOS-style radio with circular design
+  * Android: Material Design Radio
+  * Support for custom colors, toggleable mode, and disabled state
+* **NEW**: Added `AdaptiveBadge` widget for notification badges
+  * iOS: Custom iOS-style badge with rounded design
+  * Android: Material Design Badge
+  * Support for count/label display, custom colors, show zero option, and large size
+* **NEW**: Added `AdaptiveTooltip` widget for platform-specific tooltips
+  * iOS: Custom iOS-style tooltip with animation and theme support
+  * Android: Material Design Tooltip
+  * Long press/tap to show, auto-hide after duration
+* **NEW**: Added `AdaptiveCheckbox` widget (Cupertino & Material only)
+  * iOS: Custom iOS-style checkbox with Cupertino design
+  * Android: Material Design Checkbox
+  * Support for tristate, custom colors, and dark/light mode
+* Added comprehensive demo pages for all new widgets
+
 ## 0.1.3
 
 * **BREAKING CHANGE**: Renamed `AdaptiveScaffold.child` parameter to `body` to match standard Scaffold API

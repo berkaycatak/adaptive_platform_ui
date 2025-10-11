@@ -222,7 +222,104 @@ AdaptiveSlider(
 )
 ```
 
+### AdaptiveCheckbox
 
+```dart
+AdaptiveCheckbox(
+  value: true,
+  onChanged: (value) {
+    print('Checkbox: $value');
+  },
+)
+
+// Tristate checkbox
+AdaptiveCheckbox(
+  value: null, // Can be true, false, or null
+  tristate: true,
+  onChanged: (value) {
+    print('Checkbox: $value');
+  },
+)
+```
+
+### AdaptiveRadio
+
+```dart
+enum Options { option1, option2, option3 }
+Options? _selectedOption = Options.option1;
+
+AdaptiveRadio<Options>(
+  value: Options.option1,
+  groupValue: _selectedOption,
+  onChanged: (Options? value) {
+    setState(() {
+      _selectedOption = value;
+    });
+  },
+)
+```
+
+### AdaptiveCard
+
+```dart
+AdaptiveCard(
+  padding: EdgeInsets.all(16),
+  child: Text('Card Content'),
+)
+
+// Card with custom styling
+AdaptiveCard(
+  padding: EdgeInsets.all(16),
+  color: Colors.blue.withValues(alpha: 0.1),
+  borderRadius: BorderRadius.circular(20),
+  elevation: 8, // Android only
+  child: Column(
+    children: [
+      Text('Custom Card'),
+      Text('With multiple elements'),
+    ],
+  ),
+)
+```
+
+### AdaptiveBadge
+
+```dart
+AdaptiveBadge(
+  count: 5,
+  child: Icon(Icons.notifications),
+)
+
+// Badge with text label
+AdaptiveBadge(
+  label: 'NEW',
+  backgroundColor: Colors.red,
+  child: Icon(Icons.mail),
+)
+
+// Large badge
+AdaptiveBadge(
+  count: 99,
+  isLarge: true,
+  child: Icon(Icons.message),
+)
+```
+
+### AdaptiveTooltip
+
+```dart
+AdaptiveTooltip(
+  message: 'This is a tooltip',
+  child: Icon(Icons.info),
+)
+
+// Tooltip positioned above
+AdaptiveTooltip(
+  message: 'Tooltip appears above',
+  preferBelow: false,
+  child: Icon(Icons.help),
+)
+```
 
 ## Usage
 
@@ -481,6 +578,11 @@ Currently available adaptive widgets:
 - ✅ **AdaptiveSegmentedControl** - Native segmented controls
 - ✅ **AdaptiveSwitch** - Native switches
 - ✅ **AdaptiveSlider** - Native sliders
+- ✅ **AdaptiveCheckbox** - Checkboxes with adaptive styling
+- ✅ **AdaptiveRadio** - Radio button groups with adaptive styling
+- ✅ **AdaptiveCard** - Cards with platform-specific styling
+- ✅ **AdaptiveBadge** - Notification badges with adaptive styling
+- ✅ **AdaptiveTooltip** - Platform-specific tooltips
 - ✅ **AdaptiveAlertDialog** - Native alert dialogs
 - ✅ **AdaptivePopupMenuButton** - Native popup menus
 
