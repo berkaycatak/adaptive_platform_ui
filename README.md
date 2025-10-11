@@ -15,10 +15,7 @@ A Flutter package that provides adaptive platform-specific widgets with native i
 
   <img src="https://github.com/berkaycatak/adaptive_platform_ui/blob/main/img/toolbar2_p.png?raw=true" alt="iOS 26 Native Tab Bar">
 
-
-
-https://github.com/user-attachments/assets/1c5abfc3-4f28-4fcd-ae7a-3c91dd02636f
-
+![native_search](https://github.com/user-attachments/assets/da33cb62-94d7-47da-8f0c-327bbd6ee04e)
 
 Native iOS 26 UIToolbar and UITabBar with Liquid Glass blur effects, minimize behavior, and native gesture handling.
 
