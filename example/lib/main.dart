@@ -8,6 +8,7 @@ import 'package:adaptive_platform_ui_example/pages/radio_demo_page.dart';
 import 'package:adaptive_platform_ui_example/pages/card_demo_page.dart';
 import 'package:adaptive_platform_ui_example/pages/badge_demo_page.dart';
 import 'package:adaptive_platform_ui_example/pages/tooltip_demo_page.dart';
+import 'package:adaptive_platform_ui_example/pages/native_search_tab_demo_page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
@@ -185,6 +186,21 @@ class HomePage extends StatelessWidget {
               title: 'Segmented Control',
               description: 'Native segmented controls with adaptive styling',
               page: const SegmentedControlDemoPage(),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        _buildSection(
+          context,
+          title: 'iOS 26+ Features',
+          items: [
+            _DemoItem(
+              icon: PlatformInfo.isIOS
+                  ? CupertinoIcons.search_circle_fill
+                  : Icons.search,
+              title: 'Native Search Tab (iOS 26+)',
+              description: 'EXPERIMENTAL: Native tab bar with search transformation',
+              page: const NativeSearchTabDemoPage(),
             ),
           ],
         ),
