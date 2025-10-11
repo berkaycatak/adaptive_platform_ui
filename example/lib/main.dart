@@ -3,6 +3,7 @@ import 'package:adaptive_platform_ui_example/pages/popup_menu_demo_page.dart';
 import 'package:adaptive_platform_ui_example/pages/segmented_control_demo_page.dart';
 import 'package:adaptive_platform_ui_example/pages/slider_demo_page.dart';
 import 'package:adaptive_platform_ui_example/pages/switch_demo_page.dart';
+import 'package:adaptive_platform_ui_example/pages/checkbox_demo_page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
@@ -132,6 +133,14 @@ class HomePage extends StatelessWidget {
               title: 'Switch',
               description: 'Native switches with adaptive styling',
               page: const SwitchDemoPage(),
+            ),
+            _DemoItem(
+              icon: PlatformInfo.isIOS
+                  ? CupertinoIcons.checkmark_square
+                  : Icons.check_box,
+              title: 'Checkbox',
+              description: 'Native checkboxes with adaptive styling',
+              page: const CheckboxDemoPage(),
             ),
             _DemoItem(
               icon: PlatformInfo.isIOS
