@@ -88,7 +88,6 @@ AdaptiveScaffold(
   body: YourContent(),
 )
 ```
-⚠️ **Note**: Native toolbar has stability issues with GoRouter and similar router packages. Default is `false` for better compatibility. Use `useNativeToolbar: true` only if you need the native Liquid Glass effects and accept potential navigation conflicts.
 Adaptive Bottom Navigation Bar (Destinations):
 <p align="center">
   <img src="https://raw.githubusercontent.com/berkaycatak/adaptive_platform_ui/refs/heads/main/img/bottom_nav_p.png" alt="Native Toolbar"/>
