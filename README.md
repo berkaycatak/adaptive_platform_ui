@@ -78,6 +78,17 @@ AdaptiveScaffold(
   body: YourContent(),
 )
 ```
+
+**iOS 26 Native Toolbar (Optional):**
+```dart
+AdaptiveScaffold(
+  title: 'My App',
+  useNativeToolbar: true, // Enable native iOS 26 UIToolbar with Liquid Glass effects
+  actions: [...],
+  body: YourContent(),
+)
+```
+⚠️ **Note**: Native toolbar has stability issues with GoRouter and similar router packages. Default is `false` for better compatibility. Use `useNativeToolbar: true` only if you need the native Liquid Glass effects and accept potential navigation conflicts.
 Adaptive Bottom Navigation Bar (Destinations):
 <p align="center">
   <img src="https://raw.githubusercontent.com/berkaycatak/adaptive_platform_ui/refs/heads/main/img/bottom_nav_p.png" alt="Native Toolbar"/>
@@ -321,6 +332,44 @@ AdaptiveTooltip(
   child: Icon(Icons.help),
 )
 ```
+
+### AdaptiveSnackBar
+
+```dart
+// Basic snackbar
+AdaptiveSnackBar.show(
+  context,
+  message: 'Operation completed successfully!',
+  type: AdaptiveSnackBarType.success,
+)
+
+// Snackbar with action button
+AdaptiveSnackBar.show(
+  context,
+  message: 'File deleted',
+  type: AdaptiveSnackBarType.info,
+  action: 'Undo',
+  onActionPressed: () {
+    // Undo action
+  },
+)
+
+// Custom duration
+AdaptiveSnackBar.show(
+  context,
+  message: 'This will stay longer',
+  duration: Duration(seconds: 8),
+)
+
+// Different types
+AdaptiveSnackBar.show(context, message: 'Info', type: AdaptiveSnackBarType.info);
+AdaptiveSnackBar.show(context, message: 'Success', type: AdaptiveSnackBarType.success);
+AdaptiveSnackBar.show(context, message: 'Warning', type: AdaptiveSnackBarType.warning);
+AdaptiveSnackBar.show(context, message: 'Error', type: AdaptiveSnackBarType.error);
+```
+
+**iOS**: Banner-style notification at the top with slide/fade animations, tap to dismiss, and icon indicators.
+**Android**: Material SnackBar at the bottom with standard Material Design appearance.
 
 ## Usage
 
@@ -662,7 +711,7 @@ See the example app's Native Search Tab demo page for detailed technical explana
 Currently available adaptive widgets:
 
 - ✅ **AdaptiveApp** - Platform-specific app configuration with theme support and router
-- ✅ **AdaptiveScaffold** - Scaffold with native iOS 26 toolbar and tab bar
+- ✅ **AdaptiveScaffold** - Scaffold with optional native iOS 26 toolbar and tab bar
 - ✅ **AdaptiveButton** - Buttons with iOS 26+ native designs
 - ✅ **AdaptiveSegmentedControl** - Native segmented controls
 - ✅ **AdaptiveSwitch** - Native switches
@@ -672,6 +721,7 @@ Currently available adaptive widgets:
 - ✅ **AdaptiveCard** - Cards with platform-specific styling
 - ✅ **AdaptiveBadge** - Notification badges with adaptive styling
 - ✅ **AdaptiveTooltip** - Platform-specific tooltips
+- ✅ **AdaptiveSnackBar** - Platform-specific notification snackbars
 - ✅ **AdaptiveAlertDialog** - Native alert dialogs
 - ✅ **AdaptivePopupMenuButton** - Native popup menus
 - ⚠️ **IOS26NativeSearchTabBar** - EXPERIMENTAL native search tab bar (iOS 26+ only)

@@ -1,5 +1,30 @@
 # Changelog
 
+## 0.1.5
+
+* **NEW**: Added `AdaptiveSnackBar` widget for platform-specific notifications
+  * iOS: Banner-style notification at the top with slide/fade animations
+    - Tap to dismiss
+    - Icon indicators for different types
+    - Action button support with blur effect
+    - Automatic dismissal
+  * Android: Material SnackBar at the bottom
+    - Standard Material Design appearance
+    - Action button support
+  * Supports 4 types: info, success, warning, error
+  * Customizable duration and action callbacks
+* **BREAKING CHANGE**: iOS 26 Native Toolbar is now optional due to stability issues with GoRouter and other router packages
+  * Native toolbar can still be enabled via `useNativeToolbar: true` parameter in `AdaptiveScaffold`
+  * Default behavior now uses `CupertinoNavigationBar` for better compatibility
+  * iOS 26+ users will get custom animated back button when `useNativeToolbar: false`
+  * Resolves touch callback issues and navigation conflicts with router-based navigation
+* **IMPROVEMENT**: Added automatic back button with fade animation for iOS 26+ when using `useNativeToolbar: false`
+  * Appears automatically when page can pop
+  * Prevents native back button conflicts during transitions
+  * Smooth fade-out animation on tap
+* **FIX**: Fixed icon handling in bottom navigation - icons now properly support both SF Symbol strings and IconData
+* Updated demo app with comprehensive snackbar examples
+
 ## 0.1.4+1
   * Updated README.md
 

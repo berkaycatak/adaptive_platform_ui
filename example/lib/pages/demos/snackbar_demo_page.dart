@@ -255,31 +255,5 @@ class _DemoButton extends StatelessWidget {
       width: double.infinity,
       child: AdaptiveButton(onPressed: onPressed, label: label),
     );
-    if (PlatformInfo.isIOS) {
-      return CupertinoButton(
-        padding: const EdgeInsets.symmetric(vertical: 16),
-        color: color,
-        borderRadius: BorderRadius.circular(12),
-        onPressed: onPressed,
-        child: Text(
-          label,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-        ),
-      );
-    }
-
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: color,
-        foregroundColor: Colors.white,
-        padding: const EdgeInsets.symmetric(vertical: 16),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      ),
-      onPressed: onPressed,
-      child: Text(
-        label,
-        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-      ),
-    );
   }
 }
