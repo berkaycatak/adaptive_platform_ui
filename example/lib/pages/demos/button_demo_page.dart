@@ -13,7 +13,7 @@ class ButtonDemoPage extends StatefulWidget {
 class _ButtonDemoPageState extends State<ButtonDemoPage> {
   @override
   Widget build(BuildContext context) {
-    return AdaptiveScaffold(title: 'Button Demos', body: _buildBody(context));
+    return AdaptiveScaffold(body: _buildBody(context));
   }
 
   Widget _buildBody(BuildContext context) {

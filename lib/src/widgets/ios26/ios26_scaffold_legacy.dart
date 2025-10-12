@@ -40,7 +40,6 @@ class _IOS26ScaffoldLegacyState extends State<IOS26ScaffoldLegacy>
   late AnimationController _tabBarController;
   late Animation<double> _tabBarAnimation;
   bool _isMinimized = false;
-  final GlobalKey _toolbarKey = GlobalKey();
 
   @override
   void initState() {
@@ -106,16 +105,14 @@ class _IOS26ScaffoldLegacyState extends State<IOS26ScaffoldLegacy>
 
   @override
   Widget build(BuildContext context) {
-    // Check if we can pop (for automatic back button)
-    final canPop = Navigator.canPop(context);
-
-    // Determine leading text for native toolbar
+    // Auto back button logic
     String? leadingText;
     VoidCallback? leadingCallback;
 
-    if (widget.leading == null && canPop) {
-      // Auto back button
-      leadingText = ''; // Empty string will show chevron icon
+    if (widget.leading == null &&
+        widget.destinations.isEmpty &&
+        Navigator.of(context).canPop()) {
+      leadingText = ''; // Empty string = native chevron
       leadingCallback = () => Navigator.of(context).pop();
     }
 
@@ -136,32 +133,19 @@ class _IOS26ScaffoldLegacyState extends State<IOS26ScaffoldLegacy>
               left: 0,
               right: 0,
               top: 0,
-              child: Stack(
-                children: [
-                  // Native toolbar with title, leading, and actions
-                  IOS26NativeToolbar(
-                    key: _toolbarKey,
-                    title: widget.title,
-                    leadingText: leadingText,
-                    actions: widget.actions,
-                    onLeadingTap: leadingCallback,
-                    onActionTap: (index) {
-                      // Call the appropriate action callback
-                      if (widget.actions != null &&
-                          index >= 0 &&
-                          index < widget.actions!.length) {
-                        widget.actions![index].onPressed();
-                      }
-                    },
-                  ),
-                  // Custom leading widget overlay (if provided by user)
-                  if (widget.leading != null)
-                    Positioned(
-                      left: 8,
-                      top: MediaQuery.of(context).padding.top + 8,
-                      child: SizedBox(height: 36, child: widget.leading!),
-                    ),
-                ],
+              child: IOS26NativeToolbar(
+                title: widget.title,
+                leadingText: leadingText,
+                actions: widget.actions,
+                onLeadingTap: leadingCallback,
+                onActionTap: (index) {
+                  // Call the appropriate action callback
+                  if (widget.actions != null &&
+                      index >= 0 &&
+                      index < widget.actions!.length) {
+                    widget.actions![index].onPressed();
+                  }
+                },
               ),
             ),
             // Tab bar - only show if destinations exist

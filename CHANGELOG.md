@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.1.4+1
+  * Updated README.md
+
 ## 0.1.4
 
 * **NEW**: Added `AdaptiveCard` widget for platform-specific card styling

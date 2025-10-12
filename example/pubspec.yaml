@@ -8,12 +8,13 @@ environment:
   flutter: ">=1.17.0"
 
 dependencies:
-  flutter:
-    sdk: flutter
+  go_router: ^15.1.2
   cupertino_icons: ^1.0.8
-  # cupertino: ^0.0.1
   adaptive_platform_ui:
     path: ../
+  flutter:
+    sdk: flutter
+  # cupertino: ^0.0.1
 
 dev_dependencies:
   flutter_test:

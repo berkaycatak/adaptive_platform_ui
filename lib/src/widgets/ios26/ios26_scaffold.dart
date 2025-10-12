@@ -38,7 +38,6 @@ class _IOS26ScaffoldState extends State<IOS26Scaffold>
   late AnimationController _tabBarController;
   late Animation<double> _tabBarAnimation;
   bool _isMinimized = false;
-  final GlobalKey _toolbarKey = GlobalKey();
 
   @override
   void initState() {
@@ -104,17 +103,26 @@ class _IOS26ScaffoldState extends State<IOS26Scaffold>
 
   @override
   Widget build(BuildContext context) {
-    // Check if we can pop (for automatic back button)
-    final canPop = Navigator.canPop(context);
-
-    // Determine leading text for native toolbar
+    // Auto back button logic
     String? leadingText;
     VoidCallback? leadingCallback;
 
-    if (widget.leading == null && canPop) {
-      // Auto back button
-      leadingText = ''; // Empty string will show chevron icon
-      leadingCallback = () => Navigator.of(context).pop();
+    final canPop = Navigator.of(context).canPop();
+    debugPrint('🔍 IOS26Scaffold: leading=${widget.leading}, destinations=${widget.destinations.length}, canPop=$canPop');
+
+    if (widget.leading == null &&
+        widget.destinations.isEmpty &&
+        canPop) {
+      leadingText = ''; // Empty string = native chevron
+      leadingCallback = () {
+        debugPrint('🔙 IOS26Scaffold: Leading callback triggered!');
+        debugPrint('🔙 IOS26Scaffold: Calling Navigator.pop()');
+        Navigator.of(context).pop();
+        debugPrint('🔙 IOS26Scaffold: Pop called');
+      };
+      debugPrint('✅ IOS26Scaffold: Back button ENABLED - leadingText="$leadingText"');
+    } else {
+      debugPrint('❌ IOS26Scaffold: Back button DISABLED');
     }
 
     // Wrap everything in Material to ensure proper layer ordering during transitions
@@ -124,42 +132,34 @@ class _IOS26ScaffoldState extends State<IOS26Scaffold>
         child: Stack(
           children: [
             // Content - full screen - use KeepAlive to prevent rebuild
-            IndexedStack(
-              index: widget.selectedIndex,
-              sizing: StackFit.expand,
-              children: widget.children,
-            ),
+            // If only one child, use it directly (e.g., StatefulNavigationShell from GoRouter)
+            // Otherwise use IndexedStack for tab switching
+            if (widget.children.length == 1)
+              widget.children.first
+            else
+              IndexedStack(
+                index: widget.selectedIndex,
+                sizing: StackFit.expand,
+                children: widget.children,
+              ),
             // Top toolbar - iOS 26 Liquid Glass style
             Positioned(
               left: 0,
               right: 0,
               top: 0,
-              child: Stack(
-                children: [
-                  // Native toolbar with title, leading, and actions
-                  IOS26NativeToolbar(
-                    key: _toolbarKey,
-                    title: widget.title,
-                    leadingText: leadingText,
-                    actions: widget.actions,
-                    onLeadingTap: leadingCallback,
-                    onActionTap: (index) {
-                      // Call the appropriate action callback
-                      if (widget.actions != null &&
-                          index >= 0 &&
-                          index < widget.actions!.length) {
-                        widget.actions![index].onPressed();
-                      }
-                    },
-                  ),
-                  // Custom leading widget overlay (if provided by user)
-                  if (widget.leading != null)
-                    Positioned(
-                      left: 8,
-                      top: MediaQuery.of(context).padding.top + 8,
-                      child: SizedBox(height: 36, child: widget.leading!),
-                    ),
-                ],
+              child: IOS26NativeToolbar(
+                title: widget.title,
+                leadingText: leadingText,
+                actions: widget.actions,
+                onLeadingTap: leadingCallback,
+                onActionTap: (index) {
+                  // Call the appropriate action callback
+                  if (widget.actions != null &&
+                      index >= 0 &&
+                      index < widget.actions!.length) {
+                    widget.actions![index].onPressed();
+                  }
+                },
               ),
             ),
             // Tab bar - only show if destinations exist

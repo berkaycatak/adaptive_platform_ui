@@ -100,13 +100,24 @@ class AdaptiveScaffold extends StatelessWidget {
   Widget build(BuildContext context) {
     // iOS 26+ - Always use native iOS 26 toolbar
     if (PlatformInfo.isIOS26OrHigher()) {
-      // If destinations are provided but only one body, replicate body for each destination
+      // For GoRouter compatibility: Use body directly if it's StatefulNavigationShell
+      // Otherwise replicate body for each destination
       List<Widget> childrenList;
-      if (destinations != null && destinations!.isNotEmpty) {
-        // Tab-based navigation: replicate single body for all tabs
+      final bodyType = body?.runtimeType.toString() ?? '';
+      final isNavigationShell = bodyType.contains('StatefulNavigationShell');
+
+      if (isNavigationShell) {
+        // GoRouter's StatefulNavigationShell already manages children
+        // Don't replicate, just use it directly
+        childrenList = [body ?? const SizedBox.shrink()];
+      } else if (destinations != null && destinations!.isNotEmpty) {
+        // Tab-based navigation: replicate single body for all tabs with unique keys
         childrenList = List.generate(
           destinations!.length,
-          (index) => body ?? const SizedBox.shrink(),
+          (index) => KeyedSubtree(
+            key: ValueKey('tab_$index'),
+            child: body ?? const SizedBox.shrink(),
+          ),
         );
       } else {
         // Single page: just one body
@@ -114,6 +125,7 @@ class AdaptiveScaffold extends StatelessWidget {
       }
 
       return IOS26Scaffold(
+        key: ValueKey('ios26_scaffold_${selectedIndex ?? 0}_${body?.runtimeType.toString() ?? "empty"}'),
         destinations: destinations ?? [],
         selectedIndex: selectedIndex ?? 0,
         onDestinationSelected: onDestinationSelected ?? (_) {},
