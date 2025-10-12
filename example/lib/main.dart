@@ -1,20 +1,7 @@
-import 'package:adaptive_platform_ui_example/pages/demos/demo_tabbar_page.dart';
-import 'package:adaptive_platform_ui_example/pages/demos/popup_menu_demo_page.dart';
-import 'package:adaptive_platform_ui_example/pages/demos/segmented_control_demo_page.dart';
-import 'package:adaptive_platform_ui_example/pages/demos/slider_demo_page.dart';
-import 'package:adaptive_platform_ui_example/pages/demos/switch_demo_page.dart';
-import 'package:adaptive_platform_ui_example/pages/demos/checkbox_demo_page.dart';
-import 'package:adaptive_platform_ui_example/pages/demos/radio_demo_page.dart';
-import 'package:adaptive_platform_ui_example/pages/demos/card_demo_page.dart';
-import 'package:adaptive_platform_ui_example/pages/demos/badge_demo_page.dart';
-import 'package:adaptive_platform_ui_example/pages/demos/tooltip_demo_page.dart';
-import 'package:adaptive_platform_ui_example/pages/demos/native_search_tab_demo_page.dart';
 import 'package:adaptive_platform_ui_example/service/router/router_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
-import 'pages/demos/alert_dialog_demo_page.dart';
-import 'pages/demos/button_demo_page.dart';
 
 void main() {
   runApp(const AdaptivePlatformUIDemo());

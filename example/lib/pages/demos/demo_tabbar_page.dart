@@ -133,7 +133,9 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
-    print("Home Screen initState called");
+    if (kDebugMode) {
+      print("Home Screen initState called");
+    }
     super.initState();
   }
 
@@ -153,7 +155,9 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   @override
   void initState() {
-    print("Profile Screen initState called");
+    if (kDebugMode) {
+      print("Profile Screen initState called");
+    }
     super.initState();
   }
 
@@ -173,7 +177,9 @@ class SearchScreen extends StatefulWidget {
 class _SearchScreenState extends State<SearchScreen> {
   @override
   void initState() {
-    print("Search Screen initState called");
+    if (kDebugMode) {
+      print("Search Screen initState called");
+    }
     super.initState();
   }
 

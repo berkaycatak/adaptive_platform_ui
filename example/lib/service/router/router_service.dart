@@ -158,12 +158,14 @@ class RouterService {
                   GoRoute(
                     name: routes.segmentedControl,
                     path: routes.segmentedControl,
-                    builder: (context, state) => const SegmentedControlDemoPage(),
+                    builder: (context, state) =>
+                        const SegmentedControlDemoPage(),
                   ),
                   GoRoute(
                     name: routes.nativeSearchTab,
                     path: routes.nativeSearchTab,
-                    builder: (context, state) => const NativeSearchTabDemoPage(),
+                    builder: (context, state) =>
+                        const NativeSearchTabDemoPage(),
                   ),
                 ],
               ),

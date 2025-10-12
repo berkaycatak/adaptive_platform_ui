@@ -1,7 +1,10 @@
+import 'package:adaptive_platform_ui/src/widgets/ios26/ios26_native_tab_bar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import '../platform/platform_info.dart';
+import '../style/sf_symbol.dart';
 import 'adaptive_app_bar_action.dart';
+import 'adaptive_button.dart';
 import 'ios26/ios26_scaffold.dart';
 
 /// Navigation destination for bottom navigation
@@ -56,6 +59,7 @@ class AdaptiveScaffold extends StatelessWidget {
     this.floatingActionButton,
     this.minimizeBehavior = TabBarMinimizeBehavior.automatic,
     this.enableBlur = true,
+    this.useNativeToolbar = false,
   });
 
   /// Navigation destinations for bottom navigation bar
@@ -96,10 +100,15 @@ class AdaptiveScaffold extends StatelessWidget {
   /// When enabled, content behind the tab bar will be blurred
   final bool enableBlur;
 
+  /// Use native iOS 26 toolbar (iOS 26+ only)
+  /// When false (default), uses CupertinoNavigationBar for better compatibility
+  /// When true, uses native iOS 26 UIToolbar with Liquid Glass effect
+  final bool useNativeToolbar;
+
   @override
   Widget build(BuildContext context) {
-    // iOS 26+ - Always use native iOS 26 toolbar
-    if (PlatformInfo.isIOS26OrHigher()) {
+    // iOS 26+ with native toolbar enabled - Use IOS26Scaffold
+    if (PlatformInfo.isIOS26OrHigher() && useNativeToolbar) {
       // For GoRouter compatibility: Use body directly if it's StatefulNavigationShell
       // Otherwise replicate body for each destination
       List<Widget> childrenList;
@@ -125,7 +134,9 @@ class AdaptiveScaffold extends StatelessWidget {
       }
 
       return IOS26Scaffold(
-        key: ValueKey('ios26_scaffold_${selectedIndex ?? 0}_${body?.runtimeType.toString() ?? "empty"}'),
+        key: ValueKey(
+          'ios26_scaffold_${selectedIndex ?? 0}_${body?.runtimeType.toString() ?? "empty"}',
+        ),
         destinations: destinations ?? [],
         selectedIndex: selectedIndex ?? 0,
         onDestinationSelected: onDestinationSelected ?? (_) {},
@@ -138,64 +149,127 @@ class AdaptiveScaffold extends StatelessWidget {
       );
     }
 
-    // iOS <26 (iOS 18 and below) - Use CupertinoPageScaffold with CupertinoTabBar if destinations provided
+    // iOS <26 (iOS 18 and below) OR iOS 26+ with useNativeToolbar: false
+    // Use CupertinoPageScaffold with CupertinoTabBar if destinations provided
     if (PlatformInfo.isIOS) {
+      // Auto back button for iOS 26+ when useNativeToolbar is false
+      Widget? effectiveLeading = leading;
+      if (PlatformInfo.isIOS26OrHigher() &&
+          !useNativeToolbar &&
+          leading == null &&
+          (destinations == null || destinations!.isEmpty)) {
+        // Check if we can pop AND this is the current route (to prevent showing on previous page during transition)
+        final canPop = Navigator.maybeOf(context)?.canPop() ?? false;
+        final isCurrent = ModalRoute.of(context)?.isCurrent ?? true;
+
+        if (canPop) {
+          if (isCurrent) {
+            // Active route: show animated back button
+            effectiveLeading = _AnimatedBackButton(
+              onPressed: () => Navigator.of(context).pop(),
+            );
+          } else {
+            // Transition/background route: show empty SizedBox to prevent native back button
+            effectiveLeading = const SizedBox(height: 38, width: 38);
+          }
+        }
+      }
+
       if (destinations != null &&
           destinations!.isNotEmpty &&
           selectedIndex != null &&
           onDestinationSelected != null) {
         // Tab-based navigation
+        // If no title, actions, or leading, skip navigationBar to avoid nested CupertinoPageScaffold issues
+        final hasNavigationBar =
+            title != null ||
+            (actions != null && actions!.isNotEmpty) ||
+            effectiveLeading != null;
+
         return CupertinoPageScaffold(
-          navigationBar: CupertinoNavigationBar(
-            middle: title != null ? Text(title!) : null,
-            trailing: actions != null && actions!.isNotEmpty
-                ? Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: actions!.map((action) {
-                      Widget actionChild;
-                      if (action.title != null) {
-                        actionChild = Text(action.title!);
-                      } else if (action.iosSymbol != null) {
-                        actionChild = Icon(
-                          _sfSymbolToCupertinoIcon(action.iosSymbol!),
-                        );
-                      } else {
-                        actionChild = const Icon(CupertinoIcons.circle);
-                      }
-                      return CupertinoButton(
-                        padding: EdgeInsets.zero,
-                        onPressed: action.onPressed,
-                        child: actionChild,
-                      );
-                    }).toList(),
-                  )
-                : null,
-            leading: leading,
-          ),
+          navigationBar: hasNavigationBar
+              ? CupertinoNavigationBar(
+                  automaticallyImplyLeading: PlatformInfo.isIOS26OrHigher()
+                      ? false
+                      : true, // Let CupertinoNavigationBar handle back button for iOS < 26
+                  middle: title != null ? Text(title!) : null,
+                  trailing: actions != null && actions!.isNotEmpty
+                      ? Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: actions!.map((action) {
+                            Widget actionChild;
+                            if (action.title != null) {
+                              actionChild = Text(action.title!);
+                            } else if (action.iosSymbol != null) {
+                              actionChild = Icon(
+                                _sfSymbolToCupertinoIcon(action.iosSymbol!),
+                              );
+                            } else {
+                              actionChild = const Icon(CupertinoIcons.circle);
+                            }
+                            return CupertinoButton(
+                              padding: EdgeInsets.zero,
+                              onPressed: action.onPressed,
+                              child: actionChild,
+                            );
+                          }).toList(),
+                        )
+                      : null,
+                  leading: effectiveLeading,
+                )
+              : null,
           child: Column(
             children: [
-              Expanded(child: SafeArea(child: body ?? const SizedBox.shrink())),
-              CupertinoTabBar(
-                currentIndex: selectedIndex!,
-                onTap: onDestinationSelected!,
-                items: destinations!.map((dest) {
-                  return BottomNavigationBarItem(
-                    icon: _getIcon(dest.icon),
-                    activeIcon: dest.selectedIcon != null
-                        ? _getIcon(dest.selectedIcon!)
-                        : _getIcon(dest.icon),
-                    label: dest.label,
-                  );
-                }).toList(),
+              Expanded(
+                child: Stack(
+                  children: [
+                    body ?? const SizedBox.shrink(),
+                    if (PlatformInfo.isIOS26OrHigher())
+                      Positioned(
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        child: IOS26NativeTabBar(
+                          selectedIndex: selectedIndex!,
+                          onTap: onDestinationSelected!,
+                          destinations: destinations!,
+                        ),
+                      ),
+                  ],
+                ),
               ),
+              if (PlatformInfo.isIOS18OrLower())
+                CupertinoTabBar(
+                  currentIndex: selectedIndex!,
+                  onTap: onDestinationSelected!,
+                  items: destinations!.map((dest) {
+                    return BottomNavigationBarItem(
+                      icon: Icon(dest.icon),
+                      activeIcon: dest.selectedIcon != null
+                          ? Icon(dest.selectedIcon!)
+                          : Icon(dest.icon),
+                      label: dest.label,
+                    );
+                  }).toList(),
+                ),
             ],
           ),
         );
       }
 
       // Simple page without tabs
+      // If no title, actions, or leading, just return body to avoid nested CupertinoPageScaffold
+      if (title == null &&
+          (actions == null || actions!.isEmpty) &&
+          effectiveLeading == null) {
+        return body ?? const SizedBox.shrink();
+      }
+
       return CupertinoPageScaffold(
         navigationBar: CupertinoNavigationBar(
+          automaticallyImplyLeading: PlatformInfo.isIOS26OrHigher()
+              ? false
+              : true, // Let CupertinoNavigationBar handle back button for iOS < 26,
           middle: title != null ? Text(title!) : null,
           trailing: actions != null && actions!.isNotEmpty
               ? Row(
@@ -219,7 +293,7 @@ class AdaptiveScaffold extends StatelessWidget {
                   }).toList(),
                 )
               : null,
-          leading: leading,
+          leading: effectiveLeading,
         ),
         child: body ?? const SizedBox.shrink(),
       );
@@ -231,35 +305,42 @@ class AdaptiveScaffold extends StatelessWidget {
         selectedIndex != null &&
         onDestinationSelected != null) {
       // Tab-based navigation
+      final hasAppBar =
+          title != null ||
+          (actions != null && actions!.isNotEmpty) ||
+          leading != null;
+
       return Scaffold(
-        appBar: AppBar(
-          title: title != null ? Text(title!) : null,
-          actions: actions?.map((action) {
-            if (action.title != null) {
-              return TextButton(
-                onPressed: action.onPressed,
-                child: Text(action.title!),
-              );
-            }
-            return IconButton(
-              icon: action.androidIcon != null
-                  ? Icon(action.androidIcon!)
-                  : const Icon(Icons.circle),
-              onPressed: action.onPressed,
-            );
-          }).toList(),
-          leading: leading,
-        ),
+        appBar: hasAppBar
+            ? AppBar(
+                title: title != null ? Text(title!) : null,
+                actions: actions?.map((action) {
+                  if (action.title != null) {
+                    return TextButton(
+                      onPressed: action.onPressed,
+                      child: Text(action.title!),
+                    );
+                  }
+                  return IconButton(
+                    icon: action.androidIcon != null
+                        ? Icon(action.androidIcon!)
+                        : const Icon(Icons.circle),
+                    onPressed: action.onPressed,
+                  );
+                }).toList(),
+                leading: leading,
+              )
+            : null,
         body: body ?? const SizedBox.shrink(),
         bottomNavigationBar: NavigationBar(
           selectedIndex: selectedIndex!,
           onDestinationSelected: onDestinationSelected!,
           destinations: destinations!.map((dest) {
             return NavigationDestination(
-              icon: _getIcon(dest.icon),
+              icon: Icon(dest.icon),
               selectedIcon: dest.selectedIcon != null
-                  ? _getIcon(dest.selectedIcon!)
-                  : _getIcon(dest.icon),
+                  ? Icon(dest.selectedIcon!)
+                  : Icon(dest.icon),
               label: dest.label,
             );
           }).toList(),
@@ -269,6 +350,13 @@ class AdaptiveScaffold extends StatelessWidget {
     }
 
     // Simple page without tabs
+    // If no title, actions, or leading, just return body to avoid nested Scaffold
+    if (title == null &&
+        (actions == null || actions!.isEmpty) &&
+        leading == null) {
+      return body ?? const SizedBox.shrink();
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: title != null ? Text(title!) : null,
@@ -291,15 +379,6 @@ class AdaptiveScaffold extends StatelessWidget {
       body: body ?? const SizedBox.shrink(),
       floatingActionButton: floatingActionButton,
     );
-  }
-
-  Widget _getIcon(dynamic icon) {
-    if (icon is IconData) {
-      return Icon(icon);
-    } else if (icon is String) {
-      return Icon(_sfSymbolToCupertinoIcon(icon));
-    }
-    return const Icon(CupertinoIcons.circle);
   }
 
   IconData _sfSymbolToCupertinoIcon(String sfSymbol) {
@@ -326,5 +405,75 @@ class AdaptiveScaffold extends StatelessWidget {
       'checkmark.circle': CupertinoIcons.checkmark_circle,
     };
     return iconMap[sfSymbol] ?? CupertinoIcons.circle;
+  }
+}
+
+/// Animated back button for iOS 26+
+/// Fades out when pressed
+class _AnimatedBackButton extends StatefulWidget {
+  const _AnimatedBackButton({required this.onPressed});
+
+  final VoidCallback onPressed;
+
+  @override
+  State<_AnimatedBackButton> createState() => _AnimatedBackButtonState();
+}
+
+class _AnimatedBackButtonState extends State<_AnimatedBackButton>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _opacityAnimation;
+  bool _isPopping = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 400),
+      vsync: this,
+    );
+    _opacityAnimation = Tween<double>(
+      begin: 1.0,
+      end: 0.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _handlePressed() {
+    if (_isPopping) return;
+
+    setState(() {
+      _isPopping = true;
+    });
+
+    // Start animation and pop immediately (parallel)
+    _controller.forward();
+    widget.onPressed();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _opacityAnimation,
+      builder: (context, child) {
+        return Opacity(
+          opacity: _isPopping ? 0.0 : _opacityAnimation.value,
+          child: IgnorePointer(ignoring: _isPopping, child: child),
+        );
+      },
+      child: SizedBox(
+        height: 38,
+        width: 38,
+        child: AdaptiveButton.sfSymbol(
+          onPressed: _handlePressed,
+          sfSymbol: SFSymbol("chevron.left", size: 20),
+        ),
+      ),
+    );
   }
 }

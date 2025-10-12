@@ -56,4 +56,5 @@ export 'src/widgets/ios26/ios26_slider.dart';
 export 'src/widgets/ios26/ios26_segmented_control.dart';
 export 'src/widgets/ios26/ios26_alert_dialog.dart';
 export 'src/widgets/ios26/ios26_native_search_tab_bar.dart';
+export 'src/widgets/ios26/ios26_native_tab_bar.dart';
 export 'src/widgets/ios26/ios26_scaffold_legacy.dart';

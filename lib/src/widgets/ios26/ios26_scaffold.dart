@@ -108,21 +108,14 @@ class _IOS26ScaffoldState extends State<IOS26Scaffold>
     VoidCallback? leadingCallback;
 
     final canPop = Navigator.of(context).canPop();
-    debugPrint('🔍 IOS26Scaffold: leading=${widget.leading}, destinations=${widget.destinations.length}, canPop=$canPop');
 
     if (widget.leading == null &&
         widget.destinations.isEmpty &&
         canPop) {
       leadingText = ''; // Empty string = native chevron
       leadingCallback = () {
-        debugPrint('🔙 IOS26Scaffold: Leading callback triggered!');
-        debugPrint('🔙 IOS26Scaffold: Calling Navigator.pop()');
         Navigator.of(context).pop();
-        debugPrint('🔙 IOS26Scaffold: Pop called');
       };
-      debugPrint('✅ IOS26Scaffold: Back button ENABLED - leadingText="$leadingText"');
-    } else {
-      debugPrint('❌ IOS26Scaffold: Back button DISABLED');
     }
 
     // Wrap everything in Material to ensure proper layer ordering during transitions

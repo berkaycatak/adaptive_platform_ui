@@ -107,14 +107,10 @@ class iOS26ToolbarPlatformView: NSObject, FlutterPlatformView {
     private func configureToolbar(_ params: [String: Any]) {
         var items: [UIBarButtonItem] = []
 
-        NSLog("🔧 Swift: configureToolbar called with params: \(params)")
-
         // Leading button
         if let leadingTitle = params["leading"] as? String {
-            NSLog("🔧 Swift: Leading parameter found: '\(leadingTitle)'")
             let leadingButton: UIBarButtonItem
             if leadingTitle.isEmpty {
-                NSLog("🔧 Swift: Creating chevron back button")
                 // Empty string = show back chevron icon
                 leadingButton = UIBarButtonItem(
                     image: UIImage(systemName: "chevron.left"),
@@ -123,7 +119,6 @@ class iOS26ToolbarPlatformView: NSObject, FlutterPlatformView {
                     action: #selector(leadingTapped)
                 )
             } else {
-                NSLog("🔧 Swift: Creating text button: '\(leadingTitle)'")
                 // Show text
                 leadingButton = UIBarButtonItem(
                     title: leadingTitle,
@@ -133,9 +128,6 @@ class iOS26ToolbarPlatformView: NSObject, FlutterPlatformView {
                 )
             }
             items.append(leadingButton)
-            NSLog("🔧 Swift: Leading button added to toolbar")
-        } else {
-            NSLog("🔧 Swift: NO leading parameter found")
         }
 
         // Flexible space before title
@@ -185,9 +177,7 @@ class iOS26ToolbarPlatformView: NSObject, FlutterPlatformView {
     }
 
     @objc private func leadingTapped() {
-        NSLog("🍎 Swift: leadingTapped called!")
         _channel.invokeMethod("onLeadingTapped", arguments: nil)
-        NSLog("🍎 Swift: Method channel invoked")
     }
 
     @objc private func actionTapped(_ sender: UIBarButtonItem) {

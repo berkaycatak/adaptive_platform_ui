@@ -1,15 +1,29 @@
 import 'package:adaptive_platform_ui_example/service/router/router_service.dart';
+import 'package:adaptive_platform_ui_example/utils/global_variables.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  @override
+  void initState() {
+    if (kDebugMode) {
+      print("HomePage initState");
+    }
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     return AdaptiveScaffold(
-      leading: SizedBox(),
       title: "Adaptive Platform UI",
       actions: [
         AdaptiveAppBarAction(
@@ -23,149 +37,153 @@ class HomePage extends StatelessWidget {
   }
 
   Widget _buildBody(BuildContext context) {
-    final topPadding = PlatformInfo.isIOS ? 130.0 : 16.0;
+    final topPadding = PlatformInfo.isIOS ? 16.0 : 16.0;
 
-    return ListView(
-      padding: EdgeInsets.only(
-        left: 16.0,
-        right: 16.0,
-        top: topPadding,
-        bottom: 16.0,
+    return SafeArea(
+      bottom: false,
+      child: ListView(
+        controller: homeScrollController,
+        padding: EdgeInsets.only(
+          left: 16.0,
+          right: 16.0,
+          top: topPadding,
+          bottom: 16.0,
+        ),
+        children: [
+          _buildHeader(context),
+          const SizedBox(height: 24),
+          // _buildSection(
+          //   context,
+          //   title: 'Screen',
+          //   items: [
+          //     _DemoItem(
+          //       icon: PlatformInfo.isIOS
+          //           ? CupertinoIcons.square_split_2x2
+          //           : Icons.dashboard,
+          //       title: 'Tabbar',
+          //       description: 'Adaptive tab bars with platform-specific styles',
+          //       routeName: RouterService.routes.demoTabbar,
+          //     ),
+          //   ],
+          // ),
+          // const SizedBox(height: 12),
+          _buildSection(
+            context,
+            title: 'Components',
+            items: [
+              _DemoItem(
+                icon: PlatformInfo.isIOS
+                    ? CupertinoIcons.hand_point_right_fill
+                    : Icons.touch_app,
+                title: 'Button',
+                description: 'Adaptive buttons with platform-specific styles',
+                routeName: RouterService.routes.button,
+              ),
+              _DemoItem(
+                icon: PlatformInfo.isIOS
+                    ? CupertinoIcons.chat_bubble_fill
+                    : Icons.message,
+                title: 'Alert Dialog',
+                description: 'Native alert dialogs with adaptive styling',
+                routeName: RouterService.routes.alertDialog,
+              ),
+              _DemoItem(
+                icon: PlatformInfo.isIOS
+                    ? CupertinoIcons.ellipsis_circle_fill
+                    : Icons.more_horiz,
+                title: 'Popup Menu',
+                description: 'Native popup menus with adaptive styling',
+                routeName: RouterService.routes.popupMenu,
+              ),
+              _DemoItem(
+                icon: Icons.tune,
+                title: 'Slider',
+                description: 'Native sliders with adaptive styling',
+                routeName: RouterService.routes.slider,
+              ),
+              _DemoItem(
+                icon: Icons.toggle_on,
+                title: 'Switch',
+                description: 'Native switches with adaptive styling',
+                routeName: RouterService.routes.switchDemo,
+              ),
+              _DemoItem(
+                icon: PlatformInfo.isIOS
+                    ? CupertinoIcons.checkmark_square
+                    : Icons.check_box,
+                title: 'Checkbox',
+                description: 'Native checkboxes with adaptive styling',
+                routeName: RouterService.routes.checkbox,
+                isNew: true,
+              ),
+              _DemoItem(
+                icon: PlatformInfo.isIOS
+                    ? CupertinoIcons.circle
+                    : Icons.radio_button_checked,
+                title: 'Radio',
+                description: 'Radio button groups with adaptive styling',
+                routeName: RouterService.routes.radio,
+                isNew: true,
+              ),
+              _DemoItem(
+                icon: PlatformInfo.isIOS
+                    ? CupertinoIcons.rectangle_on_rectangle
+                    : Icons.credit_card,
+                title: 'Card',
+                description: 'Adaptive cards with platform-specific styling',
+                routeName: RouterService.routes.card,
+                isNew: true,
+              ),
+              _DemoItem(
+                icon: PlatformInfo.isIOS
+                    ? CupertinoIcons.number_circle_fill
+                    : Icons.notifications_active,
+                title: 'Badge',
+                description: 'Notification badges with adaptive styling',
+                routeName: RouterService.routes.badge,
+                isNew: true,
+              ),
+              _DemoItem(
+                icon: PlatformInfo.isIOS
+                    ? CupertinoIcons.info_circle
+                    : Icons.info_outline,
+                title: 'Tooltip',
+                description: 'Platform-specific tooltips',
+                routeName: RouterService.routes.tooltip,
+                isNew: true,
+              ),
+              _DemoItem(
+                icon: PlatformInfo.isIOS
+                    ? CupertinoIcons.square_split_2x2
+                    : Icons.segment,
+                title: 'Segmented Control',
+                description: 'Native segmented controls with adaptive styling',
+                routeName: RouterService.routes.segmentedControl,
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          _buildSection(
+            context,
+            title: 'iOS 26+ Features',
+            items: [
+              _DemoItem(
+                icon: PlatformInfo.isIOS
+                    ? CupertinoIcons.search_circle_fill
+                    : Icons.search,
+                title: 'Native Search Tab',
+                description:
+                    'EXPERIMENTAL: Native tab bar with search transformation',
+                routeName: RouterService.routes.nativeSearchTab,
+                isCritical: true,
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 24),
+          _buildInfoCard(context),
+        ],
       ),
-      children: [
-        _buildHeader(context),
-        const SizedBox(height: 24),
-        _buildSection(
-          context,
-          title: 'Screen',
-          items: [
-            _DemoItem(
-              icon: PlatformInfo.isIOS
-                  ? CupertinoIcons.square_split_2x2
-                  : Icons.dashboard,
-              title: 'Tabbar',
-              description: 'Adaptive tab bars with platform-specific styles',
-              routeName: RouterService.routes.demoTabbar,
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        _buildSection(
-          context,
-          title: 'Components',
-          items: [
-            _DemoItem(
-              icon: PlatformInfo.isIOS
-                  ? CupertinoIcons.hand_point_right_fill
-                  : Icons.touch_app,
-              title: 'Button',
-              description: 'Adaptive buttons with platform-specific styles',
-              routeName: RouterService.routes.button,
-            ),
-            _DemoItem(
-              icon: PlatformInfo.isIOS
-                  ? CupertinoIcons.chat_bubble_fill
-                  : Icons.message,
-              title: 'Alert Dialog',
-              description: 'Native alert dialogs with adaptive styling',
-              routeName: RouterService.routes.alertDialog,
-            ),
-            _DemoItem(
-              icon: PlatformInfo.isIOS
-                  ? CupertinoIcons.ellipsis_circle_fill
-                  : Icons.more_horiz,
-              title: 'Popup Menu',
-              description: 'Native popup menus with adaptive styling',
-              routeName: RouterService.routes.popupMenu,
-            ),
-            _DemoItem(
-              icon: Icons.tune,
-              title: 'Slider',
-              description: 'Native sliders with adaptive styling',
-              routeName: RouterService.routes.slider,
-            ),
-            _DemoItem(
-              icon: Icons.toggle_on,
-              title: 'Switch',
-              description: 'Native switches with adaptive styling',
-              routeName: RouterService.routes.switchDemo,
-            ),
-            _DemoItem(
-              icon: PlatformInfo.isIOS
-                  ? CupertinoIcons.checkmark_square
-                  : Icons.check_box,
-              title: 'Checkbox',
-              description: 'Native checkboxes with adaptive styling',
-              routeName: RouterService.routes.checkbox,
-              isNew: true,
-            ),
-            _DemoItem(
-              icon: PlatformInfo.isIOS
-                  ? CupertinoIcons.circle
-                  : Icons.radio_button_checked,
-              title: 'Radio',
-              description: 'Radio button groups with adaptive styling',
-              routeName: RouterService.routes.radio,
-              isNew: true,
-            ),
-            _DemoItem(
-              icon: PlatformInfo.isIOS
-                  ? CupertinoIcons.rectangle_on_rectangle
-                  : Icons.credit_card,
-              title: 'Card',
-              description: 'Adaptive cards with platform-specific styling',
-              routeName: RouterService.routes.card,
-              isNew: true,
-            ),
-            _DemoItem(
-              icon: PlatformInfo.isIOS
-                  ? CupertinoIcons.number_circle_fill
-                  : Icons.notifications_active,
-              title: 'Badge',
-              description: 'Notification badges with adaptive styling',
-              routeName: RouterService.routes.badge,
-              isNew: true,
-            ),
-            _DemoItem(
-              icon: PlatformInfo.isIOS
-                  ? CupertinoIcons.info_circle
-                  : Icons.info_outline,
-              title: 'Tooltip',
-              description: 'Platform-specific tooltips',
-              routeName: RouterService.routes.tooltip,
-              isNew: true,
-            ),
-            _DemoItem(
-              icon: PlatformInfo.isIOS
-                  ? CupertinoIcons.square_split_2x2
-                  : Icons.segment,
-              title: 'Segmented Control',
-              description: 'Native segmented controls with adaptive styling',
-              routeName: RouterService.routes.segmentedControl,
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        _buildSection(
-          context,
-          title: 'iOS 26+ Features',
-          items: [
-            _DemoItem(
-              icon: PlatformInfo.isIOS
-                  ? CupertinoIcons.search_circle_fill
-                  : Icons.search,
-              title: 'Native Search Tab',
-              description:
-                  'EXPERIMENTAL: Native tab bar with search transformation',
-              routeName: RouterService.routes.nativeSearchTab,
-              isCritical: true,
-            ),
-          ],
-        ),
-
-        const SizedBox(height: 24),
-        _buildInfoCard(context),
-      ],
     );
   }
 

@@ -20,9 +20,5 @@ class SFSymbol {
   final Color? color;
 
   /// Creates an SF Symbol descriptor for native iOS rendering
-  const SFSymbol(
-    this.name, {
-    this.size = 24.0,
-    this.color,
-  });
+  const SFSymbol(this.name, {this.size = 24.0, this.color});
 }

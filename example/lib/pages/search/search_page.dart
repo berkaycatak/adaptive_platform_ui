@@ -1,4 +1,6 @@
+import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 
 class SearchPage extends StatefulWidget {
   const SearchPage({super.key});
@@ -9,7 +11,19 @@ class SearchPage extends StatefulWidget {
 
 class _SearchPageState extends State<SearchPage> {
   @override
+  void initState() {
+    if (kDebugMode) {
+      print("search initState");
+    }
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+    return AdaptiveScaffold(
+      title: 'Search',
+
+      body: Center(child: Text("Search Page")),
+    );
   }
 }

@@ -49,8 +49,6 @@ class _IOS26NativeToolbarState extends State<IOS26NativeToolbar> {
         'actions': widget.actions!.map((action) => action.toNativeMap()).toList(),
     };
 
-    debugPrint('🏗️ IOS26NativeToolbar: Creating with params: $creationParams');
-
     return SizedBox(
       height: widget.height + MediaQuery.of(context).padding.top,
       child: UiKitView(
@@ -71,13 +69,9 @@ class _IOS26NativeToolbarState extends State<IOS26NativeToolbar> {
   }
 
   Future<dynamic> _handleMethodCall(MethodCall call) async {
-    debugPrint('📱 IOS26NativeToolbar: Received method call: ${call.method}');
     switch (call.method) {
       case 'onLeadingTapped':
-        debugPrint('📱 IOS26NativeToolbar: Leading tapped!');
-        debugPrint('📱 IOS26NativeToolbar: onLeadingTap callback is ${widget.onLeadingTap != null ? "SET" : "NULL"}');
         widget.onLeadingTap?.call();
-        debugPrint('📱 IOS26NativeToolbar: Callback invoked');
         break;
       case 'onActionTapped':
         if (call.arguments is Map) {

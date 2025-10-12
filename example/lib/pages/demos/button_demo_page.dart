@@ -13,7 +13,19 @@ class ButtonDemoPage extends StatefulWidget {
 class _ButtonDemoPageState extends State<ButtonDemoPage> {
   @override
   Widget build(BuildContext context) {
-    return AdaptiveScaffold(body: _buildBody(context));
+    return AdaptiveScaffold(
+      title: "Buttons",
+      actions: [
+        AdaptiveAppBarAction(
+          androidIcon: PlatformInfo.isIOS
+              ? CupertinoIcons.info_circle
+              : Icons.info_outline,
+          iosSymbol: "info.circle",
+          onPressed: () => _showMessage(context, 'Info button pressed'),
+        ),
+      ],
+      body: _buildBody(context),
+    );
   }
 
   Widget _buildBody(BuildContext context) {

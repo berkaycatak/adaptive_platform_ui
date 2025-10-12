@@ -11,7 +11,7 @@ class BadgeDemoPage extends StatefulWidget {
 
 class _BadgeDemoPageState extends State<BadgeDemoPage> {
   int _notificationCount = 5;
-  int _messageCount = 99;
+  final int _messageCount = 99;
   int _cartCount = 0;
 
   @override
