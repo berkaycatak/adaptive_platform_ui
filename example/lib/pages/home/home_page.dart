@@ -89,6 +89,15 @@ class _HomePageState extends State<HomePage> {
               ),
               _DemoItem(
                 icon: PlatformInfo.isIOS
+                    ? CupertinoIcons.bell_fill
+                    : Icons.notifications,
+                title: 'Snackbar',
+                description: 'Platform-specific notification snackbars',
+                routeName: RouterService.routes.snackbar,
+                isNew: true,
+              ),
+              _DemoItem(
+                icon: PlatformInfo.isIOS
                     ? CupertinoIcons.ellipsis_circle_fill
                     : Icons.more_horiz,
                 title: 'Popup Menu',

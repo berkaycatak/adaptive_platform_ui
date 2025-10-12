@@ -20,4 +20,5 @@ class RouteConstants {
   String tooltip = 'tooltip';
   String segmentedControl = 'segmented-control';
   String nativeSearchTab = 'native-search-tab';
+  String snackbar = 'snackbar';
 }

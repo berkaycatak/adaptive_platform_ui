@@ -13,6 +13,7 @@ import 'package:adaptive_platform_ui_example/pages/demos/popup_menu_demo_page.da
 import 'package:adaptive_platform_ui_example/pages/demos/radio_demo_page.dart';
 import 'package:adaptive_platform_ui_example/pages/demos/segmented_control_demo_page.dart';
 import 'package:adaptive_platform_ui_example/pages/demos/slider_demo_page.dart';
+import 'package:adaptive_platform_ui_example/pages/demos/snackbar_demo_page.dart';
 import 'package:adaptive_platform_ui_example/pages/demos/switch_demo_page.dart';
 import 'package:adaptive_platform_ui_example/pages/demos/tooltip_demo_page.dart';
 import 'package:adaptive_platform_ui_example/utils/constants/route_constants.dart';
@@ -166,6 +167,11 @@ class RouterService {
                     path: routes.nativeSearchTab,
                     builder: (context, state) =>
                         const NativeSearchTabDemoPage(),
+                  ),
+                  GoRoute(
+                    name: routes.snackbar,
+                    path: routes.snackbar,
+                    builder: (context, state) => const SnackbarDemoPage(),
                   ),
                 ],
               ),

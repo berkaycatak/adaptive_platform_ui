@@ -48,6 +48,7 @@ export 'src/widgets/adaptive_alert_dialog.dart';
 export 'src/widgets/adaptive_popup_menu_button.dart';
 export 'src/widgets/adaptive_scaffold.dart';
 export 'src/widgets/adaptive_app_bar_action.dart';
+export 'src/widgets/adaptive_snackbar.dart';
 
 // iOS 26 specific widgets (for advanced usage)
 export 'src/widgets/ios26/ios26_button.dart';
