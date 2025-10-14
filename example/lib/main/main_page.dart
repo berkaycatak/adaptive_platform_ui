@@ -5,19 +5,26 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-class MainPage extends StatelessWidget {
+class MainPage extends StatefulWidget {
   const MainPage({required this.navigationShell, super.key});
 
   final StatefulNavigationShell navigationShell;
 
   @override
+  State<MainPage> createState() => _MainPageState();
+}
+
+class _MainPageState extends State<MainPage> {
+  @override
   Widget build(BuildContext context) {
     return Stack(
       children: [
         AdaptiveScaffold(
-          body: navigationShell,
-          selectedIndex: navigationShell.currentIndex,
-          onDestinationSelected: onDestinationSelected,
+          useNativeToolbar: false,
+          body: widget.navigationShell,
+          selectedIndex: widget.navigationShell.currentIndex,
+          onDestinationSelected: (index) =>
+              onDestinationSelected(index, context),
           destinations: [
             AdaptiveNavigationDestination(
               icon: PlatformInfo.isIOS26OrHigher()
@@ -56,18 +63,19 @@ class MainPage extends StatelessWidget {
     );
   }
 
-  void onDestinationSelected(tappedIndex) {
+  void onDestinationSelected(tappedIndex, BuildContext context) {
     // scroll to top if the user taps the current tab
     var matchedLocation = GoRouter.of(
       navigatorKey.currentContext!,
     ).routerDelegate.currentConfiguration.last.matchedLocation;
 
-    if (navigationShell.currentIndex == tappedIndex) {
-      String routePath = "";
+    if (widget.navigationShell.currentIndex == tappedIndex) {
+      bool shouldNavigateToRoot = false;
+
       switch (tappedIndex) {
         case 0:
           if (matchedLocation != RouterService.routes.home) {
-            routePath = RouterService.routes.home;
+            shouldNavigateToRoot = true;
           } else {
             homeScrollController.animateTo(
               0,
@@ -78,7 +86,7 @@ class MainPage extends StatelessWidget {
           break;
         case 1:
           if (matchedLocation != RouterService.routes.info) {
-            routePath = RouterService.routes.info;
+            shouldNavigateToRoot = true;
           } else {
             infoScrollController.animateTo(
               0,
@@ -89,7 +97,7 @@ class MainPage extends StatelessWidget {
           break;
         case 2:
           if (matchedLocation != RouterService.routes.search) {
-            routePath = RouterService.routes.search;
+            shouldNavigateToRoot = true;
           } else {
             // searchScrollController.animateTo(
             //   0,
@@ -100,16 +108,14 @@ class MainPage extends StatelessWidget {
           break;
       }
 
-      if (routePath.isEmpty) {
+      if (shouldNavigateToRoot) {
+        // Pop until we reach the root of the current branch
+        widget.navigationShell.goBranch(tappedIndex, initialLocation: true);
         return;
       }
-
-      RouterService.goNamed(
-        context: navigatorKey.currentContext!,
-        route: routePath,
-      );
+      return;
     }
 
-    navigationShell.goBranch(tappedIndex);
+    widget.navigationShell.goBranch(tappedIndex);
   }
 }

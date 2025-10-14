@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import '../adaptive_app_bar_action.dart';
@@ -46,11 +47,33 @@ class _IOS26NativeToolbarState extends State<IOS26NativeToolbar> {
       if (widget.leadingText != null) 'leading': widget.leadingText!,
       if (widget.leading != null) 'leading': '',
       if (widget.actions != null && widget.actions!.isNotEmpty)
-        'actions': widget.actions!.map((action) => action.toNativeMap()).toList(),
+        'actions': widget.actions!
+            .map((action) => action.toNativeMap())
+            .toList(),
     };
 
-    return SizedBox(
+    return Container(
       height: widget.height + MediaQuery.of(context).padding.top,
+      decoration: BoxDecoration(
+        gradient: Theme.brightnessOf(context) == Brightness.light
+            ? const LinearGradient(
+                colors: [
+                  Color.fromARGB(229, 255, 255, 255),
+                  Color.fromARGB(0, 255, 255, 255),
+                ],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              )
+            : const LinearGradient(
+                colors: [
+                  Color.fromARGB(234, 0, 0, 0),
+                  Color.fromARGB(137, 0, 0, 0),
+                  Color.fromARGB(0, 0, 0, 0),
+                ],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              ),
+      ),
       child: UiKitView(
         viewType: 'adaptive_platform_ui/ios26_toolbar',
         creationParams: creationParams,

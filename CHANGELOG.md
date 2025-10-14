@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.5+2
+  * Updated README.md
+
+## 0.1.5+1
+  * Updated README.md
+
 ## 0.1.5
 
 * **NEW**: Added `AdaptiveSnackBar` widget for platform-specific notifications

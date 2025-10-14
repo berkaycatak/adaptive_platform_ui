@@ -59,7 +59,7 @@ class AdaptiveScaffold extends StatelessWidget {
     this.floatingActionButton,
     this.minimizeBehavior = TabBarMinimizeBehavior.automatic,
     this.enableBlur = true,
-    this.useNativeToolbar = false,
+    this.useNativeToolbar = true,
   });
 
   /// Navigation destinations for bottom navigation bar

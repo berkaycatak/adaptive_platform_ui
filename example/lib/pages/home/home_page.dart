@@ -24,10 +24,16 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return AdaptiveScaffold(
+      useNativeToolbar: true,
       title: "Adaptive Platform UI",
       actions: [
         AdaptiveAppBarAction(
-          onPressed: () {},
+          onPressed: () {
+            RouterService.goNamed(
+              context: context,
+              route: RouterService.routes.info,
+            );
+          },
           iosSymbol: "info.circle",
           androidIcon: CupertinoIcons.info_circle,
         ),
@@ -40,6 +46,7 @@ class _HomePageState extends State<HomePage> {
     final topPadding = PlatformInfo.isIOS ? 16.0 : 16.0;
 
     return SafeArea(
+      top: false,
       bottom: false,
       child: ListView(
         controller: homeScrollController,
@@ -50,6 +57,7 @@ class _HomePageState extends State<HomePage> {
           bottom: 16.0,
         ),
         children: [
+          SizedBox(height: 100),
           _buildHeader(context),
           const SizedBox(height: 24),
           // _buildSection(

@@ -14,6 +14,7 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
   @override
   Widget build(BuildContext context) {
     return AdaptiveScaffold(
+      useNativeToolbar: true,
       title: "Buttons",
       actions: [
         AdaptiveAppBarAction(
@@ -458,6 +459,7 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
             ],
           ],
         ),
+        SizedBox(height: 100),
       ],
     );
   }
