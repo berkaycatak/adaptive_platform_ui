@@ -266,10 +266,22 @@ AdaptiveContextMenu(
 AdaptivePopupMenuButton.text<String>(
   label: 'Options',
   items: [
-    AdaptivePopupMenuItem(label: 'Edit', icon: 'pencil', value: 'edit'),
-    AdaptivePopupMenuItem(label: 'Delete', icon: 'trash', value: 'delete'),
-    AdaptivePopupMenuDivider(),
-    AdaptivePopupMenuItem(label: 'Share', icon: 'square.and.arrow.up', value: 'share'),
+    AdaptivePopupMenuItem(
+        label: 'Edit',
+        icon:  PlatformInfo.isIOS26OrHigher() ?  'pencil' : Icons.edit,
+        value: 'edit',
+      ),
+      AdaptivePopupMenuItem(
+        label: 'Delete',
+        icon: PlatformInfo.isIOS26OrHigher() ?  'trash' : Icons.delete,
+        value: 'delete',
+      ),
+      AdaptivePopupMenuDivider(),
+      AdaptivePopupMenuItem(
+        label: 'Share',
+        icon: PlatformInfo.isIOS26OrHigher() ? 'square.and.arrow.up' : Icons.share,
+        value: 'share',
+      ),
   ],
   onSelected: (index, item) {
     print('Selected: ${item.value}');

@@ -45,13 +45,13 @@ class AdaptiveSegmentedControl extends StatelessWidget {
   /// Whether the control should shrink to fit content
   final bool shrinkWrap;
 
-  /// Optional SF Symbol names for icons (iOS only)
-  final List<String>? sfSymbols;
+  /// Optional SF Symbol names or IconData
+  final List<dynamic>? sfSymbols;
 
-  /// Icon size (when using sfSymbols)
+  /// Icon size
   final double? iconSize;
 
-  /// Icon color (when using sfSymbols)
+  /// Icon color
   final Color? iconColor;
 
   @override
@@ -66,7 +66,7 @@ class AdaptiveSegmentedControl extends StatelessWidget {
         color: color,
         height: height,
         shrinkWrap: shrinkWrap,
-        sfSymbols: sfSymbols,
+        icons: sfSymbols,
         iconSize: iconSize,
         iconColor: iconColor,
       );
@@ -86,25 +86,6 @@ class AdaptiveSegmentedControl extends StatelessWidget {
     return _buildCupertinoSegmentedControl(context);
   }
 
-  IconData _sfSymbolToCupertinoIcon(String sfSymbol) {
-    const iconMap = {
-      'list.clipboard': CupertinoIcons.list_bullet_below_rectangle,
-      'leaf.arrow.trianglehead.clockwise': CupertinoIcons.arrow_clockwise,
-      'figure.walk.diamond': CupertinoIcons.person,
-      'house': CupertinoIcons.house,
-      'house.fill': CupertinoIcons.house_fill,
-      'magnifyingglass': CupertinoIcons.search,
-      'heart': CupertinoIcons.heart,
-      'heart.fill': CupertinoIcons.heart_fill,
-      'person': CupertinoIcons.person,
-      'person.fill': CupertinoIcons.person_fill,
-      'gear': CupertinoIcons.settings,
-      'star': CupertinoIcons.star,
-      'star.fill': CupertinoIcons.star_fill,
-    };
-    return iconMap[sfSymbol] ?? CupertinoIcons.circle;
-  }
-
   Widget _buildCupertinoSegmentedControl(BuildContext context) {
     // Build children map from labels or icons
     final Map<int, Widget> children = {};
@@ -116,13 +97,12 @@ class AdaptiveSegmentedControl extends StatelessWidget {
     for (int i = 0; i < itemCount; i++) {
       if (useIcons) {
         // Icon mode
+        final dynamic icon = sfSymbols![i];
         children[i] = Padding(
           padding: const EdgeInsets.all(8),
-          child: Icon(
-            _sfSymbolToCupertinoIcon(sfSymbols![i]),
-            size: iconSize ?? 20,
-            color: iconColor,
-          ),
+          child: icon is IconData
+              ? Icon(icon, size: iconSize ?? 20, color: iconColor)
+              : Text(icon.toString()),
         );
       } else {
         // Text mode
@@ -149,25 +129,6 @@ class AdaptiveSegmentedControl extends StatelessWidget {
     return SizedBox(height: height, child: control);
   }
 
-  IconData _sfSymbolToMaterialIcon(String sfSymbol) {
-    const iconMap = {
-      'list.clipboard': Icons.list,
-      'leaf.arrow.trianglehead.clockwise': Icons.refresh,
-      'figure.walk.diamond': Icons.directions_walk,
-      'house': Icons.home_outlined,
-      'house.fill': Icons.home,
-      'magnifyingglass': Icons.search,
-      'heart': Icons.favorite_border,
-      'heart.fill': Icons.favorite,
-      'person': Icons.person_outline,
-      'person.fill': Icons.person,
-      'gear': Icons.settings,
-      'star': Icons.star_border,
-      'star.fill': Icons.star,
-    };
-    return iconMap[sfSymbol] ?? Icons.circle_outlined;
-  }
-
   Widget _buildMaterialSegmentedButton(BuildContext context) {
     final segments = <ButtonSegment<int>>[];
 
@@ -178,14 +139,13 @@ class AdaptiveSegmentedControl extends StatelessWidget {
     for (int i = 0; i < itemCount; i++) {
       if (useIcons) {
         // Icon mode
+        final dynamic icon = sfSymbols![i];
         segments.add(
           ButtonSegment<int>(
             value: i,
-            icon: Icon(
-              _sfSymbolToMaterialIcon(sfSymbols![i]),
-              size: iconSize ?? 20,
-              color: iconColor,
-            ),
+            icon: icon is IconData
+                ? Icon(icon, size: iconSize ?? 20, color: iconColor)
+                : Icon(Icons.circle, size: iconSize ?? 20, color: iconColor),
           ),
         );
       } else {
@@ -193,7 +153,10 @@ class AdaptiveSegmentedControl extends StatelessWidget {
         segments.add(
           ButtonSegment<int>(
             value: i,
-            label: Text(labels[i]),
+            label: Text(
+              labels[i],
+              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+            ),
           ),
         );
       }
@@ -209,12 +172,16 @@ class AdaptiveSegmentedControl extends StatelessWidget {
               }
             }
           : null,
+      style: SegmentedButton.styleFrom(
+        minimumSize: Size.fromHeight(height),
+        padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+      ),
     );
 
     if (shrinkWrap) {
       control = Center(child: IntrinsicWidth(child: control));
     }
 
-    return SizedBox(height: height, child: control);
+    return control;
   }
 }

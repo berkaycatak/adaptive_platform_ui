@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.92
+* 
+
+## 0.1.91
+* Enhance AdaptivePopupMenuButton to support dynamic icon types for iOS and Android
+
 ## 0.1.9
 * **NEW**: Added text input support to `AdaptiveAlertDialog`
   * Added `AdaptiveAlertDialogInput` class for input configuration

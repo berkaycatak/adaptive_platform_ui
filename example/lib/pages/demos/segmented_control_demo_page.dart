@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
+import 'package:flutter/material.dart';
 
 class SegmentedControlDemoPage extends StatefulWidget {
   const SegmentedControlDemoPage({super.key});
@@ -172,10 +173,14 @@ class _SegmentedControlDemoPageState extends State<SegmentedControlDemoPage> {
             Center(
               child: AdaptiveSegmentedControl(
                 labels: const [],
-                sfSymbols: const [
-                  'house.fill',
-                  'leaf.arrow.trianglehead.clockwise',
-                  'figure.walk.diamond',
+                sfSymbols: [
+                  PlatformInfo.isIOS26OrHigher() ? 'house.fill' : Icons.house,
+                  PlatformInfo.isIOS26OrHigher()
+                      ? 'leaf.arrow.trianglehead.clockwise'
+                      : Icons.eco,
+                  PlatformInfo.isIOS26OrHigher()
+                      ? 'figure.walk.diamond'
+                      : Icons.directions_walk,
                 ],
                 selectedIndex: _iconSegmentedControlIndex,
                 iconColor: CupertinoColors.systemBlue,

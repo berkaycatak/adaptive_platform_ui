@@ -15,7 +15,7 @@ class IOS26SegmentedControl extends StatefulWidget {
     this.color,
     this.height = 32.0,
     this.shrinkWrap = false,
-    this.sfSymbols,
+    this.icons,
     this.iconSize,
     this.iconColor,
   });
@@ -42,12 +42,12 @@ class IOS26SegmentedControl extends StatefulWidget {
   final bool shrinkWrap;
 
   /// Optional SF Symbol names for icons (iOS only)
-  final List<String>? sfSymbols;
+  final List<dynamic>? icons;
 
-  /// Icon size (when using sfSymbols)
+  /// Icon size (when using icons)
   final double? iconSize;
 
-  /// Icon color (when using sfSymbols)
+  /// Icon color (when using icons)
   final Color? iconColor;
 
   @override
@@ -63,7 +63,9 @@ class _IOS26SegmentedControlState extends State<IOS26SegmentedControl> {
   void initState() {
     super.initState();
     _id = _nextId++;
-    _channel = MethodChannel('adaptive_platform_ui/ios26_segmented_control_$_id');
+    _channel = MethodChannel(
+      'adaptive_platform_ui/ios26_segmented_control_$_id',
+    );
     _channel.setMethodCallHandler(_handleMethod);
   }
 
@@ -76,8 +78,8 @@ class _IOS26SegmentedControlState extends State<IOS26SegmentedControl> {
   Future<dynamic> _handleMethod(MethodCall call) async {
     if (call.method == 'valueChanged') {
       final index = call.arguments['index'] as int;
-      final itemCount = (widget.sfSymbols != null && widget.sfSymbols!.isNotEmpty)
-          ? widget.sfSymbols!.length
+      final itemCount = (widget.icons != null && widget.icons!.isNotEmpty)
+          ? widget.icons!.length
           : widget.labels.length;
 
       if (index >= 0 && index < itemCount && widget.enabled) {
@@ -91,7 +93,9 @@ class _IOS26SegmentedControlState extends State<IOS26SegmentedControl> {
     super.didUpdateWidget(oldWidget);
 
     if (widget.selectedIndex != oldWidget.selectedIndex) {
-      _channel.invokeMethod('setSelectedIndex', {'index': widget.selectedIndex});
+      _channel.invokeMethod('setSelectedIndex', {
+        'index': widget.selectedIndex,
+      });
     }
   }
 
@@ -103,7 +107,8 @@ class _IOS26SegmentedControlState extends State<IOS26SegmentedControl> {
   }
 
   Map<String, dynamic> _buildCreationParams() {
-    final bool isDark = MediaQuery.platformBrightnessOf(context) == Brightness.dark;
+    final bool isDark =
+        MediaQuery.platformBrightnessOf(context) == Brightness.dark;
 
     final params = <String, dynamic>{
       'id': _id,
@@ -114,8 +119,8 @@ class _IOS26SegmentedControlState extends State<IOS26SegmentedControl> {
     };
 
     // Add SF symbols if provided
-    if (widget.sfSymbols != null && widget.sfSymbols!.isNotEmpty) {
-      params['sfSymbols'] = widget.sfSymbols!;
+    if (widget.icons != null && widget.icons!.isNotEmpty) {
+      params['sfSymbols'] = widget.icons!;
     }
 
     // Add color if provided
@@ -145,7 +150,9 @@ class _IOS26SegmentedControlState extends State<IOS26SegmentedControl> {
         creationParamsCodec: const StandardMessageCodec(),
         gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
           Factory<TapGestureRecognizer>(() => TapGestureRecognizer()),
-          Factory<HorizontalDragGestureRecognizer>(() => HorizontalDragGestureRecognizer()),
+          Factory<HorizontalDragGestureRecognizer>(
+            () => HorizontalDragGestureRecognizer(),
+          ),
           Factory<PanGestureRecognizer>(() => PanGestureRecognizer()),
         },
       );
