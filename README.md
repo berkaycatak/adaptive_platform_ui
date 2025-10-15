@@ -27,13 +27,6 @@ Native iOS 26 UIToolbar and UITabBar with Liquid Glass blur effects, minimize be
 - Router support via `AdaptiveApp.router()`
 - Zero configuration required
 
-**AdaptiveAppBar** - Flexible app bar configuration:
-- Centralized configuration with `title`, `actions`, `leading`
-- Custom navigation bar support (`CupertinoNavigationBar` for iOS, `AppBar` for Android)
-- Optional native iOS 26 toolbar with Liquid Glass effects
-- Priority system: Custom bars > Auto-generated bars
-- Null-safe: No app bar if `appBar` parameter is null
-
 **iOS 26+ Native Designs** - Modern iOS 26 components with:
 - **Native UIToolbar** - Liquid Glass blur effects with native iOS 26 design
 - **Native UITabBar** - Tab bar with minimize behavior and smooth animations
@@ -72,18 +65,20 @@ AdaptiveScaffold(
       ),
     ],
   ),
-  destinations: [
-    AdaptiveNavigationDestination(
-      icon: 'house.fill',
-      label: 'Home',
-    ),
-    AdaptiveNavigationDestination(
-      icon: 'person.fill',
-      label: 'Profile',
-    ),
-  ],
-  selectedIndex: 0,
-  onDestinationSelected: (index) {},
+  bottomNavigationBar: AdaptiveBottomNavigationBar(
+    items: [
+      AdaptiveNavigationDestination(
+        icon: 'house.fill',
+        label: 'Home',
+      ),
+      AdaptiveNavigationDestination(
+        icon: 'person.fill',
+        label: 'Profile',
+      ),
+    ],
+    selectedIndex: 0,
+    onTap: (index) {},
+  ),
   body: YourContent(),
 )
 ```
@@ -100,9 +95,21 @@ AdaptiveScaffold(
 )
 ```
 
-**No AppBar:**
+**iOS 26 Native Bottom Bar:**
 ```dart
-// If appBar is null, no app bar or toolbar will be shown
+AdaptiveScaffold(
+  bottomNavigationBar: AdaptiveBottomNavigationBar(
+    useNativeBottomBar: true, // Enable native iOS 26 UITabBar with Liquid Glass effects (default)
+    items: [...],
+    selectedIndex: 0,
+    onTap: (index) {},
+  ),
+  body: YourContent(),
+)
+```
+**No AppBar or Bottom Navigation:**
+```dart
+// If appBar and bottomNavigationBar are null, neither will be shown
 AdaptiveScaffold(
   body: YourContent(),
 )
@@ -110,10 +117,11 @@ AdaptiveScaffold(
 
 **Key Features:**
 - 🎨 **AdaptiveAppBar**: Centralized app bar configuration
-- 🔧 **Custom Navigation Bars**: Provide your own `CupertinoNavigationBar` or `AppBar`
-- 🌟 **Native iOS 26 Toolbar**: Optional Liquid Glass effects with `useNativeToolbar: true`
+- 📱 **AdaptiveBottomNavigationBar**: Centralized bottom navigation configuration
+- 🔧 **Custom Navigation Bars**: Provide your own navigation components
+- 🌟 **Native iOS 26 Components**: Optional Liquid Glass effects with native UIKit
 - 🎯 **Priority System**: Custom bars take priority over auto-generated ones
-- 🔄 **Flexible**: If `appBar` is null, no app bar is shown
+- 🔄 **Flexible**: Null parameters hide components
 
 Adaptive Bottom Navigation Bar (Destinations):
 <p align="center">
@@ -774,6 +782,7 @@ Currently available adaptive widgets:
 
 - ✅ **AdaptiveApp** - Platform-specific app configuration with theme support and router
 - ✅ **AdaptiveAppBar** - Centralized app bar configuration with custom navigation bar support
+- ✅ **AdaptiveBottomNavigationBar** - Centralized bottom navigation configuration with custom tab bar support
 - ✅ **AdaptiveScaffold** - Scaffold with optional native iOS 26 toolbar and tab bar
 - ✅ **AdaptiveButton** - Buttons with iOS 26+ native designs
 - ✅ **AdaptiveSegmentedControl** - Native segmented controls

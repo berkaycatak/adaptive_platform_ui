@@ -1,5 +1,46 @@
 # Changelog
 
+## 0.1.8
+* **NEW**: Added `AdaptiveBottomNavigationBar` class for cleaner bottom navigation configuration
+  * Centralized bottom navigation configuration with `bottomNavigationBar` parameter in `AdaptiveScaffold`
+  * Replaces individual `destinations`, `selectedIndex`, `onDestinationSelected` parameters
+  * If `bottomNavigationBar` is null, no bottom navigation will be shown
+* **NEW**: Added custom bottom navigation bar support via `AdaptiveBottomNavigationBar`
+  * `items` parameter: Navigation items (renamed from `destinations`)
+  * `selectedIndex` parameter: Currently selected item index
+  * `onTap` parameter: Callback when item is tapped (renamed from `onDestinationSelected`)
+  * `useNativeBottomBar` parameter: Control iOS 26+ native bottom bar (default: `true`)
+  * `cupertinoTabBar` parameter: Provide custom `CupertinoTabBar` for iOS
+  * `bottomNavigationBar` parameter: Provide custom `NavigationBar` or `BottomNavigationBar` for Android
+* **IMPORTANT**: `useNativeBottomBar` priority behavior on iOS
+  * iOS 26+ with `useNativeBottomBar: true`: Native UITabBar with Liquid Glass effect is shown, custom `cupertinoTabBar` is ignored
+  * iOS 26+ with `useNativeBottomBar: false`: Custom `cupertinoTabBar` is used if provided, otherwise auto-generated from items
+  * iOS <26: Custom `cupertinoTabBar` is used if provided, otherwise auto-generated from items (useNativeBottomBar is ignored)
+* **FIX**: Fixed icon type handling in bottom navigation
+  * SF Symbol strings (e.g., "house.fill") are now properly converted to IconData for CupertinoTabBar
+  * Android NavigationBar handles both IconData and SF Symbol strings with appropriate fallbacks
+* **BREAKING CHANGE**: `AdaptiveScaffold` bottom navigation parameters refactored
+  * Removed: Direct `destinations`, `selectedIndex`, `onDestinationSelected` parameters
+  * Added: Single `bottomNavigationBar` parameter of type `AdaptiveBottomNavigationBar?`
+  * Migration: Wrap existing parameters in `AdaptiveBottomNavigationBar()`
+  ```dart
+  // Before
+  AdaptiveScaffold(
+    destinations: [...],
+    selectedIndex: 0,
+    onDestinationSelected: (index) {},
+  )
+
+  // After
+  AdaptiveScaffold(
+    bottomNavigationBar: AdaptiveBottomNavigationBar(
+      items: [...],
+      selectedIndex: 0,
+      onTap: (index) {},
+    ),
+  )
+  ```
+
 ## 0.1.7+1
   * Updated README.md
 

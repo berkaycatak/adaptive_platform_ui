@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import '../adaptive_app_bar_action.dart';
+import '../adaptive_bottom_navigation_bar.dart';
 import '../adaptive_scaffold.dart';
 import 'ios26_native_tab_bar.dart';
 import 'ios26_native_toolbar.dart';
@@ -8,9 +9,7 @@ import 'ios26_native_toolbar.dart';
 class IOS26Scaffold extends StatefulWidget {
   const IOS26Scaffold({
     super.key,
-    required this.destinations,
-    required this.selectedIndex,
-    required this.onDestinationSelected,
+    this.bottomNavigationBar,
     this.title,
     this.actions,
     this.leading,
@@ -19,9 +18,7 @@ class IOS26Scaffold extends StatefulWidget {
     required this.children,
   });
 
-  final List<AdaptiveNavigationDestination> destinations;
-  final int selectedIndex;
-  final ValueChanged<int> onDestinationSelected;
+  final AdaptiveBottomNavigationBar? bottomNavigationBar;
   final String? title;
   final List<AdaptiveAppBarAction>? actions;
   final Widget? leading;
@@ -112,7 +109,7 @@ class _IOS26ScaffoldState extends State<IOS26Scaffold>
 
     // Only show auto back button if no custom leading widget
     if (widget.leading == null &&
-        widget.destinations.isEmpty &&
+        (widget.bottomNavigationBar?.items == null || widget.bottomNavigationBar!.items!.isEmpty) &&
         canPop) {
       leadingText = ''; // Empty string = native chevron
       leadingCallback = () {
@@ -136,7 +133,7 @@ class _IOS26ScaffoldState extends State<IOS26Scaffold>
           widget.children.first
         else
           IndexedStack(
-            index: widget.selectedIndex,
+            index: widget.bottomNavigationBar?.selectedIndex ?? 0,
             sizing: StackFit.expand,
             children: widget.children,
           ),
@@ -163,7 +160,10 @@ class _IOS26ScaffoldState extends State<IOS26Scaffold>
             ),
           ),
         // Tab bar - only show if destinations exist
-        if (widget.destinations.isNotEmpty)
+        if (widget.bottomNavigationBar?.items != null &&
+            widget.bottomNavigationBar!.items!.isNotEmpty &&
+            widget.bottomNavigationBar!.selectedIndex != null &&
+            widget.bottomNavigationBar!.onTap != null)
           Positioned(
             left: 0,
             right: 0,
@@ -185,16 +185,16 @@ class _IOS26ScaffoldState extends State<IOS26Scaffold>
               },
               child: widget.enableBlur
                   ? IOS26NativeTabBar(
-                      destinations: widget.destinations,
-                      selectedIndex: widget.selectedIndex,
-                      onTap: widget.onDestinationSelected,
+                      destinations: widget.bottomNavigationBar!.items!,
+                      selectedIndex: widget.bottomNavigationBar!.selectedIndex!,
+                      onTap: widget.bottomNavigationBar!.onTap!,
                       tint: CupertinoTheme.of(context).primaryColor,
                       minimizeBehavior: widget.minimizeBehavior,
                     )
                   : IOS26NativeTabBar(
-                      destinations: widget.destinations,
-                      selectedIndex: widget.selectedIndex,
-                      onTap: widget.onDestinationSelected,
+                      destinations: widget.bottomNavigationBar!.items!,
+                      selectedIndex: widget.bottomNavigationBar!.selectedIndex!,
+                      onTap: widget.bottomNavigationBar!.onTap!,
                       tint: CupertinoTheme.of(context).primaryColor,
                       minimizeBehavior: widget.minimizeBehavior,
                     ),
@@ -205,8 +205,11 @@ class _IOS26ScaffoldState extends State<IOS26Scaffold>
 
     // Only use NotificationListener if tab bar exists (destinations not empty)
     // This allows scroll notifications to bubble up in single-page scenarios
+    final hasBottomNav = widget.bottomNavigationBar?.items != null &&
+        widget.bottomNavigationBar!.items!.isNotEmpty;
+
     return CupertinoPageScaffold(
-      child: widget.destinations.isNotEmpty
+      child: hasBottomNav
           ? NotificationListener<ScrollNotification>(
               onNotification: _handleScrollNotification,
               child: stackContent,

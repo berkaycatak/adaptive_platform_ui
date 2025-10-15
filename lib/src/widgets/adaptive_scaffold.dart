@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../platform/platform_info.dart';
 import '../style/sf_symbol.dart';
 import 'adaptive_app_bar.dart';
+import 'adaptive_bottom_navigation_bar.dart';
 import 'adaptive_button.dart';
 import 'ios26/ios26_scaffold.dart';
 
@@ -50,9 +51,7 @@ class AdaptiveScaffold extends StatefulWidget {
   const AdaptiveScaffold({
     super.key,
     this.appBar,
-    this.destinations,
-    this.selectedIndex,
-    this.onDestinationSelected,
+    this.bottomNavigationBar,
     this.body,
     this.floatingActionButton,
     this.minimizeBehavior = TabBarMinimizeBehavior.automatic,
@@ -63,17 +62,9 @@ class AdaptiveScaffold extends StatefulWidget {
   /// If null, no app bar or toolbar will be shown
   final AdaptiveAppBar? appBar;
 
-  /// Navigation destinations for bottom navigation bar
+  /// Bottom navigation bar configuration
   /// If null, no bottom navigation will be shown
-  final List<AdaptiveNavigationDestination>? destinations;
-
-  /// Currently selected destination index
-  /// If null, no destination will be selected
-  final int? selectedIndex;
-
-  /// Called when a destination is selected
-  /// If null, navigation will not be interactive
-  final ValueChanged<int>? onDestinationSelected;
+  final AdaptiveBottomNavigationBar? bottomNavigationBar;
 
   /// Body widget
   final Widget? body;
@@ -99,6 +90,7 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
   @override
   Widget build(BuildContext context) {
     final useNativeToolbar = widget.appBar?.useNativeToolbar ?? false;
+    final useNativeBottomBar = widget.bottomNavigationBar?.useNativeBottomBar ?? true;
 
     // iOS 26+ with native toolbar enabled - Use IOS26Scaffold
     if (PlatformInfo.isIOS26OrHigher() && useNativeToolbar) {
@@ -112,10 +104,10 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
         // GoRouter's StatefulNavigationShell already manages children
         // Don't replicate, just use it directly
         childrenList = [widget.body ?? const SizedBox.shrink()];
-      } else if (widget.destinations != null && widget.destinations!.isNotEmpty) {
+      } else if (widget.bottomNavigationBar?.items != null && widget.bottomNavigationBar!.items!.isNotEmpty) {
         // Tab-based navigation: replicate single body for all tabs with unique keys
         childrenList = List.generate(
-          widget.destinations!.length,
+          widget.bottomNavigationBar!.items!.length,
           (index) => KeyedSubtree(
             key: ValueKey('tab_$index'),
             child: widget.body ?? const SizedBox.shrink(),
@@ -128,11 +120,9 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
 
       return IOS26Scaffold(
         key: ValueKey(
-          'ios26_scaffold_${widget.selectedIndex ?? 0}_${widget.body?.runtimeType.toString() ?? "empty"}',
+          'ios26_scaffold_${widget.bottomNavigationBar?.selectedIndex ?? 0}_${widget.body?.runtimeType.toString() ?? "empty"}',
         ),
-        destinations: widget.destinations ?? [],
-        selectedIndex: widget.selectedIndex ?? 0,
-        onDestinationSelected: widget.onDestinationSelected ?? (_) {},
+        bottomNavigationBar: widget.bottomNavigationBar,
         title: widget.appBar?.title,
         actions: widget.appBar?.actions,
         leading: widget.appBar?.leading,
@@ -150,7 +140,7 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
       if (PlatformInfo.isIOS26OrHigher() &&
           !useNativeToolbar &&
           widget.appBar?.leading == null &&
-          (widget.destinations == null || widget.destinations!.isEmpty)) {
+          (widget.bottomNavigationBar?.items == null || widget.bottomNavigationBar!.items!.isEmpty)) {
         // Check if we can pop AND this is the current route (to prevent showing on previous page during transition)
         final canPop = Navigator.maybeOf(context)?.canPop() ?? false;
         final isCurrent = ModalRoute.of(context)?.isCurrent ?? true;
@@ -168,10 +158,10 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
         }
       }
 
-      if (widget.destinations != null &&
-          widget.destinations!.isNotEmpty &&
-          widget.selectedIndex != null &&
-          widget.onDestinationSelected != null) {
+      if (widget.bottomNavigationBar?.items != null &&
+          widget.bottomNavigationBar!.items!.isNotEmpty &&
+          widget.bottomNavigationBar!.selectedIndex != null &&
+          widget.bottomNavigationBar!.onTap != null) {
         // Tab-based navigation
 
         // Determine which navigation bar to use
@@ -217,6 +207,55 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
           );
         }
 
+        // Determine which tab bar to use based on platform and configuration
+        Widget? tabBar;
+
+        // iOS 26+ with useNativeBottomBar=true -> Use native tab bar
+        if (PlatformInfo.isIOS26OrHigher() && useNativeBottomBar) {
+          tabBar = _MinimizableTabBar(
+            key: _tabBarKey,
+            selectedIndex: widget.bottomNavigationBar!.selectedIndex!,
+            onTap: widget.bottomNavigationBar!.onTap!,
+            destinations: widget.bottomNavigationBar!.items!,
+            minimizeBehavior: widget.minimizeBehavior,
+            enableBlur: widget.enableBlur,
+          );
+        }
+        // iOS 26+ with useNativeBottomBar=false OR iOS <26
+        else {
+          // Priority 1: Custom CupertinoTabBar (if provided)
+          if (widget.bottomNavigationBar!.cupertinoTabBar != null) {
+            tabBar = widget.bottomNavigationBar!.cupertinoTabBar;
+          }
+          // Priority 2: Build from items
+          else {
+            tabBar = CupertinoTabBar(
+              currentIndex: widget.bottomNavigationBar!.selectedIndex!,
+              onTap: widget.bottomNavigationBar!.onTap!,
+              items: widget.bottomNavigationBar!.items!.map((dest) {
+                // Convert icon to IconData if it's a String (SF Symbol)
+                final IconData iconData = dest.icon is String
+                    ? _sfSymbolToCupertinoIcon(dest.icon as String)
+                    : dest.icon as IconData;
+
+                final IconData? selectedIconData = dest.selectedIcon != null
+                    ? (dest.selectedIcon is String
+                        ? _sfSymbolToCupertinoIcon(dest.selectedIcon as String)
+                        : dest.selectedIcon as IconData)
+                    : null;
+
+                return BottomNavigationBarItem(
+                  icon: Icon(iconData),
+                  activeIcon: selectedIconData != null
+                      ? Icon(selectedIconData)
+                      : Icon(iconData),
+                  label: dest.label,
+                );
+              }).toList(),
+            );
+          }
+        }
+
         return CupertinoPageScaffold(
           navigationBar: navigationBar,
           child: Column(
@@ -224,45 +263,30 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
               Expanded(
                 child: NotificationListener<ScrollNotification>(
                   onNotification: (notification) {
-                    // Forward scroll notifications to _MinimizableTabBar state
-                    _tabBarKey.currentState?.handleScrollNotification(notification);
+                    // Forward scroll notifications to _MinimizableTabBar state (iOS 26+ native only)
+                    if (PlatformInfo.isIOS26OrHigher() && useNativeBottomBar) {
+                      _tabBarKey.currentState?.handleScrollNotification(notification);
+                    }
                     return false; // Let it bubble up
                   },
-                  child: Stack(
-                    children: [
-                      widget.body ?? const SizedBox.shrink(),
-                      if (PlatformInfo.isIOS26OrHigher())
-                        Positioned(
-                          left: 0,
-                          right: 0,
-                          bottom: 0,
-                          child: _MinimizableTabBar(
-                            key: _tabBarKey,
-                            selectedIndex: widget.selectedIndex!,
-                            onTap: widget.onDestinationSelected!,
-                            destinations: widget.destinations!,
-                            minimizeBehavior: widget.minimizeBehavior,
-                            enableBlur: widget.enableBlur,
-                          ),
-                        ),
-                    ],
-                  ),
+                  child: PlatformInfo.isIOS26OrHigher() && useNativeBottomBar
+                      ? Stack(
+                          children: [
+                            widget.body ?? const SizedBox.shrink(),
+                            Positioned(
+                              left: 0,
+                              right: 0,
+                              bottom: 0,
+                              child: tabBar!,
+                            ),
+                          ],
+                        )
+                      : widget.body ?? const SizedBox.shrink(),
                 ),
               ),
-              if (PlatformInfo.isIOS18OrLower())
-                CupertinoTabBar(
-                  currentIndex: widget.selectedIndex!,
-                  onTap: widget.onDestinationSelected!,
-                  items: widget.destinations!.map((dest) {
-                    return BottomNavigationBarItem(
-                      icon: Icon(dest.icon),
-                      activeIcon: dest.selectedIcon != null
-                          ? Icon(dest.selectedIcon!)
-                          : Icon(dest.icon),
-                      label: dest.label,
-                    );
-                  }).toList(),
-                ),
+              // Show tab bar at bottom for non-native cases
+              if (!PlatformInfo.isIOS26OrHigher() || !useNativeBottomBar)
+                tabBar!,
             ],
           ),
         );
@@ -325,10 +349,10 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
     }
 
     // Android - Use NavigationBar if destinations provided
-    if (widget.destinations != null &&
-        widget.destinations!.isNotEmpty &&
-        widget.selectedIndex != null &&
-        widget.onDestinationSelected != null) {
+    if (widget.bottomNavigationBar?.items != null &&
+        widget.bottomNavigationBar!.items!.isNotEmpty &&
+        widget.bottomNavigationBar!.selectedIndex != null &&
+        widget.bottomNavigationBar!.onTap != null) {
       // Tab-based navigation
 
       // Determine which app bar to use
@@ -363,22 +387,45 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
         );
       }
 
-      return Scaffold(
-        appBar: appBar,
-        body: widget.body ?? const SizedBox.shrink(),
-        bottomNavigationBar: NavigationBar(
-          selectedIndex: widget.selectedIndex!,
-          onDestinationSelected: widget.onDestinationSelected!,
-          destinations: widget.destinations!.map((dest) {
+      // Determine which bottom navigation bar to use
+      Widget? bottomNavBar;
+
+      // Priority 1: Custom BottomNavigationBar (if provided)
+      if (widget.bottomNavigationBar!.bottomNavigationBar != null) {
+        bottomNavBar = widget.bottomNavigationBar!.bottomNavigationBar;
+      }
+      // Priority 2: Build from items
+      else {
+        bottomNavBar = NavigationBar(
+          selectedIndex: widget.bottomNavigationBar!.selectedIndex!,
+          onDestinationSelected: widget.bottomNavigationBar!.onTap!,
+          destinations: widget.bottomNavigationBar!.items!.map((dest) {
+            // Convert icon to IconData if it's a String (SF Symbol - fallback to Icons)
+            final IconData iconData = dest.icon is String
+                ? Icons.circle // Fallback for Android if SF Symbol is provided
+                : dest.icon as IconData;
+
+            final IconData? selectedIconData = dest.selectedIcon != null
+                ? (dest.selectedIcon is String
+                    ? Icons.circle // Fallback for Android
+                    : dest.selectedIcon as IconData)
+                : null;
+
             return NavigationDestination(
-              icon: Icon(dest.icon),
-              selectedIcon: dest.selectedIcon != null
-                  ? Icon(dest.selectedIcon!)
-                  : Icon(dest.icon),
+              icon: Icon(iconData),
+              selectedIcon: selectedIconData != null
+                  ? Icon(selectedIconData)
+                  : Icon(iconData),
               label: dest.label,
             );
           }).toList(),
-        ),
+        );
+      }
+
+      return Scaffold(
+        appBar: appBar,
+        body: widget.body ?? const SizedBox.shrink(),
+        bottomNavigationBar: bottomNavBar,
         floatingActionButton: widget.floatingActionButton,
       );
     }
@@ -448,6 +495,7 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
       'bookmark': CupertinoIcons.bookmark,
       'bookmark.fill': CupertinoIcons.bookmark_fill,
       'info.circle': CupertinoIcons.info_circle,
+      'info.circle.fill': CupertinoIcons.info_circle_fill,
       'plus.circle': CupertinoIcons.add_circled,
       'plus': CupertinoIcons.add,
       'checkmark.circle': CupertinoIcons.checkmark_circle,

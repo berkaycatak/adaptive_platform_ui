@@ -72,54 +72,56 @@ class _DemoTabbarPageState extends State<DemoTabbarPage> {
           ),
         ],
       ),
+      bottomNavigationBar: AdaptiveBottomNavigationBar(
+        selectedIndex: _selectedIndex,
+        onTap: (index) {
+          setState(() {
+            if (kDebugMode) {
+              print('Index selected: $index');
+            }
+            _selectedIndex = index;
+          });
+        },
 
-      selectedIndex: _selectedIndex,
-      onDestinationSelected: (index) {
-        setState(() {
-          if (kDebugMode) {
-            print('Index selected: $index');
-          }
-          _selectedIndex = index;
-        });
-      },
+        items: [
+          AdaptiveNavigationDestination(
+            icon: PlatformInfo.isIOS26OrHigher()
+                ? "house.fill"
+                : PlatformInfo.isIOS
+                ? CupertinoIcons.home
+                : Icons.home_outlined,
+            selectedIcon: PlatformInfo.isIOS26OrHigher()
+                ? "house.fill"
+                : PlatformInfo.isIOS
+                ? CupertinoIcons.home
+                : Icons.home,
+            label: 'Home',
+          ),
+          AdaptiveNavigationDestination(
+            icon: PlatformInfo.isIOS26OrHigher()
+                ? "person.fill"
+                : PlatformInfo.isIOS
+                ? CupertinoIcons.person
+                : Icons.person_outline,
+            selectedIcon: PlatformInfo.isIOS26OrHigher()
+                ? "person.fill"
+                : PlatformInfo.isIOS
+                ? CupertinoIcons.person_fill
+                : Icons.person,
+            label: 'Profile',
+          ),
+          AdaptiveNavigationDestination(
+            icon: PlatformInfo.isIOS26OrHigher()
+                ? "magnifyingglass"
+                : PlatformInfo.isIOS
+                ? CupertinoIcons.search
+                : Icons.search,
+            label: 'Search',
+            isSearch: true,
+          ),
+        ],
+      ),
 
-      destinations: [
-        AdaptiveNavigationDestination(
-          icon: PlatformInfo.isIOS26OrHigher()
-              ? "house.fill"
-              : PlatformInfo.isIOS
-              ? CupertinoIcons.home
-              : Icons.home_outlined,
-          selectedIcon: PlatformInfo.isIOS26OrHigher()
-              ? "house.fill"
-              : PlatformInfo.isIOS
-              ? CupertinoIcons.home
-              : Icons.home,
-          label: 'Home',
-        ),
-        AdaptiveNavigationDestination(
-          icon: PlatformInfo.isIOS26OrHigher()
-              ? "person.fill"
-              : PlatformInfo.isIOS
-              ? CupertinoIcons.person
-              : Icons.person_outline,
-          selectedIcon: PlatformInfo.isIOS26OrHigher()
-              ? "person.fill"
-              : PlatformInfo.isIOS
-              ? CupertinoIcons.person_fill
-              : Icons.person,
-          label: 'Profile',
-        ),
-        AdaptiveNavigationDestination(
-          icon: PlatformInfo.isIOS26OrHigher()
-              ? "magnifyingglass"
-              : PlatformInfo.isIOS
-              ? CupertinoIcons.search
-              : Icons.search,
-          label: 'Search',
-          isSearch: true,
-        ),
-      ],
       // body is automatically wrapped into a single-item children list for iOS26Scaffold
       // The scaffold handles showing the content based on selectedIndex
       body: _buildCurrentScreen(),

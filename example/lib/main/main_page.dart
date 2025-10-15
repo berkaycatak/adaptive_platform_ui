@@ -22,42 +22,43 @@ class _MainPageState extends State<MainPage> {
         AdaptiveScaffold(
           minimizeBehavior: TabBarMinimizeBehavior.automatic,
           body: widget.navigationShell,
-          selectedIndex: widget.navigationShell.currentIndex,
-          onDestinationSelected: (index) =>
-              onDestinationSelected(index, context),
-          destinations: [
-            AdaptiveNavigationDestination(
-              icon: PlatformInfo.isIOS26OrHigher()
-                  ? "house.fill"
-                  : PlatformInfo.isIOS
-                  ? CupertinoIcons.home
-                  : Icons.home_outlined,
-              selectedIcon: PlatformInfo.isIOS
-                  ? CupertinoIcons.home
-                  : Icons.home,
-              label: 'Home',
-            ),
-            AdaptiveNavigationDestination(
-              icon: PlatformInfo.isIOS26OrHigher()
-                  ? "info.circle"
-                  : PlatformInfo.isIOS
-                  ? CupertinoIcons.info
-                  : Icons.info_outline,
-              selectedIcon: PlatformInfo.isIOS
-                  ? CupertinoIcons.info
-                  : Icons.info,
-              label: 'Info',
-            ),
-            AdaptiveNavigationDestination(
-              icon: PlatformInfo.isIOS26OrHigher()
-                  ? "magnifyingglass"
-                  : PlatformInfo.isIOS
-                  ? CupertinoIcons.search
-                  : Icons.search,
-              label: 'Search',
-              isSearch: true,
-            ),
-          ],
+          bottomNavigationBar: AdaptiveBottomNavigationBar(
+            selectedIndex: widget.navigationShell.currentIndex,
+            onTap: (index) => onDestinationSelected(index, context),
+            items: [
+              AdaptiveNavigationDestination(
+                icon: PlatformInfo.isIOS26OrHigher()
+                    ? "house.fill"
+                    : PlatformInfo.isIOS
+                    ? CupertinoIcons.home
+                    : Icons.home_outlined,
+                selectedIcon: PlatformInfo.isIOS
+                    ? CupertinoIcons.home
+                    : Icons.home,
+                label: 'Home',
+              ),
+              AdaptiveNavigationDestination(
+                icon: PlatformInfo.isIOS26OrHigher()
+                    ? "info.circle"
+                    : PlatformInfo.isIOS
+                    ? CupertinoIcons.info
+                    : Icons.info_outline,
+                selectedIcon: PlatformInfo.isIOS
+                    ? CupertinoIcons.info
+                    : Icons.info,
+                label: 'Info',
+              ),
+              AdaptiveNavigationDestination(
+                icon: PlatformInfo.isIOS26OrHigher()
+                    ? "magnifyingglass"
+                    : PlatformInfo.isIOS
+                    ? CupertinoIcons.search
+                    : Icons.search,
+                label: 'Search',
+                isSearch: true,
+              ),
+            ],
+          ),
         ),
       ],
     );

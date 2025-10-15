@@ -9,10 +9,11 @@ class AlertDialogDemoPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AdaptiveScaffold(
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {},
+        child: const Icon(Icons.add),
+      ),
       appBar: AdaptiveAppBar(title: 'Alert Dialog'),
-      destinations: [],
-      selectedIndex: null,
-      onDestinationSelected: (int value) {},
       body: _buildBody(context),
     );
   }
