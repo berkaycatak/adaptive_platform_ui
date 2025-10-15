@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.1.9
+* **NEW**: Added text input support to `AdaptiveAlertDialog`
+  * Added `AdaptiveAlertDialogInput` class for input configuration
+  * iOS 26+: Native UITextField with native keyboard types
+  * iOS <26: CupertinoTextField with scrollable content
+  * Android: Material TextField
+  * Returns `Future<String?>` with user input
+  * Supports placeholder, initial value, keyboard type, obscure text, and max length
+* **NEW**: Added `AdaptiveContextMenu` widget for long-press context menus
+  * iOS: Uses `CupertinoContextMenu.builder` with native animations
+  * Android: Uses `PopupMenuButton` with Material Design styling
+  * Supports icons, destructive actions, and disabled states
+  * Long press to show, tap to select action
+* **IMPROVEMENT**: Changed `AdaptiveAlertDialog` icon parameter to dynamic type
+  * iOS 26+: Accepts SF Symbol strings (e.g., "checkmark.circle.fill")
+  * iOS <26 and Android: Accepts IconData
+  * Automatically handles platform-specific icon rendering
+
 ## 0.1.8
 * **NEW**: Added `AdaptiveBottomNavigationBar` class for cleaner bottom navigation configuration
   * Centralized bottom navigation configuration with `bottomNavigationBar` parameter in `AdaptiveScaffold`

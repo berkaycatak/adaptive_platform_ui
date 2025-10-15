@@ -11,6 +11,7 @@ class RouteConstants {
   String button = 'button';
   String alertDialog = 'alert-dialog';
   String popupMenu = 'popup-menu';
+  String contextMenu = 'context-menu';
   String slider = 'slider';
   String switchDemo = 'switch';
   String checkbox = 'checkbox';

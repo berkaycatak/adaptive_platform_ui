@@ -164,7 +164,8 @@ AdaptiveButton.icon(
 
 
 ```dart
-showAdaptiveAlertDialog(
+// Basic alert dialog
+AdaptiveAlertDialog.show(
   context: context,
   title: 'Confirm',
   message: 'Are you sure?',
@@ -173,19 +174,86 @@ showAdaptiveAlertDialog(
     AlertAction(
       title: 'Cancel',
       style: AlertActionStyle.cancel,
-      onPressed: () => Navigator.pop(context),
+      onPressed: () {},
     ),
     AlertAction(
       title: 'Confirm',
       style: AlertActionStyle.primary,
       onPressed: () {
-        Navigator.pop(context);
         // Do something
       },
     ),
   ],
 );
+
+// Alert dialog with text input
+final result = await AdaptiveAlertDialog.show(
+  context: context,
+  title: 'Enter Your Name',
+  message: 'Please provide your name',
+  icon: 'person.fill',
+  input: AdaptiveAlertDialogInput(
+    placeholder: 'Your name',
+    initialValue: '',
+    keyboardType: TextInputType.text,
+  ),
+  actions: [
+    AlertAction(
+      title: 'Cancel',
+      style: AlertActionStyle.cancel,
+      onPressed: () {},
+    ),
+    AlertAction(
+      title: 'Submit',
+      style: AlertActionStyle.primary,
+      onPressed: () {},
+    ),
+  ],
+);
+
+// result contains the text entered by the user
+if (result != null) {
+  print('User entered: $result');
+}
 ```
+
+### AdaptiveContextMenu
+
+```dart
+AdaptiveContextMenu(
+  actions: [
+    AdaptiveContextMenuAction(
+      title: 'Edit',
+      icon: PlatformInfo.isIOS ? CupertinoIcons.pencil : Icons.edit,
+      onPressed: () {
+        print('Edit pressed');
+      },
+    ),
+    AdaptiveContextMenuAction(
+      title: 'Share',
+      icon: PlatformInfo.isIOS ? CupertinoIcons.share : Icons.share,
+      onPressed: () {
+        print('Share pressed');
+      },
+    ),
+    AdaptiveContextMenuAction(
+      title: 'Delete',
+      icon: PlatformInfo.isIOS ? CupertinoIcons.trash : Icons.delete,
+      isDestructive: true,
+      onPressed: () {
+        print('Delete pressed');
+      },
+    ),
+  ],
+  child: Container(
+    padding: EdgeInsets.all(16),
+    child: Text('Long press me'),
+  ),
+)
+```
+
+**iOS**: Uses `CupertinoContextMenu` with preview and native animations.
+**Android**: Uses `PopupMenuButton` with Material Design styling.
 
 ### AdaptivePopupMenuButton
 
@@ -794,7 +862,8 @@ Currently available adaptive widgets:
 - ✅ **AdaptiveBadge** - Notification badges with adaptive styling
 - ✅ **AdaptiveTooltip** - Platform-specific tooltips
 - ✅ **AdaptiveSnackBar** - Platform-specific notification snackbars
-- ✅ **AdaptiveAlertDialog** - Native alert dialogs
+- ✅ **AdaptiveAlertDialog** - Native alert dialogs with text input support
+- ✅ **AdaptiveContextMenu** - Long-press context menus with platform-specific styling
 - ✅ **AdaptivePopupMenuButton** - Native popup menus
 - ⚠️ **IOS26NativeSearchTabBar** - EXPERIMENTAL native search tab bar (iOS 26+ only)
 

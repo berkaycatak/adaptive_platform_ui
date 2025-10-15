@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
+import '../adaptive_alert_dialog.dart';
 
 /// Action types for alert dialog buttons
 enum AlertActionStyle {
@@ -69,6 +70,7 @@ class IOS26AlertDialog extends StatefulWidget {
     this.iconSize,
     this.iconColor,
     this.oneTimeCode,
+    this.input,
   });
 
   /// The title of the alert dialog
@@ -91,6 +93,9 @@ class IOS26AlertDialog extends StatefulWidget {
 
   /// Optional 6-digit one-time code to display
   final String? oneTimeCode;
+
+  /// Optional text input configuration
+  final AdaptiveAlertDialogInput? input;
 
   @override
   State<IOS26AlertDialog> createState() => _IOS26AlertDialogState();
@@ -123,6 +128,14 @@ class _IOS26AlertDialogState extends State<IOS26AlertDialog> {
         ((color.b * 255.0).round() & 0xff);
   }
 
+  String _keyboardTypeToString(TextInputType type) {
+    if (type == TextInputType.emailAddress) return 'emailAddress';
+    if (type == TextInputType.number) return 'number';
+    if (type == TextInputType.phone) return 'phone';
+    if (type == TextInputType.url) return 'url';
+    return 'default';
+  }
+
   @override
   Widget build(BuildContext context) {
     if (!kIsWeb && Platform.isIOS) {
@@ -136,6 +149,13 @@ class _IOS26AlertDialogState extends State<IOS26AlertDialog> {
         if (widget.iconSize != null) 'iconSize': widget.iconSize,
         if (widget.iconColor != null) 'iconColor': _colorToARGB(widget.iconColor!),
         if (widget.oneTimeCode != null) 'oneTimeCode': widget.oneTimeCode,
+        if (widget.input != null) ...{
+          'textFieldPlaceholder': widget.input!.placeholder,
+          if (widget.input!.initialValue != null) 'textFieldInitialValue': widget.input!.initialValue,
+          'textFieldObscureText': widget.input!.obscureText,
+          if (widget.input!.maxLength != null) 'textFieldMaxLength': widget.input!.maxLength,
+          if (widget.input!.keyboardType != null) 'textFieldKeyboardType': _keyboardTypeToString(widget.input!.keyboardType!),
+        },
         'alertStyle': 'glass',
         'isDark': _isDark,
         if (_effectiveTint != null) 'tint': _colorToARGB(_effectiveTint!),
@@ -194,11 +214,12 @@ class _IOS26AlertDialogState extends State<IOS26AlertDialog> {
     if (call.method == 'actionPressed') {
       final args = call.arguments as Map?;
       final idx = (args?['index'] as num?)?.toInt();
+      final textFieldValue = args?['textFieldValue'] as String?;
 
       if (idx != null && idx >= 0 && idx < widget.actions.length) {
-        // Dismiss the dialog first
+        // Dismiss the dialog first with the text field value
         if (mounted) {
-          Navigator.of(context).pop();
+          Navigator.of(context).pop(textFieldValue);
         }
 
         // Then call the action

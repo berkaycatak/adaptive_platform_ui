@@ -96,6 +96,11 @@ class iOS26AlertDialogView: NSObject, FlutterPlatformView {
         var isDark: Bool = false
         var tint: UIColor? = nil
         var alertStyleParam: String = "glass"
+        var textFieldPlaceholder: String? = nil
+        var textFieldInitialValue: String? = nil
+        var textFieldObscureText: Bool = false
+        var textFieldMaxLength: Int? = nil
+        var textFieldKeyboardType: String? = nil
 
         if let dict = args as? [String: Any] {
             if let t = dict["title"] as? String { title = t }
@@ -110,6 +115,11 @@ class iOS26AlertDialogView: NSObject, FlutterPlatformView {
             if let v = dict["isDark"] as? NSNumber { isDark = v.boolValue }
             if let t = dict["tint"] as? NSNumber { tint = UIColor(argb: t.intValue) }
             if let alertStyleValue = dict["alertStyle"] as? String { alertStyleParam = alertStyleValue }
+            if let tfp = dict["textFieldPlaceholder"] as? String { textFieldPlaceholder = tfp }
+            if let tfiv = dict["textFieldInitialValue"] as? String { textFieldInitialValue = tfiv }
+            if let tfot = dict["textFieldObscureText"] as? Bool { textFieldObscureText = tfot }
+            if let tfml = dict["textFieldMaxLength"] as? NSNumber { textFieldMaxLength = tfml.intValue }
+            if let tfkt = dict["textFieldKeyboardType"] as? String { textFieldKeyboardType = tfkt }
         }
 
         self.alertStyle = alertStyleParam
@@ -127,7 +137,12 @@ class iOS26AlertDialogView: NSObject, FlutterPlatformView {
             iconColor: iconColor,
             oneTimeCode: oneTimeCode,
             isDark: isDark,
-            tint: tint
+            tint: tint,
+            textFieldPlaceholder: textFieldPlaceholder,
+            textFieldInitialValue: textFieldInitialValue,
+            textFieldObscureText: textFieldObscureText,
+            textFieldMaxLength: textFieldMaxLength,
+            textFieldKeyboardType: textFieldKeyboardType
         )
 
         self.channel.setMethodCallHandler(onMethodCall)
@@ -148,7 +163,12 @@ class iOS26AlertDialogView: NSObject, FlutterPlatformView {
         iconColor: UIColor?,
         oneTimeCode: String?,
         isDark: Bool,
-        tint: UIColor?
+        tint: UIColor?,
+        textFieldPlaceholder: String?,
+        textFieldInitialValue: String?,
+        textFieldObscureText: Bool,
+        textFieldMaxLength: Int?,
+        textFieldKeyboardType: String?
     ) {
         // Create TintAdjustingAlertController
         alertController = TintAdjustingAlertController(title: title, message: message, preferredStyle: .alert)
@@ -351,6 +371,37 @@ class iOS26AlertDialogView: NSObject, FlutterPlatformView {
             alert.setValue(contentViewController, forKey: "contentViewController")
         }
 
+        // Add text field if placeholder is provided
+        if let placeholder = textFieldPlaceholder {
+            alert.addTextField { textField in
+                textField.placeholder = placeholder
+                textField.text = textFieldInitialValue
+                textField.isSecureTextEntry = textFieldObscureText
+
+                // Set keyboard type
+                if let keyboardType = textFieldKeyboardType {
+                    switch keyboardType {
+                    case "emailAddress":
+                        textField.keyboardType = .emailAddress
+                    case "number":
+                        textField.keyboardType = .numberPad
+                    case "phone":
+                        textField.keyboardType = .phonePad
+                    case "url":
+                        textField.keyboardType = .URL
+                    default:
+                        textField.keyboardType = .default
+                    }
+                }
+
+                // Add max length if specified
+                if let maxLength = textFieldMaxLength {
+                    textField.addTarget(self, action: #selector(self.textFieldDidChange(_:)), for: .editingChanged)
+                    textField.accessibilityValue = "\(maxLength)" // Store maxLength in accessibilityValue
+                }
+            }
+        }
+
         // Add actions
         var primaryAction: UIAlertAction?
         var cancelAction: UIAlertAction?
@@ -413,7 +464,20 @@ class iOS26AlertDialogView: NSObject, FlutterPlatformView {
             }
 
             let action = UIAlertAction(title: actionTitle, style: alertActionStyle) { [weak self] _ in
-                self?.channel.invokeMethod("actionPressed", arguments: ["index": index])
+                guard let self = self, let alert = self.alertController else { return }
+
+                // Get text field value if exists
+                var textFieldValue: String? = nil
+                if let textField = alert.textFields?.first {
+                    textFieldValue = textField.text
+                }
+
+                var arguments: [String: Any] = ["index": index]
+                if let value = textFieldValue {
+                    arguments["textFieldValue"] = value
+                }
+
+                self.channel.invokeMethod("actionPressed", arguments: arguments)
             }
 
             // Apply custom colors (but not for primary, which will be white as preferred action)
@@ -472,6 +536,16 @@ class iOS26AlertDialogView: NSObject, FlutterPlatformView {
             if let topController = self?.topViewController() {
                 topController.present(alert, animated: true)
             }
+        }
+    }
+
+    @objc private func textFieldDidChange(_ textField: UITextField) {
+        // Enforce max length if stored in accessibilityValue
+        if let maxLengthString = textField.accessibilityValue,
+           let maxLength = Int(maxLengthString),
+           let text = textField.text,
+           text.count > maxLength {
+            textField.text = String(text.prefix(maxLength))
         }
     }
 

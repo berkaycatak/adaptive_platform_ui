@@ -5,37 +5,31 @@ import 'ios26/ios26_alert_dialog.dart';
 
 export 'ios26/ios26_alert_dialog.dart' show AlertAction, AlertActionStyle;
 
-// Map SF Symbol names to Flutter icons
-IconData _getIconData(String sfSymbolName) {
-  // Common SF Symbols mapping
-  final iconMap = {
-    'checkmark.circle.fill': Icons.check_circle,
-    'checkmark.circle': Icons.check_circle_outline,
-    'xmark.circle.fill': Icons.cancel,
-    'xmark.circle': Icons.cancel_outlined,
-    'exclamationmark.triangle.fill': Icons.warning,
-    'exclamationmark.triangle': Icons.warning_amber_outlined,
-    'exclamationmark.circle.fill': Icons.error,
-    'exclamationmark.circle': Icons.error_outline,
-    'info.circle.fill': Icons.info,
-    'info.circle': Icons.info_outline,
-    'questionmark.circle.fill': Icons.help,
-    'questionmark.circle': Icons.help_outline,
-    'trash.fill': Icons.delete,
-    'trash': Icons.delete_outline,
-    'lock.shield.fill': Icons.security,
-    'lock.shield': Icons.security_outlined,
-    'lock.fill': Icons.lock,
-    'lock': Icons.lock_outline,
-    'bell.fill': Icons.notifications,
-    'bell': Icons.notifications_outlined,
-    'star.fill': Icons.star,
-    'star': Icons.star_outline,
-    'heart.fill': Icons.favorite,
-    'heart': Icons.favorite_outline,
-  };
+/// Configuration for text input in alert dialog
+class AdaptiveAlertDialogInput {
+  /// Creates a text input configuration for alert dialog
+  const AdaptiveAlertDialogInput({
+    required this.placeholder,
+    this.initialValue,
+    this.keyboardType,
+    this.obscureText = false,
+    this.maxLength,
+  });
 
-  return iconMap[sfSymbolName] ?? Icons.info;
+  /// Placeholder text for the text field
+  final String placeholder;
+
+  /// Initial value for the text field
+  final String? initialValue;
+
+  /// Keyboard type for the text field
+  final TextInputType? keyboardType;
+
+  /// Whether to obscure the text (for passwords)
+  final bool obscureText;
+
+  /// Maximum length of the text input
+  final int? maxLength;
 }
 
 /// An adaptive alert dialog that renders platform-specific styles
@@ -47,93 +41,151 @@ class AdaptiveAlertDialog {
   AdaptiveAlertDialog._();
 
   /// Shows an adaptive alert dialog
-  static Future<void> show({
+  ///
+  /// The [icon] parameter accepts:
+  /// - iOS 26+: String (SF Symbol name, e.g., "checkmark.circle.fill")
+  /// - iOS <26: IconData (e.g., CupertinoIcons.checkmark_alt_circle_fill)
+  /// - Android: IconData (e.g., Icons.check_circle)
+  ///
+  /// The [input] parameter enables a text input field in the alert.
+  /// When provided, the alert will include a text field for user input.
+  /// The returned Future will contain the entered text value (or null if empty).
+  static Future<String?> show({
     required BuildContext context,
     required String title,
     String? message,
     required List<AlertAction> actions,
-    String? icon,
+    dynamic icon,
     double? iconSize,
     Color? iconColor,
     String? oneTimeCode,
+    AdaptiveAlertDialogInput? input,
   }) {
     // iOS 26+ - Use native iOS 26 alert dialog
     if (PlatformInfo.isIOS26OrHigher()) {
-      return showCupertinoDialog<void>(
+      // Convert icon to String if needed for iOS 26 (expects SF Symbol)
+      String? iconString;
+      if (icon != null) {
+        if (icon is String) {
+          iconString = icon;
+        }
+        // If IconData is provided on iOS 26+, ignore it (iOS 26 uses SF Symbols)
+      }
+
+      return showCupertinoDialog<String?>(
         context: context,
         builder: (context) => IOS26AlertDialog(
           title: title,
           message: message,
           actions: actions,
-          icon: icon,
+          icon: iconString,
           iconSize: iconSize,
           iconColor: iconColor,
           oneTimeCode: oneTimeCode,
+          input: input,
         ),
       );
     }
 
-    // iOS 18 and below - Use CupertinoAlertDialog with custom content for OTP/icon
+    // iOS 18 and below - Use CupertinoAlertDialog with custom content for OTP/icon/textfield
     if (PlatformInfo.isIOS) {
-      return showCupertinoDialog<void>(
+      final textController = TextEditingController(text: input?.initialValue);
+
+      return showCupertinoDialog<String?>(
         context: context,
         builder: (context) {
           Widget? contentWidget;
 
-          // Build custom content if icon or OTP is present
-          if (icon != null || oneTimeCode != null) {
-            contentWidget = Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (icon != null && iconSize != null) ...[
-                  Icon(
-                    _getIconData(icon),
-                    size: iconSize,
-                    color: iconColor ?? CupertinoColors.systemBlue,
-                  ),
-                  const SizedBox(height: 8),
-                ],
-                if (message != null) ...[
-                  Text(
-                    message,
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 12),
-                ],
-                if (oneTimeCode != null) ...[
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: CupertinoColors.systemGrey6,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      oneTimeCode,
-                      style: const TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'Courier',
+          // Build custom content if icon, OTP, or textfield is present
+          if (icon != null ||
+              oneTimeCode != null ||
+              message != null ||
+              input != null) {
+            contentWidget = ConstrainedBox(
+              constraints: BoxConstraints(
+                minHeight: input != null ? 100 : 60,
+                maxHeight: 300,
+              ),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    if (icon != null &&
+                        icon is IconData &&
+                        iconSize != null) ...[
+                      Icon(
+                        icon,
+                        size: iconSize,
+                        color: iconColor ?? CupertinoColors.systemBlue,
                       ),
-                    ),
-                  ),
-                ],
-              ],
+                      const SizedBox(height: 8),
+                    ],
+                    if (message != null) ...[
+                      Text(
+                        message,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(fontSize: 13),
+                      ),
+                      const SizedBox(height: 12),
+                    ],
+                    if (oneTimeCode != null) ...[
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          color: CupertinoColors.systemGrey6,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          oneTimeCode,
+                          style: const TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'Courier',
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                    ],
+                    if (input != null) ...[
+                      CupertinoTextField(
+                        controller: textController,
+                        placeholder: input.placeholder,
+                        keyboardType: input.keyboardType,
+                        obscureText: input.obscureText,
+                        maxLength: input.maxLength,
+                        autofocus: true,
+                        padding: const EdgeInsets.all(12),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
             );
-          } else if (message != null) {
-            contentWidget = Text(message);
           }
 
           return CupertinoAlertDialog(
             title: Text(title),
-            content: contentWidget,
+            content: contentWidget != null
+                ? Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: contentWidget,
+                  )
+                : null,
             actions: actions.map((action) {
               return CupertinoDialogAction(
                 onPressed: () {
-                  Navigator.of(context).pop();
+                  final text = textController.text;
+                  Navigator.of(context).pop(text.isNotEmpty ? text : null);
                   action.onPressed();
                 },
                 isDefaultAction: action.style == AlertActionStyle.primary,
-                isDestructiveAction: action.style == AlertActionStyle.destructive,
+                isDestructiveAction:
+                    action.style == AlertActionStyle.destructive,
                 child: Text(action.title),
               );
             }).toList(),
@@ -144,33 +196,34 @@ class AdaptiveAlertDialog {
 
     // Android - Use Material Design AlertDialog with custom content
     if (PlatformInfo.isAndroid) {
-      return showDialog<void>(
+      final textController = TextEditingController(text: input?.initialValue);
+
+      return showDialog<String?>(
         context: context,
         builder: (context) {
-          // Build custom content if icon or OTP is present
+          // Build custom content if icon, OTP, or textfield is present
           Widget? contentWidget;
-          if (icon != null || oneTimeCode != null) {
+          if (icon != null ||
+              oneTimeCode != null ||
+              message != null ||
+              input != null) {
             contentWidget = Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                if (icon != null && iconSize != null) ...[
-                  Icon(
-                    _getIconData(icon),
-                    size: iconSize,
-                    color: iconColor ?? Colors.blue,
-                  ),
+                if (icon != null && icon is IconData && iconSize != null) ...[
+                  Icon(icon, size: iconSize, color: iconColor ?? Colors.blue),
                   const SizedBox(height: 12),
                 ],
                 if (message != null) ...[
-                  Text(
-                    message,
-                    textAlign: TextAlign.center,
-                  ),
+                  Text(message, textAlign: TextAlign.center),
                   const SizedBox(height: 16),
                 ],
                 if (oneTimeCode != null) ...[
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 12,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.grey.shade200,
                       borderRadius: BorderRadius.circular(8),
@@ -185,26 +238,36 @@ class AdaptiveAlertDialog {
                       ),
                     ),
                   ),
+                  const SizedBox(height: 16),
+                ],
+                if (input != null) ...[
+                  TextField(
+                    controller: textController,
+                    decoration: InputDecoration(
+                      hintText: input.placeholder,
+                      border: const OutlineInputBorder(),
+                    ),
+                    keyboardType: input.keyboardType,
+                    obscureText: input.obscureText,
+                    maxLength: input.maxLength,
+                  ),
                 ],
               ],
             );
-          } else if (message != null) {
-            contentWidget = Text(message);
           }
 
           // Separate actions by type
           final normalActions = actions
               .where((a) => a.style != AlertActionStyle.cancel)
               .toList();
-          final cancelAction = actions
-              .firstWhere(
-                (a) => a.style == AlertActionStyle.cancel,
-                orElse: () => AlertAction(
-                  title: 'Cancel',
-                  onPressed: () {},
-                  style: AlertActionStyle.cancel,
-                ),
-              );
+          final cancelAction = actions.firstWhere(
+            (a) => a.style == AlertActionStyle.cancel,
+            orElse: () => AlertAction(
+              title: 'Cancel',
+              onPressed: () {},
+              style: AlertActionStyle.cancel,
+            ),
+          );
 
           return AlertDialog(
             title: Text(title),
@@ -235,7 +298,10 @@ class AdaptiveAlertDialog {
                 return TextButton(
                   onPressed: action.enabled
                       ? () {
-                          Navigator.of(context).pop();
+                          final text = textController.text;
+                          Navigator.of(
+                            context,
+                          ).pop(text.isNotEmpty ? text : null);
                           action.onPressed();
                         }
                       : null,
@@ -248,7 +314,8 @@ class AdaptiveAlertDialog {
               if (actions.any((a) => a.style == AlertActionStyle.cancel))
                 TextButton(
                   onPressed: () {
-                    Navigator.of(context).pop();
+                    final text = textController.text;
+                    Navigator.of(context).pop(text.isNotEmpty ? text : null);
                     cancelAction.onPressed();
                   },
                   child: Text(cancelAction.title),
@@ -260,7 +327,7 @@ class AdaptiveAlertDialog {
     }
 
     // Fallback to CupertinoAlertDialog
-    return showCupertinoDialog<void>(
+    return showCupertinoDialog<String?>(
       context: context,
       builder: (context) => CupertinoAlertDialog(
         title: Text(title),
@@ -268,7 +335,7 @@ class AdaptiveAlertDialog {
         actions: actions.map((action) {
           return CupertinoDialogAction(
             onPressed: () {
-              Navigator.of(context).pop();
+              Navigator.of(context).pop(null);
               action.onPressed();
             },
             isDefaultAction: action.style == AlertActionStyle.defaultAction,

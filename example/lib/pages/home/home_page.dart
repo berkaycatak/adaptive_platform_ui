@@ -125,6 +125,15 @@ class _HomePageState extends State<HomePage> {
                 routeName: RouterService.routes.popupMenu,
               ),
               _DemoItem(
+                icon: PlatformInfo.isIOS
+                    ? CupertinoIcons.hand_raised_fill
+                    : Icons.touch_app,
+                title: 'Context Menu',
+                description: 'Long-press context menus with platform styles',
+                routeName: RouterService.routes.contextMenu,
+                isNew: true,
+              ),
+              _DemoItem(
                 icon: Icons.tune,
                 title: 'Slider',
                 description: 'Native sliders with adaptive styling',

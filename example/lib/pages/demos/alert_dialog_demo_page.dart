@@ -107,6 +107,38 @@ class AlertDialogDemoPage extends StatelessWidget {
         const SizedBox(height: 24),
         _buildSection(
           context,
+          title: 'Text Input Alerts',
+          items: [
+            _DemoItem(
+              title: 'Simple Text Input',
+              description: 'Alert with text field for user input',
+              onTap: () => _showTextInputAlert(context),
+            ),
+            _DemoItem(
+              title: 'Password Input',
+              description: 'Alert with secure text field',
+              onTap: () => _showPasswordInputAlert(context),
+            ),
+            _DemoItem(
+              title: 'Email Input',
+              description: 'Alert with email keyboard type',
+              onTap: () => _showEmailInputAlert(context),
+            ),
+            _DemoItem(
+              title: 'Phone Input',
+              description: 'Alert with phone keyboard type',
+              onTap: () => _showPhoneInputAlert(context),
+            ),
+            _DemoItem(
+              title: 'Limited Input',
+              description: 'Alert with max length constraint',
+              onTap: () => _showLimitedInputAlert(context),
+            ),
+          ],
+        ),
+        const SizedBox(height: 24),
+        _buildSection(
+          context,
           title: 'Complex Scenarios',
           items: [
             _DemoItem(
@@ -583,6 +615,168 @@ class AlertDialogDemoPage extends StatelessWidget {
           style: AlertActionStyle.cancel,
         ),
       ],
+    );
+  }
+
+  // Text Input Examples
+
+  void _showTextInputAlert(BuildContext context) async {
+    final result = await AdaptiveAlertDialog.show(
+      context: context,
+      title: 'Enter Your Name',
+      message: 'Please enter your full name below:',
+      input: const AdaptiveAlertDialogInput(
+        placeholder: 'Full Name',
+      ),
+      actions: [
+        AlertAction(
+          title: 'Submit',
+          onPressed: () {},
+          style: AlertActionStyle.primary,
+        ),
+        AlertAction(
+          title: 'Cancel',
+          onPressed: () {},
+          style: AlertActionStyle.cancel,
+        ),
+      ],
+    );
+
+    if (context.mounted && result != null && result.isNotEmpty) {
+      _showResultSnackbar(context, 'You entered: $result');
+    }
+  }
+
+  void _showPasswordInputAlert(BuildContext context) async {
+    final result = await AdaptiveAlertDialog.show(
+      context: context,
+      title: 'Enter Password',
+      message: 'Please enter your password to continue:',
+      icon: PlatformInfo.isIOS26OrHigher() ? 'lock.fill' : (PlatformInfo.isIOS ? CupertinoIcons.lock_fill : Icons.lock),
+      iconSize: 40,
+      iconColor: PlatformInfo.isIOS ? CupertinoColors.systemBlue : Colors.blue,
+      input: const AdaptiveAlertDialogInput(
+        placeholder: 'Password',
+        obscureText: true,
+      ),
+      actions: [
+        AlertAction(
+          title: 'Unlock',
+          onPressed: () {},
+          style: AlertActionStyle.primary,
+        ),
+        AlertAction(
+          title: 'Cancel',
+          onPressed: () {},
+          style: AlertActionStyle.cancel,
+        ),
+      ],
+    );
+
+    if (context.mounted && result != null && result.isNotEmpty) {
+      _showResultSnackbar(context, 'Password entered (${result.length} characters)');
+    }
+  }
+
+  void _showEmailInputAlert(BuildContext context) async {
+    final result = await AdaptiveAlertDialog.show(
+      context: context,
+      title: 'Enter Email',
+      message: 'Please provide your email address:',
+      icon: PlatformInfo.isIOS26OrHigher() ? 'envelope.fill' : (PlatformInfo.isIOS ? CupertinoIcons.mail_solid : Icons.email),
+      iconSize: 40,
+      iconColor: PlatformInfo.isIOS ? CupertinoColors.systemBlue : Colors.blue,
+      input: const AdaptiveAlertDialogInput(
+        placeholder: 'email@example.com',
+        keyboardType: TextInputType.emailAddress,
+      ),
+      actions: [
+        AlertAction(
+          title: 'Continue',
+          onPressed: () {},
+          style: AlertActionStyle.primary,
+        ),
+        AlertAction(
+          title: 'Cancel',
+          onPressed: () {},
+          style: AlertActionStyle.cancel,
+        ),
+      ],
+    );
+
+    if (context.mounted && result != null && result.isNotEmpty) {
+      _showResultSnackbar(context, 'Email: $result');
+    }
+  }
+
+  void _showPhoneInputAlert(BuildContext context) async {
+    final result = await AdaptiveAlertDialog.show(
+      context: context,
+      title: 'Enter Phone Number',
+      message: 'Please provide your phone number:',
+      icon: PlatformInfo.isIOS26OrHigher() ? 'phone.fill' : (PlatformInfo.isIOS ? CupertinoIcons.phone_fill : Icons.phone),
+      iconSize: 40,
+      iconColor: PlatformInfo.isIOS ? CupertinoColors.systemGreen : Colors.green,
+      input: const AdaptiveAlertDialogInput(
+        placeholder: '+1 234 567 8900',
+        keyboardType: TextInputType.phone,
+      ),
+      actions: [
+        AlertAction(
+          title: 'Save',
+          onPressed: () {},
+          style: AlertActionStyle.primary,
+        ),
+        AlertAction(
+          title: 'Cancel',
+          onPressed: () {},
+          style: AlertActionStyle.cancel,
+        ),
+      ],
+    );
+
+    if (context.mounted && result != null && result.isNotEmpty) {
+      _showResultSnackbar(context, 'Phone: $result');
+    }
+  }
+
+  void _showLimitedInputAlert(BuildContext context) async {
+    final result = await AdaptiveAlertDialog.show(
+      context: context,
+      title: 'Enter Code',
+      message: 'Please enter the 6-digit verification code:',
+      icon: PlatformInfo.isIOS26OrHigher() ? 'number.circle.fill' : (PlatformInfo.isIOS ? CupertinoIcons.number_circle_fill : Icons.pin),
+      iconSize: 40,
+      iconColor: PlatformInfo.isIOS ? CupertinoColors.systemOrange : Colors.orange,
+      input: const AdaptiveAlertDialogInput(
+        placeholder: '000000',
+        keyboardType: TextInputType.number,
+        maxLength: 6,
+      ),
+      actions: [
+        AlertAction(
+          title: 'Verify',
+          onPressed: () {},
+          style: AlertActionStyle.primary,
+        ),
+        AlertAction(
+          title: 'Cancel',
+          onPressed: () {},
+          style: AlertActionStyle.cancel,
+        ),
+      ],
+    );
+
+    if (context.mounted && result != null && result.isNotEmpty) {
+      _showResultSnackbar(context, 'Code: $result');
+    }
+  }
+
+  void _showResultSnackbar(BuildContext context, String message) {
+    AdaptiveSnackBar.show(
+      context,
+      message: message,
+      type: AdaptiveSnackBarType.success,
     );
   }
 }

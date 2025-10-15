@@ -7,6 +7,7 @@ import 'package:adaptive_platform_ui_example/pages/demos/badge_demo_page.dart';
 import 'package:adaptive_platform_ui_example/pages/demos/button_demo_page.dart';
 import 'package:adaptive_platform_ui_example/pages/demos/card_demo_page.dart';
 import 'package:adaptive_platform_ui_example/pages/demos/checkbox_demo_page.dart';
+import 'package:adaptive_platform_ui_example/pages/demos/context_menu_demo_page.dart';
 import 'package:adaptive_platform_ui_example/pages/demos/demo_tabbar_page.dart';
 import 'package:adaptive_platform_ui_example/pages/demos/native_search_tab_demo_page.dart';
 import 'package:adaptive_platform_ui_example/pages/demos/popup_menu_demo_page.dart';
@@ -120,6 +121,11 @@ class RouterService {
                     name: routes.popupMenu,
                     path: routes.popupMenu,
                     builder: (context, state) => const PopupMenuDemoPage(),
+                  ),
+                  GoRoute(
+                    name: routes.contextMenu,
+                    path: routes.contextMenu,
+                    builder: (context, state) => const ContextMenuDemoPage(),
                   ),
                   GoRoute(
                     name: routes.slider,
