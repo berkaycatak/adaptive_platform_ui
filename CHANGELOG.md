@@ -1,7 +1,8 @@
 # Changelog
 
 ## 0.1.92
-* 
+* AdaptiveSegmentedControl now renders icons directly based on platform.
+* Maintained existing height, padding, and shrinkWrap behavior.
 
 ## 0.1.91
 * Enhance AdaptivePopupMenuButton to support dynamic icon types for iOS and Android
