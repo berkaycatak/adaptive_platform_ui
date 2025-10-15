@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.1.7+1
+  * Updated README.md
+
 ## 0.1.7
 * **NEW**: Added `AdaptiveAppBar` class for cleaner app bar configuration
   * Centralized app bar configuration with `appBar` parameter in `AdaptiveScaffold`
