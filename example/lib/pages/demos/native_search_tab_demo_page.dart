@@ -39,7 +39,7 @@ class _NativeSearchTabDemoPageState extends State<NativeSearchTabDemoPage> {
   @override
   Widget build(BuildContext context) {
     return AdaptiveScaffold(
-      title: 'Native Search Tab (iOS 26+)',
+      appBar: AdaptiveAppBar(title: 'Native Search Tab (iOS 26+)'),
       body: _buildContent(),
     );
   }

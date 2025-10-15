@@ -61,7 +61,18 @@ class _DemoTabbarPageState extends State<DemoTabbarPage> {
     }
 
     return AdaptiveScaffold(
-      title: 'Tabbar Demos',
+      appBar: AdaptiveAppBar(
+        title: 'Tabbar Demos',
+        actions: [
+          AdaptiveAppBarAction(onPressed: () {}, title: "Title"),
+          AdaptiveAppBarAction(
+            onPressed: () {},
+            androidIcon: Icons.info,
+            iosSymbol: "info.circle",
+          ),
+        ],
+      ),
+
       selectedIndex: _selectedIndex,
       onDestinationSelected: (index) {
         setState(() {
@@ -71,14 +82,7 @@ class _DemoTabbarPageState extends State<DemoTabbarPage> {
           _selectedIndex = index;
         });
       },
-      actions: [
-        AdaptiveAppBarAction(onPressed: () {}, title: "Title"),
-        AdaptiveAppBarAction(
-          onPressed: () {},
-          androidIcon: Icons.info,
-          iosSymbol: "info.circle",
-        ),
-      ],
+
       destinations: [
         AdaptiveNavigationDestination(
           icon: PlatformInfo.isIOS26OrHigher()

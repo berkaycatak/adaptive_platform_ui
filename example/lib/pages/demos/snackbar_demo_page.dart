@@ -8,7 +8,7 @@ class SnackbarDemoPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AdaptiveScaffold(
-      title: 'Snackbar Demo',
+      appBar: AdaptiveAppBar(title: 'Snackbar Demo'),
       body: SafeArea(
         bottom: false,
         child: ListView(

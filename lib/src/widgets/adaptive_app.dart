@@ -154,10 +154,32 @@ class AdaptiveApp extends StatelessWidget {
   final RouteInformationProvider? routeInformationProvider;
   final RouteInformationParser<Object>? routeInformationParser;
   final RouterDelegate<Object>? routerDelegate;
+
+  /// A delegate that decides how to respond to the Android back button
+  ///
+  /// Only used when [routerDelegate] is provided (router mode).
+  /// See [BackButtonDispatcher] for more details.
   final BackButtonDispatcher? backButtonDispatcher;
 
   // Common properties
+
+  /// A builder that wraps the navigator or router
+  ///
+  /// Used to insert widgets above the navigator but below the routes.
+  /// This is useful for adding overlays, notifications, or other widgets
+  /// that should appear on all pages.
+  ///
+  /// Example:
+  /// ```dart
+  /// builder: (context, child) {
+  ///   return MediaQuery(
+  ///     data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+  ///     child: child!,
+  ///   );
+  /// }
+  /// ```
   final TransitionBuilder? builder;
+
   final String title;
   final GenerateAppTitle? onGenerateTitle;
 
@@ -165,7 +187,21 @@ class AdaptiveApp extends StatelessWidget {
   final ThemeMode? themeMode;
   final ThemeData? materialLightTheme;
   final ThemeData? materialDarkTheme;
+
+  /// The light theme for iOS (CupertinoApp)
+  ///
+  /// This theme is used when [themeMode] is [ThemeMode.light] or when
+  /// the system is in light mode and [themeMode] is [ThemeMode.system].
+  ///
+  /// Defaults to [CupertinoThemeData] with [Brightness.light].
   final CupertinoThemeData? cupertinoLightTheme;
+
+  /// The dark theme for iOS (CupertinoApp)
+  ///
+  /// This theme is used when [themeMode] is [ThemeMode.dark] or when
+  /// the system is in dark mode and [themeMode] is [ThemeMode.system].
+  ///
+  /// Defaults to [CupertinoThemeData] with [Brightness.dark].
   final CupertinoThemeData? cupertinoDarkTheme;
 
   // Localization properties
@@ -177,6 +213,21 @@ class AdaptiveApp extends StatelessWidget {
 
   // Platform-specific configuration callbacks
   final MaterialAppData Function(BuildContext, PlatformTarget)? material;
+
+  /// Platform-specific configuration callback for iOS (CupertinoApp)
+  ///
+  /// This callback is called when building the CupertinoApp and allows
+  /// you to provide platform-specific configuration options.
+  ///
+  /// Example:
+  /// ```dart
+  /// cupertino: (context, platform) {
+  ///   return CupertinoAppData(
+  ///     color: CupertinoColors.systemBlue,
+  ///     showPerformanceOverlay: true,
+  ///   );
+  /// }
+  /// ```
   final CupertinoAppData Function(BuildContext, PlatformTarget)? cupertino;
 
   @override

@@ -35,6 +35,7 @@ export 'src/style/sf_symbol.dart';
 
 // Widgets
 export 'src/widgets/adaptive_app.dart';
+export 'src/widgets/adaptive_app_bar.dart';
 export 'src/widgets/adaptive_button.dart';
 export 'src/widgets/adaptive_switch.dart';
 export 'src/widgets/adaptive_checkbox.dart';

@@ -9,7 +9,7 @@ class AlertDialogDemoPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AdaptiveScaffold(
-      title: 'Alert Dialog',
+      appBar: AdaptiveAppBar(title: 'Alert Dialog'),
       destinations: [],
       selectedIndex: null,
       onDestinationSelected: (int value) {},
@@ -161,7 +161,8 @@ class AlertDialogDemoPage extends StatelessWidget {
 
   Widget _buildDemoItem(BuildContext context, _DemoItem item) {
     if (PlatformInfo.isIOS) {
-      final isDark = MediaQuery.platformBrightnessOf(context) == Brightness.dark;
+      final isDark =
+          MediaQuery.platformBrightnessOf(context) == Brightness.dark;
 
       return Container(
         margin: const EdgeInsets.only(bottom: 12),

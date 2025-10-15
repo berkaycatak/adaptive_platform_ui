@@ -1,5 +1,39 @@
 # Changelog
 
+## 0.1.7
+* **NEW**: Added `AdaptiveAppBar` class for cleaner app bar configuration
+  * Centralized app bar configuration with `appBar` parameter in `AdaptiveScaffold`
+  * Replaces individual `title`, `actions`, `leading`, `useNativeToolbar` parameters
+  * If `appBar` is null, no app bar or toolbar will be shown
+* **NEW**: Added custom navigation bar support via `AdaptiveAppBar`
+  * `cupertinoNavigationBar` parameter: Provide custom `CupertinoNavigationBar` for iOS
+  * `appBar` parameter: Provide custom `AppBar` for Android
+  * Custom navigation bars take priority over auto-generated ones
+* **IMPORTANT**: `useNativeToolbar` priority behavior on iOS
+  * When `useNativeToolbar: true`: Native iOS 26 toolbar is shown, custom `cupertinoNavigationBar` is ignored
+  * When `useNativeToolbar: false` or not set: Custom `cupertinoNavigationBar` is used if provided
+* **BREAKING CHANGE**: `AdaptiveScaffold` parameters refactored
+  * Removed: Direct `title`, `actions`, `leading`, `useNativeToolbar` parameters
+  * Added: Single `appBar` parameter of type `AdaptiveAppBar?`
+  * Migration: Wrap existing parameters in `AdaptiveAppBar()`
+  ```dart
+  // Before
+  AdaptiveScaffold(
+    title: 'My App',
+    actions: [...],
+    useNativeToolbar: true,
+  )
+
+  // After
+  AdaptiveScaffold(
+    appBar: AdaptiveAppBar(
+      title: 'My App',
+      actions: [...],
+      useNativeToolbar: true,
+    ),
+  )
+  ```
+
 ## 0.1.6
 * **NEW**: Added `AdaptivePopupMenuButton.widget()` constructor for custom widget support
   * iOS <26: GestureDetector with CupertinoActionSheet fallback

@@ -81,9 +81,12 @@ class AdaptiveRadio<T> extends StatelessWidget {
 
     // Android - Use Material Design Radio
     if (PlatformInfo.isAndroid) {
+      // ignore: deprecated_member_use
       return Radio<T>(
         value: value,
+        // ignore: deprecated_member_use
         groupValue: groupValue,
+        // ignore: deprecated_member_use
         onChanged: onChanged,
         activeColor: activeColor,
         focusColor: focusColor,
@@ -93,9 +96,12 @@ class AdaptiveRadio<T> extends StatelessWidget {
     }
 
     // Fallback for other platforms (web, desktop, etc.)
+    // ignore: deprecated_member_use
     return Radio<T>(
       value: value,
+      // ignore: deprecated_member_use
       groupValue: groupValue,
+      // ignore: deprecated_member_use
       onChanged: onChanged,
       activeColor: activeColor,
       focusColor: focusColor,

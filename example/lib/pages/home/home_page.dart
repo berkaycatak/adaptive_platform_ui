@@ -24,31 +24,32 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return AdaptiveScaffold(
-      useNativeToolbar: true,
-      title: "Adaptive Platform UI",
-      actions: [
-        AdaptiveAppBarAction(
-          onPressed: () {
-            RouterService.goNamed(
-              context: context,
-              route: RouterService.routes.info,
-            );
-          },
-          iosSymbol: "info.circle",
-          androidIcon: CupertinoIcons.info_circle,
-        ),
-
-        AdaptiveAppBarAction(
-          onPressed: () {
-            RouterService.goNamed(
-              context: context,
-              route: RouterService.routes.info,
-            );
-          },
-          iosSymbol: "info.circle",
-          androidIcon: CupertinoIcons.info_circle,
-        ),
-      ],
+      appBar: AdaptiveAppBar(
+        title: "Adaptive Platform UI",
+        useNativeToolbar: true,
+        actions: [
+          AdaptiveAppBarAction(
+            onPressed: () {
+              RouterService.goNamed(
+                context: context,
+                route: RouterService.routes.info,
+              );
+            },
+            iosSymbol: "info.circle",
+            androidIcon: CupertinoIcons.info_circle,
+          ),
+          AdaptiveAppBarAction(
+            onPressed: () {
+              RouterService.goNamed(
+                context: context,
+                route: RouterService.routes.info,
+              );
+            },
+            iosSymbol: "info.circle",
+            androidIcon: CupertinoIcons.info_circle,
+          ),
+        ],
+      ),
       body: _buildBody(context),
     );
   }

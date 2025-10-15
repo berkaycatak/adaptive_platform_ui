@@ -21,7 +21,7 @@ class _InfoPageState extends State<InfoPage> {
     final isDark = brightness == Brightness.dark;
 
     return AdaptiveScaffold(
-      title: "Info",
+      appBar: AdaptiveAppBar(title: "Info"),
       body: SafeArea(
         bottom: false,
         child: ListView(

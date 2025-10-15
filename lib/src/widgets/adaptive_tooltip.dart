@@ -94,7 +94,7 @@ class AdaptiveTooltip extends StatelessWidget {
       verticalOffset: verticalOffset,
       padding: padding,
       margin: margin,
-      height: height,
+      constraints: height != null ? BoxConstraints(minHeight: height!, maxHeight: height!) : null,
       decoration: decoration,
       textStyle: textStyle,
       waitDuration: waitDuration,

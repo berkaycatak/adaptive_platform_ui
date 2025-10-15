@@ -3,7 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import '../platform/platform_info.dart';
 import '../style/sf_symbol.dart';
-import 'adaptive_app_bar_action.dart';
+import 'adaptive_app_bar.dart';
 import 'adaptive_button.dart';
 import 'ios26/ios26_scaffold.dart';
 
@@ -49,18 +49,19 @@ enum TabBarMinimizeBehavior {
 class AdaptiveScaffold extends StatefulWidget {
   const AdaptiveScaffold({
     super.key,
+    this.appBar,
     this.destinations,
     this.selectedIndex,
     this.onDestinationSelected,
     this.body,
-    this.title,
-    this.actions,
-    this.leading,
     this.floatingActionButton,
     this.minimizeBehavior = TabBarMinimizeBehavior.automatic,
     this.enableBlur = true,
-    this.useNativeToolbar = true,
   });
+
+  /// App bar configuration
+  /// If null, no app bar or toolbar will be shown
+  final AdaptiveAppBar? appBar;
 
   /// Navigation destinations for bottom navigation bar
   /// If null, no bottom navigation will be shown
@@ -77,18 +78,6 @@ class AdaptiveScaffold extends StatefulWidget {
   /// Body widget
   final Widget? body;
 
-  /// Title for the navigation bar
-  final String? title;
-
-  /// Action buttons in the navigation bar
-  /// - iOS 26+: Rendered as native UIBarButtonItem in UIToolbar
-  /// - iOS < 26: Rendered as buttons in CupertinoNavigationBar
-  /// - Android: Rendered as IconButtons in Material AppBar
-  final List<AdaptiveAppBarAction>? actions;
-
-  /// Leading widget in the navigation bar (e.g., back button)
-  final Widget? leading;
-
   /// Floating action button (Material only)
   final Widget? floatingActionButton;
 
@@ -100,11 +89,6 @@ class AdaptiveScaffold extends StatefulWidget {
   /// When enabled, content behind the tab bar will be blurred
   final bool enableBlur;
 
-  /// Use native iOS 26 toolbar (iOS 26+ only)
-  /// When false (default), uses CupertinoNavigationBar for better compatibility
-  /// When true, uses native iOS 26 UIToolbar with Liquid Glass effect
-  final bool useNativeToolbar;
-
   @override
   State<AdaptiveScaffold> createState() => _AdaptiveScaffoldState();
 }
@@ -114,8 +98,10 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
 
   @override
   Widget build(BuildContext context) {
+    final useNativeToolbar = widget.appBar?.useNativeToolbar ?? false;
+
     // iOS 26+ with native toolbar enabled - Use IOS26Scaffold
-    if (PlatformInfo.isIOS26OrHigher() && widget.useNativeToolbar) {
+    if (PlatformInfo.isIOS26OrHigher() && useNativeToolbar) {
       // For GoRouter compatibility: Use body directly if it's StatefulNavigationShell
       // Otherwise replicate body for each destination
       List<Widget> childrenList;
@@ -147,9 +133,9 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
         destinations: widget.destinations ?? [],
         selectedIndex: widget.selectedIndex ?? 0,
         onDestinationSelected: widget.onDestinationSelected ?? (_) {},
-        title: widget.title,
-        actions: widget.actions,
-        leading: widget.leading,
+        title: widget.appBar?.title,
+        actions: widget.appBar?.actions,
+        leading: widget.appBar?.leading,
         minimizeBehavior: widget.minimizeBehavior,
         enableBlur: widget.enableBlur,
         children: childrenList,
@@ -160,10 +146,10 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
     // Use CupertinoPageScaffold with CupertinoTabBar if destinations provided
     if (PlatformInfo.isIOS) {
       // Auto back button for iOS 26+ when useNativeToolbar is false
-      Widget? effectiveLeading = widget.leading;
+      Widget? effectiveLeading = widget.appBar?.leading;
       if (PlatformInfo.isIOS26OrHigher() &&
-          !widget.useNativeToolbar &&
-          widget.leading == null &&
+          !useNativeToolbar &&
+          widget.appBar?.leading == null &&
           (widget.destinations == null || widget.destinations!.isEmpty)) {
         // Check if we can pop AND this is the current route (to prevent showing on previous page during transition)
         final canPop = Navigator.maybeOf(context)?.canPop() ?? false;
@@ -187,44 +173,52 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
           widget.selectedIndex != null &&
           widget.onDestinationSelected != null) {
         // Tab-based navigation
-        // If no title, actions, or leading, skip navigationBar to avoid nested CupertinoPageScaffold issues
-        final hasNavigationBar =
-            widget.title != null ||
-            (widget.actions != null && widget.actions!.isNotEmpty) ||
-            effectiveLeading != null;
+
+        // Determine which navigation bar to use
+        ObstructingPreferredSizeWidget? navigationBar;
+
+        // Priority 1: Custom CupertinoNavigationBar (if provided and useNativeToolbar is false)
+        if (widget.appBar?.cupertinoNavigationBar != null) {
+          navigationBar = widget.appBar!.cupertinoNavigationBar as ObstructingPreferredSizeWidget;
+        }
+        // Priority 2: Build from title, actions, leading (if appBar has content)
+        else if (widget.appBar != null &&
+            (widget.appBar!.title != null ||
+                (widget.appBar!.actions != null && widget.appBar!.actions!.isNotEmpty) ||
+                effectiveLeading != null)) {
+          navigationBar = CupertinoNavigationBar(
+            automaticallyImplyLeading: PlatformInfo.isIOS26OrHigher()
+                ? false
+                : true, // Let CupertinoNavigationBar handle back button for iOS < 26
+            middle: widget.appBar!.title != null ? Text(widget.appBar!.title!) : null,
+            trailing: widget.appBar!.actions != null && widget.appBar!.actions!.isNotEmpty
+                ? Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: widget.appBar!.actions!.map((action) {
+                      Widget actionChild;
+                      if (action.title != null) {
+                        actionChild = Text(action.title!);
+                      } else if (action.iosSymbol != null) {
+                        actionChild = Icon(
+                          _sfSymbolToCupertinoIcon(action.iosSymbol!),
+                        );
+                      } else {
+                        actionChild = const Icon(CupertinoIcons.circle);
+                      }
+                      return CupertinoButton(
+                        padding: EdgeInsets.zero,
+                        onPressed: action.onPressed,
+                        child: actionChild,
+                      );
+                    }).toList(),
+                  )
+                : null,
+            leading: effectiveLeading,
+          );
+        }
 
         return CupertinoPageScaffold(
-          navigationBar: hasNavigationBar
-              ? CupertinoNavigationBar(
-                  automaticallyImplyLeading: PlatformInfo.isIOS26OrHigher()
-                      ? false
-                      : true, // Let CupertinoNavigationBar handle back button for iOS < 26
-                  middle: widget.title != null ? Text(widget.title!) : null,
-                  trailing: widget.actions != null && widget.actions!.isNotEmpty
-                      ? Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: widget.actions!.map((action) {
-                            Widget actionChild;
-                            if (action.title != null) {
-                              actionChild = Text(action.title!);
-                            } else if (action.iosSymbol != null) {
-                              actionChild = Icon(
-                                _sfSymbolToCupertinoIcon(action.iosSymbol!),
-                              );
-                            } else {
-                              actionChild = const Icon(CupertinoIcons.circle);
-                            }
-                            return CupertinoButton(
-                              padding: EdgeInsets.zero,
-                              onPressed: action.onPressed,
-                              child: actionChild,
-                            );
-                          }).toList(),
-                        )
-                      : null,
-                  leading: effectiveLeading,
-                )
-              : null,
+          navigationBar: navigationBar,
           child: Column(
             children: [
               Expanded(
@@ -275,23 +269,28 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
       }
 
       // Simple page without tabs
-      // If no title, actions, or leading, just return body to avoid nested CupertinoPageScaffold
-      if (widget.title == null &&
-          (widget.actions == null || widget.actions!.isEmpty) &&
-          effectiveLeading == null) {
-        return widget.body ?? const SizedBox.shrink();
-      }
 
-      return CupertinoPageScaffold(
-        navigationBar: CupertinoNavigationBar(
+      // Determine which navigation bar to use
+      ObstructingPreferredSizeWidget? navigationBar;
+
+      // Priority 1: Custom CupertinoNavigationBar (if provided and useNativeToolbar is false)
+      if (widget.appBar?.cupertinoNavigationBar != null) {
+        navigationBar = widget.appBar!.cupertinoNavigationBar as ObstructingPreferredSizeWidget;
+      }
+      // Priority 2: Build from title, actions, leading (if appBar has content)
+      else if (widget.appBar != null &&
+          (widget.appBar!.title != null ||
+              (widget.appBar!.actions != null && widget.appBar!.actions!.isNotEmpty) ||
+              effectiveLeading != null)) {
+        navigationBar = CupertinoNavigationBar(
           automaticallyImplyLeading: PlatformInfo.isIOS26OrHigher()
               ? false
-              : true, // Let CupertinoNavigationBar handle back button for iOS < 26,
-          middle: widget.title != null ? Text(widget.title!) : null,
-          trailing: widget.actions != null && widget.actions!.isNotEmpty
+              : true, // Let CupertinoNavigationBar handle back button for iOS < 26
+          middle: widget.appBar!.title != null ? Text(widget.appBar!.title!) : null,
+          trailing: widget.appBar!.actions != null && widget.appBar!.actions!.isNotEmpty
               ? Row(
                   mainAxisSize: MainAxisSize.min,
-                  children: widget.actions!.map((action) {
+                  children: widget.appBar!.actions!.map((action) {
                     Widget actionChild;
                     if (action.title != null) {
                       actionChild = Text(action.title!);
@@ -311,7 +310,16 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
                 )
               : null,
           leading: effectiveLeading,
-        ),
+        );
+      }
+
+      // If no navigation bar, just return body
+      if (navigationBar == null) {
+        return widget.body ?? const SizedBox.shrink();
+      }
+
+      return CupertinoPageScaffold(
+        navigationBar: navigationBar,
         child: widget.body ?? const SizedBox.shrink(),
       );
     }
@@ -322,32 +330,41 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
         widget.selectedIndex != null &&
         widget.onDestinationSelected != null) {
       // Tab-based navigation
-      final hasAppBar =
-          widget.title != null ||
-          (widget.actions != null && widget.actions!.isNotEmpty) ||
-          widget.leading != null;
+
+      // Determine which app bar to use
+      PreferredSizeWidget? appBar;
+
+      // Priority 1: Custom AppBar (if provided)
+      if (widget.appBar?.appBar != null) {
+        appBar = widget.appBar!.appBar;
+      }
+      // Priority 2: Build from title, actions, leading (if appBar has content)
+      else if (widget.appBar != null &&
+          (widget.appBar!.title != null ||
+              (widget.appBar!.actions != null && widget.appBar!.actions!.isNotEmpty) ||
+              widget.appBar!.leading != null)) {
+        appBar = AppBar(
+          title: widget.appBar!.title != null ? Text(widget.appBar!.title!) : null,
+          actions: widget.appBar!.actions?.map((action) {
+            if (action.title != null) {
+              return TextButton(
+                onPressed: action.onPressed,
+                child: Text(action.title!),
+              );
+            }
+            return IconButton(
+              icon: action.androidIcon != null
+                  ? Icon(action.androidIcon!)
+                  : const Icon(Icons.circle),
+              onPressed: action.onPressed,
+            );
+          }).toList(),
+          leading: widget.appBar!.leading,
+        );
+      }
 
       return Scaffold(
-        appBar: hasAppBar
-            ? AppBar(
-                title: widget.title != null ? Text(widget.title!) : null,
-                actions: widget.actions?.map((action) {
-                  if (action.title != null) {
-                    return TextButton(
-                      onPressed: action.onPressed,
-                      child: Text(action.title!),
-                    );
-                  }
-                  return IconButton(
-                    icon: action.androidIcon != null
-                        ? Icon(action.androidIcon!)
-                        : const Icon(Icons.circle),
-                    onPressed: action.onPressed,
-                  );
-                }).toList(),
-                leading: widget.leading,
-              )
-            : null,
+        appBar: appBar,
         body: widget.body ?? const SizedBox.shrink(),
         bottomNavigationBar: NavigationBar(
           selectedIndex: widget.selectedIndex!,
@@ -367,17 +384,22 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
     }
 
     // Simple page without tabs
-    // If no title, actions, or leading, just return body to avoid nested Scaffold
-    if (widget.title == null &&
-        (widget.actions == null || widget.actions!.isEmpty) &&
-        widget.leading == null) {
-      return widget.body ?? const SizedBox.shrink();
-    }
 
-    return Scaffold(
-      appBar: AppBar(
-        title: widget.title != null ? Text(widget.title!) : null,
-        actions: widget.actions?.map((action) {
+    // Determine which app bar to use
+    PreferredSizeWidget? appBar;
+
+    // Priority 1: Custom AppBar (if provided)
+    if (widget.appBar?.appBar != null) {
+      appBar = widget.appBar!.appBar;
+    }
+    // Priority 2: Build from title, actions, leading (if appBar has content)
+    else if (widget.appBar != null &&
+        (widget.appBar!.title != null ||
+            (widget.appBar!.actions != null && widget.appBar!.actions!.isNotEmpty) ||
+            widget.appBar!.leading != null)) {
+      appBar = AppBar(
+        title: widget.appBar!.title != null ? Text(widget.appBar!.title!) : null,
+        actions: widget.appBar!.actions?.map((action) {
           if (action.title != null) {
             return TextButton(
               onPressed: action.onPressed,
@@ -391,8 +413,17 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
             onPressed: action.onPressed,
           );
         }).toList(),
-        leading: widget.leading,
-      ),
+        leading: widget.appBar!.leading,
+      );
+    }
+
+    // If no app bar, just return body
+    if (appBar == null) {
+      return widget.body ?? const SizedBox.shrink();
+    }
+
+    return Scaffold(
+      appBar: appBar,
       body: widget.body ?? const SizedBox.shrink(),
       floatingActionButton: widget.floatingActionButton,
     );

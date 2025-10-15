@@ -16,7 +16,10 @@ class _BadgeDemoPageState extends State<BadgeDemoPage> {
 
   @override
   Widget build(BuildContext context) {
-    return AdaptiveScaffold(title: 'AdaptiveBadge Demo', body: _buildContent());
+    return AdaptiveScaffold(
+      appBar: const AdaptiveAppBar(title: 'AdaptiveBadge Demo'),
+      body: _buildContent(),
+    );
   }
 
   Widget _buildContent() {

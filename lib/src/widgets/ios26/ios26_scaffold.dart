@@ -120,6 +120,12 @@ class _IOS26ScaffoldState extends State<IOS26Scaffold>
       };
     }
 
+    // Determine if toolbar should be shown
+    final hasToolbarContent = widget.title != null ||
+        widget.leading != null ||
+        leadingText != null ||
+        (widget.actions != null && widget.actions!.isNotEmpty);
+
     // Build the stack content
     final stackContent = Stack(
       children: [
@@ -134,27 +140,28 @@ class _IOS26ScaffoldState extends State<IOS26Scaffold>
             sizing: StackFit.expand,
             children: widget.children,
           ),
-        // Top toolbar - iOS 26 Liquid Glass style
-        Positioned(
-          left: 0,
-          right: 0,
-          top: 0,
-          child: IOS26NativeToolbar(
-            title: widget.title,
-            leading: widget.leading, // Custom leading widget has priority
-            leadingText: leadingText,
-            actions: widget.actions,
-            onLeadingTap: leadingCallback,
-            onActionTap: (index) {
-              // Call the appropriate action callback
-              if (widget.actions != null &&
-                  index >= 0 &&
-                  index < widget.actions!.length) {
-                widget.actions![index].onPressed();
-              }
-            },
+        // Top toolbar - iOS 26 Liquid Glass style - only show if there's content
+        if (hasToolbarContent)
+          Positioned(
+            left: 0,
+            right: 0,
+            top: 0,
+            child: IOS26NativeToolbar(
+              title: widget.title,
+              leading: widget.leading, // Custom leading widget has priority
+              leadingText: leadingText,
+              actions: widget.actions,
+              onLeadingTap: leadingCallback,
+              onActionTap: (index) {
+                // Call the appropriate action callback
+                if (widget.actions != null &&
+                    index >= 0 &&
+                    index < widget.actions!.length) {
+                  widget.actions![index].onPressed();
+                }
+              },
+            ),
           ),
-        ),
         // Tab bar - only show if destinations exist
         if (widget.destinations.isNotEmpty)
           Positioned(

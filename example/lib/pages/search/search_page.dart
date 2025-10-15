@@ -21,7 +21,7 @@ class _SearchPageState extends State<SearchPage> {
   @override
   Widget build(BuildContext context) {
     return AdaptiveScaffold(
-      title: 'Search',
+      appBar: AdaptiveAppBar(title: 'Search'),
 
       body: Center(child: Text("Search Page")),
     );

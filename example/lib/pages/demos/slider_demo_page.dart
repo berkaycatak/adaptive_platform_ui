@@ -19,7 +19,7 @@ class _SliderDemoPageState extends State<SliderDemoPage> {
   @override
   Widget build(BuildContext context) {
     return AdaptiveScaffold(
-      title: 'AdaptiveSlider Demo',
+      appBar: AdaptiveAppBar(title: 'AdaptiveSlider Demo'),
       body: _buildContent(),
     );
   }
@@ -44,9 +44,10 @@ class _SliderDemoPageState extends State<SliderDemoPage> {
                 'Value: ${_basicValue.toStringAsFixed(2)}',
                 style: TextStyle(
                   color: PlatformInfo.isIOS
-                      ? (MediaQuery.platformBrightnessOf(context) == Brightness.dark
-                          ? CupertinoColors.systemGrey
-                          : CupertinoColors.systemGrey2)
+                      ? (MediaQuery.platformBrightnessOf(context) ==
+                                Brightness.dark
+                            ? CupertinoColors.systemGrey
+                            : CupertinoColors.systemGrey2)
                       : (isDark ? Colors.grey[400] : Colors.grey[700]),
                 ),
               ),
@@ -95,9 +96,10 @@ class _SliderDemoPageState extends State<SliderDemoPage> {
                 'Value: ${_rangeValue.toStringAsFixed(0)}',
                 style: TextStyle(
                   color: PlatformInfo.isIOS
-                      ? (MediaQuery.platformBrightnessOf(context) == Brightness.dark
-                          ? CupertinoColors.systemGrey
-                          : CupertinoColors.systemGrey2)
+                      ? (MediaQuery.platformBrightnessOf(context) ==
+                                Brightness.dark
+                            ? CupertinoColors.systemGrey
+                            : CupertinoColors.systemGrey2)
                       : (isDark ? Colors.grey[400] : Colors.grey[700]),
                 ),
               ),
@@ -121,8 +123,8 @@ class _SliderDemoPageState extends State<SliderDemoPage> {
             fontWeight: FontWeight.bold,
             color: PlatformInfo.isIOS
                 ? (MediaQuery.platformBrightnessOf(context) == Brightness.dark
-                    ? CupertinoColors.white
-                    : CupertinoColors.black)
+                      ? CupertinoColors.white
+                      : CupertinoColors.black)
                 : (isDark ? Colors.white : Colors.black87),
           ),
         ),

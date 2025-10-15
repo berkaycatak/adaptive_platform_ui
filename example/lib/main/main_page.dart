@@ -21,7 +21,6 @@ class _MainPageState extends State<MainPage> {
       children: [
         AdaptiveScaffold(
           minimizeBehavior: TabBarMinimizeBehavior.automatic,
-          useNativeToolbar: false,
           body: widget.navigationShell,
           selectedIndex: widget.navigationShell.currentIndex,
           onDestinationSelected: (index) =>

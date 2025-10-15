@@ -20,7 +20,7 @@ class _SwitchDemoPageState extends State<SwitchDemoPage> {
   @override
   Widget build(BuildContext context) {
     return AdaptiveScaffold(
-      title: 'AdaptiveSwitch Demo',
+      appBar: AdaptiveAppBar(title: 'AdaptiveSwitch Demo'),
       body: _buildContent(),
     );
   }

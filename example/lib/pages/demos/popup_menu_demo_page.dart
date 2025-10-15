@@ -16,7 +16,7 @@ class _PopupMenuDemoPageState extends State<PopupMenuDemoPage> {
   @override
   Widget build(BuildContext context) {
     return AdaptiveScaffold(
-      title: 'Popup Menu Demo',
+      appBar: AdaptiveAppBar(title: 'Popup Menu Demo'),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: _buildContent(),

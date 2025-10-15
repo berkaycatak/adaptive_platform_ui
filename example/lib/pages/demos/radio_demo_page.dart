@@ -24,7 +24,7 @@ class _RadioDemoPageState extends State<RadioDemoPage> {
   @override
   Widget build(BuildContext context) {
     return AdaptiveScaffold(
-      title: 'AdaptiveRadio Demo',
+      appBar: AdaptiveAppBar(title: 'AdaptiveRadio Demo'),
       body: _buildContent(),
     );
   }
@@ -138,10 +138,7 @@ class _RadioDemoPageState extends State<RadioDemoPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Notification Settings',
-                  style: _getTitleStyle(context),
-                ),
+                Text('Notification Settings', style: _getTitleStyle(context)),
                 const SizedBox(height: 12),
                 _buildRadioListTile<NotificationOption>(
                   title: 'All Notifications',
@@ -279,8 +276,8 @@ class _RadioDemoPageState extends State<RadioDemoPage> {
             fontSize: 14,
             color: PlatformInfo.isIOS
                 ? (isDark
-                    ? CupertinoColors.systemGrey
-                    : CupertinoColors.systemGrey2)
+                      ? CupertinoColors.systemGrey
+                      : CupertinoColors.systemGrey2)
                 : Theme.of(context).colorScheme.onSurfaceVariant,
           ),
         ),
@@ -333,8 +330,8 @@ class _RadioDemoPageState extends State<RadioDemoPage> {
                       fontSize: 16,
                       color: PlatformInfo.isIOS
                           ? (isDark
-                              ? CupertinoColors.white
-                              : CupertinoColors.black)
+                                ? CupertinoColors.white
+                                : CupertinoColors.black)
                           : Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
@@ -346,8 +343,8 @@ class _RadioDemoPageState extends State<RadioDemoPage> {
                         fontSize: 13,
                         color: PlatformInfo.isIOS
                             ? (isDark
-                                ? CupertinoColors.systemGrey
-                                : CupertinoColors.systemGrey2)
+                                  ? CupertinoColors.systemGrey
+                                  : CupertinoColors.systemGrey2)
                             : Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                     ),

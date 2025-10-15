@@ -12,7 +12,10 @@ class CardDemoPage extends StatefulWidget {
 class _CardDemoPageState extends State<CardDemoPage> {
   @override
   Widget build(BuildContext context) {
-    return AdaptiveScaffold(title: 'AdaptiveCard Demo', body: _buildContent());
+    return AdaptiveScaffold(
+      appBar: const AdaptiveAppBar(title: 'AdaptiveCard Demo'),
+      body: _buildContent(),
+    );
   }
 
   Widget _buildContent() {

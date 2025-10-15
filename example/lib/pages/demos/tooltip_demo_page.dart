@@ -13,7 +13,7 @@ class _TooltipDemoPageState extends State<TooltipDemoPage> {
   @override
   Widget build(BuildContext context) {
     return AdaptiveScaffold(
-      title: 'AdaptiveTooltip Demo',
+      appBar: AdaptiveAppBar(title: 'AdaptiveTooltip Demo'),
       body: _buildContent(),
     );
   }

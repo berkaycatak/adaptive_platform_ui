@@ -18,7 +18,7 @@ class _SegmentedControlDemoPageState extends State<SegmentedControlDemoPage> {
   @override
   Widget build(BuildContext context) {
     return AdaptiveScaffold(
-      title: 'Segmented Control',
+      appBar: AdaptiveAppBar(title: 'Segmented Control'),
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.only(
@@ -35,9 +35,9 @@ class _SegmentedControlDemoPageState extends State<SegmentedControlDemoPage> {
                   style: TextStyle(
                     color: PlatformInfo.isIOS
                         ? (MediaQuery.platformBrightnessOf(context) ==
-                                Brightness.dark
-                            ? CupertinoColors.white
-                            : CupertinoColors.black)
+                                  Brightness.dark
+                              ? CupertinoColors.white
+                              : CupertinoColors.black)
                         : null,
                   ),
                 ),
@@ -47,9 +47,9 @@ class _SegmentedControlDemoPageState extends State<SegmentedControlDemoPage> {
                   style: TextStyle(
                     color: PlatformInfo.isIOS
                         ? (MediaQuery.platformBrightnessOf(context) ==
-                                Brightness.dark
-                            ? CupertinoColors.white
-                            : CupertinoColors.black)
+                                  Brightness.dark
+                              ? CupertinoColors.white
+                              : CupertinoColors.black)
                         : null,
                   ),
                 ),
@@ -72,9 +72,9 @@ class _SegmentedControlDemoPageState extends State<SegmentedControlDemoPage> {
                   style: TextStyle(
                     color: PlatformInfo.isIOS
                         ? (MediaQuery.platformBrightnessOf(context) ==
-                                Brightness.dark
-                            ? CupertinoColors.white
-                            : CupertinoColors.black)
+                                  Brightness.dark
+                              ? CupertinoColors.white
+                              : CupertinoColors.black)
                         : null,
                   ),
                 ),
@@ -84,9 +84,9 @@ class _SegmentedControlDemoPageState extends State<SegmentedControlDemoPage> {
                   style: TextStyle(
                     color: PlatformInfo.isIOS
                         ? (MediaQuery.platformBrightnessOf(context) ==
-                                Brightness.dark
-                            ? CupertinoColors.white
-                            : CupertinoColors.black)
+                                  Brightness.dark
+                              ? CupertinoColors.white
+                              : CupertinoColors.black)
                         : null,
                   ),
                 ),
@@ -110,9 +110,9 @@ class _SegmentedControlDemoPageState extends State<SegmentedControlDemoPage> {
                   style: TextStyle(
                     color: PlatformInfo.isIOS
                         ? (MediaQuery.platformBrightnessOf(context) ==
-                                Brightness.dark
-                            ? CupertinoColors.white
-                            : CupertinoColors.black)
+                                  Brightness.dark
+                              ? CupertinoColors.white
+                              : CupertinoColors.black)
                         : null,
                   ),
                 ),
@@ -122,9 +122,9 @@ class _SegmentedControlDemoPageState extends State<SegmentedControlDemoPage> {
                   style: TextStyle(
                     color: PlatformInfo.isIOS
                         ? (MediaQuery.platformBrightnessOf(context) ==
-                                Brightness.dark
-                            ? CupertinoColors.white
-                            : CupertinoColors.black)
+                                  Brightness.dark
+                              ? CupertinoColors.white
+                              : CupertinoColors.black)
                         : null,
                   ),
                 ),
@@ -148,9 +148,9 @@ class _SegmentedControlDemoPageState extends State<SegmentedControlDemoPage> {
                   style: TextStyle(
                     color: PlatformInfo.isIOS
                         ? (MediaQuery.platformBrightnessOf(context) ==
-                                Brightness.dark
-                            ? CupertinoColors.white
-                            : CupertinoColors.black)
+                                  Brightness.dark
+                              ? CupertinoColors.white
+                              : CupertinoColors.black)
                         : null,
                   ),
                 ),
@@ -160,9 +160,9 @@ class _SegmentedControlDemoPageState extends State<SegmentedControlDemoPage> {
                   style: TextStyle(
                     color: PlatformInfo.isIOS
                         ? (MediaQuery.platformBrightnessOf(context) ==
-                                Brightness.dark
-                            ? CupertinoColors.white
-                            : CupertinoColors.black)
+                                  Brightness.dark
+                              ? CupertinoColors.white
+                              : CupertinoColors.black)
                         : null,
                   ),
                 ),

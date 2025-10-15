@@ -21,7 +21,7 @@ class _CheckboxDemoPageState extends State<CheckboxDemoPage> {
   @override
   Widget build(BuildContext context) {
     return AdaptiveScaffold(
-      title: 'AdaptiveCheckbox Demo',
+      appBar: AdaptiveAppBar(title: 'AdaptiveCheckbox Demo'),
       body: _buildContent(),
     );
   }
@@ -46,8 +46,8 @@ class _CheckboxDemoPageState extends State<CheckboxDemoPage> {
             decoration: BoxDecoration(
               color: PlatformInfo.isIOS
                   ? (MediaQuery.platformBrightnessOf(context) == Brightness.dark
-                      ? CupertinoColors.systemGrey5
-                      : CupertinoColors.systemGrey6)
+                        ? CupertinoColors.systemGrey5
+                        : CupertinoColors.systemGrey6)
                   : (isDark ? Colors.grey[850] : Colors.grey[200]),
               borderRadius: BorderRadius.circular(8),
             ),
@@ -58,9 +58,9 @@ class _CheckboxDemoPageState extends State<CheckboxDemoPage> {
                 fontWeight: FontWeight.w500,
                 color: PlatformInfo.isIOS
                     ? (MediaQuery.platformBrightnessOf(context) ==
-                            Brightness.dark
-                        ? CupertinoColors.white
-                        : CupertinoColors.black)
+                              Brightness.dark
+                          ? CupertinoColors.white
+                          : CupertinoColors.black)
                     : (isDark ? Colors.white : Colors.black87),
               ),
             ),
@@ -137,9 +137,9 @@ class _CheckboxDemoPageState extends State<CheckboxDemoPage> {
                   fontSize: 12,
                   color: PlatformInfo.isIOS
                       ? (MediaQuery.platformBrightnessOf(context) ==
-                              Brightness.dark
-                          ? CupertinoColors.systemGrey
-                          : CupertinoColors.systemGrey2)
+                                Brightness.dark
+                            ? CupertinoColors.systemGrey
+                            : CupertinoColors.systemGrey2)
                       : (isDark ? Colors.grey[400] : Colors.grey[700]),
                 ),
               ),
@@ -191,8 +191,8 @@ class _CheckboxDemoPageState extends State<CheckboxDemoPage> {
               height: 1.5,
               color: PlatformInfo.isIOS
                   ? (MediaQuery.platformBrightnessOf(context) == Brightness.dark
-                      ? CupertinoColors.systemGrey
-                      : CupertinoColors.systemGrey2)
+                        ? CupertinoColors.systemGrey
+                        : CupertinoColors.systemGrey2)
                   : (isDark ? Colors.grey[400] : Colors.grey[700]),
             ),
           ),
@@ -214,8 +214,8 @@ class _CheckboxDemoPageState extends State<CheckboxDemoPage> {
             fontWeight: FontWeight.bold,
             color: PlatformInfo.isIOS
                 ? (MediaQuery.platformBrightnessOf(context) == Brightness.dark
-                    ? CupertinoColors.white
-                    : CupertinoColors.black)
+                      ? CupertinoColors.white
+                      : CupertinoColors.black)
                 : (isDark ? Colors.white : Colors.black87),
           ),
         ),
@@ -243,8 +243,8 @@ class _CheckboxDemoPageState extends State<CheckboxDemoPage> {
             fontSize: 16,
             color: PlatformInfo.isIOS
                 ? (MediaQuery.platformBrightnessOf(context) == Brightness.dark
-                    ? CupertinoColors.white
-                    : CupertinoColors.black)
+                      ? CupertinoColors.white
+                      : CupertinoColors.black)
                 : (isDark ? Colors.white : Colors.black87),
           ),
         ),
@@ -270,16 +270,12 @@ class _CheckboxDemoPageState extends State<CheckboxDemoPage> {
             fontSize: 14,
             color: PlatformInfo.isIOS
                 ? (MediaQuery.platformBrightnessOf(context) == Brightness.dark
-                    ? CupertinoColors.systemGrey
-                    : CupertinoColors.systemGrey2)
+                      ? CupertinoColors.systemGrey
+                      : CupertinoColors.systemGrey2)
                 : (isDark ? Colors.grey[400] : Colors.grey[700]),
           ),
         ),
-        AdaptiveCheckbox(
-          value: value,
-          tristate: tristate,
-          onChanged: (v) {},
-        ),
+        AdaptiveCheckbox(value: value, tristate: tristate, onChanged: (v) {}),
       ],
     );
   }
