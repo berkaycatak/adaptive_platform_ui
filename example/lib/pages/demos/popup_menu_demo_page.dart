@@ -56,9 +56,10 @@ class _PopupMenuDemoPageState extends State<PopupMenuDemoPage> {
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
                 color: PlatformInfo.isIOS
-                    ? (MediaQuery.platformBrightnessOf(context) == Brightness.dark
-                        ? CupertinoColors.white
-                        : CupertinoColors.black)
+                    ? (MediaQuery.platformBrightnessOf(context) ==
+                              Brightness.dark
+                          ? CupertinoColors.white
+                          : CupertinoColors.black)
                     : Theme.of(context).colorScheme.onSurface,
               ),
             ),
@@ -194,9 +195,10 @@ class _PopupMenuDemoPageState extends State<PopupMenuDemoPage> {
                   style: TextStyle(
                     fontSize: 12,
                     color: PlatformInfo.isIOS
-                        ? (MediaQuery.platformBrightnessOf(context) == Brightness.dark
-                            ? CupertinoColors.systemGrey
-                            : CupertinoColors.systemGrey2)
+                        ? (MediaQuery.platformBrightnessOf(context) ==
+                                  Brightness.dark
+                              ? CupertinoColors.systemGrey
+                              : CupertinoColors.systemGrey2)
                         : Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                 ),
@@ -222,9 +224,10 @@ class _PopupMenuDemoPageState extends State<PopupMenuDemoPage> {
                   style: TextStyle(
                     fontSize: 12,
                     color: PlatformInfo.isIOS
-                        ? (MediaQuery.platformBrightnessOf(context) == Brightness.dark
-                            ? CupertinoColors.systemGrey
-                            : CupertinoColors.systemGrey2)
+                        ? (MediaQuery.platformBrightnessOf(context) ==
+                                  Brightness.dark
+                              ? CupertinoColors.systemGrey
+                              : CupertinoColors.systemGrey2)
                         : Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                 ),
@@ -250,9 +253,10 @@ class _PopupMenuDemoPageState extends State<PopupMenuDemoPage> {
                   style: TextStyle(
                     fontSize: 12,
                     color: PlatformInfo.isIOS
-                        ? (MediaQuery.platformBrightnessOf(context) == Brightness.dark
-                            ? CupertinoColors.systemGrey
-                            : CupertinoColors.systemGrey2)
+                        ? (MediaQuery.platformBrightnessOf(context) ==
+                                  Brightness.dark
+                              ? CupertinoColors.systemGrey
+                              : CupertinoColors.systemGrey2)
                         : Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                 ),
@@ -277,9 +281,10 @@ class _PopupMenuDemoPageState extends State<PopupMenuDemoPage> {
                   style: TextStyle(
                     fontSize: 12,
                     color: PlatformInfo.isIOS
-                        ? (MediaQuery.platformBrightnessOf(context) == Brightness.dark
-                            ? CupertinoColors.systemGrey
-                            : CupertinoColors.systemGrey2)
+                        ? (MediaQuery.platformBrightnessOf(context) ==
+                                  Brightness.dark
+                              ? CupertinoColors.systemGrey
+                              : CupertinoColors.systemGrey2)
                         : Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                 ),
@@ -483,6 +488,207 @@ class _PopupMenuDemoPageState extends State<PopupMenuDemoPage> {
           ],
         ),
       ]),
+      const SizedBox(height: 24),
+
+      // Custom Widget Examples
+      _buildSection('Custom Widget', [
+        _buildDemo(
+          'Custom Button',
+          AdaptivePopupMenuButton.widget<String>(
+            items: _basicMenuItems(),
+            onSelected: (index, item) {
+              setState(() {
+                _selectedAction = item.label;
+                _selectedValue = item.value ?? '';
+              });
+            },
+            buttonStyle: PopupButtonStyle.plain,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: PlatformInfo.isIOS
+                    ? CupertinoColors.systemGrey5
+                    : Theme.of(context).colorScheme.surfaceContainerHighest,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    PlatformInfo.isIOS
+                        ? CupertinoIcons.ellipsis_circle
+                        : Icons.more_horiz,
+                    size: 18,
+                    color: PlatformInfo.isIOS
+                        ? CupertinoColors.systemBlue
+                        : Theme.of(context).colorScheme.primary,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Custom Button',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: PlatformInfo.isIOS
+                          ? (MediaQuery.platformBrightnessOf(context) ==
+                                    Brightness.dark
+                                ? CupertinoColors.white
+                                : CupertinoColors.black)
+                          : Theme.of(context).colorScheme.onSurface,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        _buildDemo(
+          'Card Style',
+          AdaptivePopupMenuButton.widget<String>(
+            items: _iconMenuItems(),
+            onSelected: (index, item) {
+              setState(() {
+                _selectedAction = item.label;
+                _selectedValue = item.value ?? '';
+              });
+            },
+            buttonStyle: PopupButtonStyle.prominentGlass,
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: PlatformInfo.isIOS
+                    ? (MediaQuery.platformBrightnessOf(context) ==
+                              Brightness.dark
+                          ? CupertinoColors.darkBackgroundGray
+                          : CupertinoColors.white)
+                    : Theme.of(context).colorScheme.surface,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: PlatformInfo.isIOS
+                      ? (MediaQuery.platformBrightnessOf(context) ==
+                                Brightness.dark
+                            ? CupertinoColors.systemGrey4
+                            : CupertinoColors.separator)
+                      : Theme.of(context).colorScheme.outline,
+                  width: 0.5,
+                ),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  Container(
+                    width: 36,
+                    height: 36,
+                    decoration: BoxDecoration(
+                      color: CupertinoColors.systemPurple.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(
+                      PlatformInfo.isIOS
+                          ? CupertinoIcons.square_grid_2x2
+                          : Icons.apps,
+                      color: CupertinoColors.systemPurple,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'Actions',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: PlatformInfo.isIOS
+                              ? (MediaQuery.platformBrightnessOf(context) ==
+                                        Brightness.dark
+                                    ? CupertinoColors.white
+                                    : CupertinoColors.black)
+                              : Theme.of(context).colorScheme.onSurface,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'Tap to open menu',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: PlatformInfo.isIOS
+                              ? CupertinoColors.systemGrey
+                              : Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(width: 8),
+                  Icon(
+                    PlatformInfo.isIOS
+                        ? CupertinoIcons.chevron_down
+                        : Icons.arrow_drop_down,
+                    size: 20,
+                    color: PlatformInfo.isIOS
+                        ? CupertinoColors.systemGrey
+                        : Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        _buildDemo(
+          'Chip Style',
+          AdaptivePopupMenuButton.widget<String>(
+            items: _basicMenuItems(),
+            onSelected: (index, item) {
+              setState(() {
+                _selectedAction = item.label;
+                _selectedValue = item.value ?? '';
+              });
+            },
+            buttonStyle: PopupButtonStyle.plain,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    CupertinoColors.systemBlue,
+                    CupertinoColors.systemPurple,
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: CupertinoColors.systemBlue.withOpacity(0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    CupertinoIcons.sparkles,
+                    size: 18,
+                    color: Colors.white,
+                  ),
+                  const SizedBox(width: 8),
+                  const Text(
+                    'Premium Options',
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ]),
       const SizedBox(height: 40),
     ];
   }
@@ -519,9 +725,10 @@ class _PopupMenuDemoPageState extends State<PopupMenuDemoPage> {
               style: TextStyle(
                 fontSize: 15,
                 color: PlatformInfo.isIOS
-                    ? (MediaQuery.platformBrightnessOf(context) == Brightness.dark
-                        ? CupertinoColors.white
-                        : CupertinoColors.black)
+                    ? (MediaQuery.platformBrightnessOf(context) ==
+                              Brightness.dark
+                          ? CupertinoColors.white
+                          : CupertinoColors.black)
                     : Theme.of(context).colorScheme.onSurface,
               ),
             ),

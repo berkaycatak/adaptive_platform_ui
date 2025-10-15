@@ -64,6 +64,7 @@ class IOS26PopupMenuButton<T> extends StatefulWidget {
     this.shrinkWrap = false,
     this.buttonStyle = PopupButtonStyle.plain,
   })  : buttonIcon = null,
+        child = null,
         width = null,
         round = false;
 
@@ -77,16 +78,35 @@ class IOS26PopupMenuButton<T> extends StatefulWidget {
     double size = 44.0,
     this.buttonStyle = PopupButtonStyle.glass,
   })  : buttonLabel = null,
+        child = null,
         round = true,
         width = size,
         height = size,
         shrinkWrap = false;
+
+  /// Creates a popup menu button with a custom child widget
+  const IOS26PopupMenuButton.widget({
+    super.key,
+    required this.items,
+    required this.onSelected,
+    this.tint,
+    this.buttonStyle = PopupButtonStyle.plain,
+    required this.child,
+  })  : buttonLabel = null,
+        buttonIcon = null,
+        round = false,
+        width = null,
+        height = 32.0,
+        shrinkWrap = true;
 
   /// Text for the button (null when using icon)
   final String? buttonLabel;
 
   /// Icon for the button (non-null in icon mode)
   final String? buttonIcon;
+
+  /// Custom child widget (non-null in widget mode)
+  final Widget? child;
 
   /// Fixed width in icon mode
   final double? width;
@@ -154,6 +174,9 @@ class _IOS26PopupMenuButtonState<T> extends State<IOS26PopupMenuButton<T>> {
         ((color.b * 255.0).round() & 0xff);
   }
 
+  /// Whether this instance uses a custom child widget
+  bool get isCustomWidget => widget.child != null;
+
   @override
   Widget build(BuildContext context) {
     if (!kIsWeb && Platform.isIOS) {
@@ -181,6 +204,7 @@ class _IOS26PopupMenuButtonState<T> extends State<IOS26PopupMenuButton<T>> {
         if (widget.buttonLabel != null) 'buttonTitle': widget.buttonLabel,
         if (widget.buttonIcon != null) 'buttonIconName': widget.buttonIcon,
         if (widget.isIconButton) 'round': true,
+        if (isCustomWidget) 'customWidget': true, // Hide native button content
         'buttonStyle': widget.buttonStyle.name,
         'labels': labels,
         'sfSymbols': symbols,
@@ -191,7 +215,7 @@ class _IOS26PopupMenuButtonState<T> extends State<IOS26PopupMenuButton<T>> {
       };
 
       // Create a unique key based on button label/icon to force recreation on change
-      final viewKey = ValueKey('${widget.buttonLabel}_${widget.buttonIcon}_${widget.items.length}');
+      final viewKey = ValueKey('${widget.buttonLabel}_${widget.buttonIcon}_${widget.child?.runtimeType}_${widget.items.length}');
 
       final platformView = UiKitView(
         key: viewKey,
@@ -204,6 +228,20 @@ class _IOS26PopupMenuButtonState<T> extends State<IOS26PopupMenuButton<T>> {
         },
       );
 
+      // Custom widget mode: Stack with custom widget determining size
+      if (isCustomWidget) {
+        return Stack(
+          fit: StackFit.passthrough,
+          children: [
+            widget.child!, // Determines size and is visible
+            Positioned.fill(
+              child: platformView, // Native button overlay (transparent but catches touches)
+            ),
+          ],
+        );
+      }
+
+      // Standard mode: Use LayoutBuilder for sizing
       return LayoutBuilder(
         builder: (context, constraints) {
           final hasBoundedWidth = constraints.hasBoundedWidth;
@@ -226,6 +264,13 @@ class _IOS26PopupMenuButtonState<T> extends State<IOS26PopupMenuButton<T>> {
     }
 
     // Fallback to CupertinoButton with action sheet
+    if (isCustomWidget) {
+      return GestureDetector(
+        onTap: () => _showContextMenu(context, Offset.zero),
+        child: widget.child!,
+      );
+    }
+
     return SizedBox(
       height: widget.height,
       width: widget.isIconButton && widget.round ? (widget.width ?? widget.height) : null,
@@ -233,39 +278,7 @@ class _IOS26PopupMenuButtonState<T> extends State<IOS26PopupMenuButton<T>> {
         padding: widget.isIconButton
             ? const EdgeInsets.all(4)
             : const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-        onPressed: () async {
-          final selected = await showCupertinoModalPopup<int>(
-            context: context,
-            builder: (ctx) {
-              return CupertinoActionSheet(
-                title: widget.buttonLabel != null ? Text(widget.buttonLabel!) : null,
-                actions: [
-                  for (var i = 0; i < widget.items.length; i++)
-                    if (widget.items[i] is AdaptivePopupMenuItem<T>)
-                      CupertinoActionSheetAction(
-                        onPressed: () => Navigator.of(ctx).pop(i),
-                        child: Text(
-                          (widget.items[i] as AdaptivePopupMenuItem<T>).label,
-                        ),
-                      )
-                    else
-                      const SizedBox(height: 8),
-                ],
-                cancelButton: CupertinoActionSheetAction(
-                  onPressed: () => Navigator.of(ctx).pop(),
-                  isDefaultAction: true,
-                  child: const Text('Cancel'),
-                ),
-              );
-            },
-          );
-          if (selected != null) {
-            final selectedEntry = widget.items[selected];
-            if (selectedEntry is AdaptivePopupMenuItem<T>) {
-              widget.onSelected(selected, selectedEntry);
-            }
-          }
-        },
+        onPressed: () => _showContextMenu(context, Offset.zero),
         child: widget.isIconButton
             ? const Icon(CupertinoIcons.ellipsis)
             : Text(widget.buttonLabel ?? ''),
@@ -344,6 +357,40 @@ class _IOS26PopupMenuButtonState<T> extends State<IOS26PopupMenuButton<T>> {
         await ch.invokeMethod('setStyle', {'tint': tint});
         _lastTint = tint;
       } catch (_) {}
+    }
+  }
+
+  Future<void> _showContextMenu(BuildContext context, Offset globalPosition) async {
+    final selected = await showCupertinoModalPopup<int>(
+      context: context,
+      builder: (ctx) {
+        return CupertinoActionSheet(
+          actions: [
+            for (var i = 0; i < widget.items.length; i++)
+              if (widget.items[i] is AdaptivePopupMenuItem<T>)
+                CupertinoActionSheetAction(
+                  onPressed: () => Navigator.of(ctx).pop(i),
+                  child: Text(
+                    (widget.items[i] as AdaptivePopupMenuItem<T>).label,
+                  ),
+                )
+              else
+                const SizedBox(height: 8),
+          ],
+          cancelButton: CupertinoActionSheetAction(
+            onPressed: () => Navigator.of(ctx).pop(),
+            isDefaultAction: true,
+            child: const Text('Cancel'),
+          ),
+        );
+      },
+    );
+
+    if (selected != null) {
+      final selectedEntry = widget.items[selected];
+      if (selectedEntry is AdaptivePopupMenuItem<T>) {
+        widget.onSelected(selected, selectedEntry);
+      }
     }
   }
 }

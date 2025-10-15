@@ -57,6 +57,45 @@ class AdaptivePopupMenuButton<T> {
     );
   }
 
+  /// Creates a popup menu button with a custom child widget
+  static Widget widget<T>({
+    Key? key,
+    required List<AdaptivePopupMenuEntry> items,
+    required void Function(int index, AdaptivePopupMenuItem<T> entry) onSelected,
+    Color? tint,
+    PopupButtonStyle buttonStyle = PopupButtonStyle.plain,
+    required Widget child,
+  }) {
+    // iOS 26+ - Use gesture detector with native menu
+    if (PlatformInfo.isIOS26OrHigher()) {
+      return IOS26PopupMenuButton<T>.widget(
+        items: items,
+        onSelected: onSelected,
+        tint: tint,
+        buttonStyle: buttonStyle,
+        child: child,
+      );
+    }
+
+    // Android - Use Material PopupMenuButton with custom child
+    if (PlatformInfo.isAndroid) {
+      return _MaterialPopupMenuButton<T>.widget(
+        items: items,
+        onSelected: onSelected,
+        tint: tint,
+        child: child,
+      );
+    }
+
+    // iOS <26 (iOS 18 and below) - Use GestureDetector with action sheet
+    return Builder(
+      builder: (context) => GestureDetector(
+        onTap: () => _showMenu<T>(context, null, items, onSelected),
+        child: child,
+      ),
+    );
+  }
+
   /// Creates a round, icon-only popup menu button
   static Widget icon<T>({
     Key? key,
@@ -185,7 +224,8 @@ class _MaterialPopupMenuButton<T> extends StatelessWidget {
     this.tint,
     this.height = 32.0,
   })  : icon = null,
-        size = null;
+        size = null,
+        child = null;
 
   const _MaterialPopupMenuButton.icon({
     required this.icon,
@@ -194,10 +234,22 @@ class _MaterialPopupMenuButton<T> extends StatelessWidget {
     this.tint,
     this.size = 44.0,
   })  : label = null,
-        height = null;
+        height = null,
+        child = null;
+
+  const _MaterialPopupMenuButton.widget({
+    required this.items,
+    required this.onSelected,
+    this.tint,
+    required this.child,
+  })  : label = null,
+        icon = null,
+        height = null,
+        size = null;
 
   final String? label;
   final String? icon;
+  final Widget? child;
   final List<AdaptivePopupMenuEntry> items;
   final void Function(int index, AdaptivePopupMenuItem<T> entry) onSelected;
   final Color? tint;
@@ -205,6 +257,7 @@ class _MaterialPopupMenuButton<T> extends StatelessWidget {
   final double? size;
 
   bool get isIconButton => icon != null;
+  bool get isCustomWidget => child != null;
 
   @override
   Widget build(BuildContext context) {
@@ -234,6 +287,20 @@ class _MaterialPopupMenuButton<T> extends StatelessWidget {
           ),
         );
       }
+    }
+
+    // Custom widget case
+    if (isCustomWidget) {
+      return PopupMenuButton<int>(
+        child: child!,
+        itemBuilder: (context) => menuItems,
+        onSelected: (index) {
+          final selectedEntry = items[index];
+          if (selectedEntry is AdaptivePopupMenuItem<T>) {
+            onSelected(index, selectedEntry);
+          }
+        },
+      );
     }
 
     if (isIconButton) {

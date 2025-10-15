@@ -28,6 +28,7 @@ class iOS26PopupMenuButtonView: NSObject, FlutterPlatformView {
         var symbols: [String] = []
         var dividers: [NSNumber] = []
         var enabled: [NSNumber] = []
+        var isCustomWidget: Bool = false
 
         if let dict = args as? [String: Any] {
             if let t = dict["buttonTitle"] as? String { title = t }
@@ -36,6 +37,7 @@ class iOS26PopupMenuButtonView: NSObject, FlutterPlatformView {
             if let v = dict["isDark"] as? NSNumber { isDark = v.boolValue }
             if let tintArgb = dict["tint"] as? NSNumber { tint = UIColor(argb: tintArgb.intValue) }
             if let bs = dict["buttonStyle"] as? String { buttonStyle = bs }
+            if let cw = dict["customWidget"] as? NSNumber { isCustomWidget = cw.boolValue }
             labels = (dict["labels"] as? [String]) ?? []
             symbols = (dict["sfSymbols"] as? [String]) ?? []
             dividers = (dict["isDivider"] as? [NSNumber]) ?? []
@@ -67,11 +69,23 @@ class iOS26PopupMenuButtonView: NSObject, FlutterPlatformView {
         self.enabled = enabled.map { $0.boolValue }
 
         self.isRoundButton = makeRound
-        applyButtonStyle(buttonStyle: buttonStyle, round: makeRound)
         currentButtonStyle = buttonStyle
 
-        // Set button content
-        setButtonContent(title: title, icon: iconName)
+        // Set button content (hide if custom widget is used)
+        if !isCustomWidget {
+            applyButtonStyle(buttonStyle: buttonStyle, round: makeRound)
+            setButtonContent(title: title, icon: iconName)
+        } else {
+            // Make button fully transparent but functional
+            button.backgroundColor = .clear
+            if #available(iOS 15.0, *) {
+                var config = UIButton.Configuration.plain()
+                config.background.backgroundColor = .clear
+                config.baseBackgroundColor = .clear
+                config.baseForegroundColor = .clear
+                button.configuration = config
+            }
+        }
 
         // Build menu
         rebuildMenu()
