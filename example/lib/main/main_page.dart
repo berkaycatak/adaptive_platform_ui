@@ -20,6 +20,7 @@ class _MainPageState extends State<MainPage> {
     return Stack(
       children: [
         AdaptiveScaffold(
+          minimizeBehavior: TabBarMinimizeBehavior.automatic,
           useNativeToolbar: false,
           body: widget.navigationShell,
           selectedIndex: widget.navigationShell.currentIndex,

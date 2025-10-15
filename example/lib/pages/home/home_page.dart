@@ -37,6 +37,17 @@ class _HomePageState extends State<HomePage> {
           iosSymbol: "info.circle",
           androidIcon: CupertinoIcons.info_circle,
         ),
+
+        AdaptiveAppBarAction(
+          onPressed: () {
+            RouterService.goNamed(
+              context: context,
+              route: RouterService.routes.info,
+            );
+          },
+          iosSymbol: "info.circle",
+          androidIcon: CupertinoIcons.info_circle,
+        ),
       ],
       body: _buildBody(context),
     );

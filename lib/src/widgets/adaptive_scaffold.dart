@@ -46,7 +46,7 @@ enum TabBarMinimizeBehavior {
 }
 
 /// An adaptive scaffold that renders platform-specific navigation
-class AdaptiveScaffold extends StatelessWidget {
+class AdaptiveScaffold extends StatefulWidget {
   const AdaptiveScaffold({
     super.key,
     this.destinations,
@@ -106,45 +106,52 @@ class AdaptiveScaffold extends StatelessWidget {
   final bool useNativeToolbar;
 
   @override
+  State<AdaptiveScaffold> createState() => _AdaptiveScaffoldState();
+}
+
+class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
+  final GlobalKey<_MinimizableTabBarState> _tabBarKey = GlobalKey<_MinimizableTabBarState>();
+
+  @override
   Widget build(BuildContext context) {
     // iOS 26+ with native toolbar enabled - Use IOS26Scaffold
-    if (PlatformInfo.isIOS26OrHigher() && useNativeToolbar) {
+    if (PlatformInfo.isIOS26OrHigher() && widget.useNativeToolbar) {
       // For GoRouter compatibility: Use body directly if it's StatefulNavigationShell
       // Otherwise replicate body for each destination
       List<Widget> childrenList;
-      final bodyType = body?.runtimeType.toString() ?? '';
+      final bodyType = widget.body?.runtimeType.toString() ?? '';
       final isNavigationShell = bodyType.contains('StatefulNavigationShell');
 
       if (isNavigationShell) {
         // GoRouter's StatefulNavigationShell already manages children
         // Don't replicate, just use it directly
-        childrenList = [body ?? const SizedBox.shrink()];
-      } else if (destinations != null && destinations!.isNotEmpty) {
+        childrenList = [widget.body ?? const SizedBox.shrink()];
+      } else if (widget.destinations != null && widget.destinations!.isNotEmpty) {
         // Tab-based navigation: replicate single body for all tabs with unique keys
         childrenList = List.generate(
-          destinations!.length,
+          widget.destinations!.length,
           (index) => KeyedSubtree(
             key: ValueKey('tab_$index'),
-            child: body ?? const SizedBox.shrink(),
+            child: widget.body ?? const SizedBox.shrink(),
           ),
         );
       } else {
         // Single page: just one body
-        childrenList = [body ?? const SizedBox.shrink()];
+        childrenList = [widget.body ?? const SizedBox.shrink()];
       }
 
       return IOS26Scaffold(
         key: ValueKey(
-          'ios26_scaffold_${selectedIndex ?? 0}_${body?.runtimeType.toString() ?? "empty"}',
+          'ios26_scaffold_${widget.selectedIndex ?? 0}_${widget.body?.runtimeType.toString() ?? "empty"}',
         ),
-        destinations: destinations ?? [],
-        selectedIndex: selectedIndex ?? 0,
-        onDestinationSelected: onDestinationSelected ?? (_) {},
-        title: title,
-        actions: actions,
-        leading: leading,
-        minimizeBehavior: minimizeBehavior,
-        enableBlur: enableBlur,
+        destinations: widget.destinations ?? [],
+        selectedIndex: widget.selectedIndex ?? 0,
+        onDestinationSelected: widget.onDestinationSelected ?? (_) {},
+        title: widget.title,
+        actions: widget.actions,
+        leading: widget.leading,
+        minimizeBehavior: widget.minimizeBehavior,
+        enableBlur: widget.enableBlur,
         children: childrenList,
       );
     }
@@ -153,11 +160,11 @@ class AdaptiveScaffold extends StatelessWidget {
     // Use CupertinoPageScaffold with CupertinoTabBar if destinations provided
     if (PlatformInfo.isIOS) {
       // Auto back button for iOS 26+ when useNativeToolbar is false
-      Widget? effectiveLeading = leading;
+      Widget? effectiveLeading = widget.leading;
       if (PlatformInfo.isIOS26OrHigher() &&
-          !useNativeToolbar &&
-          leading == null &&
-          (destinations == null || destinations!.isEmpty)) {
+          !widget.useNativeToolbar &&
+          widget.leading == null &&
+          (widget.destinations == null || widget.destinations!.isEmpty)) {
         // Check if we can pop AND this is the current route (to prevent showing on previous page during transition)
         final canPop = Navigator.maybeOf(context)?.canPop() ?? false;
         final isCurrent = ModalRoute.of(context)?.isCurrent ?? true;
@@ -175,15 +182,15 @@ class AdaptiveScaffold extends StatelessWidget {
         }
       }
 
-      if (destinations != null &&
-          destinations!.isNotEmpty &&
-          selectedIndex != null &&
-          onDestinationSelected != null) {
+      if (widget.destinations != null &&
+          widget.destinations!.isNotEmpty &&
+          widget.selectedIndex != null &&
+          widget.onDestinationSelected != null) {
         // Tab-based navigation
         // If no title, actions, or leading, skip navigationBar to avoid nested CupertinoPageScaffold issues
         final hasNavigationBar =
-            title != null ||
-            (actions != null && actions!.isNotEmpty) ||
+            widget.title != null ||
+            (widget.actions != null && widget.actions!.isNotEmpty) ||
             effectiveLeading != null;
 
         return CupertinoPageScaffold(
@@ -192,11 +199,11 @@ class AdaptiveScaffold extends StatelessWidget {
                   automaticallyImplyLeading: PlatformInfo.isIOS26OrHigher()
                       ? false
                       : true, // Let CupertinoNavigationBar handle back button for iOS < 26
-                  middle: title != null ? Text(title!) : null,
-                  trailing: actions != null && actions!.isNotEmpty
+                  middle: widget.title != null ? Text(widget.title!) : null,
+                  trailing: widget.actions != null && widget.actions!.isNotEmpty
                       ? Row(
                           mainAxisSize: MainAxisSize.min,
-                          children: actions!.map((action) {
+                          children: widget.actions!.map((action) {
                             Widget actionChild;
                             if (action.title != null) {
                               actionChild = Text(action.title!);
@@ -221,28 +228,38 @@ class AdaptiveScaffold extends StatelessWidget {
           child: Column(
             children: [
               Expanded(
-                child: Stack(
-                  children: [
-                    body ?? const SizedBox.shrink(),
-                    if (PlatformInfo.isIOS26OrHigher())
-                      Positioned(
-                        left: 0,
-                        right: 0,
-                        bottom: 0,
-                        child: IOS26NativeTabBar(
-                          selectedIndex: selectedIndex!,
-                          onTap: onDestinationSelected!,
-                          destinations: destinations!,
+                child: NotificationListener<ScrollNotification>(
+                  onNotification: (notification) {
+                    // Forward scroll notifications to _MinimizableTabBar state
+                    _tabBarKey.currentState?.handleScrollNotification(notification);
+                    return false; // Let it bubble up
+                  },
+                  child: Stack(
+                    children: [
+                      widget.body ?? const SizedBox.shrink(),
+                      if (PlatformInfo.isIOS26OrHigher())
+                        Positioned(
+                          left: 0,
+                          right: 0,
+                          bottom: 0,
+                          child: _MinimizableTabBar(
+                            key: _tabBarKey,
+                            selectedIndex: widget.selectedIndex!,
+                            onTap: widget.onDestinationSelected!,
+                            destinations: widget.destinations!,
+                            minimizeBehavior: widget.minimizeBehavior,
+                            enableBlur: widget.enableBlur,
+                          ),
                         ),
-                      ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
               if (PlatformInfo.isIOS18OrLower())
                 CupertinoTabBar(
-                  currentIndex: selectedIndex!,
-                  onTap: onDestinationSelected!,
-                  items: destinations!.map((dest) {
+                  currentIndex: widget.selectedIndex!,
+                  onTap: widget.onDestinationSelected!,
+                  items: widget.destinations!.map((dest) {
                     return BottomNavigationBarItem(
                       icon: Icon(dest.icon),
                       activeIcon: dest.selectedIcon != null
@@ -259,10 +276,10 @@ class AdaptiveScaffold extends StatelessWidget {
 
       // Simple page without tabs
       // If no title, actions, or leading, just return body to avoid nested CupertinoPageScaffold
-      if (title == null &&
-          (actions == null || actions!.isEmpty) &&
+      if (widget.title == null &&
+          (widget.actions == null || widget.actions!.isEmpty) &&
           effectiveLeading == null) {
-        return body ?? const SizedBox.shrink();
+        return widget.body ?? const SizedBox.shrink();
       }
 
       return CupertinoPageScaffold(
@@ -270,11 +287,11 @@ class AdaptiveScaffold extends StatelessWidget {
           automaticallyImplyLeading: PlatformInfo.isIOS26OrHigher()
               ? false
               : true, // Let CupertinoNavigationBar handle back button for iOS < 26,
-          middle: title != null ? Text(title!) : null,
-          trailing: actions != null && actions!.isNotEmpty
+          middle: widget.title != null ? Text(widget.title!) : null,
+          trailing: widget.actions != null && widget.actions!.isNotEmpty
               ? Row(
                   mainAxisSize: MainAxisSize.min,
-                  children: actions!.map((action) {
+                  children: widget.actions!.map((action) {
                     Widget actionChild;
                     if (action.title != null) {
                       actionChild = Text(action.title!);
@@ -295,26 +312,26 @@ class AdaptiveScaffold extends StatelessWidget {
               : null,
           leading: effectiveLeading,
         ),
-        child: body ?? const SizedBox.shrink(),
+        child: widget.body ?? const SizedBox.shrink(),
       );
     }
 
     // Android - Use NavigationBar if destinations provided
-    if (destinations != null &&
-        destinations!.isNotEmpty &&
-        selectedIndex != null &&
-        onDestinationSelected != null) {
+    if (widget.destinations != null &&
+        widget.destinations!.isNotEmpty &&
+        widget.selectedIndex != null &&
+        widget.onDestinationSelected != null) {
       // Tab-based navigation
       final hasAppBar =
-          title != null ||
-          (actions != null && actions!.isNotEmpty) ||
-          leading != null;
+          widget.title != null ||
+          (widget.actions != null && widget.actions!.isNotEmpty) ||
+          widget.leading != null;
 
       return Scaffold(
         appBar: hasAppBar
             ? AppBar(
-                title: title != null ? Text(title!) : null,
-                actions: actions?.map((action) {
+                title: widget.title != null ? Text(widget.title!) : null,
+                actions: widget.actions?.map((action) {
                   if (action.title != null) {
                     return TextButton(
                       onPressed: action.onPressed,
@@ -328,14 +345,14 @@ class AdaptiveScaffold extends StatelessWidget {
                     onPressed: action.onPressed,
                   );
                 }).toList(),
-                leading: leading,
+                leading: widget.leading,
               )
             : null,
-        body: body ?? const SizedBox.shrink(),
+        body: widget.body ?? const SizedBox.shrink(),
         bottomNavigationBar: NavigationBar(
-          selectedIndex: selectedIndex!,
-          onDestinationSelected: onDestinationSelected!,
-          destinations: destinations!.map((dest) {
+          selectedIndex: widget.selectedIndex!,
+          onDestinationSelected: widget.onDestinationSelected!,
+          destinations: widget.destinations!.map((dest) {
             return NavigationDestination(
               icon: Icon(dest.icon),
               selectedIcon: dest.selectedIcon != null
@@ -345,22 +362,22 @@ class AdaptiveScaffold extends StatelessWidget {
             );
           }).toList(),
         ),
-        floatingActionButton: floatingActionButton,
+        floatingActionButton: widget.floatingActionButton,
       );
     }
 
     // Simple page without tabs
     // If no title, actions, or leading, just return body to avoid nested Scaffold
-    if (title == null &&
-        (actions == null || actions!.isEmpty) &&
-        leading == null) {
-      return body ?? const SizedBox.shrink();
+    if (widget.title == null &&
+        (widget.actions == null || widget.actions!.isEmpty) &&
+        widget.leading == null) {
+      return widget.body ?? const SizedBox.shrink();
     }
 
     return Scaffold(
       appBar: AppBar(
-        title: title != null ? Text(title!) : null,
-        actions: actions?.map((action) {
+        title: widget.title != null ? Text(widget.title!) : null,
+        actions: widget.actions?.map((action) {
           if (action.title != null) {
             return TextButton(
               onPressed: action.onPressed,
@@ -374,10 +391,10 @@ class AdaptiveScaffold extends StatelessWidget {
             onPressed: action.onPressed,
           );
         }).toList(),
-        leading: leading,
+        leading: widget.leading,
       ),
-      body: body ?? const SizedBox.shrink(),
-      floatingActionButton: floatingActionButton,
+      body: widget.body ?? const SizedBox.shrink(),
+      floatingActionButton: widget.floatingActionButton,
     );
   }
 
@@ -405,6 +422,126 @@ class AdaptiveScaffold extends StatelessWidget {
       'checkmark.circle': CupertinoIcons.checkmark_circle,
     };
     return iconMap[sfSymbol] ?? CupertinoIcons.circle;
+  }
+}
+
+/// Minimizable tab bar wrapper for iOS 26+ (used when useNativeToolbar: false)
+/// Just handles animation, scroll notification is handled by parent
+class _MinimizableTabBar extends StatefulWidget {
+  const _MinimizableTabBar({
+    super.key,
+    required this.selectedIndex,
+    required this.onTap,
+    required this.destinations,
+    required this.minimizeBehavior,
+    required this.enableBlur,
+  });
+
+  final int selectedIndex;
+  final ValueChanged<int> onTap;
+  final List<AdaptiveNavigationDestination> destinations;
+  final TabBarMinimizeBehavior minimizeBehavior;
+  final bool enableBlur;
+
+  @override
+  State<_MinimizableTabBar> createState() => _MinimizableTabBarState();
+}
+
+class _MinimizableTabBarState extends State<_MinimizableTabBar>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+  bool _isMinimized = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 200),
+      vsync: this,
+    );
+    _animation = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeInOut,
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  // Called from parent's NotificationListener
+  void handleScrollNotification(ScrollNotification notification) {
+    if (widget.minimizeBehavior == TabBarMinimizeBehavior.never) {
+      return;
+    }
+
+    if (notification is ScrollUpdateNotification) {
+      final delta = notification.scrollDelta ?? 0;
+
+      if (widget.minimizeBehavior == TabBarMinimizeBehavior.onScrollDown ||
+          widget.minimizeBehavior == TabBarMinimizeBehavior.automatic) {
+        // Minimize when scrolling down (positive delta)
+        if (delta > 0 && !_isMinimized) {
+          _minimizeTabBar();
+        } else if (delta < 0 && _isMinimized) {
+          _expandTabBar();
+        }
+      } else if (widget.minimizeBehavior == TabBarMinimizeBehavior.onScrollUp) {
+        // Minimize when scrolling up (negative delta)
+        if (delta < 0 && !_isMinimized) {
+          _minimizeTabBar();
+        } else if (delta > 0 && _isMinimized) {
+          _expandTabBar();
+        }
+      }
+    }
+  }
+
+  void _minimizeTabBar() {
+    if (!_isMinimized && mounted) {
+      _isMinimized = true;
+      _controller.forward();
+    }
+  }
+
+  void _expandTabBar() {
+    if (_isMinimized && mounted) {
+      _isMinimized = false;
+      _controller.reverse();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _animation,
+      builder: (context, child) {
+        // Calculate minimized state
+        // value: 0.0 = expanded (full size), 1.0 = minimized (70% size, 50% opacity)
+        final minimizeProgress = _animation.value;
+        final scale = 1.0 - (minimizeProgress * 0.3); // 1.0 → 0.7
+        final opacity = 1.0 - (minimizeProgress * 0.5); // 1.0 → 0.5
+
+        return Transform.scale(
+          scale: scale,
+          alignment: Alignment.bottomCenter,
+          child: Opacity(
+            opacity: opacity,
+            child: child,
+          ),
+        );
+      },
+      child: IOS26NativeTabBar(
+        destinations: widget.destinations,
+        selectedIndex: widget.selectedIndex,
+        onTap: widget.onTap,
+        tint: CupertinoTheme.of(context).primaryColor,
+        minimizeBehavior: widget.minimizeBehavior,
+      ),
+    );
   }
 }
 

@@ -42,18 +42,22 @@ class _IOS26NativeToolbarState extends State<IOS26NativeToolbar> {
       return _buildFallbackToolbar();
     }
 
+    final safePadding = MediaQuery.of(context).padding.top;
+
+    // Priority: custom leading widget > leadingText
+    // If custom leading widget provided, don't send leadingText to native
     final creationParams = <String, dynamic>{
       if (widget.title != null) 'title': widget.title!,
-      if (widget.leadingText != null) 'leading': widget.leadingText!,
-      if (widget.leading != null) 'leading': '',
+      if (widget.leading == null && widget.leadingText != null)
+        'leading': widget.leadingText!,
       if (widget.actions != null && widget.actions!.isNotEmpty)
         'actions': widget.actions!
             .map((action) => action.toNativeMap())
             .toList(),
     };
 
-    return Container(
-      height: widget.height + MediaQuery.of(context).padding.top,
+    final toolbar = Container(
+      height: widget.height + safePadding,
       decoration: BoxDecoration(
         gradient: Theme.brightnessOf(context) == Brightness.light
             ? const LinearGradient(
@@ -84,6 +88,29 @@ class _IOS26NativeToolbarState extends State<IOS26NativeToolbar> {
         gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
       ),
     );
+
+    // If custom leading widget provided, overlay it on top of native toolbar
+    if (widget.leading != null) {
+      return SizedBox(
+        height: widget.height + safePadding,
+        child: Stack(
+          children: [
+            toolbar,
+            Positioned(
+              left: 8,
+              top: safePadding,
+              bottom: 0,
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: widget.leading!,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return toolbar;
   }
 
   void _onPlatformViewCreated(int id) {

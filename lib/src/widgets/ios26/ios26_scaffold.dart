@@ -104,11 +104,13 @@ class _IOS26ScaffoldState extends State<IOS26Scaffold>
   @override
   Widget build(BuildContext context) {
     // Auto back button logic
+    // Priority: custom leading widget > auto back button
     String? leadingText;
     VoidCallback? leadingCallback;
 
     final canPop = Navigator.of(context).canPop();
 
+    // Only show auto back button if no custom leading widget
     if (widget.leading == null &&
         widget.destinations.isEmpty &&
         canPop) {
@@ -118,85 +120,91 @@ class _IOS26ScaffoldState extends State<IOS26Scaffold>
       };
     }
 
-    // Wrap everything in Material to ensure proper layer ordering during transitions
-    return CupertinoPageScaffold(
-      child: NotificationListener<ScrollNotification>(
-        onNotification: _handleScrollNotification,
-        child: Stack(
-          children: [
-            // Content - full screen - use KeepAlive to prevent rebuild
-            // If only one child, use it directly (e.g., StatefulNavigationShell from GoRouter)
-            // Otherwise use IndexedStack for tab switching
-            if (widget.children.length == 1)
-              widget.children.first
-            else
-              IndexedStack(
-                index: widget.selectedIndex,
-                sizing: StackFit.expand,
-                children: widget.children,
-              ),
-            // Top toolbar - iOS 26 Liquid Glass style
-            Positioned(
-              left: 0,
-              right: 0,
-              top: 0,
-              child: IOS26NativeToolbar(
-                title: widget.title,
-                leadingText: leadingText,
-                actions: widget.actions,
-                onLeadingTap: leadingCallback,
-                onActionTap: (index) {
-                  // Call the appropriate action callback
-                  if (widget.actions != null &&
-                      index >= 0 &&
-                      index < widget.actions!.length) {
-                    widget.actions![index].onPressed();
-                  }
-                },
-              ),
-            ),
-            // Tab bar - only show if destinations exist
-            if (widget.destinations.isNotEmpty)
-              Positioned(
-                left: 0,
-                right: 0,
-                bottom: 0,
-                child: AnimatedBuilder(
-                  animation: _tabBarAnimation,
-                  builder: (context, child) {
-                    // Calculate minimized state
-                    final minimizeProgress = _tabBarAnimation.value;
-                    final scale =
-                        1.0 - (minimizeProgress * 0.0); // Scale down to 70%
-                    final opacity =
-                        1.0 - (minimizeProgress * 0.5); // Fade to 50%
-
-                    return Transform.scale(
-                      scale: scale,
-                      alignment: Alignment.bottomCenter,
-                      child: Opacity(opacity: opacity, child: child),
-                    );
-                  },
-                  child: widget.enableBlur
-                      ? IOS26NativeTabBar(
-                          destinations: widget.destinations,
-                          selectedIndex: widget.selectedIndex,
-                          onTap: widget.onDestinationSelected,
-                          tint: CupertinoTheme.of(context).primaryColor,
-                          minimizeBehavior: widget.minimizeBehavior,
-                        )
-                      : IOS26NativeTabBar(
-                          destinations: widget.destinations,
-                          selectedIndex: widget.selectedIndex,
-                          onTap: widget.onDestinationSelected,
-                          tint: CupertinoTheme.of(context).primaryColor,
-                          minimizeBehavior: widget.minimizeBehavior,
-                        ),
-                ),
-              ),
-          ],
+    // Build the stack content
+    final stackContent = Stack(
+      children: [
+        // Content - full screen - use KeepAlive to prevent rebuild
+        // If only one child, use it directly (e.g., StatefulNavigationShell from GoRouter)
+        // Otherwise use IndexedStack for tab switching
+        if (widget.children.length == 1)
+          widget.children.first
+        else
+          IndexedStack(
+            index: widget.selectedIndex,
+            sizing: StackFit.expand,
+            children: widget.children,
+          ),
+        // Top toolbar - iOS 26 Liquid Glass style
+        Positioned(
+          left: 0,
+          right: 0,
+          top: 0,
+          child: IOS26NativeToolbar(
+            title: widget.title,
+            leading: widget.leading, // Custom leading widget has priority
+            leadingText: leadingText,
+            actions: widget.actions,
+            onLeadingTap: leadingCallback,
+            onActionTap: (index) {
+              // Call the appropriate action callback
+              if (widget.actions != null &&
+                  index >= 0 &&
+                  index < widget.actions!.length) {
+                widget.actions![index].onPressed();
+              }
+            },
+          ),
         ),
-      ),
+        // Tab bar - only show if destinations exist
+        if (widget.destinations.isNotEmpty)
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: AnimatedBuilder(
+              animation: _tabBarAnimation,
+              builder: (context, child) {
+                // Calculate minimized state
+                // value: 0.0 = expanded (full size), 1.0 = minimized (70% size, 50% opacity)
+                final minimizeProgress = _tabBarAnimation.value;
+                final scale = 1.0 - (minimizeProgress * 0.3); // 1.0 → 0.7
+                final opacity = 1.0 - (minimizeProgress * 0.5); // 1.0 → 0.5
+
+                return Transform.scale(
+                  scale: scale,
+                  alignment: Alignment.bottomCenter,
+                  child: Opacity(opacity: opacity, child: child),
+                );
+              },
+              child: widget.enableBlur
+                  ? IOS26NativeTabBar(
+                      destinations: widget.destinations,
+                      selectedIndex: widget.selectedIndex,
+                      onTap: widget.onDestinationSelected,
+                      tint: CupertinoTheme.of(context).primaryColor,
+                      minimizeBehavior: widget.minimizeBehavior,
+                    )
+                  : IOS26NativeTabBar(
+                      destinations: widget.destinations,
+                      selectedIndex: widget.selectedIndex,
+                      onTap: widget.onDestinationSelected,
+                      tint: CupertinoTheme.of(context).primaryColor,
+                      minimizeBehavior: widget.minimizeBehavior,
+                    ),
+            ),
+          ),
+      ],
+    );
+
+    // Only use NotificationListener if tab bar exists (destinations not empty)
+    // This allows scroll notifications to bubble up in single-page scenarios
+    return CupertinoPageScaffold(
+      child: widget.destinations.isNotEmpty
+          ? NotificationListener<ScrollNotification>(
+              onNotification: _handleScrollNotification,
+              child: stackContent,
+            )
+          : stackContent,
     );
   }
 }
