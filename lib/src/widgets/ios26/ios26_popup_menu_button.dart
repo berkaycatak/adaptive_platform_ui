@@ -23,8 +23,8 @@ class AdaptivePopupMenuItem<T> extends AdaptivePopupMenuEntry {
   /// Display label for the item
   final String label;
 
-  /// Optional SF Symbol icon name
-  final String? icon;
+  /// Optional icon (SF Symbol String for iOS 26+, IconData for iOS <26 and Android)
+  final dynamic icon;
 
   /// Whether the item can be selected
   final bool enabled;
@@ -63,10 +63,10 @@ class IOS26PopupMenuButton<T> extends StatefulWidget {
     this.height = 32.0,
     this.shrinkWrap = false,
     this.buttonStyle = PopupButtonStyle.plain,
-  })  : buttonIcon = null,
-        child = null,
-        width = null,
-        round = false;
+  }) : buttonIcon = null,
+       child = null,
+       width = null,
+       round = false;
 
   /// Creates a round, icon-only popup menu button
   const IOS26PopupMenuButton.icon({
@@ -77,12 +77,12 @@ class IOS26PopupMenuButton<T> extends StatefulWidget {
     this.tint,
     double size = 44.0,
     this.buttonStyle = PopupButtonStyle.glass,
-  })  : buttonLabel = null,
-        child = null,
-        round = true,
-        width = size,
-        height = size,
-        shrinkWrap = false;
+  }) : buttonLabel = null,
+       child = null,
+       round = true,
+       width = size,
+       height = size,
+       shrinkWrap = false;
 
   /// Creates a popup menu button with a custom child widget
   const IOS26PopupMenuButton.widget({
@@ -92,12 +92,12 @@ class IOS26PopupMenuButton<T> extends StatefulWidget {
     this.tint,
     this.buttonStyle = PopupButtonStyle.plain,
     required this.child,
-  })  : buttonLabel = null,
-        buttonIcon = null,
-        round = false,
-        width = null,
-        height = 32.0,
-        shrinkWrap = true;
+  }) : buttonLabel = null,
+       buttonIcon = null,
+       round = false,
+       width = null,
+       height = 32.0,
+       shrinkWrap = true;
 
   /// Text for the button (null when using icon)
   final String? buttonLabel;
@@ -136,7 +136,8 @@ class IOS26PopupMenuButton<T> extends StatefulWidget {
   bool get isIconButton => buttonIcon != null;
 
   @override
-  State<IOS26PopupMenuButton<T>> createState() => _IOS26PopupMenuButtonState<T>();
+  State<IOS26PopupMenuButton<T>> createState() =>
+      _IOS26PopupMenuButtonState<T>();
 }
 
 class _IOS26PopupMenuButtonState<T> extends State<IOS26PopupMenuButton<T>> {
@@ -145,8 +146,10 @@ class _IOS26PopupMenuButtonState<T> extends State<IOS26PopupMenuButton<T>> {
   int? _lastTint;
   double? _intrinsicWidth;
 
-  bool get _isDark => MediaQuery.platformBrightnessOf(context) == Brightness.dark;
-  Color? get _effectiveTint => widget.tint ?? CupertinoTheme.of(context).primaryColor;
+  bool get _isDark =>
+      MediaQuery.platformBrightnessOf(context) == Brightness.dark;
+  Color? get _effectiveTint =>
+      widget.tint ?? CupertinoTheme.of(context).primaryColor;
 
   @override
   void didChangeDependencies() {
@@ -194,7 +197,7 @@ class _IOS26PopupMenuButtonState<T> extends State<IOS26PopupMenuButton<T>> {
           enabled.add(false);
         } else if (e is AdaptivePopupMenuItem<T>) {
           labels.add(e.label);
-          symbols.add(e.icon ?? '');
+          symbols.add(e.icon is String ? e.icon as String : '');
           isDivider.add(false);
           enabled.add(e.enabled);
         }
@@ -215,7 +218,9 @@ class _IOS26PopupMenuButtonState<T> extends State<IOS26PopupMenuButton<T>> {
       };
 
       // Create a unique key based on button label/icon to force recreation on change
-      final viewKey = ValueKey('${widget.buttonLabel}_${widget.buttonIcon}_${widget.child?.runtimeType}_${widget.items.length}');
+      final viewKey = ValueKey(
+        '${widget.buttonLabel}_${widget.buttonIcon}_${widget.child?.runtimeType}_${widget.items.length}',
+      );
 
       final platformView = UiKitView(
         key: viewKey,
@@ -235,7 +240,8 @@ class _IOS26PopupMenuButtonState<T> extends State<IOS26PopupMenuButton<T>> {
           children: [
             widget.child!, // Determines size and is visible
             Positioned.fill(
-              child: platformView, // Native button overlay (transparent but catches touches)
+              child:
+                  platformView, // Native button overlay (transparent but catches touches)
             ),
           ],
         );
@@ -256,7 +262,11 @@ class _IOS26PopupMenuButtonState<T> extends State<IOS26PopupMenuButton<T>> {
 
           return SizedBox(
             height: widget.height,
-            width: widget.width ?? (preferIntrinsic ? width : (hasBoundedWidth ? constraints.maxWidth : null)),
+            width:
+                widget.width ??
+                (preferIntrinsic
+                    ? width
+                    : (hasBoundedWidth ? constraints.maxWidth : null)),
             child: platformView,
           );
         },
@@ -273,7 +283,9 @@ class _IOS26PopupMenuButtonState<T> extends State<IOS26PopupMenuButton<T>> {
 
     return SizedBox(
       height: widget.height,
-      width: widget.isIconButton && widget.round ? (widget.width ?? widget.height) : null,
+      width: widget.isIconButton && widget.round
+          ? (widget.width ?? widget.height)
+          : null,
       child: CupertinoButton(
         padding: widget.isIconButton
             ? const EdgeInsets.all(4)
@@ -287,7 +299,9 @@ class _IOS26PopupMenuButtonState<T> extends State<IOS26PopupMenuButton<T>> {
   }
 
   void _onCreated(int id) {
-    final ch = MethodChannel('adaptive_platform_ui/ios26_popup_menu_button_$id');
+    final ch = MethodChannel(
+      'adaptive_platform_ui/ios26_popup_menu_button_$id',
+    );
     _channel = ch;
     ch.setMethodCallHandler(_onMethodCall);
     _lastTint = _effectiveTint != null ? _colorToARGB(_effectiveTint!) : null;
@@ -360,7 +374,10 @@ class _IOS26PopupMenuButtonState<T> extends State<IOS26PopupMenuButton<T>> {
     }
   }
 
-  Future<void> _showContextMenu(BuildContext context, Offset globalPosition) async {
+  Future<void> _showContextMenu(
+    BuildContext context,
+    Offset globalPosition,
+  ) async {
     final selected = await showCupertinoModalPopup<int>(
       context: context,
       builder: (ctx) {

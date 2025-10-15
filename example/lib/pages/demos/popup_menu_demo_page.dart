@@ -179,7 +179,9 @@ class _PopupMenuDemoPageState extends State<PopupMenuDemoPage> {
             Column(
               children: [
                 AdaptivePopupMenuButton.icon<String>(
-                  icon: 'ellipsis.circle',
+                  icon: PlatformInfo.isIOS26OrHigher()
+                      ? 'ellipsis.circle'
+                      : Icons.more_horiz,
                   items: _iconMenuItems(),
                   onSelected: (index, item) {
                     setState(() {
@@ -207,7 +209,9 @@ class _PopupMenuDemoPageState extends State<PopupMenuDemoPage> {
             Column(
               children: [
                 AdaptivePopupMenuButton.icon<String>(
-                  icon: 'gear',
+                  icon: PlatformInfo.isIOS26OrHigher()
+                      ? 'gear'
+                      : Icons.settings,
                   items: _iconMenuItems(),
                   onSelected: (index, item) {
                     setState(() {
@@ -236,7 +240,9 @@ class _PopupMenuDemoPageState extends State<PopupMenuDemoPage> {
             Column(
               children: [
                 AdaptivePopupMenuButton.icon<String>(
-                  icon: 'square.and.arrow.up',
+                  icon: PlatformInfo.isIOS26OrHigher()
+                      ? 'square.and.arrow.up'
+                      : Icons.share,
                   items: _iconMenuItems(),
                   onSelected: (index, item) {
                     setState(() {
@@ -265,7 +271,9 @@ class _PopupMenuDemoPageState extends State<PopupMenuDemoPage> {
             Column(
               children: [
                 AdaptivePopupMenuButton.icon<String>(
-                  icon: 'star.fill',
+                  icon: PlatformInfo.isIOS26OrHigher()
+                      ? 'star.fill'
+                      : Icons.star,
                   items: _iconMenuItems(),
                   onSelected: (index, item) {
                     setState(() {
@@ -301,32 +309,38 @@ class _PopupMenuDemoPageState extends State<PopupMenuDemoPage> {
           'With Dividers',
           AdaptivePopupMenuButton.text<String>(
             label: 'File',
-            items: const [
+            items: [
               AdaptivePopupMenuItem(
                 label: 'New',
-                icon: 'doc.badge.plus',
+                icon: PlatformInfo.isIOS26OrHigher()
+                    ? 'doc.badge.plus'
+                    : Icons.add,
                 value: 'new',
               ),
               AdaptivePopupMenuItem(
                 label: 'Open',
-                icon: 'folder',
+                icon: PlatformInfo.isIOS26OrHigher() ? 'folder' : Icons.folder,
                 value: 'open',
               ),
               AdaptivePopupMenuDivider(),
               AdaptivePopupMenuItem(
                 label: 'Save',
-                icon: 'square.and.arrow.down',
+                icon: PlatformInfo.isIOS26OrHigher()
+                    ? 'square.and.arrow.down'
+                    : Icons.save,
                 value: 'save',
               ),
               AdaptivePopupMenuItem(
                 label: 'Save As...',
-                icon: 'square.and.arrow.down.on.square',
+                icon: PlatformInfo.isIOS26OrHigher()
+                    ? 'square.and.arrow.down.on.square'
+                    : Icons.save_as_sharp,
                 value: 'save_as',
               ),
               AdaptivePopupMenuDivider(),
               AdaptivePopupMenuItem(
                 label: 'Close',
-                icon: 'xmark',
+                icon: PlatformInfo.isIOS26OrHigher() ? 'xmark' : Icons.close,
                 value: 'close',
               ),
             ],
@@ -343,32 +357,40 @@ class _PopupMenuDemoPageState extends State<PopupMenuDemoPage> {
           'With Disabled Items',
           AdaptivePopupMenuButton.text<String>(
             label: 'Edit',
-            items: const [
+            items: [
               AdaptivePopupMenuItem(
                 label: 'Cut',
-                icon: 'scissors',
+                icon: PlatformInfo.isIOS26OrHigher() ? 'scissors' : Icons.cut,
                 value: 'cut',
               ),
               AdaptivePopupMenuItem(
                 label: 'Copy',
-                icon: 'doc.on.doc',
+                icon: PlatformInfo.isIOS26OrHigher()
+                    ? 'doc.on.doc'
+                    : Icons.copy,
                 value: 'copy',
               ),
               AdaptivePopupMenuItem(
                 label: 'Paste',
-                icon: 'doc.on.clipboard',
+                icon: PlatformInfo.isIOS26OrHigher()
+                    ? 'doc.on.clipboard'
+                    : Icons.paste,
                 value: 'paste',
                 enabled: false,
               ),
               AdaptivePopupMenuDivider(),
               AdaptivePopupMenuItem(
                 label: 'Select All',
-                icon: 'selection.pin.in.out',
+                icon: PlatformInfo.isIOS26OrHigher()
+                    ? 'selection.pin.in.out'
+                    : Icons.select_all,
                 value: 'select_all',
               ),
               AdaptivePopupMenuItem(
                 label: 'Undo',
-                icon: 'arrow.uturn.backward',
+                icon: PlatformInfo.isIOS26OrHigher()
+                    ? 'arrow.uturn.backward'
+                    : Icons.undo,
                 value: 'undo',
                 enabled: false,
               ),
@@ -386,31 +408,35 @@ class _PopupMenuDemoPageState extends State<PopupMenuDemoPage> {
           'System Actions',
           AdaptivePopupMenuButton.icon<String>(
             icon: 'ellipsis',
-            items: const [
+            items: [
               AdaptivePopupMenuItem(
                 label: 'Share',
-                icon: 'square.and.arrow.up',
+                icon: PlatformInfo.isIOS26OrHigher()
+                    ? 'square.and.arrow.up'
+                    : Icons.share,
                 value: 'share',
               ),
               AdaptivePopupMenuItem(
                 label: 'Favorite',
-                icon: 'heart',
+                icon: PlatformInfo.isIOS26OrHigher() ? 'heart' : Icons.favorite,
                 value: 'favorite',
               ),
               AdaptivePopupMenuItem(
                 label: 'Add to Reading List',
-                icon: 'book',
+                icon: PlatformInfo.isIOS26OrHigher() ? 'book' : Icons.book,
                 value: 'reading_list',
               ),
               AdaptivePopupMenuDivider(),
               AdaptivePopupMenuItem(
                 label: 'Report',
-                icon: 'exclamationmark.triangle',
+                icon: PlatformInfo.isIOS26OrHigher()
+                    ? 'exclamationmark.triangle'
+                    : Icons.report,
                 value: 'report',
               ),
               AdaptivePopupMenuItem(
                 label: 'Block',
-                icon: 'nosign',
+                icon: PlatformInfo.isIOS26OrHigher() ? 'nosign' : Icons.block,
                 value: 'block',
               ),
             ],
@@ -751,16 +777,30 @@ class _PopupMenuDemoPageState extends State<PopupMenuDemoPage> {
   }
 
   List<AdaptivePopupMenuEntry> _iconMenuItems() {
-    return const [
-      AdaptivePopupMenuItem(label: 'Copy', icon: 'doc.on.doc', value: 'copy'),
+    return [
+      AdaptivePopupMenuItem(
+        label: 'Copy',
+        icon: PlatformInfo.isIOS26OrHigher() ? 'doc.on.doc' : Icons.file_copy,
+        value: 'copy',
+      ),
       AdaptivePopupMenuItem(
         label: 'Share',
-        icon: 'square.and.arrow.up',
+        icon: PlatformInfo.isIOS26OrHigher()
+            ? 'square.and.arrow.up'
+            : Icons.share,
         value: 'share',
       ),
-      AdaptivePopupMenuItem(label: 'Delete', icon: 'trash', value: 'delete'),
+      AdaptivePopupMenuItem(
+        label: 'Delete',
+        icon: PlatformInfo.isIOS26OrHigher() ? 'trash' : Icons.delete,
+        value: 'delete',
+      ),
       AdaptivePopupMenuDivider(),
-      AdaptivePopupMenuItem(label: 'Info', icon: 'info.circle', value: 'info'),
+      AdaptivePopupMenuItem(
+        label: 'Info',
+        icon: PlatformInfo.isIOS26OrHigher() ? 'info.circle' : Icons.info,
+        value: 'info',
+      ),
     ];
   }
 }

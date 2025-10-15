@@ -97,19 +97,23 @@ class AdaptivePopupMenuButton<T> {
   }
 
   /// Creates a round, icon-only popup menu button
+  ///
+  /// [icon] can be either:
+  /// - String (SF Symbol) for iOS 26+
+  /// - IconData for iOS <26 and Android
   static Widget icon<T>({
     Key? key,
-    required String icon,
+    required dynamic icon,
     required List<AdaptivePopupMenuEntry> items,
     required void Function(int index, AdaptivePopupMenuItem<T> entry) onSelected,
     Color? tint,
     double size = 44.0,
     PopupButtonStyle buttonStyle = PopupButtonStyle.glass,
   }) {
-    // iOS 26+ - Use native iOS 26 popup menu button
+    // iOS 26+ - Use native iOS 26 popup menu button (expects String - SF Symbol)
     if (PlatformInfo.isIOS26OrHigher()) {
       return IOS26PopupMenuButton<T>.icon(
-        buttonIcon: icon,
+        buttonIcon: icon is String ? icon : 'ellipsis.circle',
         items: items,
         onSelected: onSelected,
         tint: tint,
@@ -137,7 +141,7 @@ class AdaptivePopupMenuButton<T> {
         child: CupertinoButton(
           padding: const EdgeInsets.all(4),
           onPressed: () => _showMenu<T>(context, null, items, onSelected),
-          child: const Icon(CupertinoIcons.ellipsis),
+          child: Icon(icon is IconData ? icon : CupertinoIcons.ellipsis),
         ),
       ),
     );
@@ -180,39 +184,6 @@ class AdaptivePopupMenuButton<T> {
       }
     }
   }
-
-  // SF Symbol to Material Icon mapping
-  static IconData _sfSymbolToMaterialIcon(String sfSymbol) {
-    const iconMap = {
-      'ellipsis.circle': Icons.more_horiz,
-      'ellipsis': Icons.more_vert,
-      'gear': Icons.settings,
-      'square.and.arrow.up': Icons.share,
-      'star.fill': Icons.star,
-      'star': Icons.star_border,
-      'doc.on.doc': Icons.content_copy,
-      'trash': Icons.delete,
-      'info.circle': Icons.info,
-      'checkmark': Icons.check,
-      'xmark': Icons.close,
-      'plus': Icons.add,
-      'minus': Icons.remove,
-      'heart': Icons.favorite_border,
-      'heart.fill': Icons.favorite,
-      'book': Icons.book,
-      'folder': Icons.folder,
-      'doc.badge.plus': Icons.note_add,
-      'square.and.arrow.down': Icons.save,
-      'square.and.arrow.down.on.square': Icons.save_as,
-      'scissors': Icons.content_cut,
-      'doc.on.clipboard': Icons.content_paste,
-      'selection.pin.in.out': Icons.select_all,
-      'arrow.uturn.backward': Icons.undo,
-      'exclamationmark.triangle': Icons.warning,
-      'nosign': Icons.block,
-    };
-    return iconMap[sfSymbol] ?? Icons.circle;
-  }
 }
 
 /// Material implementation of popup menu button for Android
@@ -248,7 +219,7 @@ class _MaterialPopupMenuButton<T> extends StatelessWidget {
         size = null;
 
   final String? label;
-  final String? icon;
+  final dynamic icon; // IconData for Android
   final Widget? child;
   final List<AdaptivePopupMenuEntry> items;
   final void Function(int index, AdaptivePopupMenuItem<T> entry) onSelected;
@@ -276,7 +247,7 @@ class _MaterialPopupMenuButton<T> extends StatelessWidget {
               children: [
                 if (item.icon != null) ...[
                   Icon(
-                    AdaptivePopupMenuButton._sfSymbolToMaterialIcon(item.icon!),
+                    item.icon is IconData ? item.icon as IconData : Icons.circle,
                     size: 20,
                   ),
                   const SizedBox(width: 12),
@@ -309,9 +280,7 @@ class _MaterialPopupMenuButton<T> extends StatelessWidget {
         height: size,
         child: PopupMenuButton<int>(
           icon: Icon(
-            icon != null
-                ? AdaptivePopupMenuButton._sfSymbolToMaterialIcon(icon!)
-                : Icons.more_vert,
+            icon is IconData ? icon as IconData : Icons.more_vert,
             color: tint,
           ),
           itemBuilder: (context) => menuItems,
