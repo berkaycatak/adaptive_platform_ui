@@ -159,16 +159,52 @@ showAdaptiveAlertDialog(
 </p>
 
 ```dart
-AdaptivePopupMenuButton<String>(
-  buttonLabel: 'Options',
+// Text button with popup menu
+AdaptivePopupMenuButton.text<String>(
+  label: 'Options',
   items: [
-    PopupMenuItem(value: 'edit', label: 'Edit', icon: 'pencil'),
-    PopupMenuItem(value: 'delete', label: 'Delete', icon: 'trash', destructive: true),
-    PopupMenuItem(value: 'share', label: 'Share', icon: 'square.and.arrow.up'),
+    AdaptivePopupMenuItem(label: 'Edit', icon: 'pencil', value: 'edit'),
+    AdaptivePopupMenuItem(label: 'Delete', icon: 'trash', value: 'delete'),
+    AdaptivePopupMenuDivider(),
+    AdaptivePopupMenuItem(label: 'Share', icon: 'square.and.arrow.up', value: 'share'),
   ],
-  onSelected: (value) {
-    print('Selected: $value');
+  onSelected: (index, item) {
+    print('Selected: ${item.value}');
   },
+)
+
+// Icon button with popup menu
+AdaptivePopupMenuButton.icon<String>(
+  icon: 'ellipsis.circle',
+  items: [...],
+  onSelected: (index, item) { },
+  buttonStyle: PopupButtonStyle.glass,
+)
+
+// Custom widget with popup menu
+AdaptivePopupMenuButton.widget<String>(
+  items: [
+    AdaptivePopupMenuItem(label: 'Option 1', value: 'opt1'),
+    AdaptivePopupMenuItem(label: 'Option 2', value: 'opt2'),
+  ],
+  onSelected: (index, item) {
+    print('Selected: ${item.value}');
+  },
+  child: Container(
+    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+    decoration: BoxDecoration(
+      color: Colors.blue.withOpacity(0.1),
+      borderRadius: BorderRadius.circular(8),
+    ),
+    child: Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(Icons.menu),
+        SizedBox(width: 8),
+        Text('Custom Button'),
+      ],
+    ),
+  ),
 )
 ```
 

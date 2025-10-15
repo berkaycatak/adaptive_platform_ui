@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.6
+* **NEW**: Added `AdaptivePopupMenuButton.widget()` constructor for custom widget support
+  * iOS <26: GestureDetector with CupertinoActionSheet fallback
+  * Android: Material PopupMenuButton with custom child
+  * Added demo examples: Custom Button, Card Style, and Chip Style
+
 ## 0.1.5+2
   * Updated README.md
 
