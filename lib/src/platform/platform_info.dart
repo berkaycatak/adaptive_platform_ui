@@ -15,6 +15,15 @@ class PlatformInfo {
   /// Returns true if the current platform is macOS
   static bool get isMacOS => !kIsWeb && Platform.isMacOS;
 
+  /// Returns true if the current platform is Windows
+  static bool get isWindows => !kIsWeb && Platform.isWindows;
+
+  /// Returns true if the current platform is Linux
+  static bool get isLinux => !kIsWeb && Platform.isLinux;
+
+  /// Returns true if the current platform is Fuchsia
+  static bool get isFuchsia => !kIsWeb && Platform.isFuchsia;
+
   /// Returns true if running on web
   static bool get isWeb => kIsWeb;
 
@@ -72,6 +81,9 @@ class PlatformInfo {
     if (isIOS) return 'iOS $iOSVersion';
     if (isAndroid) return 'Android';
     if (isMacOS) return 'macOS';
+    if (isWindows) return 'Windows';
+    if (isLinux) return 'Linux';
+    if (isFuchsia) return 'Fuchsia';
     if (isWeb) return 'Web';
     return 'Unknown';
   }

@@ -338,6 +338,7 @@ void main() {
           home: Scaffold(
             body: AdaptivePopupMenuButton.text<String>(
               label: 'Options',
+              height: 40.0,
               items: const [
                 AdaptivePopupMenuItem(
                   label: 'Edit',
@@ -363,6 +364,7 @@ void main() {
           home: Scaffold(
             body: AdaptivePopupMenuButton.text<String>(
               label: 'Menu',
+              height: 40.0,
               items: const [
                 AdaptivePopupMenuItem(
                   label: 'Item 1',
@@ -395,6 +397,7 @@ void main() {
           home: Scaffold(
             body: AdaptivePopupMenuButton.text<String>(
               label: 'Select',
+              height: 40.0,
               items: const [
                 AdaptivePopupMenuItem(
                   label: 'Option A',

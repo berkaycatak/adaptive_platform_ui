@@ -8,6 +8,9 @@ void main() {
       final hasValidPlatform = PlatformInfo.isIOS ||
           PlatformInfo.isAndroid ||
           PlatformInfo.isMacOS ||
+          PlatformInfo.isWindows ||
+          PlatformInfo.isLinux ||
+          PlatformInfo.isFuchsia ||
           PlatformInfo.isWeb;
 
       expect(hasValidPlatform, isTrue);
@@ -61,12 +64,15 @@ void main() {
     });
 
     test('only one primary platform is detected', () {
-      // On native platforms, only one of iOS/Android/macOS should be true
+      // On native platforms, only one platform should be true
       if (!PlatformInfo.isWeb) {
         final platformCount = [
           PlatformInfo.isIOS,
           PlatformInfo.isAndroid,
           PlatformInfo.isMacOS,
+          PlatformInfo.isWindows,
+          PlatformInfo.isLinux,
+          PlatformInfo.isFuchsia,
         ].where((p) => p).length;
 
         expect(platformCount, equals(1));
