@@ -24,4 +24,5 @@ class RouteConstants {
   String snackbar = 'snackbar';
   String datePicker = 'date-picker';
   String timePicker = 'time-picker';
+  String listTile = 'list-tile';
 }

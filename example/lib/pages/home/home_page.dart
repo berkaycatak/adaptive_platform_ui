@@ -216,6 +216,15 @@ class _HomePageState extends State<HomePage> {
                 routeName: RouterService.routes.timePicker,
                 isNew: true,
               ),
+              _DemoItem(
+                icon: PlatformInfo.isIOS
+                    ? CupertinoIcons.list_bullet
+                    : Icons.list,
+                title: 'List Tile',
+                description: 'Platform-specific list item tiles',
+                routeName: RouterService.routes.listTile,
+                isNew: true,
+              ),
             ],
           ),
           const SizedBox(height: 12),
