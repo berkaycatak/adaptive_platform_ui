@@ -5,7 +5,7 @@ publish_to: 'none'
 
 environment:
   sdk: ^3.9.2
-  flutter: ">=3.35.0"
+  flutter: ">=1.17.0"
 
 dependencies:
   go_router: ^15.1.2
