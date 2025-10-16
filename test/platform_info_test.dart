@@ -5,7 +5,8 @@ void main() {
   group('PlatformInfo', () {
     test('returns valid platform type', () {
       // At least one platform should be detected
-      final hasValidPlatform = PlatformInfo.isIOS ||
+      final hasValidPlatform =
+          PlatformInfo.isIOS ||
           PlatformInfo.isAndroid ||
           PlatformInfo.isMacOS ||
           PlatformInfo.isWindows ||
@@ -41,10 +42,7 @@ void main() {
       if (PlatformInfo.isIOS) {
         final version = PlatformInfo.iOSVersion;
         if (version > 0) {
-          expect(
-            PlatformInfo.isIOSVersionInRange(version, version),
-            isTrue,
-          );
+          expect(PlatformInfo.isIOSVersionInRange(version, version), isTrue);
           expect(
             PlatformInfo.isIOSVersionInRange(version - 1, version + 1),
             isTrue,

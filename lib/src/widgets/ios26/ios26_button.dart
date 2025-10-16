@@ -68,9 +68,9 @@ class IOS26Button extends StatefulWidget {
     this.padding,
     this.borderRadius,
     this.minSize,
-  })  : child = null,
-        isChildMode = false,
-        sfSymbol = null;
+  }) : child = null,
+       isChildMode = false,
+       sfSymbol = null;
 
   /// Creates an iOS 26 style button with a custom child widget
   /// The child will be overlaid on top of the native button background
@@ -85,10 +85,10 @@ class IOS26Button extends StatefulWidget {
     this.padding,
     this.borderRadius,
     this.minSize,
-  })  : label = '',
-        textColor = null,
-        isChildMode = true,
-        sfSymbol = null;
+  }) : label = '',
+       textColor = null,
+       isChildMode = true,
+       sfSymbol = null;
 
   /// Creates an iOS 26 style button with a native SF Symbol icon
   const IOS26Button.sfSymbol({
@@ -102,10 +102,10 @@ class IOS26Button extends StatefulWidget {
     this.padding,
     this.borderRadius,
     this.minSize,
-  })  : label = '',
-        textColor = null,
-        child = null,
-        isChildMode = false;
+  }) : label = '',
+       textColor = null,
+       child = null,
+       isChildMode = false;
 
   /// The callback that is called when the button is tapped
   final VoidCallback? onPressed;
@@ -185,11 +185,15 @@ class _IOS26ButtonState extends State<IOS26Button> {
 
     // Update native side if properties changed
     if (oldWidget.style != widget.style) {
-      _channel.invokeMethod('setStyle', {'style': _styleToString(widget.style)});
+      _channel.invokeMethod('setStyle', {
+        'style': _styleToString(widget.style),
+      });
     }
 
     if (oldWidget.enabled != widget.enabled) {
-      _channel.invokeMethod('setEnabled', {'enabled': widget.enabled && widget.onPressed != null});
+      _channel.invokeMethod('setEnabled', {
+        'enabled': widget.enabled && widget.onPressed != null,
+      });
     }
 
     if (oldWidget.label != widget.label) {
@@ -225,11 +229,14 @@ class _IOS26ButtonState extends State<IOS26Button> {
       'size': _sizeToString(widget.size),
       'enabled': widget.enabled && widget.onPressed != null,
       'color': widget.color != null ? _colorToHex(widget.color!) : null,
-      'textColor': widget.textColor != null ? _colorToHex(widget.textColor!) : null,
+      'textColor': widget.textColor != null
+          ? _colorToHex(widget.textColor!)
+          : null,
       'isDark': MediaQuery.platformBrightnessOf(context) == Brightness.dark,
       if (widget.sfSymbol != null) 'iconName': widget.sfSymbol!.name,
       if (widget.sfSymbol != null) 'iconSize': widget.sfSymbol!.size,
-      if (widget.sfSymbol?.color != null) 'iconColor': _colorToARGB(widget.sfSymbol!.color!),
+      if (widget.sfSymbol?.color != null)
+        'iconColor': _colorToARGB(widget.sfSymbol!.color!),
     };
   }
 
@@ -301,11 +308,7 @@ class _IOS26ButtonState extends State<IOS26Button> {
             ? Stack(
                 children: [
                   Positioned.fill(child: platformView),
-                  Center(
-                    child: IgnorePointer(
-                      child: widget.child!,
-                    ),
-                  ),
+                  Center(child: IgnorePointer(child: widget.child!)),
                 ],
               )
             : platformView,
@@ -318,7 +321,9 @@ class _IOS26ButtonState extends State<IOS26Button> {
 
   Widget _buildFallbackButton() {
     final buttonColor = widget.color ?? CupertinoColors.systemBlue;
-    final textStyle = TextStyle(color: widget.textColor ?? CupertinoColors.white);
+    final textStyle = TextStyle(
+      color: widget.textColor ?? CupertinoColors.white,
+    );
 
     // If child mode, use the child widget
     final buttonChild = widget.isChildMode
@@ -329,14 +334,16 @@ class _IOS26ButtonState extends State<IOS26Button> {
       case IOS26ButtonStyle.filled:
         return CupertinoButton.filled(
           onPressed: widget.enabled ? widget.onPressed : null,
-          padding: widget.padding ?? const EdgeInsets.symmetric(horizontal: 16.0),
+          padding:
+              widget.padding ?? const EdgeInsets.symmetric(horizontal: 16.0),
           child: buttonChild,
         );
 
       case IOS26ButtonStyle.plain:
         return CupertinoButton(
           onPressed: widget.enabled ? widget.onPressed : null,
-          padding: widget.padding ?? const EdgeInsets.symmetric(horizontal: 16.0),
+          padding:
+              widget.padding ?? const EdgeInsets.symmetric(horizontal: 16.0),
           child: widget.isChildMode
               ? widget.child!
               : Text(
@@ -349,7 +356,8 @@ class _IOS26ButtonState extends State<IOS26Button> {
         return CupertinoButton(
           onPressed: widget.enabled ? widget.onPressed : null,
           color: buttonColor,
-          padding: widget.padding ?? const EdgeInsets.symmetric(horizontal: 16.0),
+          padding:
+              widget.padding ?? const EdgeInsets.symmetric(horizontal: 16.0),
           child: buttonChild,
         );
     }

@@ -28,9 +28,9 @@ class AdaptiveBadge extends StatelessWidget {
     this.offset,
     required this.child,
   }) : assert(
-          count != null || label != null,
-          'Either count or label must be provided',
-        );
+         count != null || label != null,
+         'Either count or label must be provided',
+       );
 
   /// The count to display in the badge
   ///
@@ -81,9 +81,9 @@ class AdaptiveBadge extends StatelessWidget {
     }
 
     // Display "99+" for counts greater than 99
-    final displayText = label ?? (count != null
-        ? (count! > 99 ? '99+' : count!.toString())
-        : '');
+    final displayText =
+        label ??
+        (count != null ? (count! > 99 ? '99+' : count!.toString()) : '');
 
     // iOS - Use custom iOS-style badge
     if (PlatformInfo.isIOS) {
@@ -161,19 +161,23 @@ class _IOSBadge extends StatelessWidget {
       children: [
         child,
         Positioned(
-          top: badgeAlignment == Alignment.topRight ||
+          top:
+              badgeAlignment == Alignment.topRight ||
                   badgeAlignment == Alignment.topLeft
               ? badgeOffset.dy
               : null,
-          bottom: badgeAlignment == Alignment.bottomRight ||
+          bottom:
+              badgeAlignment == Alignment.bottomRight ||
                   badgeAlignment == Alignment.bottomLeft
               ? -badgeOffset.dy
               : null,
-          right: badgeAlignment == Alignment.topRight ||
+          right:
+              badgeAlignment == Alignment.topRight ||
                   badgeAlignment == Alignment.bottomRight
               ? badgeOffset.dx
               : null,
-          left: badgeAlignment == Alignment.topLeft ||
+          left:
+              badgeAlignment == Alignment.topLeft ||
                   badgeAlignment == Alignment.bottomLeft
               ? -badgeOffset.dx
               : null,

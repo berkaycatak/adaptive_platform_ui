@@ -1,5 +1,8 @@
 # Changelog
 
+## [0.1.94+1]
+* fix: improve pub.dev score and CI compatibility
+
 ## [0.1.94]
 * **NEW**: Added `AdaptiveTextField` for platform-specific text input
   * iOS: Uses `CupertinoTextField` with tertiarySystemBackground color and rounded corners

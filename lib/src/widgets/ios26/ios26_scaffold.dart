@@ -109,7 +109,8 @@ class _IOS26ScaffoldState extends State<IOS26Scaffold>
 
     // Only show auto back button if no custom leading widget
     if (widget.leading == null &&
-        (widget.bottomNavigationBar?.items == null || widget.bottomNavigationBar!.items!.isEmpty) &&
+        (widget.bottomNavigationBar?.items == null ||
+            widget.bottomNavigationBar!.items!.isEmpty) &&
         canPop) {
       leadingText = ''; // Empty string = native chevron
       leadingCallback = () {
@@ -118,7 +119,8 @@ class _IOS26ScaffoldState extends State<IOS26Scaffold>
     }
 
     // Determine if toolbar should be shown
-    final hasToolbarContent = widget.title != null ||
+    final hasToolbarContent =
+        widget.title != null ||
         widget.leading != null ||
         leadingText != null ||
         (widget.actions != null && widget.actions!.isNotEmpty);
@@ -205,7 +207,8 @@ class _IOS26ScaffoldState extends State<IOS26Scaffold>
 
     // Only use NotificationListener if tab bar exists (destinations not empty)
     // This allows scroll notifications to bubble up in single-page scenarios
-    final hasBottomNav = widget.bottomNavigationBar?.items != null &&
+    final hasBottomNav =
+        widget.bottomNavigationBar?.items != null &&
         widget.bottomNavigationBar!.items!.isNotEmpty;
 
     return CupertinoPageScaffold(

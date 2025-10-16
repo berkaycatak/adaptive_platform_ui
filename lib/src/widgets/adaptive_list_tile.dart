@@ -66,17 +66,18 @@ class AdaptiveListTile extends StatelessWidget {
     final isDark = MediaQuery.platformBrightnessOf(context) == Brightness.dark;
 
     Widget child = Container(
-      padding: padding ??
-          const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding:
+          padding ?? const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: backgroundColor ??
+        color:
+            backgroundColor ??
             (selected
                 ? (isDark
-                    ? CupertinoColors.systemGrey5.darkColor
-                    : CupertinoColors.systemGrey6.color)
+                      ? CupertinoColors.systemGrey5.darkColor
+                      : CupertinoColors.systemGrey6.color)
                 : (isDark
-                    ? CupertinoColors.darkBackgroundGray
-                    : CupertinoColors.white)),
+                      ? CupertinoColors.darkBackgroundGray
+                      : CupertinoColors.white)),
         border: Border(
           bottom: BorderSide(
             color: isDark
@@ -88,10 +89,7 @@ class AdaptiveListTile extends StatelessWidget {
       ),
       child: Row(
         children: [
-          if (leading != null) ...[
-            leading!,
-            const SizedBox(width: 12),
-          ],
+          if (leading != null) ...[leading!, const SizedBox(width: 12)],
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -104,11 +102,11 @@ class AdaptiveListTile extends StatelessWidget {
                       fontWeight: FontWeight.w400,
                       color: enabled
                           ? (isDark
-                              ? CupertinoColors.white
-                              : CupertinoColors.black)
+                                ? CupertinoColors.white
+                                : CupertinoColors.black)
                           : (isDark
-                              ? CupertinoColors.systemGrey
-                              : CupertinoColors.systemGrey2),
+                                ? CupertinoColors.systemGrey
+                                : CupertinoColors.systemGrey2),
                     ),
                     child: title!,
                   ),
@@ -127,10 +125,7 @@ class AdaptiveListTile extends StatelessWidget {
               ],
             ),
           ),
-          if (trailing != null) ...[
-            const SizedBox(width: 12),
-            trailing!,
-          ],
+          if (trailing != null) ...[const SizedBox(width: 12), trailing!],
         ],
       ),
     );
@@ -158,8 +153,8 @@ class AdaptiveListTile extends StatelessWidget {
       enabled: enabled,
       selected: selected,
       tileColor: backgroundColor,
-      contentPadding: padding ??
-          const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      contentPadding:
+          padding ?? const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
     );
   }
 }

@@ -29,8 +29,9 @@ import 'package:flutter/services.dart';
 /// }
 /// ```
 class IOS26NativeSearchTabBar {
-  static const MethodChannel _channel =
-      MethodChannel('adaptive_platform_ui/native_tab_bar');
+  static const MethodChannel _channel = MethodChannel(
+    'adaptive_platform_ui/native_tab_bar',
+  );
 
   static bool _isEnabled = false;
 
@@ -75,11 +76,13 @@ class IOS26NativeSearchTabBar {
     // Enable native tab bar
     await _channel.invokeMethod('enableNativeTabBar', {
       'tabs': tabs
-          .map((tab) => {
-                'title': tab.title,
-                'sfSymbol': tab.sfSymbol,
-                'isSearch': tab.isSearchTab,
-              })
+          .map(
+            (tab) => {
+              'title': tab.title,
+              'sfSymbol': tab.sfSymbol,
+              'isSearch': tab.isSearchTab,
+            },
+          )
           .toList(),
       'selectedIndex': selectedIndex,
     });

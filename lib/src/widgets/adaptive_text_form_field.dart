@@ -171,28 +171,32 @@ class AdaptiveTextFormField extends StatelessWidget {
               autofocus: autofocus,
               enabled: enabled,
               readOnly: readOnly,
-              prefix: prefix ?? (prefixIcon != null
-                ? Padding(
-                    padding: const EdgeInsets.only(left: 6, right: 6),
-                    child: GestureDetector(
-                      onTap: () {
-                        // Prevent focus when tapping on prefix icon
-                      },
-                      child: prefixIcon,
-                    ),
-                  )
-                : null),
-              suffix: suffix ?? (suffixIcon != null
-                ? Padding(
-                    padding: const EdgeInsets.only(right: 6),
-                    child: GestureDetector(
-                      onTap: () {
-                        // Prevent focus when tapping on suffix icon
-                      },
-                      child: suffixIcon,
-                    ),
-                  )
-                : null),
+              prefix:
+                  prefix ??
+                  (prefixIcon != null
+                      ? Padding(
+                          padding: const EdgeInsets.only(left: 6, right: 6),
+                          child: GestureDetector(
+                            onTap: () {
+                              // Prevent focus when tapping on prefix icon
+                            },
+                            child: prefixIcon,
+                          ),
+                        )
+                      : null),
+              suffix:
+                  suffix ??
+                  (suffixIcon != null
+                      ? Padding(
+                          padding: const EdgeInsets.only(right: 6),
+                          child: GestureDetector(
+                            onTap: () {
+                              // Prevent focus when tapping on suffix icon
+                            },
+                            child: suffixIcon,
+                          ),
+                        )
+                      : null),
               onChanged: (value) {
                 field.didChange(value);
                 onChanged?.call(value);
@@ -200,7 +204,9 @@ class AdaptiveTextFormField extends StatelessWidget {
               onSubmitted: onSubmitted,
               onTap: onTap,
               inputFormatters: inputFormatters,
-              padding: padding ?? const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              padding:
+                  padding ??
+                  const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
                 color: enabled
                     ? CupertinoColors.tertiarySystemBackground
@@ -253,17 +259,18 @@ class AdaptiveTextFormField extends StatelessWidget {
       validator: validator,
       inputFormatters: inputFormatters,
       autovalidateMode: autovalidateMode,
-      decoration: decoration ??
+      decoration:
+          decoration ??
           InputDecoration(
             hintText: placeholder,
             prefixIcon: prefixIcon,
             suffixIcon: suffixIcon,
             prefix: prefix,
             suffix: suffix,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-            contentPadding: padding ?? const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+            contentPadding:
+                padding ??
+                const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
           ),
     );
   }

@@ -154,36 +154,32 @@ class _IOSCheckbox extends StatelessWidget {
           color: value == true
               ? activeColor
               : (isDark
-                  ? CupertinoColors.systemGrey5.darkColor
-                  : CupertinoColors.white),
+                    ? CupertinoColors.systemGrey5.darkColor
+                    : CupertinoColors.white),
           border: Border.all(
             color: value == true
                 ? activeColor
                 : (isDark
-                    ? CupertinoColors.systemGrey3
-                    : CupertinoColors.systemGrey4),
+                      ? CupertinoColors.systemGrey3
+                      : CupertinoColors.systemGrey4),
             width: value == true ? 0 : 1.5,
           ),
           borderRadius: BorderRadius.circular(6),
         ),
         child: value == true
-            ? Icon(
-                CupertinoIcons.checkmark,
-                size: 14,
-                color: checkColor,
-              )
+            ? Icon(CupertinoIcons.checkmark, size: 14, color: checkColor)
             : value == null
-                ? Center(
-                    child: Container(
-                      width: 8,
-                      height: 2,
-                      decoration: BoxDecoration(
-                        color: activeColor,
-                        borderRadius: BorderRadius.circular(1),
-                      ),
-                    ),
-                  )
-                : null,
+            ? Center(
+                child: Container(
+                  width: 8,
+                  height: 2,
+                  decoration: BoxDecoration(
+                    color: activeColor,
+                    borderRadius: BorderRadius.circular(1),
+                  ),
+                ),
+              )
+            : null,
       ),
     );
   }

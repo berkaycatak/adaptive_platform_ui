@@ -94,7 +94,9 @@ class AdaptiveTooltip extends StatelessWidget {
       verticalOffset: verticalOffset,
       padding: padding,
       margin: margin,
-      constraints: height != null ? BoxConstraints(minHeight: height!, maxHeight: height!) : null,
+      constraints: height != null
+          ? BoxConstraints(minHeight: height!, maxHeight: height!)
+          : null,
       decoration: decoration,
       textStyle: textStyle,
       waitDuration: waitDuration,
@@ -164,10 +166,9 @@ class _IOSTooltipState extends State<_IOSTooltip> {
         size: size,
         preferBelow: widget.preferBelow,
         verticalOffset: widget.verticalOffset ?? 24,
-        padding: widget.padding ?? const EdgeInsets.symmetric(
-          horizontal: 12,
-          vertical: 6,
-        ),
+        padding:
+            widget.padding ??
+            const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         margin: widget.margin ?? const EdgeInsets.symmetric(horizontal: 16),
         height: widget.height,
         decoration: widget.decoration,
@@ -242,9 +243,10 @@ class _TooltipOverlayState extends State<_TooltipOverlay>
       duration: const Duration(milliseconds: 200),
       vsync: this,
     );
-    _opacity = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOut),
-    );
+    _opacity = Tween<double>(
+      begin: 0,
+      end: 1,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
     _controller.forward();
   }
 
@@ -266,7 +268,8 @@ class _TooltipOverlayState extends State<_TooltipOverlay>
     if (widget.preferBelow) {
       top = widget.position.dy + widget.size.height + widget.verticalOffset;
     } else {
-      top = widget.position.dy - widget.verticalOffset - 40; // Approximate height
+      top =
+          widget.position.dy - widget.verticalOffset - 40; // Approximate height
     }
 
     // Default iOS tooltip style
@@ -290,17 +293,12 @@ class _TooltipOverlayState extends State<_TooltipOverlay>
           top: top,
           left: 0,
           right: 0,
-          child: Opacity(
-            opacity: _opacity.value,
-            child: child!,
-          ),
+          child: Opacity(opacity: _opacity.value, child: child!),
         );
       },
       child: Center(
         child: Container(
-          constraints: BoxConstraints(
-            maxWidth: screenSize.width - 32,
-          ),
+          constraints: BoxConstraints(maxWidth: screenSize.width - 32),
           margin: widget.margin,
           height: widget.height,
           padding: widget.padding,

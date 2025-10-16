@@ -79,13 +79,15 @@ class _IOS26SwitchState extends State<IOS26Switch> {
       _channel.invokeMethod('setValue', {'value': widget.value});
     }
 
-    if (oldWidget.activeColor != widget.activeColor && widget.activeColor != null) {
+    if (oldWidget.activeColor != widget.activeColor &&
+        widget.activeColor != null) {
       _channel.invokeMethod('setActiveColor', {
         'color': _colorToARGB(widget.activeColor!),
       });
     }
 
-    if (oldWidget.thumbColor != widget.thumbColor && widget.thumbColor != null) {
+    if (oldWidget.thumbColor != widget.thumbColor &&
+        widget.thumbColor != null) {
       _channel.invokeMethod('setThumbColor', {
         'color': _colorToARGB(widget.thumbColor!),
       });
@@ -93,7 +95,9 @@ class _IOS26SwitchState extends State<IOS26Switch> {
 
     // Update enabled state
     if ((oldWidget.onChanged == null) != (widget.onChanged == null)) {
-      _channel.invokeMethod('setEnabled', {'enabled': widget.onChanged != null});
+      _channel.invokeMethod('setEnabled', {
+        'enabled': widget.onChanged != null,
+      });
     }
   }
 
@@ -102,8 +106,10 @@ class _IOS26SwitchState extends State<IOS26Switch> {
       'id': _id,
       'value': widget.value,
       'enabled': widget.onChanged != null,
-      if (widget.activeColor != null) 'activeColor': _colorToARGB(widget.activeColor!),
-      if (widget.thumbColor != null) 'thumbColor': _colorToARGB(widget.thumbColor!),
+      if (widget.activeColor != null)
+        'activeColor': _colorToARGB(widget.activeColor!),
+      if (widget.thumbColor != null)
+        'thumbColor': _colorToARGB(widget.thumbColor!),
       'isDark': MediaQuery.platformBrightnessOf(context) == Brightness.dark,
     };
   }

@@ -237,7 +237,9 @@ class _IOS26NativeTabBarState extends State<IOS26NativeTabBar> {
     }
 
     // Badge counts update
-    final currentBadgeCounts = widget.destinations.map((e) => e.badgeCount).toList();
+    final currentBadgeCounts = widget.destinations
+        .map((e) => e.badgeCount)
+        .toList();
     if (_lastBadgeCounts?.join('|') != currentBadgeCounts.join('|')) {
       await ch.invokeMethod('setBadgeCounts', {
         'badgeCounts': currentBadgeCounts,

@@ -9,10 +9,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: AdaptiveButton(
-              onPressed: () {},
-              label: 'Test Button',
-            ),
+            body: AdaptiveButton(onPressed: () {}, label: 'Test Button'),
           ),
         ),
       );
@@ -57,8 +54,9 @@ void main() {
       expect(pressed, isTrue);
     });
 
-    testWidgets('does not call onPressed when disabled',
-        (WidgetTester tester) async {
+    testWidgets('does not call onPressed when disabled', (
+      WidgetTester tester,
+    ) async {
       bool pressed = false;
 
       await tester.pumpWidget(
@@ -156,10 +154,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: AdaptiveButton.icon(
-              onPressed: () {},
-              icon: Icons.add,
-            ),
+            body: AdaptiveButton.icon(onPressed: () {}, icon: Icons.add),
           ),
         ),
       );
@@ -169,14 +164,13 @@ void main() {
   });
 
   group('IOS26Button', () {
-    testWidgets('creates iOS 26 button with label', (WidgetTester tester) async {
+    testWidgets('creates iOS 26 button with label', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         const CupertinoApp(
           home: CupertinoPageScaffold(
-            child: IOS26Button(
-              onPressed: null,
-              label: 'iOS 26 Button',
-            ),
+            child: IOS26Button(onPressed: null, label: 'iOS 26 Button'),
           ),
         ),
       );
@@ -184,7 +178,9 @@ void main() {
       expect(find.text('iOS 26 Button'), findsOneWidget);
     });
 
-    testWidgets('creates iOS 26 button with child', (WidgetTester tester) async {
+    testWidgets('creates iOS 26 button with child', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         const CupertinoApp(
           home: CupertinoPageScaffold(
@@ -221,8 +217,9 @@ void main() {
       expect(pressed, isTrue);
     });
 
-    testWidgets('renders all iOS 26 button styles',
-        (WidgetTester tester) async {
+    testWidgets('renders all iOS 26 button styles', (
+      WidgetTester tester,
+    ) async {
       for (final style in IOS26ButtonStyle.values) {
         await tester.pumpWidget(
           CupertinoApp(
@@ -241,17 +238,12 @@ void main() {
       }
     });
 
-    testWidgets('renders all iOS 26 button sizes',
-        (WidgetTester tester) async {
+    testWidgets('renders all iOS 26 button sizes', (WidgetTester tester) async {
       for (final size in IOS26ButtonSize.values) {
         await tester.pumpWidget(
           CupertinoApp(
             home: CupertinoPageScaffold(
-              child: IOS26Button(
-                onPressed: () {},
-                size: size,
-                label: '$size',
-              ),
+              child: IOS26Button(onPressed: () {}, size: size, label: '$size'),
             ),
           ),
         );

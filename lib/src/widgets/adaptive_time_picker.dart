@@ -26,10 +26,7 @@ class AdaptiveTimePicker {
     }
 
     // Android - Use Material TimePicker
-    return _showMaterialTimePicker(
-      context: context,
-      initialTime: initialTime,
-    );
+    return _showMaterialTimePicker(context: context, initialTime: initialTime);
   }
 
   static Future<TimeOfDay?> _showCupertinoTimePicker({
@@ -57,7 +54,10 @@ class AdaptiveTimePicker {
             children: [
               // Header with Done button
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 decoration: BoxDecoration(
                   border: Border(
                     bottom: BorderSide(
@@ -76,7 +76,8 @@ class AdaptiveTimePicker {
                     ),
                     CupertinoButton(
                       padding: EdgeInsets.zero,
-                      onPressed: () => Navigator.of(context).pop(selectedDateTime),
+                      onPressed: () =>
+                          Navigator.of(context).pop(selectedDateTime),
                       child: const Text(
                         'Done',
                         style: TextStyle(fontWeight: FontWeight.w600),
@@ -112,9 +113,6 @@ class AdaptiveTimePicker {
     required BuildContext context,
     required TimeOfDay initialTime,
   }) async {
-    return showTimePicker(
-      context: context,
-      initialTime: initialTime,
-    );
+    return showTimePicker(context: context, initialTime: initialTime);
   }
 }

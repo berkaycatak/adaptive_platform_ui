@@ -93,11 +93,7 @@ class _TabBarItem extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            _getIcon(),
-            color: iconColor,
-            size: 24,
-          ),
+          Icon(_getIcon(), color: iconColor, size: 24),
           const SizedBox(height: 2),
           Text(
             destination.label,

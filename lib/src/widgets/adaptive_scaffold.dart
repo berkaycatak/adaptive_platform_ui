@@ -92,12 +92,14 @@ class AdaptiveScaffold extends StatefulWidget {
 }
 
 class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
-  final GlobalKey<_MinimizableTabBarState> _tabBarKey = GlobalKey<_MinimizableTabBarState>();
+  final GlobalKey<_MinimizableTabBarState> _tabBarKey =
+      GlobalKey<_MinimizableTabBarState>();
 
   @override
   Widget build(BuildContext context) {
     final useNativeToolbar = widget.appBar?.useNativeToolbar ?? false;
-    final useNativeBottomBar = widget.bottomNavigationBar?.useNativeBottomBar ?? true;
+    final useNativeBottomBar =
+        widget.bottomNavigationBar?.useNativeBottomBar ?? true;
 
     // iOS 26+ with native toolbar enabled - Use IOS26Scaffold
     if (PlatformInfo.isIOS26OrHigher() && useNativeToolbar) {
@@ -111,7 +113,8 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
         // GoRouter's StatefulNavigationShell already manages children
         // Don't replicate, just use it directly
         childrenList = [widget.body ?? const SizedBox.shrink()];
-      } else if (widget.bottomNavigationBar?.items != null && widget.bottomNavigationBar!.items!.isNotEmpty) {
+      } else if (widget.bottomNavigationBar?.items != null &&
+          widget.bottomNavigationBar!.items!.isNotEmpty) {
         // Tab-based navigation: replicate single body for all tabs with unique keys
         childrenList = List.generate(
           widget.bottomNavigationBar!.items!.length,
@@ -147,7 +150,8 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
       if (PlatformInfo.isIOS26OrHigher() &&
           !useNativeToolbar &&
           widget.appBar?.leading == null &&
-          (widget.bottomNavigationBar?.items == null || widget.bottomNavigationBar!.items!.isEmpty)) {
+          (widget.bottomNavigationBar?.items == null ||
+              widget.bottomNavigationBar!.items!.isEmpty)) {
         // Check if we can pop AND this is the current route (to prevent showing on previous page during transition)
         final canPop = Navigator.maybeOf(context)?.canPop() ?? false;
         final isCurrent = ModalRoute.of(context)?.isCurrent ?? true;
@@ -176,19 +180,26 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
 
         // Priority 1: Custom CupertinoNavigationBar (if provided and useNativeToolbar is false)
         if (widget.appBar?.cupertinoNavigationBar != null) {
-          navigationBar = widget.appBar!.cupertinoNavigationBar as ObstructingPreferredSizeWidget;
+          navigationBar =
+              widget.appBar!.cupertinoNavigationBar
+                  as ObstructingPreferredSizeWidget;
         }
         // Priority 2: Build from title, actions, leading (if appBar has content)
         else if (widget.appBar != null &&
             (widget.appBar!.title != null ||
-                (widget.appBar!.actions != null && widget.appBar!.actions!.isNotEmpty) ||
+                (widget.appBar!.actions != null &&
+                    widget.appBar!.actions!.isNotEmpty) ||
                 effectiveLeading != null)) {
           navigationBar = CupertinoNavigationBar(
             automaticallyImplyLeading: PlatformInfo.isIOS26OrHigher()
                 ? false
                 : true, // Let CupertinoNavigationBar handle back button for iOS < 26
-            middle: widget.appBar!.title != null ? Text(widget.appBar!.title!) : null,
-            trailing: widget.appBar!.actions != null && widget.appBar!.actions!.isNotEmpty
+            middle: widget.appBar!.title != null
+                ? Text(widget.appBar!.title!)
+                : null,
+            trailing:
+                widget.appBar!.actions != null &&
+                    widget.appBar!.actions!.isNotEmpty
                 ? Row(
                     mainAxisSize: MainAxisSize.min,
                     children: widget.appBar!.actions!.map((action) {
@@ -247,8 +258,10 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
 
                 final IconData? selectedIconData = dest.selectedIcon != null
                     ? (dest.selectedIcon is String
-                        ? _sfSymbolToCupertinoIcon(dest.selectedIcon as String)
-                        : dest.selectedIcon as IconData)
+                          ? _sfSymbolToCupertinoIcon(
+                              dest.selectedIcon as String,
+                            )
+                          : dest.selectedIcon as IconData)
                     : null;
 
                 // Wrap icons with badge if badgeCount is provided
@@ -289,7 +302,9 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
                   onNotification: (notification) {
                     // Forward scroll notifications to _MinimizableTabBar state (iOS 26+ native only)
                     if (PlatformInfo.isIOS26OrHigher() && useNativeBottomBar) {
-                      _tabBarKey.currentState?.handleScrollNotification(notification);
+                      _tabBarKey.currentState?.handleScrollNotification(
+                        notification,
+                      );
                     }
                     return false; // Let it bubble up
                   },
@@ -323,19 +338,26 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
 
       // Priority 1: Custom CupertinoNavigationBar (if provided and useNativeToolbar is false)
       if (widget.appBar?.cupertinoNavigationBar != null) {
-        navigationBar = widget.appBar!.cupertinoNavigationBar as ObstructingPreferredSizeWidget;
+        navigationBar =
+            widget.appBar!.cupertinoNavigationBar
+                as ObstructingPreferredSizeWidget;
       }
       // Priority 2: Build from title, actions, leading (if appBar has content)
       else if (widget.appBar != null &&
           (widget.appBar!.title != null ||
-              (widget.appBar!.actions != null && widget.appBar!.actions!.isNotEmpty) ||
+              (widget.appBar!.actions != null &&
+                  widget.appBar!.actions!.isNotEmpty) ||
               effectiveLeading != null)) {
         navigationBar = CupertinoNavigationBar(
           automaticallyImplyLeading: PlatformInfo.isIOS26OrHigher()
               ? false
               : true, // Let CupertinoNavigationBar handle back button for iOS < 26
-          middle: widget.appBar!.title != null ? Text(widget.appBar!.title!) : null,
-          trailing: widget.appBar!.actions != null && widget.appBar!.actions!.isNotEmpty
+          middle: widget.appBar!.title != null
+              ? Text(widget.appBar!.title!)
+              : null,
+          trailing:
+              widget.appBar!.actions != null &&
+                  widget.appBar!.actions!.isNotEmpty
               ? Row(
                   mainAxisSize: MainAxisSize.min,
                   children: widget.appBar!.actions!.map((action) {
@@ -389,10 +411,13 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
       // Priority 2: Build from title, actions, leading (if appBar has content)
       else if (widget.appBar != null &&
           (widget.appBar!.title != null ||
-              (widget.appBar!.actions != null && widget.appBar!.actions!.isNotEmpty) ||
+              (widget.appBar!.actions != null &&
+                  widget.appBar!.actions!.isNotEmpty) ||
               widget.appBar!.leading != null)) {
         appBar = AppBar(
-          title: widget.appBar!.title != null ? Text(widget.appBar!.title!) : null,
+          title: widget.appBar!.title != null
+              ? Text(widget.appBar!.title!)
+              : null,
           actions: widget.appBar!.actions?.map((action) {
             if (action.title != null) {
               return TextButton(
@@ -426,13 +451,15 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
           destinations: widget.bottomNavigationBar!.items!.map((dest) {
             // Convert icon to IconData if it's a String (SF Symbol - fallback to Icons)
             final IconData iconData = dest.icon is String
-                ? Icons.circle // Fallback for Android if SF Symbol is provided
+                ? Icons
+                      .circle // Fallback for Android if SF Symbol is provided
                 : dest.icon as IconData;
 
             final IconData? selectedIconData = dest.selectedIcon != null
                 ? (dest.selectedIcon is String
-                    ? Icons.circle // Fallback for Android
-                    : dest.selectedIcon as IconData)
+                      ? Icons
+                            .circle // Fallback for Android
+                      : dest.selectedIcon as IconData)
                 : null;
 
             // Wrap icons with badge if badgeCount is provided
@@ -483,10 +510,13 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
     // Priority 2: Build from title, actions, leading (if appBar has content)
     else if (widget.appBar != null &&
         (widget.appBar!.title != null ||
-            (widget.appBar!.actions != null && widget.appBar!.actions!.isNotEmpty) ||
+            (widget.appBar!.actions != null &&
+                widget.appBar!.actions!.isNotEmpty) ||
             widget.appBar!.leading != null)) {
       appBar = AppBar(
-        title: widget.appBar!.title != null ? Text(widget.appBar!.title!) : null,
+        title: widget.appBar!.title != null
+            ? Text(widget.appBar!.title!)
+            : null,
         actions: widget.appBar!.actions?.map((action) {
           if (action.title != null) {
             return TextButton(
@@ -580,10 +610,7 @@ class _MinimizableTabBarState extends State<_MinimizableTabBar>
       duration: const Duration(milliseconds: 200),
       vsync: this,
     );
-    _animation = CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeInOut,
-    );
+    _animation = CurvedAnimation(parent: _controller, curve: Curves.easeInOut);
   }
 
   @override
@@ -648,10 +675,7 @@ class _MinimizableTabBarState extends State<_MinimizableTabBar>
         return Transform.scale(
           scale: scale,
           alignment: Alignment.bottomCenter,
-          child: Opacity(
-            opacity: opacity,
-            child: child,
-          ),
+          child: Opacity(opacity: opacity, child: child),
         );
       },
       child: IOS26NativeTabBar(

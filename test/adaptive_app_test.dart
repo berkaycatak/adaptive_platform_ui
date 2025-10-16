@@ -7,11 +7,7 @@ void main() {
   group('AdaptiveApp', () {
     testWidgets('creates app with home page', (WidgetTester tester) async {
       await tester.pumpWidget(
-        AdaptiveApp(
-          home: const Scaffold(
-            body: Text('Home Page'),
-          ),
-        ),
+        AdaptiveApp(home: const Scaffold(body: Text('Home Page'))),
       );
 
       expect(find.text('Home Page'), findsOneWidget);
@@ -21,9 +17,7 @@ void main() {
       await tester.pumpWidget(
         AdaptiveApp(
           title: 'Test App',
-          home: const Scaffold(
-            body: Text('Content'),
-          ),
+          home: const Scaffold(body: Text('Content')),
         ),
       );
 
@@ -67,8 +61,9 @@ void main() {
       expect(find.text('Home'), findsNothing);
     });
 
-    testWidgets('calls onGenerateRoute for unknown routes',
-        (WidgetTester tester) async {
+    testWidgets('calls onGenerateRoute for unknown routes', (
+      WidgetTester tester,
+    ) async {
       bool onGenerateRouteCalled = false;
 
       await tester.pumpWidget(
@@ -94,8 +89,9 @@ void main() {
       expect(find.text('Custom'), findsOneWidget);
     });
 
-    testWidgets('calls onUnknownRoute for invalid routes',
-        (WidgetTester tester) async {
+    testWidgets('calls onUnknownRoute for invalid routes', (
+      WidgetTester tester,
+    ) async {
       bool onUnknownRouteCalled = false;
 
       await tester.pumpWidget(
@@ -107,7 +103,8 @@ void main() {
               builder: (context) => const Scaffold(body: Text('Not Found')),
             );
           },
-          onGenerateRoute: (settings) => null, // Return null to trigger onUnknownRoute
+          onGenerateRoute: (settings) =>
+              null, // Return null to trigger onUnknownRoute
         ),
       );
 
@@ -130,9 +127,7 @@ void main() {
               ],
             );
           },
-          home: const Scaffold(
-            body: Text('Content'),
-          ),
+          home: const Scaffold(body: Text('Content')),
         ),
       );
 
@@ -146,9 +141,7 @@ void main() {
       await tester.pumpWidget(
         AdaptiveApp(
           navigatorKey: navigatorKey,
-          home: const Scaffold(
-            body: Text('Home'),
-          ),
+          home: const Scaffold(body: Text('Home')),
         ),
       );
 
@@ -162,9 +155,7 @@ void main() {
       await tester.pumpWidget(
         AdaptiveApp(
           navigatorObservers: [observer],
-          home: const Scaffold(
-            body: Text('Home'),
-          ),
+          home: const Scaffold(body: Text('Home')),
         ),
       );
 
@@ -180,9 +171,7 @@ void main() {
             generatedTitle = 'Generated Title';
             return generatedTitle!;
           },
-          home: const Scaffold(
-            body: Text('Home'),
-          ),
+          home: const Scaffold(body: Text('Home')),
         ),
       );
 
@@ -193,21 +182,17 @@ void main() {
     testWidgets('respects supportedLocales', (WidgetTester tester) async {
       await tester.pumpWidget(
         const AdaptiveApp(
-          supportedLocales: [
-            Locale('en', 'US'),
-            Locale('tr', 'TR'),
-          ],
-          home: Scaffold(
-            body: Text('Multi-locale App'),
-          ),
+          supportedLocales: [Locale('en', 'US'), Locale('tr', 'TR')],
+          home: Scaffold(body: Text('Multi-locale App')),
         ),
       );
 
       expect(find.text('Multi-locale App'), findsOneWidget);
     });
 
-    testWidgets('applies material theme on Android',
-        (WidgetTester tester) async {
+    testWidgets('applies material theme on Android', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         AdaptiveApp(
           materialLightTheme: ThemeData(
@@ -217,9 +202,7 @@ void main() {
           home: Builder(
             builder: (context) {
               final theme = Theme.of(context);
-              return Scaffold(
-                body: Text('Primary: ${theme.primaryColor}'),
-              );
+              return Scaffold(body: Text('Primary: ${theme.primaryColor}'));
             },
           ),
         ),
@@ -228,20 +211,17 @@ void main() {
       expect(find.textContaining('Primary:'), findsOneWidget);
     });
 
-    testWidgets('applies dark theme when themeMode is dark',
-        (WidgetTester tester) async {
+    testWidgets('applies dark theme when themeMode is dark', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         AdaptiveApp(
           themeMode: ThemeMode.dark,
-          materialDarkTheme: ThemeData(
-            brightness: Brightness.dark,
-          ),
+          materialDarkTheme: ThemeData(brightness: Brightness.dark),
           home: Builder(
             builder: (context) {
               final theme = Theme.of(context);
-              return Scaffold(
-                body: Text('Brightness: ${theme.brightness}'),
-              );
+              return Scaffold(body: Text('Brightness: ${theme.brightness}'));
             },
           ),
         ),
@@ -250,21 +230,18 @@ void main() {
       expect(find.text('Brightness: Brightness.dark'), findsOneWidget);
     });
 
-    testWidgets('material callback receives correct parameters',
-        (WidgetTester tester) async {
+    testWidgets('material callback receives correct parameters', (
+      WidgetTester tester,
+    ) async {
       PlatformTarget? receivedPlatform;
 
       await tester.pumpWidget(
         AdaptiveApp(
           material: (context, platform) {
             receivedPlatform = platform;
-            return const MaterialAppData(
-              debugShowCheckedModeBanner: false,
-            );
+            return const MaterialAppData(debugShowCheckedModeBanner: false);
           },
-          home: const Scaffold(
-            body: Text('Test'),
-          ),
+          home: const Scaffold(body: Text('Test')),
         ),
       );
 
@@ -277,19 +254,13 @@ void main() {
     testWidgets('creates router app', (WidgetTester tester) async {
       final routerConfig = RouterConfig<Object>(
         routeInformationProvider: PlatformRouteInformationProvider(
-          initialRouteInformation: RouteInformation(
-            uri: Uri(path: '/'),
-          ),
+          initialRouteInformation: RouteInformation(uri: Uri(path: '/')),
         ),
         routeInformationParser: _TestRouteInformationParser(),
         routerDelegate: _TestRouterDelegate(),
       );
 
-      await tester.pumpWidget(
-        AdaptiveApp.router(
-          routerConfig: routerConfig,
-        ),
-      );
+      await tester.pumpWidget(AdaptiveApp.router(routerConfig: routerConfig));
 
       expect(find.text('Router Home'), findsOneWidget);
     });
@@ -297,9 +268,7 @@ void main() {
     testWidgets('router app uses builder', (WidgetTester tester) async {
       final routerConfig = RouterConfig<Object>(
         routeInformationProvider: PlatformRouteInformationProvider(
-          initialRouteInformation: RouteInformation(
-            uri: Uri(path: '/'),
-          ),
+          initialRouteInformation: RouteInformation(uri: Uri(path: '/')),
         ),
         routeInformationParser: _TestRouteInformationParser(),
         routerDelegate: _TestRouterDelegate(),
@@ -326,19 +295,14 @@ void main() {
     testWidgets('router app respects title', (WidgetTester tester) async {
       final routerConfig = RouterConfig<Object>(
         routeInformationProvider: PlatformRouteInformationProvider(
-          initialRouteInformation: RouteInformation(
-            uri: Uri(path: '/'),
-          ),
+          initialRouteInformation: RouteInformation(uri: Uri(path: '/')),
         ),
         routeInformationParser: _TestRouteInformationParser(),
         routerDelegate: _TestRouterDelegate(),
       );
 
       await tester.pumpWidget(
-        AdaptiveApp.router(
-          routerConfig: routerConfig,
-          title: 'Router App',
-        ),
+        AdaptiveApp.router(routerConfig: routerConfig, title: 'Router App'),
       );
 
       expect(find.text('Router Home'), findsOneWidget);
@@ -415,7 +379,8 @@ void main() {
 class _TestRouteInformationParser extends RouteInformationParser<String> {
   @override
   Future<String> parseRouteInformation(
-      RouteInformation routeInformation) async {
+    RouteInformation routeInformation,
+  ) async {
     return routeInformation.uri.path;
   }
 
@@ -439,13 +404,7 @@ class _TestRouterDelegate extends RouterDelegate<String>
   Widget build(BuildContext context) {
     return Navigator(
       key: navigatorKey,
-      pages: const [
-        MaterialPage(
-          child: Scaffold(
-            body: Text('Router Home'),
-          ),
-        ),
-      ],
+      pages: const [MaterialPage(child: Scaffold(body: Text('Router Home')))],
       onDidRemovePage: (page) {},
     );
   }

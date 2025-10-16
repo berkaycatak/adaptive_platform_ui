@@ -97,10 +97,7 @@ class AdaptiveSnackBar {
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(
-          message,
-          style: TextStyle(color: textColor),
-        ),
+        content: Text(message, style: TextStyle(color: textColor)),
         backgroundColor: backgroundColor,
         duration: duration,
         action: action != null
@@ -174,18 +171,12 @@ class _IOSSnackBarState extends State<_IOSSnackBar>
     _slideAnimation = Tween<Offset>(
       begin: const Offset(0, -1),
       end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeOut,
-    ));
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
 
     _opacityAnimation = Tween<double>(
       begin: 0.0,
       end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeOut,
-    ));
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
 
     _controller.forward();
 
@@ -272,11 +263,7 @@ class _IOSSnackBarState extends State<_IOSSnackBar>
                   ),
                   child: Row(
                     children: [
-                      Icon(
-                        _getIcon(),
-                        color: Colors.white,
-                        size: 24,
-                      ),
+                      Icon(_getIcon(), color: Colors.white, size: 24),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(

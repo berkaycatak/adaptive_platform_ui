@@ -152,14 +152,14 @@ class _IOSRadio<T> extends StatelessWidget {
           color: _selected
               ? activeColor
               : (isDark
-                  ? CupertinoColors.systemGrey5.darkColor
-                  : CupertinoColors.white),
+                    ? CupertinoColors.systemGrey5.darkColor
+                    : CupertinoColors.white),
           border: Border.all(
             color: _selected
                 ? activeColor
                 : (isDark
-                    ? CupertinoColors.systemGrey3
-                    : CupertinoColors.systemGrey4),
+                      ? CupertinoColors.systemGrey3
+                      : CupertinoColors.systemGrey4),
             width: _selected ? 6 : 1.5,
           ),
         ),

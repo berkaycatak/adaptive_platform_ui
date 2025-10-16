@@ -7,11 +7,7 @@ void main() {
     testWidgets('creates card with child', (WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
-          home: Scaffold(
-            body: AdaptiveCard(
-              child: Text('Card Content'),
-            ),
-          ),
+          home: Scaffold(body: AdaptiveCard(child: Text('Card Content'))),
         ),
       );
 
@@ -40,10 +36,7 @@ void main() {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
-            body: AdaptiveCard(
-              color: Colors.blue,
-              child: Text('Colored Card'),
-            ),
+            body: AdaptiveCard(color: Colors.blue, child: Text('Colored Card')),
           ),
         ),
       );
@@ -70,10 +63,7 @@ void main() {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
-            body: AdaptiveCard(
-              elevation: 8,
-              child: Text('Elevated Card'),
-            ),
+            body: AdaptiveCard(elevation: 8, child: Text('Elevated Card')),
           ),
         ),
       );
@@ -87,10 +77,7 @@ void main() {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
-            body: AdaptiveBadge(
-              count: 5,
-              child: Icon(Icons.notifications),
-            ),
+            body: AdaptiveBadge(count: 5, child: Icon(Icons.notifications)),
           ),
         ),
       );
@@ -103,10 +90,7 @@ void main() {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
-            body: AdaptiveBadge(
-              label: 'NEW',
-              child: Icon(Icons.mail),
-            ),
+            body: AdaptiveBadge(label: 'NEW', child: Icon(Icons.mail)),
           ),
         ),
       );
@@ -119,10 +103,7 @@ void main() {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
-            body: AdaptiveBadge(
-              count: 150,
-              child: Icon(Icons.message),
-            ),
+            body: AdaptiveBadge(count: 150, child: Icon(Icons.message)),
           ),
         ),
       );
@@ -146,8 +127,9 @@ void main() {
       expect(find.text('0'), findsOneWidget);
     });
 
-    testWidgets('hides badge when count is 0 and showZero is false',
-        (WidgetTester tester) async {
+    testWidgets('hides badge when count is 0 and showZero is false', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
@@ -163,8 +145,7 @@ void main() {
       expect(find.text('0'), findsNothing);
     });
 
-    testWidgets('respects custom backgroundColor',
-        (WidgetTester tester) async {
+    testWidgets('respects custom backgroundColor', (WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
@@ -269,19 +250,16 @@ void main() {
     testWidgets('creates list tile with title', (WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
-          home: Scaffold(
-            body: AdaptiveListTile(
-              title: Text('Title'),
-            ),
-          ),
+          home: Scaffold(body: AdaptiveListTile(title: Text('Title'))),
         ),
       );
 
       expect(find.text('Title'), findsOneWidget);
     });
 
-    testWidgets('creates list tile with title and subtitle',
-        (WidgetTester tester) async {
+    testWidgets('creates list tile with title and subtitle', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
@@ -355,10 +333,7 @@ void main() {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
-            body: AdaptiveListTile(
-              title: Text('Selected'),
-              selected: true,
-            ),
+            body: AdaptiveListTile(title: Text('Selected'), selected: true),
           ),
         ),
       );
@@ -370,10 +345,7 @@ void main() {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
-            body: AdaptiveListTile(
-              title: Text('Disabled'),
-              enabled: false,
-            ),
+            body: AdaptiveListTile(title: Text('Disabled'), enabled: false),
           ),
         ),
       );
@@ -381,8 +353,9 @@ void main() {
       expect(find.text('Disabled'), findsOneWidget);
     });
 
-    testWidgets('calls onLongPress when long pressed',
-        (WidgetTester tester) async {
+    testWidgets('calls onLongPress when long pressed', (
+      WidgetTester tester,
+    ) async {
       bool longPressed = false;
 
       await tester.pumpWidget(

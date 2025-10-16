@@ -4,15 +4,13 @@ import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 
 void main() {
   group('AdaptiveSwitch', () {
-    testWidgets('creates switch with initial value',
-        (WidgetTester tester) async {
+    testWidgets('creates switch with initial value', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: AdaptiveSwitch(
-              value: true,
-              onChanged: (value) {},
-            ),
+            body: AdaptiveSwitch(value: true, onChanged: (value) {}),
           ),
         ),
       );
@@ -42,18 +40,14 @@ void main() {
       expect(value, isTrue);
     });
 
-    testWidgets('does not call onChanged when disabled',
-        (WidgetTester tester) async {
+    testWidgets('does not call onChanged when disabled', (
+      WidgetTester tester,
+    ) async {
       bool value = false;
 
       await tester.pumpWidget(
         MaterialApp(
-          home: Scaffold(
-            body: AdaptiveSwitch(
-              value: value,
-              onChanged: null,
-            ),
-          ),
+          home: Scaffold(body: AdaptiveSwitch(value: value, onChanged: null)),
         ),
       );
 
@@ -79,15 +73,13 @@ void main() {
   });
 
   group('AdaptiveSlider', () {
-    testWidgets('creates slider with initial value',
-        (WidgetTester tester) async {
+    testWidgets('creates slider with initial value', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: AdaptiveSlider(
-              value: 0.5,
-              onChanged: (value) {},
-            ),
+            body: AdaptiveSlider(value: 0.5, onChanged: (value) {}),
           ),
         ),
       );
@@ -157,15 +149,13 @@ void main() {
   });
 
   group('AdaptiveCheckbox', () {
-    testWidgets('creates checkbox with initial value',
-        (WidgetTester tester) async {
+    testWidgets('creates checkbox with initial value', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: AdaptiveCheckbox(
-              value: true,
-              onChanged: (value) {},
-            ),
+            body: AdaptiveCheckbox(value: true, onChanged: (value) {}),
           ),
         ),
       );
@@ -215,16 +205,12 @@ void main() {
       expect(find.byType(AdaptiveCheckbox), findsOneWidget);
     });
 
-    testWidgets('does not call onChanged when disabled',
-        (WidgetTester tester) async {
+    testWidgets('does not call onChanged when disabled', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         const MaterialApp(
-          home: Scaffold(
-            body: AdaptiveCheckbox(
-              value: false,
-              onChanged: null,
-            ),
-          ),
+          home: Scaffold(body: AdaptiveCheckbox(value: false, onChanged: null)),
         ),
       );
 
@@ -233,8 +219,9 @@ void main() {
   });
 
   group('AdaptiveRadio', () {
-    testWidgets('creates radio with initial value',
-        (WidgetTester tester) async {
+    testWidgets('creates radio with initial value', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -273,16 +260,13 @@ void main() {
       expect(groupValue, 2);
     });
 
-    testWidgets('does not call onChanged when disabled',
-        (WidgetTester tester) async {
+    testWidgets('does not call onChanged when disabled', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
-            body: AdaptiveRadio<int>(
-              value: 1,
-              groupValue: 1,
-              onChanged: null,
-            ),
+            body: AdaptiveRadio<int>(value: 1, groupValue: 1, onChanged: null),
           ),
         ),
       );

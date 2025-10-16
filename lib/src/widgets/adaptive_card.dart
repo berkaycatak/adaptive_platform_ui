@@ -81,7 +81,9 @@ class AdaptiveCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final content = padding != null ? Padding(padding: padding!, child: child) : child;
+    final content = padding != null
+        ? Padding(padding: padding!, child: child)
+        : child;
 
     // iOS - Use custom iOS-style card
     if (PlatformInfo.isIOS) {
@@ -100,7 +102,8 @@ class AdaptiveCard extends StatelessWidget {
       return Card(
         color: color,
         elevation: elevation,
-        shape: shape ??
+        shape:
+            shape ??
             (borderRadius != null
                 ? RoundedRectangleBorder(borderRadius: borderRadius!)
                 : null),
@@ -116,7 +119,8 @@ class AdaptiveCard extends StatelessWidget {
     return Card(
       color: color,
       elevation: elevation,
-      shape: shape ??
+      shape:
+          shape ??
           (borderRadius != null
               ? RoundedRectangleBorder(borderRadius: borderRadius!)
               : null),
@@ -153,10 +157,9 @@ class _IOSCard extends StatelessWidget {
     final isDark = brightness == Brightness.dark;
 
     // Default iOS card background color
-    final backgroundColor = color ??
-        (isDark
-            ? CupertinoColors.darkBackgroundGray
-            : CupertinoColors.white);
+    final backgroundColor =
+        color ??
+        (isDark ? CupertinoColors.darkBackgroundGray : CupertinoColors.white);
 
     // Default border radius
     final radius = borderRadius ?? BorderRadius.circular(12);
@@ -186,10 +189,7 @@ class _IOSCard extends StatelessWidget {
         borderRadius: radius,
         clipBehavior: clipBehavior,
         child: semanticContainer
-            ? Semantics(
-                container: true,
-                child: child,
-              )
+            ? Semantics(container: true, child: child)
             : child,
       ),
     );

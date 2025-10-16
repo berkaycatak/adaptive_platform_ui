@@ -62,7 +62,10 @@ class AdaptiveDatePicker {
             children: [
               // Header with Done button
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 decoration: BoxDecoration(
                   border: Border(
                     bottom: BorderSide(

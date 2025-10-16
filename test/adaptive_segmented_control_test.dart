@@ -4,8 +4,9 @@ import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 
 void main() {
   group('AdaptiveSegmentedControl', () {
-    testWidgets('creates segmented control with labels',
-        (WidgetTester tester) async {
+    testWidgets('creates segmented control with labels', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -29,8 +30,9 @@ void main() {
       expect(find.text('Three'), findsOneWidget);
     });
 
-    testWidgets('calls onValueChanged when segment tapped',
-        (WidgetTester tester) async {
+    testWidgets('calls onValueChanged when segment tapped', (
+      WidgetTester tester,
+    ) async {
       int selectedIndex = 0;
 
       await tester.pumpWidget(
@@ -85,8 +87,9 @@ void main() {
   });
 
   group('AdaptiveAlertDialog', () {
-    testWidgets('shows alert dialog with title and message',
-        (WidgetTester tester) async {
+    testWidgets('shows alert dialog with title and message', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -97,12 +100,7 @@ void main() {
                     context: context,
                     title: 'Alert',
                     message: 'This is a message',
-                    actions: [
-                      AlertAction(
-                        title: 'OK',
-                        onPressed: () {},
-                      ),
-                    ],
+                    actions: [AlertAction(title: 'OK', onPressed: () {})],
                   );
                 },
                 child: const Text('Show Dialog'),
@@ -120,8 +118,9 @@ void main() {
       expect(find.text('OK'), findsOneWidget);
     });
 
-    testWidgets('calls action onPressed when button tapped',
-        (WidgetTester tester) async {
+    testWidgets('calls action onPressed when button tapped', (
+      WidgetTester tester,
+    ) async {
       bool actionPressed = false;
 
       await tester.pumpWidget(
@@ -174,12 +173,7 @@ void main() {
                     input: const AdaptiveAlertDialogInput(
                       placeholder: 'Your name',
                     ),
-                    actions: [
-                      AlertAction(
-                        title: 'Submit',
-                        onPressed: () {},
-                      ),
-                    ],
+                    actions: [AlertAction(title: 'Submit', onPressed: () {})],
                   );
                 },
                 child: const Text('Show Input Dialog'),
@@ -198,8 +192,9 @@ void main() {
       expect(find.text('Submit'), findsOneWidget);
     });
 
-    testWidgets('respects destructive action style',
-        (WidgetTester tester) async {
+    testWidgets('respects destructive action style', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -240,8 +235,9 @@ void main() {
   });
 
   group('AdaptiveContextMenu', () {
-    testWidgets('creates context menu with actions',
-        (WidgetTester tester) async {
+    testWidgets('creates context menu with actions', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -297,8 +293,9 @@ void main() {
       expect(find.text('Share'), findsOneWidget);
     });
 
-    testWidgets('calls action onPressed when action tapped',
-        (WidgetTester tester) async {
+    testWidgets('calls action onPressed when action tapped', (
+      WidgetTester tester,
+    ) async {
       bool actionPressed = false;
 
       await tester.pumpWidget(
@@ -331,8 +328,9 @@ void main() {
   });
 
   group('AdaptivePopupMenuButton', () {
-    testWidgets('creates popup menu button with text',
-        (WidgetTester tester) async {
+    testWidgets('creates popup menu button with text', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -340,14 +338,8 @@ void main() {
               label: 'Options',
               height: 40.0,
               items: const [
-                AdaptivePopupMenuItem(
-                  label: 'Edit',
-                  value: 'edit',
-                ),
-                AdaptivePopupMenuItem(
-                  label: 'Delete',
-                  value: 'delete',
-                ),
+                AdaptivePopupMenuItem(label: 'Edit', value: 'edit'),
+                AdaptivePopupMenuItem(label: 'Delete', value: 'delete'),
               ],
               onSelected: (index, item) {},
             ),
@@ -366,14 +358,8 @@ void main() {
               label: 'Menu',
               height: 40.0,
               items: const [
-                AdaptivePopupMenuItem(
-                  label: 'Item 1',
-                  value: '1',
-                ),
-                AdaptivePopupMenuItem(
-                  label: 'Item 2',
-                  value: '2',
-                ),
+                AdaptivePopupMenuItem(label: 'Item 1', value: '1'),
+                AdaptivePopupMenuItem(label: 'Item 2', value: '2'),
               ],
               onSelected: (index, item) {},
             ),
@@ -388,8 +374,9 @@ void main() {
       expect(find.text('Item 2'), findsOneWidget);
     });
 
-    testWidgets('calls onSelected when item tapped',
-        (WidgetTester tester) async {
+    testWidgets('calls onSelected when item tapped', (
+      WidgetTester tester,
+    ) async {
       String? selectedValue;
 
       await tester.pumpWidget(
@@ -399,10 +386,7 @@ void main() {
               label: 'Select',
               height: 40.0,
               items: const [
-                AdaptivePopupMenuItem(
-                  label: 'Option A',
-                  value: 'a',
-                ),
+                AdaptivePopupMenuItem(label: 'Option A', value: 'a'),
               ],
               onSelected: (index, item) {
                 selectedValue = item.value;
@@ -421,18 +405,14 @@ void main() {
       expect(selectedValue, 'a');
     });
 
-    testWidgets('creates icon popup menu button',
-        (WidgetTester tester) async {
+    testWidgets('creates icon popup menu button', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
             body: AdaptivePopupMenuButton.icon<String>(
               icon: Icons.more_vert,
               items: const [
-                AdaptivePopupMenuItem(
-                  label: 'Settings',
-                  value: 'settings',
-                ),
+                AdaptivePopupMenuItem(label: 'Settings', value: 'settings'),
               ],
               onSelected: (index, item) {},
             ),

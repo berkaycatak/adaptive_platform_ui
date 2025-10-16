@@ -3,7 +3,12 @@ import 'package:flutter/material.dart';
 import '../platform/platform_info.dart';
 import 'ios26/ios26_popup_menu_button.dart';
 
-export 'ios26/ios26_popup_menu_button.dart' show AdaptivePopupMenuItem, AdaptivePopupMenuDivider, AdaptivePopupMenuEntry, PopupButtonStyle;
+export 'ios26/ios26_popup_menu_button.dart'
+    show
+        AdaptivePopupMenuItem,
+        AdaptivePopupMenuDivider,
+        AdaptivePopupMenuEntry,
+        PopupButtonStyle;
 
 /// An adaptive popup menu button that renders platform-specific styles
 class AdaptivePopupMenuButton<T> {
@@ -14,7 +19,8 @@ class AdaptivePopupMenuButton<T> {
     Key? key,
     required String label,
     required List<AdaptivePopupMenuEntry> items,
-    required void Function(int index, AdaptivePopupMenuItem<T> entry) onSelected,
+    required void Function(int index, AdaptivePopupMenuItem<T> entry)
+    onSelected,
     Color? tint,
     double height = 32.0,
     bool shrinkWrap = false,
@@ -61,7 +67,8 @@ class AdaptivePopupMenuButton<T> {
   static Widget widget<T>({
     Key? key,
     required List<AdaptivePopupMenuEntry> items,
-    required void Function(int index, AdaptivePopupMenuItem<T> entry) onSelected,
+    required void Function(int index, AdaptivePopupMenuItem<T> entry)
+    onSelected,
     Color? tint,
     PopupButtonStyle buttonStyle = PopupButtonStyle.plain,
     required Widget child,
@@ -105,7 +112,8 @@ class AdaptivePopupMenuButton<T> {
     Key? key,
     required dynamic icon,
     required List<AdaptivePopupMenuEntry> items,
-    required void Function(int index, AdaptivePopupMenuItem<T> entry) onSelected,
+    required void Function(int index, AdaptivePopupMenuItem<T> entry)
+    onSelected,
     Color? tint,
     double size = 44.0,
     PopupButtonStyle buttonStyle = PopupButtonStyle.glass,
@@ -194,9 +202,9 @@ class _MaterialPopupMenuButton<T> extends StatelessWidget {
     required this.onSelected,
     this.tint,
     this.height = 32.0,
-  })  : icon = null,
-        size = null,
-        child = null;
+  }) : icon = null,
+       size = null,
+       child = null;
 
   const _MaterialPopupMenuButton.icon({
     required this.icon,
@@ -204,19 +212,19 @@ class _MaterialPopupMenuButton<T> extends StatelessWidget {
     required this.onSelected,
     this.tint,
     this.size = 44.0,
-  })  : label = null,
-        height = null,
-        child = null;
+  }) : label = null,
+       height = null,
+       child = null;
 
   const _MaterialPopupMenuButton.widget({
     required this.items,
     required this.onSelected,
     this.tint,
     required this.child,
-  })  : label = null,
-        icon = null,
-        height = null,
-        size = null;
+  }) : label = null,
+       icon = null,
+       height = null,
+       size = null;
 
   final String? label;
   final dynamic icon; // IconData for Android
@@ -247,7 +255,9 @@ class _MaterialPopupMenuButton<T> extends StatelessWidget {
               children: [
                 if (item.icon != null) ...[
                   Icon(
-                    item.icon is IconData ? item.icon as IconData : Icons.circle,
+                    item.icon is IconData
+                        ? item.icon as IconData
+                        : Icons.circle,
                     size: 20,
                   ),
                   const SizedBox(width: 12),

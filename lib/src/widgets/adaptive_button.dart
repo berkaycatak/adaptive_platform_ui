@@ -33,10 +33,10 @@ class AdaptiveButton extends StatelessWidget {
     this.borderRadius,
     this.minSize,
     this.enabled = true,
-  })  : child = null,
-        icon = null,
-        iconColor = null,
-        sfSymbol = null;
+  }) : child = null,
+       icon = null,
+       iconColor = null,
+       sfSymbol = null;
 
   /// Creates an adaptive button with a custom child widget
   const AdaptiveButton.child({
@@ -50,11 +50,11 @@ class AdaptiveButton extends StatelessWidget {
     this.borderRadius,
     this.minSize,
     this.enabled = true,
-  })  : label = null,
-        textColor = null,
-        icon = null,
-        iconColor = null,
-        sfSymbol = null;
+  }) : label = null,
+       textColor = null,
+       icon = null,
+       iconColor = null,
+       sfSymbol = null;
 
   /// Creates an adaptive button with an icon
   const AdaptiveButton.icon({
@@ -69,10 +69,10 @@ class AdaptiveButton extends StatelessWidget {
     this.borderRadius,
     this.minSize,
     this.enabled = true,
-  })  : label = null,
-        textColor = null,
-        child = null,
-        sfSymbol = null;
+  }) : label = null,
+       textColor = null,
+       child = null,
+       sfSymbol = null;
 
   /// Creates an adaptive button with a native SF Symbol icon (iOS only)
   const AdaptiveButton.sfSymbol({
@@ -86,11 +86,11 @@ class AdaptiveButton extends StatelessWidget {
     this.borderRadius,
     this.minSize,
     this.enabled = true,
-  })  : label = null,
-        textColor = null,
-        child = null,
-        icon = null,
-        iconColor = null;
+  }) : label = null,
+       textColor = null,
+       child = null,
+       icon = null,
+       iconColor = null;
 
   /// The callback that is called when the button is tapped
   final VoidCallback? onPressed;
@@ -182,11 +182,7 @@ class AdaptiveButton extends StatelessWidget {
           padding: padding,
           borderRadius: borderRadius,
           minSize: minSize,
-          child: Icon(
-            icon,
-            color: iconColor,
-            size: 24,
-          ),
+          child: Icon(icon, color: iconColor, size: 24),
         );
       }
 
@@ -237,10 +233,7 @@ class AdaptiveButton extends StatelessWidget {
     } else if (child != null) {
       buttonChild = child!;
     } else {
-      buttonChild = Text(
-        label ?? '',
-        style: TextStyle(color: textColor),
-      );
+      buttonChild = Text(label ?? '', style: TextStyle(color: textColor));
     }
 
     switch (style) {
@@ -248,7 +241,8 @@ class AdaptiveButton extends StatelessWidget {
         return CupertinoButton.filled(
           onPressed: effectiveOnPressed,
           padding: padding,
-          borderRadius: borderRadius ?? const BorderRadius.all(Radius.circular(8.0)),
+          borderRadius:
+              borderRadius ?? const BorderRadius.all(Radius.circular(8.0)),
           child: buttonChild,
         );
 
@@ -269,7 +263,8 @@ class AdaptiveButton extends StatelessWidget {
         return CupertinoButton(
           onPressed: effectiveOnPressed,
           padding: padding,
-          borderRadius: borderRadius ?? const BorderRadius.all(Radius.circular(8.0)),
+          borderRadius:
+              borderRadius ?? const BorderRadius.all(Radius.circular(8.0)),
           color: buttonColor.withValues(alpha: 0.15),
           child: DefaultTextStyle(
             style: TextStyle(color: textColor ?? buttonColor),
@@ -282,7 +277,8 @@ class AdaptiveButton extends StatelessWidget {
         return CupertinoButton(
           onPressed: effectiveOnPressed,
           padding: padding,
-          borderRadius: borderRadius ?? const BorderRadius.all(Radius.circular(8.0)),
+          borderRadius:
+              borderRadius ?? const BorderRadius.all(Radius.circular(8.0)),
           color: buttonColor,
           child: buttonChild,
         );

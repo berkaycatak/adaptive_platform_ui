@@ -27,10 +27,7 @@ void main() {
     });
 
     test('creates action with title', () {
-      final action = AdaptiveAppBarAction(
-        title: 'Info',
-        onPressed: () {},
-      );
+      final action = AdaptiveAppBarAction(title: 'Info', onPressed: () {});
 
       expect(action.title, 'Info');
       expect(action.iosSymbol, isNull);
@@ -52,9 +49,7 @@ void main() {
 
     test('throws assertion error when all parameters are null', () {
       expect(
-        () => AdaptiveAppBarAction(
-          onPressed: () {},
-        ),
+        () => AdaptiveAppBarAction(onPressed: () {}),
         throwsAssertionError,
       );
     });
@@ -99,10 +94,7 @@ void main() {
     });
 
     test('identical instances are equal', () {
-      final action = AdaptiveAppBarAction(
-        title: 'Test',
-        onPressed: () {},
-      );
+      final action = AdaptiveAppBarAction(title: 'Test', onPressed: () {});
 
       expect(action, equals(action));
     });
@@ -154,10 +146,7 @@ void main() {
     });
 
     test('toNativeMap includes title when present', () {
-      final action = AdaptiveAppBarAction(
-        title: 'Info',
-        onPressed: () {},
-      );
+      final action = AdaptiveAppBarAction(title: 'Info', onPressed: () {});
 
       final map = action.toNativeMap();
 
@@ -203,10 +192,7 @@ void main() {
     });
 
     test('equality ignores onPressed callback', () {
-      final action1 = AdaptiveAppBarAction(
-        title: 'Test',
-        onPressed: () {},
-      );
+      final action1 = AdaptiveAppBarAction(title: 'Test', onPressed: () {});
 
       final action2 = AdaptiveAppBarAction(
         title: 'Test',
