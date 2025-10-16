@@ -29,3 +29,4 @@ migrate_working_dir/
 .flutter-plugins-dependencies
 /build/
 /coverage/
+.github/DISCUSSIONS_SETUP.md

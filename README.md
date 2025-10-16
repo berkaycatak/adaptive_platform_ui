@@ -1119,4 +1119,6 @@ Berkay Çatak
 
 ## Support
 
-For issues, feature requests, or questions, please file an issue on the [GitHub repository](https://github.com/berkaycatak/adaptive_platform_ui/issues).
+- 💬 **[Discussions](https://github.com/berkaycatak/adaptive_platform_ui/discussions)** - Ask questions, share ideas, and showcase your projects
+- 🐛 **[Issues](https://github.com/berkaycatak/adaptive_platform_ui/issues)** - Report bugs and request features
+- 📖 **[Contributing Guide](.github/CONTRIBUTING.md)** - Learn how to contribute
