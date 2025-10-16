@@ -101,11 +101,11 @@ class AdaptiveApp extends StatelessWidget {
     this.supportedLocales = const <Locale>[Locale('en', 'US')],
     this.material,
     this.cupertino,
-  })  : routerConfig = null,
-        routeInformationProvider = null,
-        routeInformationParser = null,
-        routerDelegate = null,
-        backButtonDispatcher = null;
+  }) : routerConfig = null,
+       routeInformationProvider = null,
+       routeInformationParser = null,
+       routerDelegate = null,
+       backButtonDispatcher = null;
 
   /// Creates an AdaptiveApp with router support
   const AdaptiveApp.router({
@@ -130,14 +130,14 @@ class AdaptiveApp extends StatelessWidget {
     this.supportedLocales = const <Locale>[Locale('en', 'US')],
     this.material,
     this.cupertino,
-  })  : navigatorKey = null,
-        home = null,
-        routes = const <String, WidgetBuilder>{},
-        initialRoute = null,
-        onGenerateRoute = null,
-        onGenerateInitialRoutes = null,
-        onUnknownRoute = null,
-        navigatorObservers = const <NavigatorObserver>[];
+  }) : navigatorKey = null,
+       home = null,
+       routes = const <String, WidgetBuilder>{},
+       initialRoute = null,
+       onGenerateRoute = null,
+       onGenerateInitialRoutes = null,
+       onUnknownRoute = null,
+       navigatorObservers = const <NavigatorObserver>[];
 
   // Navigation properties
   final GlobalKey<NavigatorState>? navigatorKey;
@@ -233,7 +233,8 @@ class AdaptiveApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final platform = _detectPlatform();
-    final isRouter = routerConfig != null ||
+    final isRouter =
+        routerConfig != null ||
         routerDelegate != null ||
         routeInformationParser != null;
 
@@ -245,8 +246,12 @@ class AdaptiveApp extends StatelessWidget {
   }
 
   Widget _buildCupertinoApp(
-      BuildContext context, PlatformTarget platform, bool isRouter) {
-    final config = cupertino?.call(context, platform) ?? const CupertinoAppData();
+    BuildContext context,
+    PlatformTarget platform,
+    bool isRouter,
+  ) {
+    final config =
+        cupertino?.call(context, platform) ?? const CupertinoAppData();
 
     // We need to wrap CupertinoApp in a builder to get system brightness
     // CupertinoApp doesn't have themeMode like MaterialApp, so we manually
@@ -255,13 +260,16 @@ class AdaptiveApp extends StatelessWidget {
       builder: (context) {
         // Get system brightness to determine which theme to use
         final brightness = MediaQuery.platformBrightnessOf(context);
-        final isDark = themeMode == ThemeMode.dark ||
-                       (themeMode != ThemeMode.light && brightness == Brightness.dark);
+        final isDark =
+            themeMode == ThemeMode.dark ||
+            (themeMode != ThemeMode.light && brightness == Brightness.dark);
 
         // Use dark theme if dark mode, otherwise light theme
-        final effectiveLightTheme = cupertinoLightTheme ??
+        final effectiveLightTheme =
+            cupertinoLightTheme ??
             const CupertinoThemeData(brightness: Brightness.light);
-        final effectiveDarkTheme = cupertinoDarkTheme ??
+        final effectiveDarkTheme =
+            cupertinoDarkTheme ??
             const CupertinoThemeData(brightness: Brightness.dark);
 
         final theme = isDark ? effectiveDarkTheme : effectiveLightTheme;
@@ -331,7 +339,10 @@ class AdaptiveApp extends StatelessWidget {
   }
 
   Widget _buildMaterialApp(
-      BuildContext context, PlatformTarget platform, bool isRouter) {
+    BuildContext context,
+    PlatformTarget platform,
+    bool isRouter,
+  ) {
     final config = material?.call(context, platform) ?? const MaterialAppData();
 
     if (isRouter) {

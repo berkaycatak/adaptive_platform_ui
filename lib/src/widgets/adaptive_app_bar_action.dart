@@ -13,9 +13,9 @@ class AdaptiveAppBarAction {
     this.title,
     required this.onPressed,
   }) : assert(
-          iosSymbol != null || androidIcon != null || title != null,
-          'At least one of iosSymbol, androidIcon, or title must be provided',
-        );
+         iosSymbol != null || androidIcon != null || title != null,
+         'At least one of iosSymbol, androidIcon, or title must be provided',
+       );
 
   /// SF Symbol name for iOS (e.g., 'info.circle', 'plus.circle')
   /// - iOS 26+: Uses UIImage(systemName:) in native UIBarButtonItem
