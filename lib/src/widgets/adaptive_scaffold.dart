@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../platform/platform_info.dart';
 import '../style/sf_symbol.dart';
 import 'adaptive_app_bar.dart';
+import 'adaptive_badge.dart';
 import 'adaptive_bottom_navigation_bar.dart';
 import 'adaptive_button.dart';
 import 'ios26/ios26_scaffold.dart';
@@ -15,6 +16,7 @@ class AdaptiveNavigationDestination {
     required this.label,
     this.selectedIcon,
     this.isSearch = false,
+    this.badgeCount,
   });
 
   /// Icon to display (SF Symbol name for iOS, IconData for cross-platform)
@@ -29,6 +31,11 @@ class AdaptiveNavigationDestination {
   /// Whether this is a search tab (iOS 26+)
   /// Search tabs are visually separated and transform into a search field
   final bool isSearch;
+
+  /// Badge count to display on the tab (null means no badge)
+  /// On iOS 26+: Uses native UITabBarItem.badgeValue
+  /// On iOS <26 and Android: Uses AdaptiveBadge widget
+  final int? badgeCount;
 }
 
 /// Tab bar minimize behavior for iOS 26+
@@ -244,11 +251,28 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
                         : dest.selectedIcon as IconData)
                     : null;
 
+                // Wrap icons with badge if badgeCount is provided
+                Widget iconWidget = Icon(iconData);
+                Widget activeIconWidget = selectedIconData != null
+                    ? Icon(selectedIconData)
+                    : Icon(iconData);
+
+                if (dest.badgeCount != null && dest.badgeCount! > 0) {
+                  iconWidget = AdaptiveBadge(
+                    count: dest.badgeCount,
+                    child: Icon(iconData),
+                  );
+                  activeIconWidget = AdaptiveBadge(
+                    count: dest.badgeCount,
+                    child: selectedIconData != null
+                        ? Icon(selectedIconData)
+                        : Icon(iconData),
+                  );
+                }
+
                 return BottomNavigationBarItem(
-                  icon: Icon(iconData),
-                  activeIcon: selectedIconData != null
-                      ? Icon(selectedIconData)
-                      : Icon(iconData),
+                  icon: iconWidget,
+                  activeIcon: activeIconWidget,
                   label: dest.label,
                 );
               }).toList(),
@@ -411,11 +435,28 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
                     : dest.selectedIcon as IconData)
                 : null;
 
+            // Wrap icons with badge if badgeCount is provided
+            Widget iconWidget = Icon(iconData);
+            Widget selectedIconWidget = selectedIconData != null
+                ? Icon(selectedIconData)
+                : Icon(iconData);
+
+            if (dest.badgeCount != null && dest.badgeCount! > 0) {
+              iconWidget = AdaptiveBadge(
+                count: dest.badgeCount,
+                child: Icon(iconData),
+              );
+              selectedIconWidget = AdaptiveBadge(
+                count: dest.badgeCount,
+                child: selectedIconData != null
+                    ? Icon(selectedIconData)
+                    : Icon(iconData),
+              );
+            }
+
             return NavigationDestination(
-              icon: Icon(iconData),
-              selectedIcon: selectedIconData != null
-                  ? Icon(selectedIconData)
-                  : Icon(iconData),
+              icon: iconWidget,
+              selectedIcon: selectedIconWidget,
               label: dest.label,
             );
           }).toList(),

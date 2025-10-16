@@ -9,6 +9,7 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
     private var currentLabels: [String] = []
     private var currentSymbols: [String] = []
     private var currentSearchFlags: [Bool] = []
+    private var currentBadgeCounts: [Int?] = []
 
     init(frame: CGRect, viewId: Int64, args: Any?, messenger: FlutterBinaryMessenger) {
         self.channel = FlutterMethodChannel(
@@ -20,6 +21,7 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
         var labels: [String] = []
         var symbols: [String] = []
         var searchFlags: [Bool] = []
+        var badgeCounts: [Int?] = []
         var selectedIndex: Int = 0
         var isDark: Bool = false
         var tint: UIColor? = nil
@@ -30,6 +32,9 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
             labels = (dict["labels"] as? [String]) ?? []
             symbols = (dict["sfSymbols"] as? [String]) ?? []
             searchFlags = (dict["searchFlags"] as? [Bool]) ?? []
+            if let badgeData = dict["badgeCounts"] as? [NSNumber?] {
+                badgeCounts = badgeData.map { $0?.intValue }
+            }
             if let v = dict["selectedIndex"] as? NSNumber { selectedIndex = v.intValue }
             if let v = dict["isDark"] as? NSNumber { isDark = v.boolValue }
             if let n = dict["tint"] as? NSNumber { tint = Self.colorFromARGB(n.intValue) }
@@ -89,6 +94,7 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
             for i in range {
                 let title = (i < labels.count) ? labels[i] : nil
                 let isSearch = (i < searchFlags.count) && searchFlags[i]
+                let badgeCount = (i < badgeCounts.count) ? badgeCounts[i] : nil
 
                 let item: UITabBarItem
 
@@ -114,6 +120,13 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
                     item.tag = i
                 }
 
+                // Set badge value if provided
+                if let count = badgeCount, count > 0 {
+                    item.badgeValue = count > 99 ? "99+" : String(count)
+                } else {
+                    item.badgeValue = nil
+                }
+
                 items.append(item)
             }
             return items
@@ -137,6 +150,7 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
         self.currentLabels = labels
         self.currentSymbols = symbols
         self.currentSearchFlags = searchFlags
+        self.currentBadgeCounts = badgeCounts
 
         // Apply minimize behavior if available
         self.applyMinimizeBehavior()
@@ -180,9 +194,15 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
 
             let searchFlags = (args["searchFlags"] as? [Bool]) ?? []
             let selectedIndex = (args["selectedIndex"] as? NSNumber)?.intValue ?? 0
+            var badgeCounts: [Int?] = []
+            if let badgeData = args["badgeCounts"] as? [NSNumber?] {
+                badgeCounts = badgeData.map { $0?.intValue }
+            }
+            
             self.currentLabels = labels
             self.currentSymbols = symbols
             self.currentSearchFlags = searchFlags
+            self.currentBadgeCounts = badgeCounts
 
             let count = max(labels.count, symbols.count)
             func buildItems(_ range: Range<Int>) -> [UITabBarItem] {
@@ -190,6 +210,7 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
                 for i in range {
                     let title = (i < labels.count) ? labels[i] : nil
                     let isSearch = (i < searchFlags.count) && searchFlags[i]
+                    let badgeCount = (i < badgeCounts.count) ? badgeCounts[i] : nil
 
                     let item: UITabBarItem
 
@@ -213,6 +234,13 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
                         // Create item with title
                         item = UITabBarItem(title: title ?? "Tab \(i+1)", image: image, selectedImage: image)
                         item.tag = i
+                    }
+
+                    // Set badge value if provided
+                    if let count = badgeCount, count > 0 {
+                        item.badgeValue = count > 99 ? "99+" : String(count)
+                    } else {
+                        item.badgeValue = nil
                     }
 
                     items.append(item)
@@ -277,6 +305,31 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
 
             self.minimizeBehavior = behavior
             self.applyMinimizeBehavior()
+            result(nil)
+
+        case "setBadgeCounts":
+            guard let args = call.arguments as? [String: Any],
+                  let badgeData = args["badgeCounts"] as? [NSNumber?] else {
+                result(FlutterError(code: "bad_args", message: "Missing badge counts", details: nil))
+                return
+            }
+
+            let badgeCounts = badgeData.map { $0?.intValue }
+            self.currentBadgeCounts = badgeCounts
+
+            // Update existing tab bar items with new badge values
+            if let bar = self.tabBar, let items = bar.items {
+                for (index, item) in items.enumerated() {
+                    if index < badgeCounts.count {
+                        let count = badgeCounts[index]
+                        if let count = count, count > 0 {
+                            item.badgeValue = count > 99 ? "99+" : String(count)
+                        } else {
+                            item.badgeValue = nil
+                        }
+                    }
+                }
+            }
             result(nil)
 
         default:

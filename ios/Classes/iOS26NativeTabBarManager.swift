@@ -22,6 +22,7 @@ class iOS26NativeTabBarManager: NSObject {
         let title: String
         let sfSymbol: String?
         let isSearchTab: Bool
+        let badgeCount: Int?
     }
 
     private override init() {
@@ -132,6 +133,13 @@ class iOS26NativeTabBarManager: NSObject {
                     selectedImage: image
                 )
                 tabVC.tabBarItem.tag = index
+                
+                // Set badge value if provided
+                if let count = config.badgeCount, count > 0 {
+                    tabVC.tabBarItem.badgeValue = count > 99 ? "99+" : String(count)
+                } else {
+                    tabVC.tabBarItem.badgeValue = nil
+                }
 
                 viewControllers.append(tabVC)
             }
@@ -226,7 +234,8 @@ class iOS26NativeTabBarManager: NSObject {
                 guard let title = data["title"] as? String else { return nil }
                 let symbol = data["sfSymbol"] as? String
                 let isSearch = (data["isSearch"] as? Bool) ?? false
-                return TabConfig(title: title, sfSymbol: symbol, isSearchTab: isSearch)
+                let badgeCount = data["badgeCount"] as? Int
+                return TabConfig(title: title, sfSymbol: symbol, isSearchTab: isSearch, badgeCount: badgeCount)
             }
 
             let selectedIndex = (args["selectedIndex"] as? Int) ?? 0
@@ -256,6 +265,28 @@ class iOS26NativeTabBarManager: NSObject {
 
         case "isEnabled":
             result(isEnabled)
+
+        case "setBadgeCounts":
+            guard let args = call.arguments as? [String: Any],
+                  let badgeCounts = args["badgeCounts"] as? [Int?] else {
+                result(FlutterError(code: "invalid_args", message: "Invalid badge counts", details: nil))
+                return
+            }
+
+            // Update badge counts for existing tab bar items
+            if let tabBar = tabBarController, let viewControllers = tabBar.viewControllers {
+                for (index, viewController) in viewControllers.enumerated() {
+                    if index < badgeCounts.count {
+                        let count = badgeCounts[index]
+                        if let count = count, count > 0 {
+                            viewController.tabBarItem.badgeValue = count > 99 ? "99+" : String(count)
+                        } else {
+                            viewController.tabBarItem.badgeValue = nil
+                        }
+                    }
+                }
+            }
+            result(nil)
 
         default:
             result(FlutterMethodNotImplemented)
