@@ -301,7 +301,11 @@ class _IOS26ButtonState extends State<IOS26Button> {
             ? Stack(
                 children: [
                   Positioned.fill(child: platformView),
-                  Center(child: widget.child!),
+                  Center(
+                    child: IgnorePointer(
+                      child: widget.child!,
+                    ),
+                  ),
                 ],
               )
             : platformView,

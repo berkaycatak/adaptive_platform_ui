@@ -23,4 +23,8 @@ class RouteConstants {
   String segmentedControl = 'segmented-control';
   String nativeSearchTab = 'native-search-tab';
   String snackbar = 'snackbar';
+  String datePicker = 'date-picker';
+  String timePicker = 'time-picker';
+  String listTile = 'list-tile';
+  String textField = 'text-field';
 }
