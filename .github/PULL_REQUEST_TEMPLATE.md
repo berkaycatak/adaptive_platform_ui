@@ -20,12 +20,25 @@ Closes #
 -
 -
 
-## Platform Testing
-<!-- Check all platforms where you've tested these changes -->
+## Testing
+
+### Automated Tests ⚠️ **REQUIRED**
+<!-- All PRs that add or modify functionality MUST include tests -->
+- [ ] I have added unit/widget tests for my changes
+- [ ] All new and existing tests pass locally (`flutter test`)
+- [ ] Code analysis passes with no errors (`flutter analyze`)
+- [ ] Code formatting is correct (`dart format`)
+- [ ] Test coverage is adequate (>80% for new code)
+
+### Manual Testing
+<!-- Check all platforms where you've manually tested these changes -->
 - [ ] iOS 26+ tested
 - [ ] iOS <26 tested
 - [ ] Android tested
 - [ ] Web tested (if applicable)
+- [ ] Tested in both light and dark mode
+- [ ] Tested with different screen sizes
+- [ ] Tested with accessibility features (large fonts, screen readers, etc.)
 
 ## Screenshots/Videos
 <!-- If applicable, add screenshots or videos demonstrating the changes -->
@@ -43,11 +56,10 @@ Closes #
 - [ ] I have commented my code, particularly in hard-to-understand areas
 - [ ] I have made corresponding changes to the documentation
 - [ ] My changes generate no new warnings
-- [ ] I have added tests that prove my fix is effective or that my feature works
-- [ ] New and existing unit tests pass locally with my changes
 - [ ] I have checked that my code does not introduce any accessibility issues
 - [ ] I have updated the CHANGELOG.md file (if applicable)
 - [ ] I have updated version number in pubspec.yaml (if applicable)
+- [ ] I have added examples to the example app (if adding new widgets)
 
 ## Breaking Changes
 <!-- If this PR introduces breaking changes, describe them here and provide migration guide -->

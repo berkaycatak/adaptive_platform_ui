@@ -13,7 +13,7 @@ class BadgeNavigationDemoPage extends StatefulWidget {
 
 class _BadgeNavigationDemoPageState extends State<BadgeNavigationDemoPage> {
   int _selectedIndex = 0;
-  int _homeBadgeCount = 5;
+  int _homeBadgeCount = 150;
   int _messagesBadgeCount = 12;
   int _notificationsBadgeCount = 0;
 
@@ -140,7 +140,7 @@ class _BadgeNavigationDemoPageState extends State<BadgeNavigationDemoPage> {
               ElevatedButton(
                 onPressed: () {
                   setState(() {
-                    _homeBadgeCount = 5;
+                    _homeBadgeCount = 150;
                     _messagesBadgeCount = 12;
                     _notificationsBadgeCount = 3;
                   });

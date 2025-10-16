@@ -320,22 +320,29 @@ class _IOS26ButtonState extends State<IOS26Button> {
     final buttonColor = widget.color ?? CupertinoColors.systemBlue;
     final textStyle = TextStyle(color: widget.textColor ?? CupertinoColors.white);
 
+    // If child mode, use the child widget
+    final buttonChild = widget.isChildMode
+        ? widget.child!
+        : Text(widget.label, style: textStyle);
+
     switch (widget.style) {
       case IOS26ButtonStyle.filled:
         return CupertinoButton.filled(
           onPressed: widget.enabled ? widget.onPressed : null,
           padding: widget.padding ?? const EdgeInsets.symmetric(horizontal: 16.0),
-          child: Text(widget.label, style: textStyle),
+          child: buttonChild,
         );
 
       case IOS26ButtonStyle.plain:
         return CupertinoButton(
           onPressed: widget.enabled ? widget.onPressed : null,
           padding: widget.padding ?? const EdgeInsets.symmetric(horizontal: 16.0),
-          child: Text(
-            widget.label,
-            style: TextStyle(color: widget.textColor ?? buttonColor),
-          ),
+          child: widget.isChildMode
+              ? widget.child!
+              : Text(
+                  widget.label,
+                  style: TextStyle(color: widget.textColor ?? buttonColor),
+                ),
         );
 
       default:
@@ -343,7 +350,7 @@ class _IOS26ButtonState extends State<IOS26Button> {
           onPressed: widget.enabled ? widget.onPressed : null,
           color: buttonColor,
           padding: widget.padding ?? const EdgeInsets.symmetric(horizontal: 16.0),
-          child: Text(widget.label, style: textStyle),
+          child: buttonChild,
         );
     }
   }

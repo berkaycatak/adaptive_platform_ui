@@ -80,7 +80,10 @@ class AdaptiveBadge extends StatelessWidget {
       return child;
     }
 
-    final displayText = label ?? (count != null ? count.toString() : '');
+    // Display "99+" for counts greater than 99
+    final displayText = label ?? (count != null
+        ? (count! > 99 ? '99+' : count!.toString())
+        : '');
 
     // iOS - Use custom iOS-style badge
     if (PlatformInfo.isIOS) {

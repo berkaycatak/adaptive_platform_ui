@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.1.94
+## [0.1.94]
 * **NEW**: Added `AdaptiveTextField` for platform-specific text input
   * iOS: Uses `CupertinoTextField` with tertiarySystemBackground color and rounded corners
   * Android: Uses Material `TextField` with outlined border
@@ -38,7 +38,7 @@
   * Added comprehensive demo page showcasing badge navigation functionality
 
 
-## 0.1.93
+## [0.1.93]
 * **NEW**: Added `AdaptiveDatePicker` for platform-specific date selection
   * iOS: Uses `CupertinoDatePicker` in a modal bottom sheet with Cancel/Done buttons
   * Android: Uses Material `DatePickerDialog`
@@ -60,14 +60,14 @@
 * Updated README with comprehensive examples for new widgets
 * Updated widget catalog to include all new widgets
 
-## 0.1.92
+## [0.1.92]
 * AdaptiveSegmentedControl now renders icons directly based on platform.
 * Maintained existing height, padding, and shrinkWrap behavior.
 
-## 0.1.91
+## [0.1.91]
 * Enhance AdaptivePopupMenuButton to support dynamic icon types for iOS and Android
 
-## 0.1.9
+## [0.1.9]
 * **NEW**: Added text input support to `AdaptiveAlertDialog`
   * Added `AdaptiveAlertDialogInput` class for input configuration
   * iOS 26+: Native UITextField with native keyboard types
@@ -85,7 +85,7 @@
   * iOS <26 and Android: Accepts IconData
   * Automatically handles platform-specific icon rendering
 
-## 0.1.8
+## [0.1.8]
 * **NEW**: Added `AdaptiveBottomNavigationBar` class for cleaner bottom navigation configuration
   * Centralized bottom navigation configuration with `bottomNavigationBar` parameter in `AdaptiveScaffold`
   * Replaces individual `destinations`, `selectedIndex`, `onDestinationSelected` parameters
@@ -126,10 +126,10 @@
   )
   ```
 
-## 0.1.7+1
+## [0.1.7+1]
   * Updated README.md
 
-## 0.1.7
+## [0.1.7]
 * **NEW**: Added `AdaptiveAppBar` class for cleaner app bar configuration
   * Centralized app bar configuration with `appBar` parameter in `AdaptiveScaffold`
   * Replaces individual `title`, `actions`, `leading`, `useNativeToolbar` parameters
@@ -163,19 +163,19 @@
   )
   ```
 
-## 0.1.6
+## [0.1.6]
 * **NEW**: Added `AdaptivePopupMenuButton.widget()` constructor for custom widget support
   * iOS <26: GestureDetector with CupertinoActionSheet fallback
   * Android: Material PopupMenuButton with custom child
   * Added demo examples: Custom Button, Card Style, and Chip Style
 
-## 0.1.5+2
+## [0.1.5+2]
   * Updated README.md
 
-## 0.1.5+1
+## [0.1.5+1]
   * Updated README.md
 
-## 0.1.5
+## [0.1.5]
 
 * **NEW**: Added `AdaptiveSnackBar` widget for platform-specific notifications
   * iOS: Banner-style notification at the top with slide/fade animations
@@ -200,10 +200,10 @@
 * **FIX**: Fixed icon handling in bottom navigation - icons now properly support both SF Symbol strings and IconData
 * Updated demo app with comprehensive snackbar examples
 
-## 0.1.4+1
+## [0.1.4+1]
   * Updated README.md
 
-## 0.1.4
+## [0.1.4]
 
 * **NEW**: Added `AdaptiveCard` widget for platform-specific card styling
   * iOS: Custom iOS-style card with Cupertino design (border, subtle shadow, rounded corners)
@@ -240,7 +240,7 @@
   * See demo page for detailed technical explanation of architectural conflicts
 * Added comprehensive demo pages for all new widgets
 
-## 0.1.3
+## [0.1.3]
 
 * **BREAKING CHANGE**: Renamed `AdaptiveScaffold.child` parameter to `body` to match standard Scaffold API
 * **NEW**: Added `AdaptiveApp` widget for automatic platform-specific app configuration
@@ -253,19 +253,19 @@
 * Debug banner now hidden by default (`debugShowCheckedModeBanner: false`)
 * Updated all example code to use new `body` parameter
 
-## 0.1.2
+## [0.1.2]
 
 * Fix image links in README.md to use GitHub raw URLs
 * Images now display correctly on pub.dev
 
-## 0.1.1
+## [0.1.1]
 
 * Documentation improvements
 * Added comprehensive README with images for all widgets
 * Added visual showcase for toolbar, tab bar, buttons, segmented controls, switches, sliders, alerts, and popup menus
 * Improved code examples and usage documentation
 
-## 0.1.0
+## [0.1.0]
 
 * Initial release with iOS 26+ support
 * Features:

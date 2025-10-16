@@ -66,7 +66,15 @@ flutter run
    - Support both iOS 26+ and legacy iOS versions
    - Support Material Design for Android
 
-3. **Test your changes**:
+3. **Write tests for your changes** ⚠️ **REQUIRED**:
+   - **All new features MUST include unit/widget tests**
+   - Add tests in the `test/` directory
+   - Follow existing test patterns and naming conventions
+   - Ensure tests cover edge cases and error scenarios
+   - Run `flutter test` locally before submitting
+   - Verify `flutter analyze` passes with no errors
+
+4. **Test your changes manually**:
    - Test on both iOS and Android
    - Test on different iOS versions if applicable
    - Ensure no existing functionality breaks
@@ -237,7 +245,94 @@ When adding new widgets:
 
 ## Testing Guidelines
 
+⚠️ **IMPORTANT**: All contributions that add or modify functionality **MUST** include tests. PRs without tests will not be merged.
+
+### Automated Testing Requirements
+
+#### Writing Tests
+
+All new widgets and features require comprehensive tests:
+
+1. **Create test files** in `test/` directory matching your source file:
+   ```
+   lib/src/widgets/adaptive_button.dart
+   test/adaptive_button_test.dart
+   ```
+
+2. **Test structure** - Use groups to organize tests:
+   ```dart
+   void main() {
+     group('AdaptiveWidget', () {
+       testWidgets('creates widget with required parameters', (tester) async {
+         await tester.pumpWidget(
+           const MaterialApp(
+             home: AdaptiveWidget(parameter: 'value'),
+           ),
+         );
+
+         expect(find.text('value'), findsOneWidget);
+       });
+
+       testWidgets('calls callback when interacted', (tester) async {
+         bool called = false;
+
+         await tester.pumpWidget(
+           MaterialApp(
+             home: AdaptiveWidget(
+               onTap: () => called = true,
+             ),
+           ),
+         );
+
+         await tester.tap(find.byType(AdaptiveWidget));
+         expect(called, isTrue);
+       });
+     });
+   }
+   ```
+
+3. **What to test**:
+   - ✅ Widget renders correctly with default parameters
+   - ✅ Widget renders with all parameter combinations
+   - ✅ Callbacks are called with correct values
+   - ✅ State changes update the UI correctly
+   - ✅ Edge cases (null values, empty lists, etc.)
+   - ✅ Error cases and validation
+   - ✅ Platform-specific behavior (if applicable)
+
+4. **Running tests**:
+   ```bash
+   # Run all tests
+   flutter test
+
+   # Run specific test file
+   flutter test test/adaptive_button_test.dart
+
+   # Run with coverage
+   flutter test --coverage
+
+   # Run with verbose output
+   flutter test --reporter expanded
+   ```
+
+5. **Test coverage**:
+   - Aim for **>80% code coverage** for new code
+   - Critical paths should have **100% coverage**
+   - View coverage report: `genhtml coverage/lcov.info -o coverage/html`
+
+#### CI/CD Integration
+
+All PRs automatically run:
+- ✅ `dart format` - Code formatting check
+- ✅ `flutter analyze` - Static analysis and linting
+- ✅ `flutter test` - All unit and widget tests
+- ✅ Build verification for example app
+
+**Your PR will not be merged if CI checks fail.**
+
 ### Manual Testing Checklist
+
+After writing automated tests, manually verify on devices:
 
 - [ ] Test on iOS simulator (latest version)
 - [ ] Test on iOS device (if possible)
@@ -259,6 +354,14 @@ All new widgets should have examples in the example app:
 3. Add route constant in `route_constants.dart`
 4. Add navigation item in `home_page.dart`
 5. Show various use cases and parameters
+
+## Release Process
+
+If you're a maintainer creating a new release:
+- 📋 Follow the [Release Process Guide](RELEASING.md)
+- 🏷️ Use semantic versioning for tags
+- 📝 Update CHANGELOG.md before tagging
+- 🤖 GitHub Actions will automatically build and publish the release
 
 ## Questions?
 

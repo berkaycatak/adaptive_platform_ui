@@ -326,24 +326,60 @@ class AdaptiveAlertDialog {
       );
     }
 
-    // Fallback to CupertinoAlertDialog
+    // Fallback to CupertinoAlertDialog with input support
+    final textController = TextEditingController(text: input?.initialValue);
+
     return showCupertinoDialog<String?>(
       context: context,
-      builder: (context) => CupertinoAlertDialog(
-        title: Text(title),
-        content: message != null ? Text(message) : null,
-        actions: actions.map((action) {
-          return CupertinoDialogAction(
-            onPressed: () {
-              Navigator.of(context).pop(null);
-              action.onPressed();
-            },
-            isDefaultAction: action.style == AlertActionStyle.defaultAction,
-            isDestructiveAction: action.style == AlertActionStyle.destructive,
-            child: Text(action.title),
+      builder: (context) {
+        Widget? contentWidget;
+
+        // Build custom content if message or input is present
+        if (message != null || input != null) {
+          contentWidget = Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (message != null) ...[
+                Text(
+                  message,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontSize: 13),
+                ),
+                const SizedBox(height: 12),
+              ],
+              if (input != null) ...[
+                CupertinoTextField(
+                  controller: textController,
+                  placeholder: input.placeholder,
+                  keyboardType: input.keyboardType,
+                  obscureText: input.obscureText,
+                  maxLength: input.maxLength,
+                  autofocus: true,
+                  padding: const EdgeInsets.all(12),
+                ),
+              ],
+            ],
           );
-        }).toList(),
-      ),
+        }
+
+        return CupertinoAlertDialog(
+          title: Text(title),
+          content: contentWidget,
+          actions: actions.map((action) {
+            return CupertinoDialogAction(
+              onPressed: () {
+                final text = textController.text;
+                Navigator.of(context).pop(text.isNotEmpty ? text : null);
+                action.onPressed();
+              },
+              isDefaultAction: action.style == AlertActionStyle.defaultAction,
+              isDestructiveAction: action.style == AlertActionStyle.destructive,
+              child: Text(action.title),
+            );
+          }).toList(),
+        );
+      },
     );
   }
 }
