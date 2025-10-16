@@ -198,6 +198,24 @@ class _HomePageState extends State<HomePage> {
                 description: 'Native segmented controls with adaptive styling',
                 routeName: RouterService.routes.segmentedControl,
               ),
+              _DemoItem(
+                icon: PlatformInfo.isIOS
+                    ? CupertinoIcons.calendar
+                    : Icons.calendar_today,
+                title: 'Date Picker',
+                description: 'Platform-specific date selection dialogs',
+                routeName: RouterService.routes.datePicker,
+                isNew: true,
+              ),
+              _DemoItem(
+                icon: PlatformInfo.isIOS
+                    ? CupertinoIcons.clock
+                    : Icons.access_time,
+                title: 'Time Picker',
+                description: 'Platform-specific time selection dialogs',
+                routeName: RouterService.routes.timePicker,
+                isNew: true,
+              ),
             ],
           ),
           const SizedBox(height: 12),
