@@ -18,6 +18,7 @@ class RouteConstants {
   String radio = 'radio';
   String card = 'card';
   String badge = 'badge';
+  String badgeNavigation = 'badge-navigation';
   String tooltip = 'tooltip';
   String segmentedControl = 'segmented-control';
   String nativeSearchTab = 'native-search-tab';

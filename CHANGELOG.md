@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.93
+* **NEW**: Added badge counter support to `AdaptiveNavigationDestination`
+  * Added `badgeCount` parameter to `AdaptiveNavigationDestination` class
+  * iOS 26+: Uses native `UITabBarItem.badgeValue` for native badge display
+  * iOS <26 and Android: Uses `AdaptiveBadge` widget for cross-platform badge display
+  * Supports dynamic badge updates and proper badge clearing
+  * Badge counts > 99 display as "99+" following iOS conventions
+  * Added comprehensive demo page showcasing badge navigation functionality
+
 ## 0.1.92
 * AdaptiveSegmentedControl now renders icons directly based on platform.
 * Maintained existing height, padding, and shrinkWrap behavior.

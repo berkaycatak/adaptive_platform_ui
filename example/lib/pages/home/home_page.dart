@@ -183,6 +183,15 @@ class _HomePageState extends State<HomePage> {
               ),
               _DemoItem(
                 icon: PlatformInfo.isIOS
+                    ? CupertinoIcons.rectangle_stack
+                    : Icons.tab,
+                title: 'Badge Navigation',
+                description: 'Badge counters on navigation tabs',
+                routeName: RouterService.routes.badgeNavigation,
+                isNew: true,
+              ),
+              _DemoItem(
+                icon: PlatformInfo.isIOS
                     ? CupertinoIcons.info_circle
                     : Icons.info_outline,
                 title: 'Tooltip',

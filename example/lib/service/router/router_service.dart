@@ -4,6 +4,7 @@ import 'package:adaptive_platform_ui_example/pages/info/info_page.dart';
 import 'package:adaptive_platform_ui_example/pages/search/search_page.dart';
 import 'package:adaptive_platform_ui_example/pages/demos/alert_dialog_demo_page.dart';
 import 'package:adaptive_platform_ui_example/pages/demos/badge_demo_page.dart';
+import 'package:adaptive_platform_ui_example/pages/demos/badge_navigation_demo_page.dart';
 import 'package:adaptive_platform_ui_example/pages/demos/button_demo_page.dart';
 import 'package:adaptive_platform_ui_example/pages/demos/card_demo_page.dart';
 import 'package:adaptive_platform_ui_example/pages/demos/checkbox_demo_page.dart';
@@ -156,6 +157,11 @@ class RouterService {
                     name: routes.badge,
                     path: routes.badge,
                     builder: (context, state) => const BadgeDemoPage(),
+                  ),
+                  GoRoute(
+                    name: routes.badgeNavigation,
+                    path: routes.badgeNavigation,
+                    builder: (context, state) => const BadgeNavigationDemoPage(),
                   ),
                   GoRoute(
                     name: routes.tooltip,

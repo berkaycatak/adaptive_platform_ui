@@ -36,6 +36,7 @@ class _MainPageState extends State<MainPage> {
                     ? CupertinoIcons.home
                     : Icons.home,
                 label: 'Home',
+                badgeCount: 1,
               ),
               AdaptiveNavigationDestination(
                 icon: PlatformInfo.isIOS26OrHigher()

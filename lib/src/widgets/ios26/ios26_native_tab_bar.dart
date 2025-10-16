@@ -42,6 +42,7 @@ class _IOS26NativeTabBarState extends State<IOS26NativeTabBar> {
   double? _intrinsicHeight;
   List<String>? _lastLabels;
   List<String>? _lastSymbols;
+  List<int?>? _lastBadgeCounts;
   TabBarMinimizeBehavior? _lastMinimizeBehavior;
 
   bool get _isDark =>
@@ -86,11 +87,13 @@ class _IOS26NativeTabBarState extends State<IOS26NativeTabBar> {
       }).toList();
 
       final searchFlags = widget.destinations.map((e) => e.isSearch).toList();
+      final badgeCounts = widget.destinations.map((e) => e.badgeCount).toList();
 
       final creationParams = <String, dynamic>{
         'labels': labels,
         'sfSymbols': symbols,
         'searchFlags': searchFlags,
+        'badgeCounts': badgeCounts,
         'selectedIndex': widget.selectedIndex,
         'isDark': _isDark,
         'minimizeBehavior': widget.minimizeBehavior.index,
@@ -217,6 +220,7 @@ class _IOS26NativeTabBarState extends State<IOS26NativeTabBar> {
       return '';
     }).toList();
     final searchFlags = widget.destinations.map((e) => e.isSearch).toList();
+    final badgeCounts = widget.destinations.map((e) => e.badgeCount).toList();
 
     if (_lastLabels?.join('|') != labels.join('|') ||
         _lastSymbols?.join('|') != symbols.join('|')) {
@@ -224,11 +228,21 @@ class _IOS26NativeTabBarState extends State<IOS26NativeTabBar> {
         'labels': labels,
         'sfSymbols': symbols,
         'searchFlags': searchFlags,
+        'badgeCounts': badgeCounts,
         'selectedIndex': widget.selectedIndex,
       });
       _lastLabels = labels;
       _lastSymbols = symbols;
       _requestIntrinsicSize();
+    }
+
+    // Badge counts update
+    final currentBadgeCounts = widget.destinations.map((e) => e.badgeCount).toList();
+    if (_lastBadgeCounts?.join('|') != currentBadgeCounts.join('|')) {
+      await ch.invokeMethod('setBadgeCounts', {
+        'badgeCounts': currentBadgeCounts,
+      });
+      _lastBadgeCounts = currentBadgeCounts;
     }
 
     // Minimize behavior update
@@ -257,6 +271,7 @@ class _IOS26NativeTabBarState extends State<IOS26NativeTabBar> {
       if (icon is String) return icon;
       return '';
     }).toList();
+    _lastBadgeCounts = widget.destinations.map((e) => e.badgeCount).toList();
   }
 
   Future<void> _requestIntrinsicSize() async {
