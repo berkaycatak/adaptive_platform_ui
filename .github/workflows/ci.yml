@@ -58,7 +58,7 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
 
   build-example:
-    name: Build Example App
+    name: Build Android Example
     runs-on: ubuntu-latest
     needs: test
 
@@ -81,8 +81,3 @@ jobs:
           cd example
           flutter pub get
           flutter build apk --release
-
-      - name: Build example app (iOS - no codesign)
-        run: |
-          cd example
-          flutter build ios --release --no-codesign
