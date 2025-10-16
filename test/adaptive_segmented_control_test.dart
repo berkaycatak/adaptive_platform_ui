@@ -9,10 +9,16 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: AdaptiveSegmentedControl(
-              labels: const ['One', 'Two', 'Three'],
-              selectedIndex: 0,
-              onValueChanged: (index) {},
+            body: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: AdaptiveSegmentedControl(
+                  labels: const ['One', 'Two', 'Three'],
+                  selectedIndex: 0,
+                  height: 40.0,
+                  onValueChanged: (index) {},
+                ),
+              ),
             ),
           ),
         ),
@@ -30,12 +36,18 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: AdaptiveSegmentedControl(
-              labels: const ['One', 'Two', 'Three'],
-              selectedIndex: selectedIndex,
-              onValueChanged: (index) {
-                selectedIndex = index;
-              },
+            body: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: AdaptiveSegmentedControl(
+                  labels: const ['One', 'Two', 'Three'],
+                  selectedIndex: selectedIndex,
+                  height: 40.0,
+                  onValueChanged: (index) {
+                    selectedIndex = index;
+                  },
+                ),
+              ),
             ),
           ),
         ),
@@ -51,11 +63,17 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: AdaptiveSegmentedControl(
-              labels: const ['A', 'B'],
-              selectedIndex: 0,
-              iconColor: Colors.red,
-              onValueChanged: (index) {},
+            body: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: AdaptiveSegmentedControl(
+                  labels: const ['A', 'B'],
+                  selectedIndex: 0,
+                  height: 40.0,
+                  iconColor: Colors.red,
+                  onValueChanged: (index) {},
+                ),
+              ),
             ),
           ),
         ),
