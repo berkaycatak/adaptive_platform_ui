@@ -1,5 +1,6 @@
 import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import 'package:adaptive_platform_ui_example/service/router/router_service.dart';
+import 'package:adaptive_platform_ui_example/utils/constants/route_constants.dart';
 import 'package:adaptive_platform_ui_example/utils/global_variables.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -22,44 +23,49 @@ class _MainPageState extends State<MainPage> {
         AdaptiveScaffold(
           minimizeBehavior: TabBarMinimizeBehavior.automatic,
           body: widget.navigationShell,
-          bottomNavigationBar: AdaptiveBottomNavigationBar(
-            selectedIndex: widget.navigationShell.currentIndex,
-            onTap: (index) => onDestinationSelected(index, context),
-            items: [
-              AdaptiveNavigationDestination(
-                icon: PlatformInfo.isIOS26OrHigher()
-                    ? "house.fill"
-                    : PlatformInfo.isIOS
-                    ? CupertinoIcons.home
-                    : Icons.home_outlined,
-                selectedIcon: PlatformInfo.isIOS
-                    ? CupertinoIcons.home
-                    : Icons.home,
-                label: 'Home',
-                badgeCount: 1,
-              ),
-              AdaptiveNavigationDestination(
-                icon: PlatformInfo.isIOS26OrHigher()
-                    ? "info.circle"
-                    : PlatformInfo.isIOS
-                    ? CupertinoIcons.info
-                    : Icons.info_outline,
-                selectedIcon: PlatformInfo.isIOS
-                    ? CupertinoIcons.info
-                    : Icons.info,
-                label: 'Info',
-              ),
-              AdaptiveNavigationDestination(
-                icon: PlatformInfo.isIOS26OrHigher()
-                    ? "magnifyingglass"
-                    : PlatformInfo.isIOS
-                    ? CupertinoIcons.search
-                    : Icons.search,
-                label: 'Search',
-                isSearch: true,
-              ),
-            ],
-          ),
+          bottomNavigationBar:
+              getMatchedLocation(
+                context,
+              ).contains(RouteConstants().badgeNavigation)
+              ? null
+              : AdaptiveBottomNavigationBar(
+                  selectedIndex: widget.navigationShell.currentIndex,
+                  onTap: (index) => onDestinationSelected(index, context),
+                  items: [
+                    AdaptiveNavigationDestination(
+                      icon: PlatformInfo.isIOS26OrHigher()
+                          ? "house.fill"
+                          : PlatformInfo.isIOS
+                          ? CupertinoIcons.home
+                          : Icons.home_outlined,
+                      selectedIcon: PlatformInfo.isIOS
+                          ? CupertinoIcons.home
+                          : Icons.home,
+                      label: 'Home',
+                      badgeCount: 1,
+                    ),
+                    AdaptiveNavigationDestination(
+                      icon: PlatformInfo.isIOS26OrHigher()
+                          ? "info.circle"
+                          : PlatformInfo.isIOS
+                          ? CupertinoIcons.info
+                          : Icons.info_outline,
+                      selectedIcon: PlatformInfo.isIOS
+                          ? CupertinoIcons.info
+                          : Icons.info,
+                      label: 'Info',
+                    ),
+                    AdaptiveNavigationDestination(
+                      icon: PlatformInfo.isIOS26OrHigher()
+                          ? "magnifyingglass"
+                          : PlatformInfo.isIOS
+                          ? CupertinoIcons.search
+                          : Icons.search,
+                      label: 'Search',
+                      isSearch: true,
+                    ),
+                  ],
+                ),
         ),
       ],
     );
@@ -67,9 +73,7 @@ class _MainPageState extends State<MainPage> {
 
   void onDestinationSelected(tappedIndex, BuildContext context) {
     // scroll to top if the user taps the current tab
-    var matchedLocation = GoRouter.of(
-      navigatorKey.currentContext!,
-    ).routerDelegate.currentConfiguration.last.matchedLocation;
+    var matchedLocation = getMatchedLocation(context);
 
     if (widget.navigationShell.currentIndex == tappedIndex) {
       bool shouldNavigateToRoot = false;
@@ -119,5 +123,11 @@ class _MainPageState extends State<MainPage> {
     }
 
     widget.navigationShell.goBranch(tappedIndex);
+  }
+
+  String getMatchedLocation(BuildContext context) {
+    return GoRouter.of(
+      navigatorKey.currentContext!,
+    ).routerDelegate.currentConfiguration.last.matchedLocation;
   }
 }

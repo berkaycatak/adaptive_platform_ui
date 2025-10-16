@@ -1,12 +1,14 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
+import 'package:go_router/go_router.dart';
 
 class BadgeNavigationDemoPage extends StatefulWidget {
   const BadgeNavigationDemoPage({super.key});
 
   @override
-  State<BadgeNavigationDemoPage> createState() => _BadgeNavigationDemoPageState();
+  State<BadgeNavigationDemoPage> createState() =>
+      _BadgeNavigationDemoPageState();
 }
 
 class _BadgeNavigationDemoPageState extends State<BadgeNavigationDemoPage> {
@@ -18,7 +20,10 @@ class _BadgeNavigationDemoPageState extends State<BadgeNavigationDemoPage> {
   @override
   Widget build(BuildContext context) {
     return AdaptiveScaffold(
-      appBar: const AdaptiveAppBar(title: 'Badge Navigation Demo'),
+      appBar: AdaptiveAppBar(
+        leading: PlatformInfo.isIOS26OrHigher() ? popButton(context) : null,
+        title: 'Badge Navigation Demo',
+      ),
       body: _buildContent(),
       bottomNavigationBar: AdaptiveBottomNavigationBar(
         selectedIndex: _selectedIndex,
@@ -38,9 +43,7 @@ class _BadgeNavigationDemoPageState extends State<BadgeNavigationDemoPage> {
                 : PlatformInfo.isIOS
                 ? CupertinoIcons.home
                 : Icons.home_outlined,
-            selectedIcon: PlatformInfo.isIOS
-                ? CupertinoIcons.home
-                : Icons.home,
+            selectedIcon: PlatformInfo.isIOS ? CupertinoIcons.home : Icons.home,
             label: 'Home',
             badgeCount: _homeBadgeCount > 0 ? _homeBadgeCount : null,
           ),
@@ -66,9 +69,37 @@ class _BadgeNavigationDemoPageState extends State<BadgeNavigationDemoPage> {
                 ? CupertinoIcons.bell_fill
                 : Icons.notifications,
             label: 'Notifications',
-            badgeCount: _notificationsBadgeCount > 0 ? _notificationsBadgeCount : null,
+            badgeCount: _notificationsBadgeCount > 0
+                ? _notificationsBadgeCount
+                : null,
           ),
         ],
+      ),
+    );
+  }
+
+  Widget popButton(BuildContext context) {
+    if (PlatformInfo.isIOS26OrHigher()) {
+      return Container(
+        margin: EdgeInsets.only(left: 8),
+        width: 40,
+        height: 40,
+        child: AdaptiveButton.sfSymbol(
+          onPressed: () {
+            context.pop();
+          },
+          sfSymbol: SFSymbol("chevron.backward"),
+        ),
+      );
+    }
+    return SizedBox(
+      width: 40,
+      height: 40,
+      child: AdaptiveButton.icon(
+        onPressed: () {
+          context.pop();
+        },
+        icon: Icons.arrow_back,
       ),
     );
   }
@@ -87,7 +118,8 @@ class _BadgeNavigationDemoPageState extends State<BadgeNavigationDemoPage> {
         _buildSection(
           context,
           title: 'Badge Navigation Demo',
-          description: 'This demo shows badge counters on navigation tabs. Tap a tab to clear its badge.',
+          description:
+              'This demo shows badge counters on navigation tabs. Tap a tab to clear its badge.',
           child: Column(
             children: [
               const SizedBox(height: 20),
@@ -135,10 +167,7 @@ class _BadgeNavigationDemoPageState extends State<BadgeNavigationDemoPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              title,
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
+            Text(title, style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 8.0),
             Text(
               description,
