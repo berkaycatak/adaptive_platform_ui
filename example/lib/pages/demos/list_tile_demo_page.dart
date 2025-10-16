@@ -252,9 +252,7 @@ class _ListTileDemoPageState extends State<ListTileDemoPage> {
   Color _getColorForIndex(int index) {
     switch (index) {
       case 0:
-        return PlatformInfo.isIOS
-            ? CupertinoColors.systemYellow
-            : Colors.amber;
+        return PlatformInfo.isIOS ? CupertinoColors.systemYellow : Colors.amber;
       case 1:
         return PlatformInfo.isIOS ? CupertinoColors.systemPink : Colors.pink;
       case 2:
@@ -271,11 +269,11 @@ class _ListTileDemoPageState extends State<ListTileDemoPage> {
       padding: const EdgeInsets.all(16),
       color: isDark
           ? (PlatformInfo.isIOS
-              ? CupertinoColors.systemBlue.darkColor.withValues(alpha: 0.2)
-              : Colors.blue.shade900.withValues(alpha: 0.3))
+                ? CupertinoColors.systemBlue.darkColor.withValues(alpha: 0.2)
+                : Colors.blue.shade900.withValues(alpha: 0.3))
           : (PlatformInfo.isIOS
-              ? CupertinoColors.systemBlue.color.withValues(alpha: 0.1)
-              : Colors.blue.shade50),
+                ? CupertinoColors.systemBlue.color.withValues(alpha: 0.1)
+                : Colors.blue.shade50),
       child: Row(
         children: [
           Icon(
@@ -295,11 +293,11 @@ class _ListTileDemoPageState extends State<ListTileDemoPage> {
                 fontSize: 14,
                 color: isDark
                     ? (PlatformInfo.isIOS
-                        ? CupertinoColors.white
-                        : Colors.white)
+                          ? CupertinoColors.white
+                          : Colors.white)
                     : (PlatformInfo.isIOS
-                        ? CupertinoColors.black
-                        : Colors.black87),
+                          ? CupertinoColors.black
+                          : Colors.black87),
               ),
             ),
           ),
@@ -325,20 +323,16 @@ class _ListTileDemoPageState extends State<ListTileDemoPage> {
               fontSize: 20,
               fontWeight: FontWeight.w600,
               color: isDark
-                  ? (PlatformInfo.isIOS
-                      ? CupertinoColors.white
-                      : Colors.white)
+                  ? (PlatformInfo.isIOS ? CupertinoColors.white : Colors.white)
                   : (PlatformInfo.isIOS
-                      ? CupertinoColors.black
-                      : Colors.black87),
+                        ? CupertinoColors.black
+                        : Colors.black87),
             ),
           ),
         ),
         AdaptiveCard(
           padding: EdgeInsets.zero,
-          child: Column(
-            children: children,
-          ),
+          child: Column(children: children),
         ),
       ],
     );

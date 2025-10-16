@@ -35,6 +35,7 @@ class AdaptiveButton extends StatelessWidget {
     this.enabled = true,
   })  : child = null,
         icon = null,
+        iconColor = null,
         sfSymbol = null;
 
   /// Creates an adaptive button with a custom child widget
@@ -52,6 +53,7 @@ class AdaptiveButton extends StatelessWidget {
   })  : label = null,
         textColor = null,
         icon = null,
+        iconColor = null,
         sfSymbol = null;
 
   /// Creates an adaptive button with an icon
@@ -60,6 +62,7 @@ class AdaptiveButton extends StatelessWidget {
     required this.onPressed,
     required this.icon,
     this.color,
+    this.iconColor,
     this.style = AdaptiveButtonStyle.filled,
     this.size = AdaptiveButtonSize.medium,
     this.padding,
@@ -86,7 +89,8 @@ class AdaptiveButton extends StatelessWidget {
   })  : label = null,
         textColor = null,
         child = null,
-        icon = null;
+        icon = null,
+        iconColor = null;
 
   /// The callback that is called when the button is tapped
   final VoidCallback? onPressed;
@@ -111,6 +115,9 @@ class AdaptiveButton extends StatelessWidget {
 
   /// The color of the button text (only for label mode)
   final Color? textColor;
+
+  /// The color of the icon (only for icon mode)
+  final Color? iconColor;
 
   /// The visual style of the button
   final AdaptiveButtonStyle style;
@@ -177,7 +184,7 @@ class AdaptiveButton extends StatelessWidget {
           minSize: minSize,
           child: Icon(
             icon,
-            color: textColor,
+            color: iconColor,
             size: 24,
           ),
         );
@@ -226,7 +233,7 @@ class AdaptiveButton extends StatelessWidget {
         size: sfSymbol!.size,
       );
     } else if (icon != null) {
-      buttonChild = Icon(icon, color: textColor);
+      buttonChild = Icon(icon, color: iconColor);
     } else if (child != null) {
       buttonChild = child!;
     } else {
@@ -296,7 +303,7 @@ class AdaptiveButton extends StatelessWidget {
         size: sfSymbol!.size,
       );
     } else if (icon != null) {
-      buttonChild = Icon(icon, color: textColor);
+      buttonChild = Icon(icon, color: iconColor);
     } else if (child != null) {
       buttonChild = child!;
     } else {

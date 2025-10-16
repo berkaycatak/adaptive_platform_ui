@@ -521,6 +521,200 @@ AdaptiveSnackBar.show(context, message: 'Error', type: AdaptiveSnackBarType.erro
 **iOS**: Banner-style notification at the top with slide/fade animations, tap to dismiss, and icon indicators.
 **Android**: Material SnackBar at the bottom with standard Material Design appearance.
 
+### AdaptiveDatePicker
+
+```dart
+// Basic date picker
+final selectedDate = await AdaptiveDatePicker.show(
+  context: context,
+  initialDate: DateTime.now(),
+);
+
+// Date picker with range
+final selectedDate = await AdaptiveDatePicker.show(
+  context: context,
+  initialDate: DateTime.now(),
+  firstDate: DateTime(2020),
+  lastDate: DateTime(2025),
+);
+
+// Date and time picker (iOS)
+final selectedDateTime = await AdaptiveDatePicker.show(
+  context: context,
+  initialDate: DateTime.now(),
+  mode: CupertinoDatePickerMode.dateAndTime,
+);
+
+if (selectedDate != null) {
+  print('Selected: ${selectedDate.toString()}');
+}
+```
+
+**iOS**: Uses `CupertinoDatePicker` in a modal bottom sheet with Cancel/Done buttons.
+**Android**: Uses Material `DatePickerDialog`.
+
+### AdaptiveTimePicker
+
+```dart
+// 12-hour format
+final selectedTime = await AdaptiveTimePicker.show(
+  context: context,
+  initialTime: TimeOfDay.now(),
+  use24HourFormat: false,
+);
+
+// 24-hour format
+final selectedTime = await AdaptiveTimePicker.show(
+  context: context,
+  initialTime: TimeOfDay.now(),
+  use24HourFormat: true,
+);
+
+if (selectedTime != null) {
+  print('Selected: ${selectedTime.format(context)}');
+}
+```
+
+**iOS**: Uses `CupertinoDatePicker` in time mode in a modal bottom sheet.
+**Android**: Uses Material `TimePickerDialog`.
+
+### AdaptiveListTile
+
+```dart
+// Basic list tile
+AdaptiveListTile(
+  title: Text('Profile'),
+  subtitle: Text('View your profile'),
+  onTap: () {
+    // Handle tap
+  },
+)
+
+// List tile with leading and trailing
+AdaptiveListTile(
+  leading: Icon(Icons.person),
+  title: Text('Profile'),
+  subtitle: Text('View your profile'),
+  trailing: Icon(Icons.chevron_right),
+  onTap: () {
+    // Handle tap
+  },
+)
+
+// Selectable list tile
+AdaptiveListTile(
+  leading: Icon(Icons.star),
+  title: Text('Favorite'),
+  selected: true,
+  trailing: Icon(Icons.check_circle),
+  onTap: () {
+    // Handle tap
+  },
+)
+
+// List tile with custom trailing widget
+AdaptiveListTile(
+  title: Text('Enable Feature'),
+  subtitle: Text('Toggle to enable'),
+  trailing: AdaptiveSwitch(
+    value: switchValue,
+    onChanged: (value) {
+      // Handle change
+    },
+  ),
+)
+```
+
+**iOS**: Uses CupertinoListTile-like styling with bottom border separator.
+**Android**: Uses Material `ListTile`.
+
+### AdaptiveTextField
+
+```dart
+// Basic text field
+AdaptiveTextField(
+  placeholder: 'Enter your name',
+  onChanged: (value) {
+    print('Text: $value');
+  },
+)
+
+// Text field with icons
+AdaptiveTextField(
+  placeholder: 'Search',
+  prefixIcon: Icon(
+    PlatformInfo.isIOS ? CupertinoIcons.search : Icons.search,
+  ),
+  suffixIcon: IconButton(
+    icon: Icon(
+      PlatformInfo.isIOS ? CupertinoIcons.clear : Icons.clear,
+    ),
+    onPressed: () {
+      // Clear text
+    },
+  ),
+)
+
+// Password field
+AdaptiveTextField(
+  placeholder: 'Enter password',
+  obscureText: true,
+  prefixIcon: Icon(
+    PlatformInfo.isIOS ? CupertinoIcons.lock : Icons.lock,
+  ),
+)
+
+// Multiline text field
+AdaptiveTextField(
+  placeholder: 'Enter description',
+  maxLines: 5,
+  minLines: 3,
+  keyboardType: TextInputType.multiline,
+)
+```
+
+**iOS**: Uses `CupertinoTextField` with tertiarySystemBackground color and rounded corners.
+**Android**: Uses Material `TextField` with outlined border.
+
+### AdaptiveTextFormField
+
+```dart
+// Form with validation
+Form(
+  key: _formKey,
+  child: Column(
+    children: [
+      AdaptiveTextFormField(
+        placeholder: 'Email',
+        keyboardType: TextInputType.emailAddress,
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return 'Please enter your email';
+          }
+          if (!value.contains('@')) {
+            return 'Please enter a valid email';
+          }
+          return null;
+        },
+        onSaved: (value) => _email = value,
+      ),
+      AdaptiveButton(
+        onPressed: () {
+          if (_formKey.currentState!.validate()) {
+            _formKey.currentState!.save();
+            // Process form
+          }
+        },
+        label: 'Submit',
+      ),
+    ],
+  ),
+)
+```
+
+**iOS**: Uses custom `FormField` wrapper with `CupertinoTextField` for proper validation with error display.
+**Android**: Uses Material `TextFormField`.
+
 ## Usage
 
 ### Button Styles
@@ -877,6 +1071,11 @@ Currently available adaptive widgets:
 - ✅ **AdaptiveAlertDialog** - Native alert dialogs with text input support
 - ✅ **AdaptiveContextMenu** - Long-press context menus with platform-specific styling
 - ✅ **AdaptivePopupMenuButton** - Native popup menus
+- ✅ **AdaptiveDatePicker** - Platform-specific date selection dialogs
+- ✅ **AdaptiveTimePicker** - Platform-specific time selection dialogs
+- ✅ **AdaptiveListTile** - Platform-specific list item tiles
+- ✅ **AdaptiveTextField** - Platform-specific text input fields
+- ✅ **AdaptiveTextFormField** - Platform-specific form fields with validation
 - ⚠️ **IOS26NativeSearchTabBar** - EXPERIMENTAL native search tab bar (iOS 26+ only)
 
 ## Design Philosophy

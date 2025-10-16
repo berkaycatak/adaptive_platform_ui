@@ -1,5 +1,55 @@
 # Changelog
 
+## 0.1.94
+* **NEW**: Added `AdaptiveTextField` for platform-specific text input
+  * iOS: Uses `CupertinoTextField` with tertiarySystemBackground color and rounded corners
+  * Android: Uses Material `TextField` with outlined border
+  * Supports all standard text field parameters: placeholder, keyboard type, obscure text, max length, etc.
+  * Supports prefix and suffix icons on both platforms
+  * Automatic platform-specific styling and behavior
+* **NEW**: Added `AdaptiveTextFormField` for form validation support
+  * iOS: Uses custom `FormField` wrapper with `CupertinoTextField` for proper validation
+  * Android: Uses Material `TextFormField`
+  * Full form validation support with validator, onSaved, and autovalidateMode
+  * Displays error messages with red border on iOS, standard Material error styling on Android
+  * Supports prefix and suffix icons with proper validation state handling
+* **FIX**: Fixed prefix/suffix icon support in text fields
+  * Icons now display correctly on both iOS and Android
+  * iOS icons wrapped in proper padding for consistent spacing
+  * Added GestureDetector to prevent focus when tapping icons
+* **FIX**: Fixed iOS26 button icon tap area issue
+  * Child widgets in `IOS26Button.child` now wrapped with `IgnorePointer`
+  * Icon buttons now respond to taps anywhere on the icon, not just the edges
+  * Resolves issue where `AdaptiveButton.icon` had limited tap area
+* **IMPROVEMENT**: Added `iconColor` parameter to `AdaptiveButton.icon`
+  * Separate color control for icon buttons
+  * `textColor` remains for label buttons, `iconColor` for icon buttons
+  * Consistent API across all button constructors
+* Added comprehensive demo page showcasing all text field features
+* Updated documentation with text field examples
+
+## 0.1.93
+* **NEW**: Added `AdaptiveDatePicker` for platform-specific date selection
+  * iOS: Uses `CupertinoDatePicker` in a modal bottom sheet with Cancel/Done buttons
+  * Android: Uses Material `DatePickerDialog`
+  * Supports date, dateTime, and time modes
+  * Configurable date range with firstDate and lastDate parameters
+  * Returns `Future<DateTime?>` with selected date or null if cancelled
+* **NEW**: Added `AdaptiveTimePicker` for platform-specific time selection
+  * iOS: Uses `CupertinoDatePicker` in time mode in a modal bottom sheet
+  * Android: Uses Material `TimePickerDialog`
+  * Supports both 12-hour and 24-hour formats
+  * Returns `Future<TimeOfDay?>` with selected time or null if cancelled
+* **NEW**: Added `AdaptiveListTile` for platform-specific list item tiles
+  * iOS: Uses CupertinoListTile-like styling with bottom border separator
+  * Android: Uses Material `ListTile`
+  * Supports leading, title, subtitle, and trailing widgets
+  * Includes onTap and onLongPress callbacks
+  * Supports selected state and disabled state
+  * Customizable backgroundColor and padding
+* Updated README with comprehensive examples for new widgets
+* Updated widget catalog to include all new widgets
+
 ## 0.1.92
 * AdaptiveSegmentedControl now renders icons directly based on platform.
 * Maintained existing height, padding, and shrinkWrap behavior.

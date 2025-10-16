@@ -225,6 +225,15 @@ class _HomePageState extends State<HomePage> {
                 routeName: RouterService.routes.listTile,
                 isNew: true,
               ),
+              _DemoItem(
+                icon: PlatformInfo.isIOS
+                    ? CupertinoIcons.textformat
+                    : Icons.text_fields,
+                title: 'Text Field',
+                description: 'Platform-specific text input fields with validation',
+                routeName: RouterService.routes.textField,
+                isNew: true,
+              ),
             ],
           ),
           const SizedBox(height: 12),

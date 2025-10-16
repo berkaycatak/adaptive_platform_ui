@@ -20,6 +20,7 @@ import 'package:adaptive_platform_ui_example/pages/demos/tooltip_demo_page.dart'
 import 'package:adaptive_platform_ui_example/pages/demos/date_picker_demo_page.dart';
 import 'package:adaptive_platform_ui_example/pages/demos/time_picker_demo_page.dart';
 import 'package:adaptive_platform_ui_example/pages/demos/list_tile_demo_page.dart';
+import 'package:adaptive_platform_ui_example/pages/demos/text_field_demo_page.dart';
 import 'package:adaptive_platform_ui_example/utils/constants/route_constants.dart';
 import 'package:adaptive_platform_ui_example/utils/global_variables.dart';
 import 'package:flutter/material.dart';
@@ -196,6 +197,11 @@ class RouterService {
                     name: routes.listTile,
                     path: routes.listTile,
                     builder: (context, state) => const ListTileDemoPage(),
+                  ),
+                  GoRoute(
+                    name: routes.textField,
+                    path: routes.textField,
+                    builder: (context, state) => const TextFieldDemoPage(),
                   ),
                 ],
               ),
