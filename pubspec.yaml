@@ -4,8 +4,8 @@ version: 0.1.94
 homepage: https://github.com/berkaycatak/adaptive_platform_ui
 
 environment:
-  sdk: ^3.5.0
-  flutter: ">=3.24.0"
+  sdk: ^3.9.2
+  flutter: ">=3.35.0"
 
 dependencies:
   flutter:
