@@ -80,9 +80,9 @@ jobs:
         run: |
           cd example
           flutter pub get
-          flutter build apk --debug
+          flutter build apk --release
 
       - name: Build example app (iOS - no codesign)
         run: |
           cd example
-          flutter build ios --debug --no-codesign
+          flutter build ios --release --no-codesign
