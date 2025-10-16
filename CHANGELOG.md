@@ -26,8 +26,8 @@
   * `textColor` remains for label buttons, `iconColor` for icon buttons
   * Consistent API across all button constructors
 * Added comprehensive demo page showcasing all text field features
-
-@amolon615, thanks for the changes below.
+*
+* @amolon615, thanks for the changes below.
 * Updated documentation with text field examples
 * * **NEW**: Added badge counter support to `AdaptiveNavigationDestination`
   * Added `badgeCount` parameter to `AdaptiveNavigationDestination` class
