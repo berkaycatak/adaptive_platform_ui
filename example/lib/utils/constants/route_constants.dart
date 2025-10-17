@@ -28,4 +28,5 @@ class RouteConstants {
   String listTile = 'list-tile';
   String textField = 'text-field';
   String tabView = 'tab-view';
+  String floatingActionButton = 'floating-action-button';
 }

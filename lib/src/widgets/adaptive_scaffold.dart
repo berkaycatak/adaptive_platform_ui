@@ -128,6 +128,25 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
         childrenList = [widget.body ?? const SizedBox.shrink()];
       }
 
+      // Wrap children with Stack if floatingActionButton is provided
+      if (widget.floatingActionButton != null) {
+        final hasBottomNav =
+            widget.bottomNavigationBar?.items != null &&
+            widget.bottomNavigationBar!.items!.isNotEmpty;
+        childrenList = childrenList.map((child) {
+          return Stack(
+            children: [
+              child,
+              Positioned(
+                right: 16,
+                bottom: hasBottomNav ? 96 : 96, // Add space for native tab bar
+                child: widget.floatingActionButton!,
+              ),
+            ],
+          );
+        }).toList();
+      }
+
       return IOS26Scaffold(
         key: ValueKey(
           'ios26_scaffold_${widget.bottomNavigationBar?.selectedIndex ?? 0}_${widget.body?.runtimeType.toString() ?? "empty"}',
@@ -293,41 +312,58 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
           }
         }
 
+        // Wrap body with Stack if floatingActionButton is provided
+        Widget bodyWidget = Column(
+          children: [
+            Expanded(
+              child: NotificationListener<ScrollNotification>(
+                onNotification: (notification) {
+                  // Forward scroll notifications to _MinimizableTabBar state (iOS 26+ native only)
+                  if (PlatformInfo.isIOS26OrHigher() && useNativeBottomBar) {
+                    _tabBarKey.currentState?.handleScrollNotification(
+                      notification,
+                    );
+                  }
+                  return false; // Let it bubble up
+                },
+                child: PlatformInfo.isIOS26OrHigher() && useNativeBottomBar
+                    ? Stack(
+                        children: [
+                          widget.body ?? const SizedBox.shrink(),
+                          Positioned(
+                            left: 0,
+                            right: 0,
+                            bottom: 0,
+                            child: tabBar!,
+                          ),
+                        ],
+                      )
+                    : widget.body ?? const SizedBox.shrink(),
+              ),
+            ),
+            // Show tab bar at bottom for non-native cases
+            if (!PlatformInfo.isIOS26OrHigher() || !useNativeBottomBar) tabBar!,
+          ],
+        );
+
+        if (widget.floatingActionButton != null) {
+          bodyWidget = Stack(
+            children: [
+              bodyWidget,
+              Positioned(
+                right: 16,
+                bottom: (!PlatformInfo.isIOS26OrHigher() || !useNativeBottomBar)
+                    ? 96
+                    : 16, // Add space for tab bar if not native
+                child: widget.floatingActionButton!,
+              ),
+            ],
+          );
+        }
+
         return CupertinoPageScaffold(
           navigationBar: navigationBar,
-          child: Column(
-            children: [
-              Expanded(
-                child: NotificationListener<ScrollNotification>(
-                  onNotification: (notification) {
-                    // Forward scroll notifications to _MinimizableTabBar state (iOS 26+ native only)
-                    if (PlatformInfo.isIOS26OrHigher() && useNativeBottomBar) {
-                      _tabBarKey.currentState?.handleScrollNotification(
-                        notification,
-                      );
-                    }
-                    return false; // Let it bubble up
-                  },
-                  child: PlatformInfo.isIOS26OrHigher() && useNativeBottomBar
-                      ? Stack(
-                          children: [
-                            widget.body ?? const SizedBox.shrink(),
-                            Positioned(
-                              left: 0,
-                              right: 0,
-                              bottom: 0,
-                              child: tabBar!,
-                            ),
-                          ],
-                        )
-                      : widget.body ?? const SizedBox.shrink(),
-                ),
-              ),
-              // Show tab bar at bottom for non-native cases
-              if (!PlatformInfo.isIOS26OrHigher() || !useNativeBottomBar)
-                tabBar!,
-            ],
-          ),
+          child: bodyWidget,
         );
       }
 
@@ -388,10 +424,22 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
         return widget.body ?? const SizedBox.shrink();
       }
 
-      return CupertinoPageScaffold(
-        navigationBar: navigationBar,
-        child: widget.body ?? const SizedBox.shrink(),
-      );
+      // Wrap body with Stack if floatingActionButton is provided
+      Widget body = widget.body ?? const SizedBox.shrink();
+      if (widget.floatingActionButton != null) {
+        body = Stack(
+          children: [
+            body,
+            Positioned(
+              right: 16,
+              bottom: 16,
+              child: widget.floatingActionButton!,
+            ),
+          ],
+        );
+      }
+
+      return CupertinoPageScaffold(navigationBar: navigationBar, child: body);
     }
 
     // Android - Use NavigationBar if destinations provided

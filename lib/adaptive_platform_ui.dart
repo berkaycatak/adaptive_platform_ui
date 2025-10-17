@@ -58,6 +58,7 @@ export 'src/widgets/adaptive_list_tile.dart';
 export 'src/widgets/adaptive_text_field.dart';
 export 'src/widgets/adaptive_text_form_field.dart';
 export 'src/widgets/adaptive_tab_view.dart';
+export 'src/widgets/adaptive_floating_action_button.dart';
 
 // iOS 26 specific widgets (for advanced usage)
 export 'src/widgets/ios26/ios26_button.dart';

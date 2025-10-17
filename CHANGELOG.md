@@ -18,6 +18,17 @@
   * Modern sliding animation effect provides better visual feedback
   * Improved user experience with smooth thumb transitions
   * Maintains iOS 26+ native segmented control for latest devices
+  * **NEW**: Added `AdaptiveFloatingActionButton` widget for platform-specific floating action buttons
+  * iOS 26+: Circular button with native iOS design and shadow effects
+  * iOS <26: CupertinoButton with circular shape and custom shadow
+  * Android: Material FloatingActionButton with elevation
+  * Supports custom colors (backgroundColor, foregroundColor)
+  * Supports mini size for compact layouts
+  * Supports hero transitions with heroTag parameter
+  * Supports custom elevation/shadow intensity
+  * Automatic icon size adjustment based on mini property
+  * Added comprehensive demo page with counter example and color variations
+* Added 6 tests for AdaptiveFloatingActionButton functionality
 * Added tests for AdaptiveTabBarView functionality
 
 ## [0.1.94+1]

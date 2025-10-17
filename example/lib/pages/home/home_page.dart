@@ -252,6 +252,15 @@ class _HomePageState extends State<HomePage> {
                 routeName: RouterService.routes.tabView,
                 isNew: true,
               ),
+              _DemoItem(
+                icon: PlatformInfo.isIOS
+                    ? CupertinoIcons.add_circled_solid
+                    : Icons.add_circle,
+                title: 'Floating Action Button',
+                description: 'Platform-specific circular action buttons',
+                routeName: RouterService.routes.floatingActionButton,
+                isNew: true,
+              ),
             ],
           ),
           const SizedBox(height: 12),
