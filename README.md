@@ -720,6 +720,28 @@ Form(
 **iOS**: Uses custom `FormField` wrapper with `CupertinoTextField` for proper validation with error display.
 **Android**: Uses Material `TextFormField`.
 
+### AdaptiveTabBarView
+
+Horizontal swipeable tab view with tabs at the top.
+
+```dart
+// Tab bar view at the top
+AdaptiveTabBarView(
+  tabs: ['Latest', 'Popular', 'Trending'],
+  children: [
+    LatestPage(),
+    PopularPage(),
+    TrendingPage(),
+  ],
+  onTabChanged: (index) {
+    print('Tab changed to: $index');
+  },
+)
+```
+
+**iOS**: Uses `CupertinoSlidingSegmentedControl` for tab selection.
+**Android**: Uses Material `TabBar` + `TabBarView`.
+
 ## Usage
 
 ### Button Styles
@@ -1081,6 +1103,7 @@ Currently available adaptive widgets:
 - ✅ **AdaptiveListTile** - Platform-specific list item tiles
 - ✅ **AdaptiveTextField** - Platform-specific text input fields
 - ✅ **AdaptiveTextFormField** - Platform-specific form fields with validation
+- ✅ **AdaptiveTabBarView** - Horizontal swipeable tab bar view
 - ⚠️ **IOS26NativeSearchTabBar** - EXPERIMENTAL native search tab bar (iOS 26+ only)
 
 ## Design Philosophy

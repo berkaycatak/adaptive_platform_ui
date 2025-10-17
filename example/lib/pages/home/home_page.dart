@@ -243,6 +243,15 @@ class _HomePageState extends State<HomePage> {
                 routeName: RouterService.routes.textField,
                 isNew: true,
               ),
+              _DemoItem(
+                icon: PlatformInfo.isIOS
+                    ? CupertinoIcons.square_stack_3d_down_right
+                    : Icons.tab,
+                title: 'Tab View',
+                description: 'Bottom navigation and swipeable tab views',
+                routeName: RouterService.routes.tabView,
+                isNew: true,
+              ),
             ],
           ),
           const SizedBox(height: 12),

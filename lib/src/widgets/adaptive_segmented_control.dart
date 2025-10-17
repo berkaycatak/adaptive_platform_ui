@@ -6,7 +6,7 @@ import 'ios26/ios26_segmented_control.dart';
 /// An adaptive segmented control that renders platform-specific styles
 ///
 /// On iOS 26+: Uses native iOS 26 UISegmentedControl with Liquid Glass
-/// On iOS <26 (iOS 18 and below): Uses CupertinoSegmentedControl
+/// On iOS <26 (iOS 18 and below): Uses CupertinoSlidingSegmentedControl
 /// On Android: Uses Material SegmentedButton
 class AdaptiveSegmentedControl extends StatelessWidget {
   /// Creates an adaptive segmented control
@@ -72,7 +72,7 @@ class AdaptiveSegmentedControl extends StatelessWidget {
       );
     }
 
-    // iOS <26 (iOS 18 and below) - Use traditional CupertinoSegmentedControl
+    // iOS <26 (iOS 18 and below) - Use CupertinoSlidingSegmentedControl
     if (PlatformInfo.isIOS) {
       return _buildCupertinoSegmentedControl(context);
     }
@@ -116,10 +116,14 @@ class AdaptiveSegmentedControl extends StatelessWidget {
       }
     }
 
-    Widget control = CupertinoSegmentedControl<int>(
+    Widget control = CupertinoSlidingSegmentedControl<int>(
       children: children,
       groupValue: selectedIndex,
-      onValueChanged: enabled ? onValueChanged : (_) {},
+      onValueChanged: (int? value) {
+        if (enabled && value != null) {
+          onValueChanged(value);
+        }
+      },
     );
 
     if (shrinkWrap) {

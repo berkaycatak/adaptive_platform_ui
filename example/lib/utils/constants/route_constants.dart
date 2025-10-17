@@ -27,4 +27,5 @@ class RouteConstants {
   String timePicker = 'time-picker';
   String listTile = 'list-tile';
   String textField = 'text-field';
+  String tabView = 'tab-view';
 }

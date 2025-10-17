@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.1.95]
+* **NEW**: Added `AdaptiveTabBarView` widget for platform-specific tab bar view
+  * iOS 26+: Uses native iOS 26 segmented control with Liquid Glass effects + PageView
+  * iOS <26: Uses CupertinoSlidingSegmentedControl + PageView for smooth tab switching
+  * Android: Uses Material TabBar + TabBarView with standard Material Design
+  * Swipeable tab pages with animated transitions between tabs
+  * Full color customization support:
+    - `backgroundColor`: Tab bar background color
+    - `selectedColor`: Selected tab/segment color (thumb color on iOS, label color on Android)
+    - `unselectedColor`: Unselected tab text color (Android only)
+  * Automatic state management with PageController and TabController
+  * Callback support with `onTabChanged` for tab selection events
+  * Added comprehensive demo page with 4-tab example
+* **IMPROVEMENT**: Updated `AdaptiveSegmentedControl` for iOS <26
+  * Changed from `CupertinoSegmentedControl` to `CupertinoSlidingSegmentedControl`
+  * Modern sliding animation effect provides better visual feedback
+  * Improved user experience with smooth thumb transitions
+  * Maintains iOS 26+ native segmented control for latest devices
+* Added tests for AdaptiveTabBarView functionality
+
 ## [0.1.94+1]
 * fix: improve pub.dev score and CI compatibility
 
