@@ -35,8 +35,8 @@ class _HomePageState extends State<HomePage> {
                 route: RouterService.routes.info,
               );
             },
-            iosSymbol: "info.circle",
-            androidIcon: CupertinoIcons.info_circle,
+            iosSymbol: "checkmark.circle",
+            icon: CupertinoIcons.check_mark,
           ),
           AdaptiveAppBarAction(
             onPressed: () {
@@ -46,7 +46,7 @@ class _HomePageState extends State<HomePage> {
               );
             },
             iosSymbol: "info.circle",
-            androidIcon: CupertinoIcons.info_circle,
+            icon: CupertinoIcons.info_circle,
           ),
         ],
       ),
@@ -131,7 +131,7 @@ class _HomePageState extends State<HomePage> {
                 title: 'Context Menu',
                 description: 'Long-press context menus with platform styles',
                 routeName: RouterService.routes.contextMenu,
-                isNew: true,
+                isNew: false,
               ),
               _DemoItem(
                 icon: Icons.tune,
@@ -152,7 +152,6 @@ class _HomePageState extends State<HomePage> {
                 title: 'Checkbox',
                 description: 'Native checkboxes with adaptive styling',
                 routeName: RouterService.routes.checkbox,
-                isNew: true,
               ),
               _DemoItem(
                 icon: PlatformInfo.isIOS
@@ -161,7 +160,6 @@ class _HomePageState extends State<HomePage> {
                 title: 'Radio',
                 description: 'Radio button groups with adaptive styling',
                 routeName: RouterService.routes.radio,
-                isNew: true,
               ),
               _DemoItem(
                 icon: PlatformInfo.isIOS
@@ -179,7 +177,6 @@ class _HomePageState extends State<HomePage> {
                 title: 'Badge',
                 description: 'Notification badges with adaptive styling',
                 routeName: RouterService.routes.badge,
-                isNew: true,
               ),
               _DemoItem(
                 icon: PlatformInfo.isIOS
@@ -188,7 +185,6 @@ class _HomePageState extends State<HomePage> {
                 title: 'Badge Navigation',
                 description: 'Badge counters on navigation tabs',
                 routeName: RouterService.routes.badgeNavigation,
-                isNew: true,
               ),
               _DemoItem(
                 icon: PlatformInfo.isIOS
@@ -214,7 +210,6 @@ class _HomePageState extends State<HomePage> {
                 title: 'Date Picker',
                 description: 'Platform-specific date selection dialogs',
                 routeName: RouterService.routes.datePicker,
-                isNew: true,
               ),
               _DemoItem(
                 icon: PlatformInfo.isIOS
@@ -223,7 +218,6 @@ class _HomePageState extends State<HomePage> {
                 title: 'Time Picker',
                 description: 'Platform-specific time selection dialogs',
                 routeName: RouterService.routes.timePicker,
-                isNew: true,
               ),
               _DemoItem(
                 icon: PlatformInfo.isIOS
@@ -232,16 +226,15 @@ class _HomePageState extends State<HomePage> {
                 title: 'List Tile',
                 description: 'Platform-specific list item tiles',
                 routeName: RouterService.routes.listTile,
-                isNew: true,
               ),
               _DemoItem(
                 icon: PlatformInfo.isIOS
                     ? CupertinoIcons.textformat
                     : Icons.text_fields,
                 title: 'Text Field',
-                description: 'Platform-specific text input fields with validation',
+                description:
+                    'Platform-specific text input fields with validation',
                 routeName: RouterService.routes.textField,
-                isNew: true,
               ),
               _DemoItem(
                 icon: PlatformInfo.isIOS
@@ -259,6 +252,24 @@ class _HomePageState extends State<HomePage> {
                 title: 'Floating Action Button',
                 description: 'Platform-specific circular action buttons',
                 routeName: RouterService.routes.floatingActionButton,
+                isNew: true,
+              ),
+              _DemoItem(
+                icon: PlatformInfo.isIOS
+                    ? CupertinoIcons.list_bullet_below_rectangle
+                    : Icons.list_alt,
+                title: 'Form Section',
+                description: 'Grouped form sections with headers and footers',
+                routeName: RouterService.routes.formSection,
+                isNew: true,
+              ),
+              _DemoItem(
+                icon: PlatformInfo.isIOS
+                    ? CupertinoIcons.chevron_down_circle
+                    : Icons.expand_more,
+                title: 'Expansion Tile',
+                description: 'Expandable and collapsible list tiles',
+                routeName: RouterService.routes.expansionTile,
                 isNew: true,
               ),
             ],

@@ -485,7 +485,7 @@ void main() {
               actions: [
                 AdaptiveAppBarAction(
                   onPressed: () {},
-                  androidIcon: Icons.settings,
+                  icon: Icons.settings,
                 ),
               ],
             ),
@@ -513,7 +513,7 @@ void main() {
                   onPressed: () {
                     actionPressed = true;
                   },
-                  androidIcon: Icons.add,
+                  icon: Icons.add,
                 ),
               ],
             ),

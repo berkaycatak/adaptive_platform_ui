@@ -66,7 +66,7 @@ AdaptiveScaffold(
       AdaptiveAppBarAction(
         onPressed: () {},
         iosSymbol: 'gear',
-        androidIcon: Icons.settings,
+        icon: Icons.settings,
       ),
     ],
   ),
@@ -720,6 +720,110 @@ Form(
 **iOS**: Uses custom `FormField` wrapper with `CupertinoTextField` for proper validation with error display.
 **Android**: Uses Material `TextFormField`.
 
+### AdaptiveFloatingActionButton
+
+```dart
+// Basic floating action button
+AdaptiveFloatingActionButton(
+  onPressed: () {},
+  child: Icon(Icons.add),
+)
+
+// Mini FAB
+AdaptiveFloatingActionButton(
+  onPressed: () {},
+  mini: true,
+  child: Icon(Icons.edit),
+)
+
+// Custom colors
+AdaptiveFloatingActionButton(
+  onPressed: () {},
+  backgroundColor: Colors.red,
+  foregroundColor: Colors.white,
+  child: Icon(Icons.favorite),
+)
+```
+
+**iOS**: Circular button with custom shadow effects.
+**Android**: Material `FloatingActionButton` with elevation.
+
+### AdaptiveFormSection
+
+```dart
+// Basic form section
+AdaptiveFormSection(
+  header: Text('Personal Information'),
+  footer: Text('Please provide accurate information'),
+  children: [
+    CupertinoFormRow(
+      prefix: Text('Name'),
+      child: AdaptiveTextField(placeholder: 'Enter name'),
+    ),
+    CupertinoFormRow(
+      prefix: Text('Email'),
+      child: AdaptiveTextField(placeholder: 'Enter email'),
+    ),
+  ],
+)
+
+// Inset grouped style
+AdaptiveFormSection.insetGrouped(
+  header: Text('Settings'),
+  children: [
+    CupertinoFormRow(
+      prefix: Text('Notifications'),
+      child: AdaptiveSwitch(value: true, onChanged: (v) {}),
+    ),
+  ],
+)
+```
+
+**iOS**: Uses `CupertinoFormSection` with native iOS styling.
+**Android**: Uses Material `Card` with similar grouped layout.
+
+### AdaptiveExpansionTile
+
+```dart
+// Basic expansion tile
+AdaptiveExpansionTile(
+  title: Text('Settings'),
+  children: [
+    ListTile(title: Text('Option 1')),
+    ListTile(title: Text('Option 2')),
+  ],
+)
+
+// With leading and subtitle
+AdaptiveExpansionTile(
+  leading: Icon(Icons.settings),
+  title: Text('Advanced Settings'),
+  subtitle: Text('Configure advanced options'),
+  initiallyExpanded: true,
+  children: [
+    ListTile(title: Text('Option 1')),
+    ListTile(title: Text('Option 2')),
+  ],
+)
+
+// With custom colors
+AdaptiveExpansionTile(
+  title: Text('Premium Features'),
+  backgroundColor: Colors.amber.withValues(alpha: 0.1),
+  iconColor: Colors.amber,
+  onExpansionChanged: (expanded) {
+    print('Expanded: $expanded');
+  },
+  children: [
+    ListTile(title: Text('Feature 1')),
+    ListTile(title: Text('Feature 2')),
+  ],
+)
+```
+
+**iOS**: Modern custom design with rounded corners, smooth shadows, animated chevron, and gradient separator.
+**Android**: Material `ExpansionTile` with InkWell effects.
+
 ### AdaptiveTabBarView
 
 Horizontal swipeable tab view with tabs at the top.
@@ -1103,6 +1207,9 @@ Currently available adaptive widgets:
 - ✅ **AdaptiveListTile** - Platform-specific list item tiles
 - ✅ **AdaptiveTextField** - Platform-specific text input fields
 - ✅ **AdaptiveTextFormField** - Platform-specific form fields with validation
+- ✅ **AdaptiveFloatingActionButton** - Platform-specific circular action buttons
+- ✅ **AdaptiveFormSection** - Grouped form sections with headers and footers
+- ✅ **AdaptiveExpansionTile** - Modern expandable/collapsible content
 - ✅ **AdaptiveTabBarView** - Horizontal swipeable tab bar view
 - ⚠️ **IOS26NativeSearchTabBar** - EXPERIMENTAL native search tab bar (iOS 26+ only)
 

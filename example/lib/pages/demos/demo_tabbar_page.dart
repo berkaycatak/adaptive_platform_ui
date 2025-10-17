@@ -67,7 +67,7 @@ class _DemoTabbarPageState extends State<DemoTabbarPage> {
           AdaptiveAppBarAction(onPressed: () {}, title: "Title"),
           AdaptiveAppBarAction(
             onPressed: () {},
-            androidIcon: Icons.info,
+            icon: Icons.info,
             iosSymbol: "info.circle",
           ),
         ],

@@ -42,8 +42,9 @@ void main() {
       expect(pressed, true);
     });
 
-    testWidgets('creates mini FAB when mini is true',
-        (WidgetTester tester) async {
+    testWidgets('creates mini FAB when mini is true', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -76,8 +77,9 @@ void main() {
       expect(find.byType(AdaptiveFloatingActionButton), findsOneWidget);
     });
 
-    testWidgets('handles null onPressed (disabled state)',
-        (WidgetTester tester) async {
+    testWidgets('handles null onPressed (disabled state)', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -92,8 +94,9 @@ void main() {
       expect(find.byType(AdaptiveFloatingActionButton), findsOneWidget);
     });
 
-    testWidgets('supports hero tag for transitions',
-        (WidgetTester tester) async {
+    testWidgets('supports hero tag for transitions', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(

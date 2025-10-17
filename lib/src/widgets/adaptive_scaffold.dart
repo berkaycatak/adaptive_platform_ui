@@ -225,10 +225,8 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
                       Widget actionChild;
                       if (action.title != null) {
                         actionChild = Text(action.title!);
-                      } else if (action.iosSymbol != null) {
-                        actionChild = Icon(
-                          _sfSymbolToCupertinoIcon(action.iosSymbol!),
-                        );
+                      } else if (action.icon != null) {
+                        actionChild = Icon(action.icon!);
                       } else {
                         actionChild = const Icon(CupertinoIcons.circle);
                       }
@@ -400,10 +398,8 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
                     Widget actionChild;
                     if (action.title != null) {
                       actionChild = Text(action.title!);
-                    } else if (action.iosSymbol != null) {
-                      actionChild = Icon(
-                        _sfSymbolToCupertinoIcon(action.iosSymbol!),
-                      );
+                    } else if (action.icon != null) {
+                      actionChild = Icon(action.icon!);
                     } else {
                       actionChild = const Icon(CupertinoIcons.circle);
                     }
@@ -474,8 +470,8 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
               );
             }
             return IconButton(
-              icon: action.androidIcon != null
-                  ? Icon(action.androidIcon!)
+              icon: action.icon != null
+                  ? Icon(action.icon!)
                   : const Icon(Icons.circle),
               onPressed: action.onPressed,
             );
@@ -573,8 +569,8 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
             );
           }
           return IconButton(
-            icon: action.androidIcon != null
-                ? Icon(action.androidIcon!)
+            icon: action.icon != null
+                ? Icon(action.icon!)
                 : const Icon(Icons.circle),
             onPressed: action.onPressed,
           );

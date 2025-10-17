@@ -24,6 +24,8 @@ import 'package:adaptive_platform_ui_example/pages/demos/list_tile_demo_page.dar
 import 'package:adaptive_platform_ui_example/pages/demos/text_field_demo_page.dart';
 import 'package:adaptive_platform_ui_example/pages/demos/tab_view_demo_page.dart';
 import 'package:adaptive_platform_ui_example/pages/demos/floating_action_button_demo_page.dart';
+import 'package:adaptive_platform_ui_example/pages/demos/form_section_demo_page.dart';
+import 'package:adaptive_platform_ui_example/pages/demos/expansion_tile_demo_page.dart';
 import 'package:adaptive_platform_ui_example/utils/constants/route_constants.dart';
 import 'package:adaptive_platform_ui_example/utils/global_variables.dart';
 import 'package:flutter/material.dart';
@@ -167,7 +169,8 @@ class RouterService {
                   GoRoute(
                     name: routes.badgeNavigation,
                     path: routes.badgeNavigation,
-                    builder: (context, state) => const BadgeNavigationDemoPage(),
+                    builder: (context, state) =>
+                        const BadgeNavigationDemoPage(),
                   ),
                   GoRoute(
                     name: routes.tooltip,
@@ -221,6 +224,16 @@ class RouterService {
                     path: routes.floatingActionButton,
                     builder: (context, state) =>
                         const FloatingActionButtonDemoPage(),
+                  ),
+                  GoRoute(
+                    name: routes.formSection,
+                    path: routes.formSection,
+                    builder: (context, state) => const FormSectionDemoPage(),
+                  ),
+                  GoRoute(
+                    name: routes.expansionTile,
+                    path: routes.expansionTile,
+                    builder: (context, state) => const ExpansionTileDemoPage(),
                   ),
                 ],
               ),

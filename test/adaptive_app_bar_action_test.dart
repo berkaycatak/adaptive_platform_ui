@@ -11,17 +11,17 @@ void main() {
       );
 
       expect(action.iosSymbol, 'info.circle');
-      expect(action.androidIcon, isNull);
+      expect(action.icon, isNull);
       expect(action.title, isNull);
     });
 
-    test('creates action with Android icon', () {
+    test('creates action with icon', () {
       final action = AdaptiveAppBarAction(
-        androidIcon: Icons.info,
+        icon: Icons.info,
         onPressed: () {},
       );
 
-      expect(action.androidIcon, Icons.info);
+      expect(action.icon, Icons.info);
       expect(action.iosSymbol, isNull);
       expect(action.title, isNull);
     });
@@ -31,19 +31,19 @@ void main() {
 
       expect(action.title, 'Info');
       expect(action.iosSymbol, isNull);
-      expect(action.androidIcon, isNull);
+      expect(action.icon, isNull);
     });
 
     test('creates action with all parameters', () {
       final action = AdaptiveAppBarAction(
         iosSymbol: 'info.circle',
-        androidIcon: Icons.info,
+        icon: Icons.info,
         title: 'Info',
         onPressed: () {},
       );
 
       expect(action.iosSymbol, 'info.circle');
-      expect(action.androidIcon, Icons.info);
+      expect(action.icon, Icons.info);
       expect(action.title, 'Info');
     });
 
@@ -70,21 +70,21 @@ void main() {
     test('equality works correctly', () {
       final action1 = AdaptiveAppBarAction(
         iosSymbol: 'info.circle',
-        androidIcon: Icons.info,
+        icon: Icons.info,
         title: 'Info',
         onPressed: () {},
       );
 
       final action2 = AdaptiveAppBarAction(
         iosSymbol: 'info.circle',
-        androidIcon: Icons.info,
+        icon: Icons.info,
         title: 'Info',
         onPressed: () {},
       );
 
       final action3 = AdaptiveAppBarAction(
         iosSymbol: 'settings',
-        androidIcon: Icons.settings,
+        icon: Icons.settings,
         title: 'Settings',
         onPressed: () {},
       );
@@ -102,14 +102,14 @@ void main() {
     test('hashCode is consistent with equality', () {
       final action1 = AdaptiveAppBarAction(
         iosSymbol: 'info.circle',
-        androidIcon: Icons.info,
+        icon: Icons.info,
         title: 'Info',
         onPressed: () {},
       );
 
       final action2 = AdaptiveAppBarAction(
         iosSymbol: 'info.circle',
-        androidIcon: Icons.info,
+        icon: Icons.info,
         title: 'Info',
         onPressed: () {},
       );
@@ -167,9 +167,9 @@ void main() {
       expect(map['title'], 'Info');
     });
 
-    test('toNativeMap excludes androidIcon', () {
+    test('toNativeMap excludes icon parameter', () {
       final action = AdaptiveAppBarAction(
-        androidIcon: Icons.info,
+        icon: Icons.info,
         iosSymbol: 'info.circle',
         onPressed: () {},
       );
@@ -180,9 +180,9 @@ void main() {
       expect(map['icon'], 'info.circle');
     });
 
-    test('toNativeMap returns empty map when only androidIcon is provided', () {
+    test('toNativeMap returns empty map when only icon is provided', () {
       final action = AdaptiveAppBarAction(
-        androidIcon: Icons.info,
+        icon: Icons.info,
         onPressed: () {},
       );
 
@@ -199,7 +199,7 @@ void main() {
         onPressed: () {}, // Different callback instance
       );
 
-      // Equality should only check iosSymbol, androidIcon, and title
+      // Equality should only check iosSymbol, icon, and title
       expect(action1, equals(action2));
     });
   });

@@ -3,27 +3,31 @@ import 'package:flutter/material.dart';
 
 /// An app bar action that can be displayed in AdaptiveScaffold
 ///
-/// - On iOS 26+: Rendered as native UIBarButtonItem in UIToolbar
-/// - On iOS < 26: Rendered as CupertinoButton in CupertinoNavigationBar
-/// - On Android: Rendered as IconButton in Material AppBar
+/// - On iOS 26+: Uses iosSymbol (SF Symbol) in native UIToolbar
+/// - On iOS < 26: Uses icon (IconData) in CupertinoNavigationBar
+/// - On Android: Uses icon (IconData) in Material AppBar
 class AdaptiveAppBarAction {
   const AdaptiveAppBarAction({
     this.iosSymbol,
-    this.androidIcon,
+    this.icon,
     this.title,
     required this.onPressed,
   }) : assert(
-         iosSymbol != null || androidIcon != null || title != null,
-         'At least one of iosSymbol, androidIcon, or title must be provided',
+         iosSymbol != null || icon != null || title != null,
+         'At least one of iosSymbol, icon, or title must be provided',
        );
 
-  /// SF Symbol name for iOS (e.g., 'info.circle', 'plus.circle')
+  /// SF Symbol name for iOS 26+ ONLY (e.g., 'info.circle', 'plus.circle')
   /// - iOS 26+: Uses UIImage(systemName:) in native UIBarButtonItem
-  /// - iOS < 26: Rendered as SF Symbol in Flutter widget
+  /// - iOS <26: NOT used, use icon parameter instead
+  /// - Android: NOT used, use icon parameter instead
   final String? iosSymbol;
 
-  /// Material icon for Android (e.g., Icons.info, Icons.add)
-  final IconData? androidIcon;
+  /// Icon for iOS <26 and Android (e.g., Icons.info, CupertinoIcons.info)
+  /// - iOS 26+: NOT used (iosSymbol takes priority)
+  /// - iOS <26: Used for CupertinoButton
+  /// - Android: Used for IconButton
+  final IconData? icon;
 
   /// Text title for the action (optional)
   /// If provided along with icons, title takes precedence
@@ -37,12 +41,12 @@ class AdaptiveAppBarAction {
     if (identical(this, other)) return true;
     return other is AdaptiveAppBarAction &&
         other.iosSymbol == iosSymbol &&
-        other.androidIcon == androidIcon &&
+        other.icon == icon &&
         other.title == title;
   }
 
   @override
-  int get hashCode => Object.hash(iosSymbol, androidIcon, title);
+  int get hashCode => Object.hash(iosSymbol, icon, title);
 
   /// Convert action to map for native platform channel (iOS 26+ only)
   Map<String, dynamic> toNativeMap() {
