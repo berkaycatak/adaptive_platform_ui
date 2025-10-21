@@ -17,7 +17,7 @@ class AdaptiveSegmentedControl extends StatelessWidget {
     required this.onValueChanged,
     this.enabled = true,
     this.color,
-    this.height = 32.0,
+    this.height = 36.0,
     this.shrinkWrap = false,
     this.sfSymbols,
     this.iconSize,

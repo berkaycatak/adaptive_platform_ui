@@ -4,6 +4,8 @@
 * **FIX**: Added automatic localization support for AdaptiveDatePicker, AdaptiveTimePicker, and popup menu buttons
   * Platform-specific localizations: CupertinoLocalizations for iOS, MaterialLocalizations for Android
   * Supports 70+ languages automatically based on system locale
+* **FIX**: Increased default height of AdaptiveSegmentedControl from 32 to 36 pixels to prevent overflow on iOS <26
+  * Resolves RenderConstraintsTransformBox overflow issue with CupertinoSlidingSegmentedControl
 
 ## [0.1.95]
 * **NEW**: Added `AdaptiveTabBarView` widget - Platform-specific swipeable tab bar view with color customization
