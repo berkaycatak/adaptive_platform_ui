@@ -260,7 +260,9 @@ class AdaptiveAlertDialog {
           final normalActions = actions
               .where((a) => a.style != AlertActionStyle.cancel)
               .toList();
-          final cancelLabel = MaterialLocalizations.of(context).cancelButtonLabel;
+          final cancelLabel = MaterialLocalizations.of(
+            context,
+          ).cancelButtonLabel;
           final cancelAction = actions.firstWhere(
             (a) => a.style == AlertActionStyle.cancel,
             orElse: () => AlertAction(

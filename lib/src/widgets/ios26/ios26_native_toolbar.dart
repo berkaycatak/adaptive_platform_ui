@@ -83,7 +83,7 @@ class _IOS26NativeToolbarState extends State<IOS26NativeToolbar> {
         creationParams: creationParams,
         creationParamsCodec: const StandardMessageCodec(),
         onPlatformViewCreated: _onPlatformViewCreated,
-        hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+        hitTestBehavior: PlatformViewHitTestBehavior.translucent,
         // Enable Hybrid Composition mode for better layer integration
         gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
       ),
@@ -102,7 +102,7 @@ class _IOS26NativeToolbarState extends State<IOS26NativeToolbar> {
               bottom: 0,
               child: Align(
                 alignment: Alignment.centerLeft,
-                child: widget.leading!,
+                child: IgnorePointer(ignoring: false, child: widget.leading!),
               ),
             ),
           ],

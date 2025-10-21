@@ -6,6 +6,9 @@
   * Supports 70+ languages automatically based on system locale
 * **FIX**: Increased default height of AdaptiveSegmentedControl from 32 to 36 pixels to prevent overflow on iOS <26
   * Resolves RenderConstraintsTransformBox overflow issue with CupertinoSlidingSegmentedControl
+* **FIX**: Fixed tab bar minimizing during pull-to-refresh bounce animation
+  * Tab bar now ignores scroll events when content is overscrolling (pixels outside minScrollExtent/maxScrollExtent)
+  * Prevents unwanted tab bar animation during iOS elastic scroll bounce
 
 ## [0.1.95]
 * **NEW**: Added `AdaptiveTabBarView` widget - Platform-specific swipeable tab bar view with color customization

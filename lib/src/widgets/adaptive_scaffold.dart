@@ -671,6 +671,19 @@ class _MinimizableTabBarState extends State<_MinimizableTabBar>
 
     if (notification is ScrollUpdateNotification) {
       final delta = notification.scrollDelta ?? 0;
+      final metrics = notification.metrics;
+
+      // Check if we're in overscroll territory (pull-to-refresh or bottom bounce)
+      // When pixels < minScrollExtent, user is pulling down beyond top (overscroll)
+      // When pixels > maxScrollExtent, user is pulling up beyond bottom (overscroll)
+      final isOverscrolling =
+          metrics.pixels < metrics.minScrollExtent ||
+          metrics.pixels > metrics.maxScrollExtent;
+
+      // Ignore scroll events during overscroll to prevent tab bar animation during bounce
+      if (isOverscrolling) {
+        return;
+      }
 
       if (widget.minimizeBehavior == TabBarMinimizeBehavior.onScrollDown ||
           widget.minimizeBehavior == TabBarMinimizeBehavior.automatic) {
