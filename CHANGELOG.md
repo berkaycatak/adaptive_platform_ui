@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.1.96]
+* **FIX**: Added automatic localization support for AdaptiveDatePicker, AdaptiveTimePicker, and popup menu buttons
+  * Platform-specific localizations: CupertinoLocalizations for iOS, MaterialLocalizations for Android
+  * Supports 70+ languages automatically based on system locale
+
 ## [0.1.95]
 * **NEW**: Added `AdaptiveTabBarView` widget - Platform-specific swipeable tab bar view with color customization
 * **NEW**: Added `AdaptiveFloatingActionButton` widget - Platform-specific FAB with custom colors, mini size, hero transitions

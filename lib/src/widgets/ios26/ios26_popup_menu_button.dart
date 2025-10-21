@@ -397,7 +397,7 @@ class _IOS26PopupMenuButtonState<T> extends State<IOS26PopupMenuButton<T>> {
           cancelButton: CupertinoActionSheetAction(
             onPressed: () => Navigator.of(ctx).pop(),
             isDefaultAction: true,
-            child: const Text('Cancel'),
+            child: Text(CupertinoLocalizations.of(ctx).cancelButtonLabel),
           ),
         );
       },

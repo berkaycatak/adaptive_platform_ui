@@ -130,9 +130,10 @@ class _AdaptiveExpansionTileState extends State<AdaptiveExpansionTile>
       vsync: this,
     );
     _iconTurns = _animationController.drive(
-      Tween<double>(begin: 0.0, end: 0.25).chain(
-        CurveTween(curve: Curves.easeInOutCubic),
-      ),
+      Tween<double>(
+        begin: 0.0,
+        end: 0.25,
+      ).chain(CurveTween(curve: Curves.easeInOutCubic)),
     );
     if (_isExpanded) {
       _animationController.value = 1.0;
@@ -171,25 +172,31 @@ class _AdaptiveExpansionTileState extends State<AdaptiveExpansionTile>
     final isDark = MediaQuery.platformBrightnessOf(context) == Brightness.dark;
 
     final effectiveBackgroundColor = _isExpanded
-        ? (widget.backgroundColor ?? (isDark
-            ? CupertinoColors.systemGrey6.darkColor
-            : CupertinoColors.systemBackground))
-        : (widget.collapsedBackgroundColor ?? (isDark
-            ? CupertinoColors.systemGrey6.darkColor
-            : CupertinoColors.systemBackground));
+        ? (widget.backgroundColor ??
+              (isDark
+                  ? CupertinoColors.systemGrey6.darkColor
+                  : CupertinoColors.systemBackground))
+        : (widget.collapsedBackgroundColor ??
+              (isDark
+                  ? CupertinoColors.systemGrey6.darkColor
+                  : CupertinoColors.systemBackground));
 
     final effectiveTextColor = _isExpanded
         ? (widget.textColor ?? CupertinoColors.label.resolveFrom(context))
-        : (widget.collapsedTextColor ?? CupertinoColors.label.resolveFrom(context));
+        : (widget.collapsedTextColor ??
+              CupertinoColors.label.resolveFrom(context));
 
     final effectiveIconColor = _isExpanded
         ? (widget.iconColor ?? CupertinoColors.systemGrey.resolveFrom(context))
-        : (widget.collapsedIconColor ?? CupertinoColors.systemGrey.resolveFrom(context));
+        : (widget.collapsedIconColor ??
+              CupertinoColors.systemGrey.resolveFrom(context));
 
-    final effectiveTilePadding = widget.tilePadding ??
+    final effectiveTilePadding =
+        widget.tilePadding ??
         const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0);
 
-    final effectiveChildrenPadding = widget.childrenPadding ??
+    final effectiveChildrenPadding =
+        widget.childrenPadding ??
         const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0);
 
     return AnimatedContainer(
@@ -205,21 +212,29 @@ class _AdaptiveExpansionTileState extends State<AdaptiveExpansionTile>
               : CupertinoColors.systemGrey5.color,
           width: 0.5,
         ),
-        boxShadow: _isExpanded ? [
-          BoxShadow(
-            color: (isDark ? CupertinoColors.black : CupertinoColors.systemGrey)
-                .withValues(alpha: isDark ? 0.3 : 0.08),
-            blurRadius: 12.0,
-            offset: const Offset(0, 4),
-          ),
-        ] : [
-          BoxShadow(
-            color: (isDark ? CupertinoColors.black : CupertinoColors.systemGrey)
-                .withValues(alpha: isDark ? 0.2 : 0.04),
-            blurRadius: 4.0,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        boxShadow: _isExpanded
+            ? [
+                BoxShadow(
+                  color:
+                      (isDark
+                              ? CupertinoColors.black
+                              : CupertinoColors.systemGrey)
+                          .withValues(alpha: isDark ? 0.3 : 0.08),
+                  blurRadius: 12.0,
+                  offset: const Offset(0, 4),
+                ),
+              ]
+            : [
+                BoxShadow(
+                  color:
+                      (isDark
+                              ? CupertinoColors.black
+                              : CupertinoColors.systemGrey)
+                          .withValues(alpha: isDark ? 0.2 : 0.04),
+                  blurRadius: 4.0,
+                  offset: const Offset(0, 2),
+                ),
+              ],
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(12.0),
@@ -333,7 +348,9 @@ class _AdaptiveExpansionTileState extends State<AdaptiveExpansionTile>
                   gradient: LinearGradient(
                     colors: [
                       Colors.transparent,
-                      (isDark ? CupertinoColors.systemGrey : CupertinoColors.separator)
+                      (isDark
+                              ? CupertinoColors.systemGrey
+                              : CupertinoColors.separator)
                           .resolveFrom(context)
                           .withValues(alpha: 0.5),
                       Colors.transparent,
@@ -351,7 +368,8 @@ class _AdaptiveExpansionTileState extends State<AdaptiveExpansionTile>
                         padding: effectiveChildrenPadding,
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: widget.expandedCrossAxisAlignment ??
+                          crossAxisAlignment:
+                              widget.expandedCrossAxisAlignment ??
                               CrossAxisAlignment.center,
                           children: widget.children,
                         ),

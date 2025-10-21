@@ -625,9 +625,7 @@ class AlertDialogDemoPage extends StatelessWidget {
       context: context,
       title: 'Enter Your Name',
       message: 'Please enter your full name below:',
-      input: const AdaptiveAlertDialogInput(
-        placeholder: 'Full Name',
-      ),
+      input: const AdaptiveAlertDialogInput(placeholder: 'Full Name'),
       actions: [
         AlertAction(
           title: 'Submit',
@@ -652,7 +650,9 @@ class AlertDialogDemoPage extends StatelessWidget {
       context: context,
       title: 'Enter Password',
       message: 'Please enter your password to continue:',
-      icon: PlatformInfo.isIOS26OrHigher() ? 'lock.fill' : (PlatformInfo.isIOS ? CupertinoIcons.lock_fill : Icons.lock),
+      icon: PlatformInfo.isIOS26OrHigher()
+          ? 'lock.fill'
+          : (PlatformInfo.isIOS ? CupertinoIcons.lock_fill : Icons.lock),
       iconSize: 40,
       iconColor: PlatformInfo.isIOS ? CupertinoColors.systemBlue : Colors.blue,
       input: const AdaptiveAlertDialogInput(
@@ -674,7 +674,10 @@ class AlertDialogDemoPage extends StatelessWidget {
     );
 
     if (context.mounted && result != null && result.isNotEmpty) {
-      _showResultSnackbar(context, 'Password entered (${result.length} characters)');
+      _showResultSnackbar(
+        context,
+        'Password entered (${result.length} characters)',
+      );
     }
   }
 
@@ -683,7 +686,9 @@ class AlertDialogDemoPage extends StatelessWidget {
       context: context,
       title: 'Enter Email',
       message: 'Please provide your email address:',
-      icon: PlatformInfo.isIOS26OrHigher() ? 'envelope.fill' : (PlatformInfo.isIOS ? CupertinoIcons.mail_solid : Icons.email),
+      icon: PlatformInfo.isIOS26OrHigher()
+          ? 'envelope.fill'
+          : (PlatformInfo.isIOS ? CupertinoIcons.mail_solid : Icons.email),
       iconSize: 40,
       iconColor: PlatformInfo.isIOS ? CupertinoColors.systemBlue : Colors.blue,
       input: const AdaptiveAlertDialogInput(
@@ -714,9 +719,13 @@ class AlertDialogDemoPage extends StatelessWidget {
       context: context,
       title: 'Enter Phone Number',
       message: 'Please provide your phone number:',
-      icon: PlatformInfo.isIOS26OrHigher() ? 'phone.fill' : (PlatformInfo.isIOS ? CupertinoIcons.phone_fill : Icons.phone),
+      icon: PlatformInfo.isIOS26OrHigher()
+          ? 'phone.fill'
+          : (PlatformInfo.isIOS ? CupertinoIcons.phone_fill : Icons.phone),
       iconSize: 40,
-      iconColor: PlatformInfo.isIOS ? CupertinoColors.systemGreen : Colors.green,
+      iconColor: PlatformInfo.isIOS
+          ? CupertinoColors.systemGreen
+          : Colors.green,
       input: const AdaptiveAlertDialogInput(
         placeholder: '+1 234 567 8900',
         keyboardType: TextInputType.phone,
@@ -745,9 +754,15 @@ class AlertDialogDemoPage extends StatelessWidget {
       context: context,
       title: 'Enter Code',
       message: 'Please enter the 6-digit verification code:',
-      icon: PlatformInfo.isIOS26OrHigher() ? 'number.circle.fill' : (PlatformInfo.isIOS ? CupertinoIcons.number_circle_fill : Icons.pin),
+      icon: PlatformInfo.isIOS26OrHigher()
+          ? 'number.circle.fill'
+          : (PlatformInfo.isIOS
+                ? CupertinoIcons.number_circle_fill
+                : Icons.pin),
       iconSize: 40,
-      iconColor: PlatformInfo.isIOS ? CupertinoColors.systemOrange : Colors.orange,
+      iconColor: PlatformInfo.isIOS
+          ? CupertinoColors.systemOrange
+          : Colors.orange,
       input: const AdaptiveAlertDialogInput(
         placeholder: '000000',
         keyboardType: TextInputType.number,

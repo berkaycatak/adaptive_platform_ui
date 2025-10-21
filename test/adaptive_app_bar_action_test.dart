@@ -16,10 +16,7 @@ void main() {
     });
 
     test('creates action with icon', () {
-      final action = AdaptiveAppBarAction(
-        icon: Icons.info,
-        onPressed: () {},
-      );
+      final action = AdaptiveAppBarAction(icon: Icons.info, onPressed: () {});
 
       expect(action.icon, Icons.info);
       expect(action.iosSymbol, isNull);
@@ -181,10 +178,7 @@ void main() {
     });
 
     test('toNativeMap returns empty map when only icon is provided', () {
-      final action = AdaptiveAppBarAction(
-        icon: Icons.info,
-        onPressed: () {},
-      );
+      final action = AdaptiveAppBarAction(icon: Icons.info, onPressed: () {});
 
       final map = action.toNativeMap();
 

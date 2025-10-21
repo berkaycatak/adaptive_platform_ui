@@ -179,7 +179,11 @@ class AdaptivePopupMenuButton<T> {
           cancelButton: CupertinoActionSheetAction(
             onPressed: () => Navigator.of(ctx).pop(),
             isDefaultAction: true,
-            child: const Text('Cancel'),
+            child: Text(
+              PlatformInfo.isIOS
+                  ? CupertinoLocalizations.of(ctx).cancelButtonLabel
+                  : MaterialLocalizations.of(ctx).cancelButtonLabel,
+            ),
           ),
         );
       },

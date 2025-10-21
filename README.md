@@ -53,6 +53,31 @@ Native iOS 26 UIToolbar and UITabBar with Liquid Glass blur effects, minimize be
 
 ## Widget Showcase
 
+### Important: Localization Setup
+
+⚠️ **For proper localization support (automatic translations for date/time pickers, buttons, etc.), you must add localization delegates to your `AdaptiveApp`:**
+
+```dart
+import 'package:flutter_localizations/flutter_localizations.dart';
+
+AdaptiveApp(
+  localizationsDelegates: [
+    GlobalMaterialLocalizations.delegate,
+    GlobalCupertinoLocalizations.delegate, // Important!
+    GlobalWidgetsLocalizations.delegate,
+  ],
+  supportedLocales: [
+    Locale('en', ''), // English
+    Locale('de', ''), // German
+    Locale('tr', ''), // Turkish
+    // Add more locales as needed
+  ],
+  // ... rest of your app configuration
+)
+```
+
+Without these delegates, date/time pickers and other widgets will show English text regardless of system language.
+
 ### AdaptiveScaffold with AdaptiveAppBar
 
 <img src="https://github.com/berkaycatak/adaptive_platform_ui/blob/main/img/toolbar_p.png?raw=true" alt="iOS 26 Native Toolbar">

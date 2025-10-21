@@ -16,9 +16,7 @@ class _ExpansionTileDemoPageState extends State<ExpansionTileDemoPage> {
   @override
   Widget build(BuildContext context) {
     return AdaptiveScaffold(
-      appBar: const AdaptiveAppBar(
-        title: 'Expansion Tile Demo',
-      ),
+      appBar: const AdaptiveAppBar(title: 'Expansion Tile Demo'),
       body: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [
@@ -114,7 +112,9 @@ class _ExpansionTileDemoPageState extends State<ExpansionTileDemoPage> {
             leading: Icon(
               PlatformInfo.isIOS ? CupertinoIcons.chart_bar : Icons.bar_chart,
             ),
-            title: Text('Statistics ${_tile1Expanded ? '(Expanded)' : '(Collapsed)'}'),
+            title: Text(
+              'Statistics ${_tile1Expanded ? '(Expanded)' : '(Collapsed)'}',
+            ),
             onExpansionChanged: (expanded) {
               setState(() {
                 _tile1Expanded = expanded;
@@ -172,7 +172,9 @@ class _ExpansionTileDemoPageState extends State<ExpansionTileDemoPage> {
           _buildSectionHeader('Custom Padding'),
           AdaptiveExpansionTile(
             leading: Icon(
-              PlatformInfo.isIOS ? CupertinoIcons.square_grid_2x2 : Icons.grid_view,
+              PlatformInfo.isIOS
+                  ? CupertinoIcons.square_grid_2x2
+                  : Icons.grid_view,
             ),
             title: const Text('Gallery'),
             tilePadding: const EdgeInsets.symmetric(
@@ -199,7 +201,10 @@ class _ExpansionTileDemoPageState extends State<ExpansionTileDemoPage> {
             ),
             title: const Text('Notifications'),
             trailing: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 8.0,
+                vertical: 4.0,
+              ),
               decoration: BoxDecoration(
                 color: PlatformInfo.isIOS
                     ? CupertinoColors.systemRed
@@ -251,7 +256,9 @@ class _ExpansionTileDemoPageState extends State<ExpansionTileDemoPage> {
           _buildSectionHeader('Complex Content'),
           AdaptiveExpansionTile(
             leading: Icon(
-              PlatformInfo.isIOS ? CupertinoIcons.shopping_cart : Icons.shopping_cart,
+              PlatformInfo.isIOS
+                  ? CupertinoIcons.shopping_cart
+                  : Icons.shopping_cart,
             ),
             title: const Text('Shopping Cart'),
             subtitle: Text(_tile2Expanded ? 'Hide items' : 'Show items'),
@@ -332,7 +339,11 @@ class _ExpansionTileDemoPageState extends State<ExpansionTileDemoPage> {
     );
   }
 
-  Widget _buildListItem(String title, {bool showDivider = true, double indent = 16.0}) {
+  Widget _buildListItem(
+    String title, {
+    bool showDivider = true,
+    double indent = 16.0,
+  }) {
     final isDark = PlatformInfo.isIOS
         ? MediaQuery.platformBrightnessOf(context) == Brightness.dark
         : Theme.of(context).brightness == Brightness.dark;
@@ -355,7 +366,10 @@ class _ExpansionTileDemoPageState extends State<ExpansionTileDemoPage> {
           },
           padding: EdgeInsets.zero,
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10.0),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 12.0,
+              vertical: 10.0,
+            ),
             decoration: BoxDecoration(
               color: isDark
                   ? CupertinoColors.systemGrey6.darkColor.withValues(alpha: 0.5)
@@ -399,33 +413,27 @@ class _ExpansionTileDemoPageState extends State<ExpansionTileDemoPage> {
             );
           },
           child: Padding(
-            padding: EdgeInsets.only(left: indent, right: 16.0, top: 12.0, bottom: 12.0),
+            padding: EdgeInsets.only(
+              left: indent,
+              right: 16.0,
+              top: 12.0,
+              bottom: 12.0,
+            ),
             child: Row(
               children: [
                 Expanded(
                   child: Text(
                     title,
-                    style: TextStyle(
-                      fontSize: 16.0,
-                      color: Colors.black87,
-                    ),
+                    style: TextStyle(fontSize: 16.0, color: Colors.black87),
                   ),
                 ),
-                Icon(
-                  Icons.chevron_right,
-                  size: 18.0,
-                  color: Colors.grey[600],
-                ),
+                Icon(Icons.chevron_right, size: 18.0, color: Colors.grey[600]),
               ],
             ),
           ),
         ),
         if (showDivider)
-          Divider(
-            height: 1,
-            indent: indent,
-            color: Colors.grey[300],
-          ),
+          Divider(height: 1, indent: indent, color: Colors.grey[300]),
       ],
     );
   }
@@ -478,17 +486,15 @@ class _ExpansionTileDemoPageState extends State<ExpansionTileDemoPage> {
                     borderRadius: BorderRadius.circular(12.0),
                     boxShadow: [
                       BoxShadow(
-                        color: CupertinoColors.activeBlue.withValues(alpha: 0.3),
+                        color: CupertinoColors.activeBlue.withValues(
+                          alpha: 0.3,
+                        ),
                         blurRadius: 8.0,
                         offset: const Offset(0, 2),
                       ),
                     ],
                   ),
-                  child: Icon(
-                    icon,
-                    size: 24.0,
-                    color: CupertinoColors.white,
-                  ),
+                  child: Icon(icon, size: 24.0, color: CupertinoColors.white),
                 ),
                 const SizedBox(width: 14.0),
                 Expanded(
@@ -509,7 +515,9 @@ class _ExpansionTileDemoPageState extends State<ExpansionTileDemoPage> {
                         'In Stock',
                         style: TextStyle(
                           fontSize: 13.0,
-                          color: CupertinoColors.systemGreen.resolveFrom(context),
+                          color: CupertinoColors.systemGreen.resolveFrom(
+                            context,
+                          ),
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -517,7 +525,10 @@ class _ExpansionTileDemoPageState extends State<ExpansionTileDemoPage> {
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12.0,
+                    vertical: 6.0,
+                  ),
                   decoration: BoxDecoration(
                     color: CupertinoColors.activeBlue.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(8.0),
@@ -567,18 +578,11 @@ class _ExpansionTileDemoPageState extends State<ExpansionTileDemoPage> {
                     gradient: LinearGradient(
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
-                      colors: [
-                        Colors.blue[400]!,
-                        Colors.blue[600]!,
-                      ],
+                      colors: [Colors.blue[400]!, Colors.blue[600]!],
                     ),
                     borderRadius: BorderRadius.circular(12.0),
                   ),
-                  child: Icon(
-                    icon,
-                    size: 24.0,
-                    color: Colors.white,
-                  ),
+                  child: Icon(icon, size: 24.0, color: Colors.white),
                 ),
                 const SizedBox(width: 14.0),
                 Expanded(
@@ -606,7 +610,10 @@ class _ExpansionTileDemoPageState extends State<ExpansionTileDemoPage> {
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12.0,
+                    vertical: 6.0,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.blue[50],
                     borderRadius: BorderRadius.circular(8.0),

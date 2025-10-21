@@ -4,17 +4,15 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('AdaptiveExpansionTile', () {
-    testWidgets('creates expansion tile with title and children',
-        (WidgetTester tester) async {
+    testWidgets('creates expansion tile with title and children', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
             body: AdaptiveExpansionTile(
               title: Text('Test Title'),
-              children: [
-                Text('Child 1'),
-                Text('Child 2'),
-              ],
+              children: [Text('Child 1'), Text('Child 2')],
             ),
           ),
         ),
@@ -26,17 +24,15 @@ void main() {
       expect(find.text('Child 2'), findsNothing);
     });
 
-    testWidgets('expands and shows children when tapped',
-        (WidgetTester tester) async {
+    testWidgets('expands and shows children when tapped', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
             body: AdaptiveExpansionTile(
               title: Text('Test Title'),
-              children: [
-                Text('Child 1'),
-                Text('Child 2'),
-              ],
+              children: [Text('Child 1'), Text('Child 2')],
             ),
           ),
         ),
@@ -57,9 +53,7 @@ void main() {
           home: Scaffold(
             body: AdaptiveExpansionTile(
               title: Text('Test Title'),
-              children: [
-                Text('Child 1'),
-              ],
+              children: [Text('Child 1')],
             ),
           ),
         ),
@@ -125,18 +119,16 @@ void main() {
       expect(find.byIcon(Icons.notifications), findsOneWidget);
     });
 
-    testWidgets('starts expanded when initiallyExpanded is true',
-        (WidgetTester tester) async {
+    testWidgets('starts expanded when initiallyExpanded is true', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
             body: AdaptiveExpansionTile(
               title: Text('Test Title'),
               initiallyExpanded: true,
-              children: [
-                Text('Child 1'),
-                Text('Child 2'),
-              ],
+              children: [Text('Child 1'), Text('Child 2')],
             ),
           ),
         ),
@@ -149,8 +141,9 @@ void main() {
       expect(find.text('Child 2'), findsOneWidget);
     });
 
-    testWidgets('calls onExpansionChanged callback',
-        (WidgetTester tester) async {
+    testWidgets('calls onExpansionChanged callback', (
+      WidgetTester tester,
+    ) async {
       bool? callbackValue;
 
       await tester.pumpWidget(
@@ -180,8 +173,9 @@ void main() {
       expect(callbackValue, false);
     });
 
-    testWidgets('applies custom backgroundColor when expanded',
-        (WidgetTester tester) async {
+    testWidgets('applies custom backgroundColor when expanded', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
@@ -202,8 +196,9 @@ void main() {
       expect(find.text('Child'), findsOneWidget);
     });
 
-    testWidgets('applies custom collapsedBackgroundColor when collapsed',
-        (WidgetTester tester) async {
+    testWidgets('applies custom collapsedBackgroundColor when collapsed', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
@@ -223,8 +218,9 @@ void main() {
       expect(find.text('Child'), findsNothing);
     });
 
-    testWidgets('creates tile with enabled parameter',
-        (WidgetTester tester) async {
+    testWidgets('creates tile with enabled parameter', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
@@ -283,8 +279,9 @@ void main() {
       expect(paddingWidget, findsWidgets);
     });
 
-    testWidgets('maintains state when maintainState is true',
-        (WidgetTester tester) async {
+    testWidgets('maintains state when maintainState is true', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
@@ -309,8 +306,9 @@ void main() {
       expect(find.text('Test Title'), findsOneWidget);
     });
 
-    testWidgets('respects expandedCrossAxisAlignment',
-        (WidgetTester tester) async {
+    testWidgets('respects expandedCrossAxisAlignment', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(

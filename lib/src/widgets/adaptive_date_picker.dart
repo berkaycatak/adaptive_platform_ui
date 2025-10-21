@@ -80,14 +80,22 @@ class AdaptiveDatePicker {
                     CupertinoButton(
                       padding: EdgeInsets.zero,
                       onPressed: () => Navigator.of(context).pop(),
-                      child: const Text('Cancel'),
+                      child: Text(
+                        PlatformInfo.isIOS
+                            ? CupertinoLocalizations.of(
+                                context,
+                              ).cancelButtonLabel
+                            : MaterialLocalizations.of(
+                                context,
+                              ).cancelButtonLabel,
+                      ),
                     ),
                     CupertinoButton(
                       padding: EdgeInsets.zero,
                       onPressed: () => Navigator.of(context).pop(selectedDate),
-                      child: const Text(
-                        'Done',
-                        style: TextStyle(fontWeight: FontWeight.w600),
+                      child: Text(
+                        MaterialLocalizations.of(context).okButtonLabel,
+                        style: const TextStyle(fontWeight: FontWeight.w600),
                       ),
                     ),
                   ],

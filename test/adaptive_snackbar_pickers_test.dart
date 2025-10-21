@@ -483,10 +483,7 @@ void main() {
             appBar: AdaptiveAppBar(
               title: 'App',
               actions: [
-                AdaptiveAppBarAction(
-                  onPressed: () {},
-                  icon: Icons.settings,
-                ),
+                AdaptiveAppBarAction(onPressed: () {}, icon: Icons.settings),
               ],
             ),
             body: const Text('Body'),
