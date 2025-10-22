@@ -1,6 +1,18 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+/// Spacer type for toolbar items (iOS 26+ only)
+enum ToolbarSpacerType {
+  /// No spacer
+  none,
+
+  /// Fixed 12pt space - groups items within same section
+  fixed,
+
+  /// Flexible space - separates item groups (pushes next items to opposite side)
+  flexible,
+}
+
 /// An app bar action that can be displayed in AdaptiveScaffold
 ///
 /// - On iOS 26+: Uses iosSymbol (SF Symbol) in native UIToolbar
@@ -12,6 +24,7 @@ class AdaptiveAppBarAction {
     this.icon,
     this.title,
     required this.onPressed,
+    this.spacerAfter = ToolbarSpacerType.none,
   }) : assert(
          iosSymbol != null || icon != null || title != null,
          'At least one of iosSymbol, icon, or title must be provided',
@@ -36,6 +49,22 @@ class AdaptiveAppBarAction {
   /// Callback when the action is tapped
   final VoidCallback onPressed;
 
+  /// Add spacer after this action in iOS 26+ toolbar
+  /// - `none`: No spacer (default)
+  /// - `fixed`: 12pt fixed space - groups items within same section
+  /// - `flexible`: Flexible space - separates item groups (e.g., left vs right groups)
+  ///
+  /// Example: For Undo/Redo on left and Markup/More on right:
+  /// ```dart
+  /// actions: [
+  ///   AdaptiveAppBarAction(iosSymbol: 'arrow.uturn.backward', ...),
+  ///   AdaptiveAppBarAction(iosSymbol: 'arrow.uturn.forward', ..., spacerAfter: ToolbarSpacerType.flexible),
+  ///   AdaptiveAppBarAction(iosSymbol: 'pencil', ...),
+  ///   AdaptiveAppBarAction(iosSymbol: 'ellipsis', ...),
+  /// ]
+  /// ```
+  final ToolbarSpacerType spacerAfter;
+
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
@@ -53,6 +82,7 @@ class AdaptiveAppBarAction {
     return {
       if (iosSymbol != null) 'icon': iosSymbol!,
       if (title != null) 'title': title!,
+      'spacerAfter': spacerAfter.index, // 0=none, 1=fixed, 2=flexible
     };
   }
 }

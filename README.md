@@ -78,6 +78,53 @@ AdaptiveApp(
 
 Without these delegates, date/time pickers and other widgets will show English text regardless of system language.
 
+### iOS 26+ Liquid Glass Toolbar Grouping
+
+⚠️ **For iOS 26+ native toolbars, use `spacerAfter` to group and position actions according to Apple's HIG:**
+
+```dart
+AdaptiveAppBar(
+  useNativeToolbar: true,
+  actions: [
+    // LEFT GROUP: Edit actions
+    AdaptiveAppBarAction(
+      iosSymbol: 'arrow.uturn.backward',
+      icon: Icons.undo,
+      onPressed: () {},
+    ),
+    AdaptiveAppBarAction(
+      iosSymbol: 'arrow.uturn.forward',
+      icon: Icons.redo,
+      onPressed: () {},
+      spacerAfter: ToolbarSpacerType.flexible, // Push next group to right
+    ),
+    // RIGHT GROUP: Markup actions
+    AdaptiveAppBarAction(
+      iosSymbol: 'pencil.tip.crop.circle',
+      icon: Icons.edit,
+      onPressed: () {},
+    ),
+    AdaptiveAppBarAction(
+      iosSymbol: 'ellipsis.circle',
+      icon: Icons.more_horiz,
+      onPressed: () {},
+    ),
+  ],
+)
+```
+
+**Spacer types:**
+- `ToolbarSpacerType.none` - No spacer (default)
+- `ToolbarSpacerType.fixed` - 12pt fixed space (for spacing within a group)
+- `ToolbarSpacerType.flexible` - Flexible space (separates groups, pushes items to opposite sides)
+
+**Best practices:**
+- Group items that perform similar actions or affect the same part of interface
+- Use `flexible` spacer to create left/right groups like Apple's examples
+- Use `fixed` spacer for subtle spacing within a group
+- Don't mix text and icons within the same group
+- Each group shares a Liquid Glass background automatically
+
 ### AdaptiveScaffold with AdaptiveAppBar
 
 <img src="https://github.com/berkaycatak/adaptive_platform_ui/blob/main/img/toolbar_p.png?raw=true" alt="iOS 26 Native Toolbar">

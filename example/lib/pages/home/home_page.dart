@@ -28,26 +28,58 @@ class _HomePageState extends State<HomePage> {
         title: "Adaptive Platform UI",
         useNativeToolbar: true,
         actions: [
-          AdaptiveAppBarAction(
-            onPressed: () {
-              RouterService.goNamed(
-                context: context,
-                route: RouterService.routes.info,
-              );
-            },
-            iosSymbol: "checkmark.circle",
-            icon: CupertinoIcons.check_mark,
-          ),
-          AdaptiveAppBarAction(
-            onPressed: () {
-              RouterService.goNamed(
-                context: context,
-                route: RouterService.routes.info,
-              );
-            },
-            iosSymbol: "info.circle",
-            icon: CupertinoIcons.info_circle,
-          ),
+          if (PlatformInfo.isIOS26OrHigher()) ...[
+            AdaptiveAppBarAction(
+              iosSymbol: 'arrow.uturn.backward',
+              icon: Icons.undo,
+              onPressed: () {
+                if (kDebugMode) {
+                  print("Undo action pressed");
+                }
+              },
+            ),
+            AdaptiveAppBarAction(
+              iosSymbol: 'arrow.uturn.forward',
+              icon: Icons.redo,
+              onPressed: () {
+                if (kDebugMode) {
+                  print("Redo action pressed");
+                }
+              },
+              spacerAfter:
+                  ToolbarSpacerType.flexible, // Push next group to right
+            ),
+            // Markup group
+            AdaptiveAppBarAction(
+              iosSymbol: 'pencil.tip.crop.circle',
+              icon: Icons.edit,
+              onPressed: () {
+                if (kDebugMode) {
+                  print("Edit action pressed");
+                }
+              },
+            ),
+            AdaptiveAppBarAction(
+              iosSymbol: 'ellipsis.circle',
+              icon: Icons.more_horiz,
+              onPressed: () {
+                if (kDebugMode) {
+                  print("More action pressed");
+                }
+              },
+            ),
+          ] else ...[
+            AdaptiveAppBarAction(
+              iosSymbol: 'info.circle',
+              icon: Icons.info,
+              onPressed: () {
+                RouterService.goNamed(
+                  context: context,
+                  route: RouterService.routes.info,
+                );
+              },
+            ),
+          ],
         ],
       ),
       body: _buildBody(context),

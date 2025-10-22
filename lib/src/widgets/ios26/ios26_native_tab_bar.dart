@@ -88,12 +88,16 @@ class _IOS26NativeTabBarState extends State<IOS26NativeTabBar> {
 
       final searchFlags = widget.destinations.map((e) => e.isSearch).toList();
       final badgeCounts = widget.destinations.map((e) => e.badgeCount).toList();
+      final spacerFlags = widget.destinations
+          .map((e) => e.addSpacerAfter)
+          .toList();
 
       final creationParams = <String, dynamic>{
         'labels': labels,
         'sfSymbols': symbols,
         'searchFlags': searchFlags,
         'badgeCounts': badgeCounts,
+        'spacerFlags': spacerFlags,
         'selectedIndex': widget.selectedIndex,
         'isDark': _isDark,
         'minimizeBehavior': widget.minimizeBehavior.index,

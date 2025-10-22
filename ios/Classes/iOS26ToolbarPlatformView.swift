@@ -107,7 +107,9 @@ class iOS26ToolbarPlatformView: NSObject, FlutterPlatformView {
     private func configureToolbar(_ params: [String: Any]) {
         var items: [UIBarButtonItem] = []
 
-        // Leading button
+        let hasTitle = params["title"] as? String != nil && !(params["title"] as? String ?? "").isEmpty
+
+        // Leading button (left side)
         if let leadingTitle = params["leading"] as? String {
             let leadingButton: UIBarButtonItem
             if leadingTitle.isEmpty {
@@ -130,46 +132,103 @@ class iOS26ToolbarPlatformView: NSObject, FlutterPlatformView {
             items.append(leadingButton)
         }
 
-        // Flexible space before title
-        items.append(UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil))
-
-        // Title (center)
-        if let title = params["title"] as? String, !title.isEmpty {
-            let titleLabel = UILabel()
-            titleLabel.text = title
-            titleLabel.font = UIFont.systemFont(ofSize: 17, weight: .semibold)
-            titleLabel.textAlignment = .center
-            titleLabel.sizeToFit()
-
-            let titleItem = UIBarButtonItem(customView: titleLabel)
-            items.append(titleItem)
-        }
-
-        // Flexible space after title
-        items.append(UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil))
-
-        // Trailing buttons (actions)
+        // Actions - process and split into left/right groups if flexible spacer exists
         if let actions = params["actions"] as? [[String: Any]] {
+            var leftActions: [UIBarButtonItem] = []
+            var rightActions: [UIBarButtonItem] = []
+            var foundFlexibleSpacer = false
+
             for (index, action) in actions.enumerated() {
+                var actionButton: UIBarButtonItem?
+
                 if let actionTitle = action["title"] as? String {
-                    let actionButton = UIBarButtonItem(
+                    actionButton = UIBarButtonItem(
                         title: actionTitle,
                         style: .plain,
                         target: self,
                         action: #selector(actionTapped(_:))
                     )
-                    actionButton.tag = index  // Set tag to action index
-                    items.append(actionButton)
+                    actionButton?.tag = index
                 } else if let actionIcon = action["icon"] as? String {
-                    let iconButton = UIBarButtonItem(
+                    actionButton = UIBarButtonItem(
                         image: UIImage(systemName: actionIcon),
                         style: .plain,
                         target: self,
                         action: #selector(actionTapped(_:))
                     )
-                    iconButton.tag = index  // Set tag to action index
-                    items.append(iconButton)
+                    actionButton?.tag = index
                 }
+
+                if let btn = actionButton {
+                    if foundFlexibleSpacer {
+                        rightActions.append(btn)
+                    } else {
+                        leftActions.append(btn)
+                    }
+                }
+
+                // Check for spacer after this action
+                if let spacerAfter = action["spacerAfter"] as? Int {
+                    if spacerAfter == 1 { // Fixed space
+                        if #available(iOS 16.0, *) {
+                            if foundFlexibleSpacer {
+                                rightActions.append(.fixedSpace(12))
+                            } else {
+                                leftActions.append(.fixedSpace(12))
+                            }
+                        }
+                    } else if spacerAfter == 2 { // Flexible space - marks split point
+                        foundFlexibleSpacer = true
+                    }
+                }
+            }
+
+            // If we found a flexible spacer, split actions into left/right groups
+            if foundFlexibleSpacer {
+                // Add left actions
+                items.append(contentsOf: leftActions)
+
+                items.append(UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil))
+
+                // Add title in center if exists
+                if hasTitle {
+                    if let title = params["title"] as? String, !title.isEmpty {
+                        let titleLabel = UILabel()
+                        titleLabel.text = title
+                        titleLabel.font = UIFont.systemFont(ofSize: 17, weight: .semibold)
+                        titleLabel.textAlignment = .center
+
+                        let titleSize = (title as NSString).size(withAttributes: [.font: UIFont.systemFont(ofSize: 17, weight: .semibold)])
+                        titleLabel.frame = CGRect(x: 0, y: 0, width: max(titleSize.width, 200), height: 44)
+
+                        let titleItem = UIBarButtonItem(customView: titleLabel)
+                        items.append(titleItem)
+                    }
+
+                    items.append(UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil))
+                }
+
+                // Add right actions
+                items.append(contentsOf: rightActions)
+            } else {
+                // No flexible spacer - standard layout: Title on left, actions on right
+                if hasTitle {
+                    if let title = params["title"] as? String, !title.isEmpty {
+                        let titleLabel = UILabel()
+                        titleLabel.text = title
+                        titleLabel.font = UIFont.systemFont(ofSize: 17, weight: .semibold)
+                        titleLabel.textAlignment = .left
+                        titleLabel.sizeToFit()
+
+                        let titleItem = UIBarButtonItem(customView: titleLabel)
+                        items.append(titleItem)
+                    }
+
+                    items.append(UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil))
+                }
+
+                // Add all actions to the right
+                items.append(contentsOf: leftActions)
             }
         }
 

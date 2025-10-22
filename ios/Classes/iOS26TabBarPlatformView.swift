@@ -22,6 +22,7 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
         var symbols: [String] = []
         var searchFlags: [Bool] = []
         var badgeCounts: [Int?] = []
+        var spacerFlags: [Bool] = []
         var selectedIndex: Int = 0
         var isDark: Bool = false
         var tint: UIColor? = nil
@@ -32,6 +33,7 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
             labels = (dict["labels"] as? [String]) ?? []
             symbols = (dict["sfSymbols"] as? [String]) ?? []
             searchFlags = (dict["searchFlags"] as? [Bool]) ?? []
+            spacerFlags = (dict["spacerFlags"] as? [Bool]) ?? []
             if let badgeData = dict["badgeCounts"] as? [NSNumber?] {
                 badgeCounts = badgeData.map { $0?.intValue }
             }
@@ -134,6 +136,12 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
 
         let count = max(labels.count, symbols.count)
         bar.items = buildItems(0..<count)
+
+        // Note: spacerFlags are received but not yet implemented for UITabBar
+        // UITabBar doesn't natively support flexible spacing between items like UIToolbar does
+        // This would require custom UITabBar subclass or different approach
+        // TODO: Implement grouped tab bar layout if needed
+
         if selectedIndex >= 0, let items = bar.items, selectedIndex < items.count {
             bar.selectedItem = items[selectedIndex]
         }

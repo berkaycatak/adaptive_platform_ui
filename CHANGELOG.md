@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.1.97]
+* **NEW**: Added `spacerAfter` parameter (ToolbarSpacerType) to AdaptiveAppBarAction for iOS 26+ Liquid Glass toolbar grouping
+  * `ToolbarSpacerType.fixed` - 12pt fixed space using UIBarButtonItem.fixedSpace() for spacing within groups
+  * `ToolbarSpacerType.flexible` - Flexible space using UIBarButtonItem.flexibleSpace() for left/right group separation
+  * `ToolbarSpacerType.none` - No spacer (default)
+  * Follows iOS 26+ Liquid Glass design guidelines per Apple HIG
+  * Example: `AdaptiveAppBarAction(iosSymbol: 'arrow.uturn.forward', onPressed: () {}, spacerAfter: ToolbarSpacerType.flexible)`
+
+
 ## [0.1.96]
 * **FIX**: Added automatic localization support for AdaptiveDatePicker, AdaptiveTimePicker, and popup menu buttons
   * Platform-specific localizations: CupertinoLocalizations for iOS, MaterialLocalizations for Android

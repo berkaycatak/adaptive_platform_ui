@@ -17,6 +17,7 @@ class AdaptiveNavigationDestination {
     this.selectedIcon,
     this.isSearch = false,
     this.badgeCount,
+    this.addSpacerAfter = false,
   });
 
   /// Icon to display (SF Symbol name for iOS, IconData for cross-platform)
@@ -36,6 +37,11 @@ class AdaptiveNavigationDestination {
   /// On iOS 26+: Uses native UITabBarItem.badgeValue
   /// On iOS <26 and Android: Uses AdaptiveBadge widget
   final int? badgeCount;
+
+  /// Add flexible space after this tab item (iOS 26+ only)
+  /// Useful for creating grouped tabs (e.g., left group and right group)
+  /// Only applies to iOS 26+ native tab bar
+  final bool addSpacerAfter;
 }
 
 /// Tab bar minimize behavior for iOS 26+
