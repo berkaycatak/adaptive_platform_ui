@@ -177,12 +177,15 @@ void main() {
       expect(map['icon'], 'info.circle');
     });
 
-    test('toNativeMap returns empty map when only icon is provided', () {
+    test('toNativeMap returns only spacerAfter when only icon is provided', () {
       final action = AdaptiveAppBarAction(icon: Icons.info, onPressed: () {});
 
       final map = action.toNativeMap();
 
-      expect(map.isEmpty, isTrue);
+      expect(map.containsKey('icon'), isFalse);
+      expect(map.containsKey('title'), isFalse);
+      expect(map.containsKey('spacerAfter'), isTrue);
+      expect(map['spacerAfter'], 0); // Default is ToolbarSpacerType.none
     });
 
     test('equality ignores onPressed callback', () {
@@ -195,6 +198,41 @@ void main() {
 
       // Equality should only check iosSymbol, icon, and title
       expect(action1, equals(action2));
+    });
+
+    test('toNativeMap includes spacerAfter as none by default', () {
+      final action = AdaptiveAppBarAction(
+        iosSymbol: 'info.circle',
+        onPressed: () {},
+      );
+
+      final map = action.toNativeMap();
+
+      expect(map['spacerAfter'], 0); // ToolbarSpacerType.none.index
+    });
+
+    test('toNativeMap includes spacerAfter as fixed', () {
+      final action = AdaptiveAppBarAction(
+        iosSymbol: 'info.circle',
+        onPressed: () {},
+        spacerAfter: ToolbarSpacerType.fixed,
+      );
+
+      final map = action.toNativeMap();
+
+      expect(map['spacerAfter'], 1); // ToolbarSpacerType.fixed.index
+    });
+
+    test('toNativeMap includes spacerAfter as flexible', () {
+      final action = AdaptiveAppBarAction(
+        iosSymbol: 'info.circle',
+        onPressed: () {},
+        spacerAfter: ToolbarSpacerType.flexible,
+      );
+
+      final map = action.toNativeMap();
+
+      expect(map['spacerAfter'], 2); // ToolbarSpacerType.flexible.index
     });
   });
 }
