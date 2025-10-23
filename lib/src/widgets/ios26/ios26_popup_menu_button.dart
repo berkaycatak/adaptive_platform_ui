@@ -199,7 +199,8 @@ class _IOS26PopupMenuButtonState<T> extends State<IOS26PopupMenuButton<T>> {
 
       if (oldItem.runtimeType != newItem.runtimeType) return true;
 
-      if (oldItem is AdaptivePopupMenuItem<T> && newItem is AdaptivePopupMenuItem<T>) {
+      if (oldItem is AdaptivePopupMenuItem<T> &&
+          newItem is AdaptivePopupMenuItem<T>) {
         if (oldItem.label != newItem.label ||
             oldItem.icon != newItem.icon ||
             oldItem.enabled != newItem.enabled ||
@@ -299,12 +300,14 @@ class _IOS26PopupMenuButtonState<T> extends State<IOS26PopupMenuButton<T>> {
       };
 
       // Create a unique key based on button label/icon and items to force recreation on change
-      final itemsKey = widget.items.map((item) {
-        if (item is AdaptivePopupMenuItem<T>) {
-          return '${item.label}_${item.icon}_${item.enabled}_${item.value}';
-        }
-        return 'divider';
-      }).join('_');
+      final itemsKey = widget.items
+          .map((item) {
+            if (item is AdaptivePopupMenuItem<T>) {
+              return '${item.label}_${item.icon}_${item.enabled}_${item.value}';
+            }
+            return 'divider';
+          })
+          .join('_');
 
       final viewKey = ValueKey(
         '${widget.buttonLabel}_${widget.buttonIcon}_${widget.child?.runtimeType}_$itemsKey',

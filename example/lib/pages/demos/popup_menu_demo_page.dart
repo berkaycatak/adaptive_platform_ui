@@ -332,7 +332,8 @@ class _PopupMenuDemoPageState extends State<PopupMenuDemoPage> {
                   setState(() {
                     if (item.value == 'toggle_mode') {
                       _editMode = !_editMode;
-                      _selectedAction = 'Switched to ${_editMode ? "Edit" : "View"} mode';
+                      _selectedAction =
+                          'Switched to ${_editMode ? "Edit" : "View"} mode';
                     } else {
                       _selectedAction = item.label;
                     }
@@ -343,7 +344,10 @@ class _PopupMenuDemoPageState extends State<PopupMenuDemoPage> {
               ),
               const SizedBox(width: 16),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: _editMode
                       ? CupertinoColors.systemYellow.withOpacity(0.2)

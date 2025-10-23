@@ -7,19 +7,16 @@ void main() {
     testWidgets('creates blur view with child', (WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
-          home: Scaffold(
-            body: AdaptiveBlurView(
-              child: Text('Test Child'),
-            ),
-          ),
+          home: Scaffold(body: AdaptiveBlurView(child: Text('Test Child'))),
         ),
       );
 
       expect(find.text('Test Child'), findsOneWidget);
     });
 
-    testWidgets('creates blur view with custom blur style',
-        (WidgetTester tester) async {
+    testWidgets('creates blur view with custom blur style', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
@@ -35,8 +32,9 @@ void main() {
       expect(find.byType(AdaptiveBlurView), findsOneWidget);
     });
 
-    testWidgets('creates blur view with border radius',
-        (WidgetTester tester) async {
+    testWidgets('creates blur view with border radius', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -52,8 +50,9 @@ void main() {
       expect(find.byType(ClipRRect), findsWidgets);
     });
 
-    testWidgets('applies BackdropFilter on non-iOS 26 platforms',
-        (WidgetTester tester) async {
+    testWidgets('applies BackdropFilter on non-iOS 26 platforms', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
@@ -80,16 +79,23 @@ void main() {
     });
 
     test('BlurStyle converts to UIBlurEffect style string correctly', () {
-      expect(BlurStyle.systemUltraThinMaterial.toUIBlurEffectStyle(),
-          'systemUltraThinMaterial');
-      expect(BlurStyle.systemThinMaterial.toUIBlurEffectStyle(),
-          'systemThinMaterial');
       expect(
-          BlurStyle.systemMaterial.toUIBlurEffectStyle(), 'systemMaterial');
-      expect(BlurStyle.systemThickMaterial.toUIBlurEffectStyle(),
-          'systemThickMaterial');
-      expect(BlurStyle.systemChromeMaterial.toUIBlurEffectStyle(),
-          'systemChromeMaterial');
+        BlurStyle.systemUltraThinMaterial.toUIBlurEffectStyle(),
+        'systemUltraThinMaterial',
+      );
+      expect(
+        BlurStyle.systemThinMaterial.toUIBlurEffectStyle(),
+        'systemThinMaterial',
+      );
+      expect(BlurStyle.systemMaterial.toUIBlurEffectStyle(), 'systemMaterial');
+      expect(
+        BlurStyle.systemThickMaterial.toUIBlurEffectStyle(),
+        'systemThickMaterial',
+      );
+      expect(
+        BlurStyle.systemChromeMaterial.toUIBlurEffectStyle(),
+        'systemChromeMaterial',
+      );
     });
 
     test('BlurStyle converts to ImageFilter correctly', () {
@@ -99,16 +105,13 @@ void main() {
       expect(filter.runtimeType.toString(), contains('ImageFilter'));
     });
 
-    testWidgets('blur view works with different children widgets',
-        (WidgetTester tester) async {
+    testWidgets('blur view works with different children widgets', (
+      WidgetTester tester,
+    ) async {
       // Test with Icon
       await tester.pumpWidget(
         const MaterialApp(
-          home: Scaffold(
-            body: AdaptiveBlurView(
-              child: Icon(Icons.home),
-            ),
-          ),
+          home: Scaffold(body: AdaptiveBlurView(child: Icon(Icons.home))),
         ),
       );
       expect(find.byIcon(Icons.home), findsOneWidget);
@@ -118,11 +121,7 @@ void main() {
         MaterialApp(
           home: Scaffold(
             body: AdaptiveBlurView(
-              child: Container(
-                width: 100,
-                height: 100,
-                color: Colors.red,
-              ),
+              child: Container(width: 100, height: 100, color: Colors.red),
             ),
           ),
         ),
@@ -134,12 +133,7 @@ void main() {
         const MaterialApp(
           home: Scaffold(
             body: AdaptiveBlurView(
-              child: Column(
-                children: [
-                  Text('Line 1'),
-                  Text('Line 2'),
-                ],
-              ),
+              child: Column(children: [Text('Line 1'), Text('Line 2')]),
             ),
           ),
         ),
@@ -148,8 +142,9 @@ void main() {
       expect(find.text('Line 2'), findsOneWidget);
     });
 
-    testWidgets('blur view applies correct background color in light mode',
-        (WidgetTester tester) async {
+    testWidgets('blur view applies correct background color in light mode', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(brightness: Brightness.light),
@@ -167,8 +162,9 @@ void main() {
       expect(find.byType(BackdropFilter), findsOneWidget);
     });
 
-    testWidgets('blur view applies correct background color in dark mode',
-        (WidgetTester tester) async {
+    testWidgets('blur view applies correct background color in dark mode', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(brightness: Brightness.dark),

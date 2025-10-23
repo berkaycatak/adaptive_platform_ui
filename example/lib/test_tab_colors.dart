@@ -30,14 +30,13 @@ class _TestTabColorsState extends State<TestTabColors> {
   @override
   Widget build(BuildContext context) {
     return AdaptiveScaffold(
-      appBar: AdaptiveAppBar(
-        title: 'Tab Bar Color Test',
-      ),
+      appBar: AdaptiveAppBar(title: 'Tab Bar Color Test'),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('Selected Tab: $_selectedIndex',
+            Text(
+              'Selected Tab: $_selectedIndex',
               style: const TextStyle(fontSize: 24),
             ),
             const SizedBox(height: 20),
@@ -48,23 +47,14 @@ class _TestTabColorsState extends State<TestTabColors> {
       ),
       bottomNavigationBar: AdaptiveBottomNavigationBar(
         items: [
-          AdaptiveNavigationDestination(
-            icon: 'house',
-            label: 'Home',
-          ),
+          AdaptiveNavigationDestination(icon: 'house', label: 'Home'),
           AdaptiveNavigationDestination(
             icon: 'magnifyingglass',
             label: 'Search',
             isSearch: true,
           ),
-          AdaptiveNavigationDestination(
-            icon: 'person',
-            label: 'Profile',
-          ),
-          AdaptiveNavigationDestination(
-            icon: 'gearshape',
-            label: 'Settings',
-          ),
+          AdaptiveNavigationDestination(icon: 'person', label: 'Profile'),
+          AdaptiveNavigationDestination(icon: 'gearshape', label: 'Settings'),
         ],
         selectedIndex: _selectedIndex,
         onTap: (index) {

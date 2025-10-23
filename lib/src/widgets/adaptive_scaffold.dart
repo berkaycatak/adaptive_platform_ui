@@ -261,7 +261,8 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
             minimizeBehavior: widget.minimizeBehavior,
             enableBlur: widget.enableBlur,
             selectedItemColor: widget.bottomNavigationBar!.selectedItemColor,
-            unselectedItemColor: widget.bottomNavigationBar!.unselectedItemColor,
+            unselectedItemColor:
+                widget.bottomNavigationBar!.unselectedItemColor,
           );
         }
         // iOS 26+ with useNativeBottomBar=false OR iOS <26
@@ -276,7 +277,8 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
               currentIndex: widget.bottomNavigationBar!.selectedIndex!,
               onTap: widget.bottomNavigationBar!.onTap!,
               activeColor: widget.bottomNavigationBar!.selectedItemColor,
-              inactiveColor: widget.bottomNavigationBar!.unselectedItemColor ??
+              inactiveColor:
+                  widget.bottomNavigationBar!.unselectedItemColor ??
                   CupertinoColors.inactiveGray,
               items: widget.bottomNavigationBar!.items!.map((dest) {
                 // Convert icon to IconData if it's a String (SF Symbol)
@@ -757,7 +759,8 @@ class _MinimizableTabBarState extends State<_MinimizableTabBar>
         destinations: widget.destinations,
         selectedIndex: widget.selectedIndex,
         onTap: widget.onTap,
-        tint: widget.selectedItemColor ?? CupertinoTheme.of(context).primaryColor,
+        tint:
+            widget.selectedItemColor ?? CupertinoTheme.of(context).primaryColor,
         unselectedItemTint: widget.unselectedItemColor,
         minimizeBehavior: widget.minimizeBehavior,
       ),

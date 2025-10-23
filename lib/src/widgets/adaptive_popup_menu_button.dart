@@ -243,10 +243,12 @@ class _MaterialPopupMenuButton<T> extends StatefulWidget {
   bool get isCustomWidget => child != null;
 
   @override
-  State<_MaterialPopupMenuButton<T>> createState() => _MaterialPopupMenuButtonState<T>();
+  State<_MaterialPopupMenuButton<T>> createState() =>
+      _MaterialPopupMenuButtonState<T>();
 }
 
-class _MaterialPopupMenuButtonState<T> extends State<_MaterialPopupMenuButton<T>> {
+class _MaterialPopupMenuButtonState<T>
+    extends State<_MaterialPopupMenuButton<T>> {
   @override
   Widget build(BuildContext context) {
     final menuItems = <PopupMenuEntry<int>>[];

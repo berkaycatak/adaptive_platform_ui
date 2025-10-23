@@ -78,7 +78,9 @@ class _IOS26NativeTabBarState extends State<IOS26NativeTabBar> {
     if (color is CupertinoDynamicColor) {
       // Resolve based on current brightness
       final brightness = MediaQuery.platformBrightnessOf(context);
-      resolvedColor = brightness == Brightness.dark ? color.darkColor : color.color;
+      resolvedColor = brightness == Brightness.dark
+          ? color.darkColor
+          : color.color;
     }
 
     return ((resolvedColor.a * 255.0).round() & 0xff) << 24 |
@@ -118,7 +120,6 @@ class _IOS26NativeTabBarState extends State<IOS26NativeTabBar> {
         if (widget.backgroundColor != null)
           'backgroundColor': _colorToARGB(widget.backgroundColor!),
       };
-
 
       final platformView = UiKitView(
         viewType: 'adaptive_platform_ui/ios26_tab_bar',

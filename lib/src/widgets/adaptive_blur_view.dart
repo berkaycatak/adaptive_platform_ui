@@ -74,10 +74,7 @@ class AdaptiveBlurView extends StatelessWidget {
             child: Container(
               decoration: BoxDecoration(
                 borderRadius: borderRadius,
-                border: Border.all(
-                  color: _getBorderColor(context),
-                  width: 0.5,
-                ),
+                border: Border.all(color: _getBorderColor(context), width: 0.5),
               ),
             ),
           ),
