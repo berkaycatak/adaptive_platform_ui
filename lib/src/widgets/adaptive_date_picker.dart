@@ -130,16 +130,10 @@ class _CupertinoDatePickerContentState
         children: [
           // Header with Done button
           Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 8,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
               border: Border(
-                bottom: BorderSide(
-                  color: separatorColor,
-                  width: 0.5,
-                ),
+                bottom: BorderSide(color: separatorColor, width: 0.5),
               ),
             ),
             child: Row(
@@ -150,12 +144,8 @@ class _CupertinoDatePickerContentState
                   onPressed: () => Navigator.of(context).pop(),
                   child: Text(
                     PlatformInfo.isIOS
-                        ? CupertinoLocalizations.of(
-                            context,
-                          ).cancelButtonLabel
-                        : MaterialLocalizations.of(
-                            context,
-                          ).cancelButtonLabel,
+                        ? CupertinoLocalizations.of(context).cancelButtonLabel
+                        : MaterialLocalizations.of(context).cancelButtonLabel,
                   ),
                 ),
                 CupertinoButton(

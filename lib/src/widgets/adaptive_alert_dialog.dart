@@ -94,10 +94,7 @@ class AdaptiveAlertDialog {
           // Build custom content if icon or OTP is present
           if (icon != null || oneTimeCode != null || message != null) {
             contentWidget = ConstrainedBox(
-              constraints: const BoxConstraints(
-                minHeight: 60,
-                maxHeight: 300,
-              ),
+              constraints: const BoxConstraints(minHeight: 60, maxHeight: 300),
               child: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -238,18 +235,13 @@ class AdaptiveAlertDialog {
 
           // Build custom content with text field
           contentWidget = ConstrainedBox(
-            constraints: const BoxConstraints(
-              minHeight: 100,
-              maxHeight: 300,
-            ),
+            constraints: const BoxConstraints(minHeight: 100, maxHeight: 300),
             child: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  if (icon != null &&
-                      icon is IconData &&
-                      iconSize != null) ...[
+                  if (icon != null && icon is IconData && iconSize != null) ...[
                     Icon(
                       icon,
                       size: iconSize,
@@ -294,9 +286,9 @@ class AdaptiveAlertDialog {
                   } else {
                     // Other buttons return the entered text
                     final text = textController.text.trim();
-                    Navigator.of(context).pop<String?>(
-                      text.isNotEmpty ? text : null,
-                    );
+                    Navigator.of(
+                      context,
+                    ).pop<String?>(text.isNotEmpty ? text : null);
                   }
                   action.onPressed();
                 },
@@ -443,9 +435,9 @@ class AdaptiveAlertDialog {
                         if (input != null) {
                           // Input dialog - return the text
                           final text = textController.text.trim();
-                          Navigator.of(context).pop<String?>(
-                            text.isNotEmpty ? text : null,
-                          );
+                          Navigator.of(
+                            context,
+                          ).pop<String?>(text.isNotEmpty ? text : null);
                         } else {
                           // Normal dialog - just close
                           Navigator.of(context).pop();

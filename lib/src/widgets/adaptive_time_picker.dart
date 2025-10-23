@@ -56,7 +56,10 @@ class AdaptiveTimePicker {
     );
 
     if (result != null) {
-      return TimeOfDay(hour: selectedDateTime.hour, minute: selectedDateTime.minute);
+      return TimeOfDay(
+        hour: selectedDateTime.hour,
+        minute: selectedDateTime.minute,
+      );
     }
     return null;
   }
@@ -112,16 +115,10 @@ class _CupertinoTimePickerContentState
         children: [
           // Header with Done button
           Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 8,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
               border: Border(
-                bottom: BorderSide(
-                  color: separatorColor,
-                  width: 0.5,
-                ),
+                bottom: BorderSide(color: separatorColor, width: 0.5),
               ),
             ),
             child: Row(
@@ -132,18 +129,13 @@ class _CupertinoTimePickerContentState
                   onPressed: () => Navigator.of(context).pop(),
                   child: Text(
                     PlatformInfo.isIOS
-                        ? CupertinoLocalizations.of(
-                            context,
-                          ).cancelButtonLabel
-                        : MaterialLocalizations.of(
-                            context,
-                          ).cancelButtonLabel,
+                        ? CupertinoLocalizations.of(context).cancelButtonLabel
+                        : MaterialLocalizations.of(context).cancelButtonLabel,
                   ),
                 ),
                 CupertinoButton(
                   padding: EdgeInsets.zero,
-                  onPressed: () =>
-                      Navigator.of(context).pop(selectedDateTime),
+                  onPressed: () => Navigator.of(context).pop(selectedDateTime),
                   child: Text(
                     MaterialLocalizations.of(context).okButtonLabel,
                     style: const TextStyle(fontWeight: FontWeight.w600),
