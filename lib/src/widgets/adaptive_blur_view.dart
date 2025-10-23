@@ -31,7 +31,7 @@ class AdaptiveBlurView extends StatelessWidget {
   Widget build(BuildContext context) {
     // iOS 26+ uses native UIVisualEffectView
     if (PlatformInfo.isIOS && PlatformInfo.isIOSVersionInRange(26, 99)) {
-      return iOS26NativeBlurView(
+      return Ios26NativeBlurView(
         blurStyle: blurStyle,
         borderRadius: borderRadius,
         child: child,
@@ -265,8 +265,8 @@ extension BlurStyleExtension on BlurStyle {
 }
 
 /// iOS 26+ native blur view using UIVisualEffectView
-class iOS26NativeBlurView extends StatefulWidget {
-  const iOS26NativeBlurView({
+class Ios26NativeBlurView extends StatefulWidget {
+  const Ios26NativeBlurView({
     super.key,
     required this.child,
     required this.blurStyle,
@@ -278,14 +278,14 @@ class iOS26NativeBlurView extends StatefulWidget {
   final BorderRadius? borderRadius;
 
   @override
-  State<iOS26NativeBlurView> createState() => iOS26NativeBlurViewState();
+  State<Ios26NativeBlurView> createState() => Ios26NativeBlurViewState();
 }
 
-class iOS26NativeBlurViewState extends State<iOS26NativeBlurView> {
+class Ios26NativeBlurViewState extends State<Ios26NativeBlurView> {
   MethodChannel? _channel;
 
   @override
-  void didUpdateWidget(iOS26NativeBlurView oldWidget) {
+  void didUpdateWidget(Ios26NativeBlurView oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.blurStyle != widget.blurStyle && _channel != null) {
       _updateBlurStyle();
