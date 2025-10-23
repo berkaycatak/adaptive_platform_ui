@@ -13,6 +13,7 @@ class IOS26NativeTabBar extends StatefulWidget {
     required this.selectedIndex,
     required this.onTap,
     this.tint,
+    this.unselectedItemTint,
     this.backgroundColor,
     this.height,
     this.minimizeBehavior = TabBarMinimizeBehavior.automatic,
@@ -22,6 +23,7 @@ class IOS26NativeTabBar extends StatefulWidget {
   final int selectedIndex;
   final ValueChanged<int> onTap;
   final Color? tint;
+  final Color? unselectedItemTint;
   final Color? backgroundColor;
   final double? height;
 
@@ -37,6 +39,7 @@ class _IOS26NativeTabBarState extends State<IOS26NativeTabBar> {
   MethodChannel? _channel;
   int? _lastIndex;
   int? _lastTint;
+  int? _lastUnselectedTint;
   int? _lastBg;
   bool? _lastIsDark;
   double? _intrinsicHeight;
@@ -70,10 +73,18 @@ class _IOS26NativeTabBarState extends State<IOS26NativeTabBar> {
   }
 
   int _colorToARGB(Color color) {
-    return ((color.a * 255.0).round() & 0xff) << 24 |
-        ((color.r * 255.0).round() & 0xff) << 16 |
-        ((color.g * 255.0).round() & 0xff) << 8 |
-        ((color.b * 255.0).round() & 0xff);
+    // Resolve CupertinoDynamicColor if needed
+    Color resolvedColor = color;
+    if (color is CupertinoDynamicColor) {
+      // Resolve based on current brightness
+      final brightness = MediaQuery.platformBrightnessOf(context);
+      resolvedColor = brightness == Brightness.dark ? color.darkColor : color.color;
+    }
+
+    return ((resolvedColor.a * 255.0).round() & 0xff) << 24 |
+        ((resolvedColor.r * 255.0).round() & 0xff) << 16 |
+        ((resolvedColor.g * 255.0).round() & 0xff) << 8 |
+        ((resolvedColor.b * 255.0).round() & 0xff);
   }
 
   @override
@@ -102,9 +113,12 @@ class _IOS26NativeTabBarState extends State<IOS26NativeTabBar> {
         'isDark': _isDark,
         'minimizeBehavior': widget.minimizeBehavior.index,
         if (_effectiveTint != null) 'tint': _colorToARGB(_effectiveTint!),
+        if (widget.unselectedItemTint != null)
+          'unselectedItemTint': _colorToARGB(widget.unselectedItemTint!),
         if (widget.backgroundColor != null)
           'backgroundColor': _colorToARGB(widget.backgroundColor!),
       };
+
 
       final platformView = UiKitView(
         viewType: 'adaptive_platform_ui/ios26_tab_bar',
@@ -167,6 +181,9 @@ class _IOS26NativeTabBarState extends State<IOS26NativeTabBar> {
     ch.setMethodCallHandler(_onMethodCall);
     _lastIndex = widget.selectedIndex;
     _lastTint = _effectiveTint != null ? _colorToARGB(_effectiveTint!) : null;
+    _lastUnselectedTint = widget.unselectedItemTint != null
+        ? _colorToARGB(widget.unselectedItemTint!)
+        : null;
     _lastBg = widget.backgroundColor != null
         ? _colorToARGB(widget.backgroundColor!)
         : null;
@@ -194,6 +211,9 @@ class _IOS26NativeTabBarState extends State<IOS26NativeTabBar> {
 
     final idx = widget.selectedIndex;
     final tint = _effectiveTint != null ? _colorToARGB(_effectiveTint!) : null;
+    final unselectedTint = widget.unselectedItemTint != null
+        ? _colorToARGB(widget.unselectedItemTint!)
+        : null;
     final bg = widget.backgroundColor != null
         ? _colorToARGB(widget.backgroundColor!)
         : null;
@@ -207,6 +227,10 @@ class _IOS26NativeTabBarState extends State<IOS26NativeTabBar> {
     if (_lastTint != tint && tint != null) {
       style['tint'] = tint;
       _lastTint = tint;
+    }
+    if (_lastUnselectedTint != unselectedTint && unselectedTint != null) {
+      style['unselectedItemTint'] = unselectedTint;
+      _lastUnselectedTint = unselectedTint;
     }
     if (_lastBg != bg && bg != null) {
       style['backgroundColor'] = bg;

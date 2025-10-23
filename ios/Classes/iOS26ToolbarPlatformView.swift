@@ -108,6 +108,8 @@ class iOS26ToolbarPlatformView: NSObject, FlutterPlatformView {
         var items: [UIBarButtonItem] = []
 
         let hasTitle = params["title"] as? String != nil && !(params["title"] as? String ?? "").isEmpty
+        let hasActions = params["actions"] as? [[String: Any]] != nil && !(params["actions"] as? [[String: Any]] ?? []).isEmpty
+        let hasLeading = params["leading"] != nil
 
         // Leading button (left side)
         if let leadingTitle = params["leading"] as? String {
@@ -133,7 +135,7 @@ class iOS26ToolbarPlatformView: NSObject, FlutterPlatformView {
         }
 
         // Actions - process and split into left/right groups if flexible spacer exists
-        if let actions = params["actions"] as? [[String: Any]] {
+        if let actions = params["actions"] as? [[String: Any]], !actions.isEmpty {
             var leftActions: [UIBarButtonItem] = []
             var rightActions: [UIBarButtonItem] = []
             var foundFlexibleSpacer = false
@@ -212,6 +214,13 @@ class iOS26ToolbarPlatformView: NSObject, FlutterPlatformView {
                 items.append(contentsOf: rightActions)
             } else {
                 // No flexible spacer - standard layout: Title on left, actions on right
+                // Add spacing after leading button if it exists
+                if hasLeading && (hasTitle || !leftActions.isEmpty) {
+                    if #available(iOS 16.0, *) {
+                        items.append(.fixedSpace(8))
+                    }
+                }
+
                 if hasTitle {
                     if let title = params["title"] as? String, !title.isEmpty {
                         let titleLabel = UILabel()
@@ -229,6 +238,30 @@ class iOS26ToolbarPlatformView: NSObject, FlutterPlatformView {
 
                 // Add all actions to the right
                 items.append(contentsOf: leftActions)
+            }
+        } else {
+            // No actions - just add title if exists
+            if hasTitle {
+                // Add spacing after leading button if it exists
+                if hasLeading {
+                    if #available(iOS 16.0, *) {
+                        items.append(.fixedSpace(8))
+                    }
+                }
+
+                if let title = params["title"] as? String, !title.isEmpty {
+                    let titleLabel = UILabel()
+                    titleLabel.text = title
+                    titleLabel.font = UIFont.systemFont(ofSize: 17, weight: .semibold)
+                    titleLabel.textAlignment = .left
+                    titleLabel.sizeToFit()
+
+                    let titleItem = UIBarButtonItem(customView: titleLabel)
+                    items.append(titleItem)
+                }
+
+                // Add flexible space to push everything to the left
+                items.append(UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil))
             }
         }
 

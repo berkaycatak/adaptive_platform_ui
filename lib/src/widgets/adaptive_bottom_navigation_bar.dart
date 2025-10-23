@@ -23,6 +23,8 @@ class AdaptiveBottomNavigationBar {
     this.useNativeBottomBar = true,
     this.cupertinoTabBar,
     this.bottomNavigationBar,
+    this.selectedItemColor,
+    this.unselectedItemColor,
   });
 
   /// Navigation items for bottom navigation bar
@@ -68,6 +70,24 @@ class AdaptiveBottomNavigationBar {
   /// Ignored on iOS platforms.
   final Widget? bottomNavigationBar;
 
+  /// Color for the selected navigation item
+  ///
+  /// When provided:
+  /// - iOS (native/CupertinoTabBar): Sets activeColor
+  /// - Android (NavigationBar): Sets indicatorColor
+  ///
+  /// If null, uses platform defaults.
+  final Color? selectedItemColor;
+
+  /// Color for unselected navigation items
+  ///
+  /// When provided:
+  /// - iOS (native/CupertinoTabBar): Sets inactiveColor
+  /// - Android (NavigationBar): Not directly supported, but can affect icon colors
+  ///
+  /// If null, uses platform defaults.
+  final Color? unselectedItemColor;
+
   /// Creates a copy of this bottom navigation bar with the given fields replaced
   AdaptiveBottomNavigationBar copyWith({
     List<AdaptiveNavigationDestination>? items,
@@ -76,6 +96,8 @@ class AdaptiveBottomNavigationBar {
     bool? useNativeBottomBar,
     CupertinoTabBar? cupertinoTabBar,
     Widget? bottomNavigationBar,
+    Color? selectedItemColor,
+    Color? unselectedItemColor,
   }) {
     return AdaptiveBottomNavigationBar(
       items: items ?? this.items,
@@ -84,6 +106,8 @@ class AdaptiveBottomNavigationBar {
       useNativeBottomBar: useNativeBottomBar ?? this.useNativeBottomBar,
       cupertinoTabBar: cupertinoTabBar ?? this.cupertinoTabBar,
       bottomNavigationBar: bottomNavigationBar ?? this.bottomNavigationBar,
+      selectedItemColor: selectedItemColor ?? this.selectedItemColor,
+      unselectedItemColor: unselectedItemColor ?? this.unselectedItemColor,
     );
   }
 }

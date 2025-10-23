@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.1.98]
+* **NEW**: Added `selectedItemColor` and `unselectedItemColor` support for AdaptiveBottomNavigationBar
+  * iOS 26+: Icon colors via renderingMode (`.alwaysOriginal` for unselected, `.alwaysTemplate` for selected)
+  * iOS <26 & Android: Native color properties
+  * Customizable tab bar item colors for better UI flexibility
+
 ## [0.1.97]
 * **NEW**: Added `spacerAfter` parameter (ToolbarSpacerType) to AdaptiveAppBarAction for iOS 26+ Liquid Glass toolbar grouping
   * `ToolbarSpacerType.fixed` - 12pt fixed space using UIBarButtonItem.fixedSpace() for spacing within groups

@@ -29,6 +29,9 @@ class _MainPageState extends State<MainPage> {
               ).contains(RouteConstants().badgeNavigation)
               ? null
               : AdaptiveBottomNavigationBar(
+                  selectedItemColor: Colors.orange,
+                  unselectedItemColor: CupertinoColors.activeBlue,
+
                   selectedIndex: widget.navigationShell.currentIndex,
                   onTap: (index) => onDestinationSelected(index, context),
                   items: [
@@ -38,6 +41,7 @@ class _MainPageState extends State<MainPage> {
                           : PlatformInfo.isIOS
                           ? CupertinoIcons.home
                           : Icons.home_outlined,
+
                       selectedIcon: PlatformInfo.isIOS
                           ? CupertinoIcons.home
                           : Icons.home,

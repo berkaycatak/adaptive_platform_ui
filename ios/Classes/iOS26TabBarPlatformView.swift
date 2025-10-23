@@ -29,7 +29,10 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
         var bg: UIColor? = nil
         var minimize: Int = 3 // automatic
 
+        var unselectedTint: UIColor? = nil
+
         if let dict = args as? [String: Any] {
+            NSLog("📦 TabBar init dict keys: \(dict.keys)")
             labels = (dict["labels"] as? [String]) ?? []
             symbols = (dict["sfSymbols"] as? [String]) ?? []
             searchFlags = (dict["searchFlags"] as? [Bool]) ?? []
@@ -40,6 +43,10 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
             if let v = dict["selectedIndex"] as? NSNumber { selectedIndex = v.intValue }
             if let v = dict["isDark"] as? NSNumber { isDark = v.boolValue }
             if let n = dict["tint"] as? NSNumber { tint = Self.colorFromARGB(n.intValue) }
+            if let n = dict["unselectedItemTint"] as? NSNumber {
+                unselectedTint = Self.colorFromARGB(n.intValue)
+                NSLog("🎨 Parsed unselectedItemTint from dict: \(unselectedTint!)")
+            }
             if let n = dict["backgroundColor"] as? NSNumber { bg = Self.colorFromARGB(n.intValue) }
             if let m = dict["minimizeBehavior"] as? NSNumber { minimize = m.intValue }
         }
@@ -51,27 +58,6 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
             container.overrideUserInterfaceStyle = isDark ? .dark : .light
         }
 
-        // iOS 26+ appearance configuration - completely transparent for Flutter blur
-        let appearance: UITabBarAppearance? = {
-            if #available(iOS 13.0, *) {
-                let ap = UITabBarAppearance()
-
-                // Completely transparent - Flutter handles blur
-                ap.configureWithTransparentBackground()
-                ap.backgroundColor = .clear
-                ap.backgroundImage = nil
-                ap.shadowColor = .clear
-                ap.shadowImage = nil
-
-                // Remove all effects
-                if #available(iOS 26.0, *) {
-                    ap.backgroundEffect = nil
-                }
-
-                return ap
-            }
-            return nil
-        }()
 
         // Create single tab bar
         let bar = UITabBar(frame: .zero)
@@ -79,16 +65,71 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
         bar.delegate = self
         bar.translatesAutoresizingMaskIntoConstraints = false
 
-        if let bg = bg { bar.barTintColor = bg }
-        if #available(iOS 10.0, *), let tint = tint { bar.tintColor = tint }
-        if let ap = appearance {
-            if #available(iOS 13.0, *) {
-                bar.standardAppearance = ap
-                if #available(iOS 15.0, *) {
-                    bar.scrollEdgeAppearance = ap
-                }
+        // iOS 26+ special handling - Skip appearance, use direct properties only
+        if #available(iOS 26.0, *) {
+            // For iOS 26, we skip UITabBarAppearance as it interferes with custom colors
+            bar.isTranslucent = true
+            bar.backgroundImage = UIImage()
+            bar.shadowImage = UIImage()
+            bar.backgroundColor = .clear
+            NSLog("📱 iOS 26+ detected - using direct properties only")
+        }
+        // iOS 13-25 - Use appearance
+        else if #available(iOS 13.0, *) {
+            let appearance = UITabBarAppearance()
+
+            // Make transparent
+            appearance.configureWithTransparentBackground()
+            appearance.backgroundColor = .clear
+            appearance.shadowColor = .clear
+
+            // Set colors directly on the appearance layouts
+            let unselColor = unselectedTint ?? UIColor.systemGray
+            let selColor = tint ?? UIColor.systemBlue
+
+            // Normal (unselected) items
+            appearance.stackedLayoutAppearance.normal.iconColor = unselColor
+            appearance.stackedLayoutAppearance.normal.titleTextAttributes = [.foregroundColor: unselColor]
+            appearance.inlineLayoutAppearance.normal.iconColor = unselColor
+            appearance.inlineLayoutAppearance.normal.titleTextAttributes = [.foregroundColor: unselColor]
+            appearance.compactInlineLayoutAppearance.normal.iconColor = unselColor
+            appearance.compactInlineLayoutAppearance.normal.titleTextAttributes = [.foregroundColor: unselColor]
+
+            // Selected items
+            appearance.stackedLayoutAppearance.selected.iconColor = selColor
+            appearance.stackedLayoutAppearance.selected.titleTextAttributes = [.foregroundColor: selColor]
+            appearance.inlineLayoutAppearance.selected.iconColor = selColor
+            appearance.inlineLayoutAppearance.selected.titleTextAttributes = [.foregroundColor: selColor]
+            appearance.compactInlineLayoutAppearance.selected.iconColor = selColor
+            appearance.compactInlineLayoutAppearance.selected.titleTextAttributes = [.foregroundColor: selColor]
+
+            bar.standardAppearance = appearance
+            if #available(iOS 15.0, *) {
+                bar.scrollEdgeAppearance = appearance
+            }
+
+            NSLog("🎨 iOS 13-25: Applied appearance - normal: \(unselColor), selected: \(selColor)")
+        } else {
+            // iOS 10-12 fallback
+            bar.isTranslucent = true
+            bar.backgroundImage = UIImage()
+            bar.shadowImage = UIImage()
+            bar.backgroundColor = .clear
+        }
+
+        // Also set direct properties as fallback
+        if #available(iOS 10.0, *) {
+            if let unselTint = unselectedTint {
+                bar.unselectedItemTintColor = unselTint
+                NSLog("✅ Direct unselectedItemTintColor: \(unselTint)")
+            }
+            if let tint = tint {
+                bar.tintColor = tint
+                NSLog("✅ Direct tintColor: \(tint)")
             }
         }
+
+        if let bg = bg { bar.barTintColor = bg }
 
         // Build tab bar items
         func buildItems(_ range: Range<Int>) -> [UITabBarItem] {
@@ -107,6 +148,7 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
                         if let title = title {
                             item.title = title
                         }
+
                     } else {
                         // Fallback for older iOS versions
                         let searchImage = UIImage(systemName: "magnifyingglass")
@@ -114,11 +156,32 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
                     }
                 } else {
                     var image: UIImage? = nil
+                    var selectedImage: UIImage? = nil
+
                     if i < symbols.count && !symbols[i].isEmpty {
-                        image = UIImage(systemName: symbols[i])
+                        // iOS 26+: Use different rendering modes for selected/unselected
+                        if #available(iOS 26.0, *) {
+                            // Unselected: Use original rendering to show with unselected color
+                            if let unselTint = unselectedTint {
+                                // Create colored image for unselected state
+                                if let originalImage = UIImage(systemName: symbols[i]) {
+                                    image = originalImage.withTintColor(unselTint, renderingMode: .alwaysOriginal)
+                                }
+                            } else {
+                                image = UIImage(systemName: symbols[i])?.withRenderingMode(.alwaysOriginal)
+                            }
+
+                            // Selected: Use template rendering so tintColor applies
+                            selectedImage = UIImage(systemName: symbols[i])?.withRenderingMode(.alwaysTemplate)
+                        } else {
+                            // iOS <26: Use default behavior
+                            image = UIImage(systemName: symbols[i])
+                            selectedImage = image
+                        }
                     }
+
                     // Create item with title
-                    item = UITabBarItem(title: title ?? "Tab \(i+1)", image: image, selectedImage: image)
+                    item = UITabBarItem(title: title ?? "Tab \(i+1)", image: image, selectedImage: selectedImage)
                     item.tag = i
                 }
 
@@ -213,7 +276,9 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
             self.currentBadgeCounts = badgeCounts
 
             let count = max(labels.count, symbols.count)
-            func buildItems(_ range: Range<Int>) -> [UITabBarItem] {
+
+            // Reuse the same buildItems function with rendering mode logic
+            let buildItems: (Range<Int>) -> [UITabBarItem] = { range in
                 var items: [UITabBarItem] = []
                 for i in range {
                     let title = (i < labels.count) ? labels[i] : nil
@@ -229,6 +294,7 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
                             if let title = title {
                                 item.title = title
                             }
+
                         } else {
                             // Fallback for older iOS versions
                             let searchImage = UIImage(systemName: "magnifyingglass")
@@ -236,11 +302,30 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
                         }
                     } else {
                         var image: UIImage? = nil
+                        var selectedImage: UIImage? = nil
+
                         if i < symbols.count && !symbols[i].isEmpty {
-                            image = UIImage(systemName: symbols[i])
+                            // iOS 26+: Use different rendering modes for selected/unselected
+                            if #available(iOS 26.0, *) {
+                                // Get current unselected color from tab bar
+                                let unselTint = self.tabBar?.unselectedItemTintColor ?? UIColor.systemGray
+
+                                // Unselected: Use original rendering with unselected color
+                                if let originalImage = UIImage(systemName: symbols[i]) {
+                                    image = originalImage.withTintColor(unselTint, renderingMode: .alwaysOriginal)
+                                }
+
+                                // Selected: Use template rendering so tintColor applies
+                                selectedImage = UIImage(systemName: symbols[i])?.withRenderingMode(.alwaysTemplate)
+                            } else {
+                                // iOS <26: Use default behavior
+                                image = UIImage(systemName: symbols[i])
+                                selectedImage = image
+                            }
                         }
+
                         // Create item with title
-                        item = UITabBarItem(title: title ?? "Tab \(i+1)", image: image, selectedImage: image)
+                        item = UITabBarItem(title: title ?? "Tab \(i+1)", image: image, selectedImage: selectedImage)
                         item.tag = i
                     }
 
@@ -282,14 +367,32 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
                 return
             }
 
+            var tintColor: UIColor? = nil
+            var unselectedColor: UIColor? = nil
+
             if let n = args["tint"] as? NSNumber {
                 let c = Self.colorFromARGB(n.intValue)
                 self.tabBar?.tintColor = c
+                tintColor = c
+            }
+            if let n = args["unselectedItemTint"] as? NSNumber {
+                let c = Self.colorFromARGB(n.intValue)
+                if #available(iOS 10.0, *) {
+                    self.tabBar?.unselectedItemTintColor = c
+                    NSLog("✅ setStyle: unselectedItemTintColor set to \(c)")
+
+                    // iOS 26+: Rebuild items with new unselected color
+                    if #available(iOS 26.0, *) {
+                        self.rebuildItemsWithCurrentColors()
+                    }
+                }
+                unselectedColor = c
             }
             if let n = args["backgroundColor"] as? NSNumber {
                 let c = Self.colorFromARGB(n.intValue)
                 self.tabBar?.barTintColor = c
             }
+
             result(nil)
 
         case "setBrightness":
@@ -342,6 +445,66 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
 
         default:
             result(FlutterMethodNotImplemented)
+        }
+    }
+
+    // iOS 26+: Rebuild tab items with current colors
+    private func rebuildItemsWithCurrentColors() {
+        guard let bar = self.tabBar else { return }
+
+        let currentSelectedIndex = bar.items?.firstIndex { $0 == bar.selectedItem } ?? 0
+        let unselTint = bar.unselectedItemTintColor ?? UIColor.systemGray
+
+        // Rebuild items with new colors
+        var items: [UITabBarItem] = []
+        for i in 0..<currentLabels.count {
+            let title = currentLabels[i]
+            let isSearch = (i < currentSearchFlags.count) && currentSearchFlags[i]
+            let badgeCount = (i < currentBadgeCounts.count) ? currentBadgeCounts[i] : nil
+
+            let item: UITabBarItem
+
+            if isSearch {
+                if #available(iOS 26.0, *) {
+                    item = UITabBarItem(tabBarSystemItem: .search, tag: i)
+                    item.title = title
+                } else {
+                    let searchImage = UIImage(systemName: "magnifyingglass")
+                    item = UITabBarItem(title: title, image: searchImage, selectedImage: searchImage)
+                }
+            } else {
+                var image: UIImage? = nil
+                var selectedImage: UIImage? = nil
+
+                if i < currentSymbols.count && !currentSymbols[i].isEmpty {
+                    if #available(iOS 26.0, *) {
+                        // Unselected: Use original rendering with unselected color
+                        if let originalImage = UIImage(systemName: currentSymbols[i]) {
+                            image = originalImage.withTintColor(unselTint, renderingMode: .alwaysOriginal)
+                        }
+                        // Selected: Use template rendering so tintColor applies
+                        selectedImage = UIImage(systemName: currentSymbols[i])?.withRenderingMode(.alwaysTemplate)
+                    } else {
+                        image = UIImage(systemName: currentSymbols[i])
+                        selectedImage = image
+                    }
+                }
+
+                item = UITabBarItem(title: title, image: image, selectedImage: selectedImage)
+                item.tag = i
+            }
+
+            // Set badge value if provided
+            if let count = badgeCount, count > 0 {
+                item.badgeValue = count > 99 ? "99+" : String(count)
+            }
+
+            items.append(item)
+        }
+
+        bar.items = items
+        if currentSelectedIndex < items.count {
+            bar.selectedItem = items[currentSelectedIndex]
         }
     }
 

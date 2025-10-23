@@ -26,6 +26,7 @@ import 'package:adaptive_platform_ui_example/pages/demos/tab_view_demo_page.dart
 import 'package:adaptive_platform_ui_example/pages/demos/floating_action_button_demo_page.dart';
 import 'package:adaptive_platform_ui_example/pages/demos/form_section_demo_page.dart';
 import 'package:adaptive_platform_ui_example/pages/demos/expansion_tile_demo_page.dart';
+import 'package:adaptive_platform_ui_example/pages/demos/blur_view_demo_page.dart';
 import 'package:adaptive_platform_ui_example/utils/constants/route_constants.dart';
 import 'package:adaptive_platform_ui_example/utils/global_variables.dart';
 import 'package:flutter/material.dart';
@@ -234,6 +235,11 @@ class RouterService {
                     name: routes.expansionTile,
                     path: routes.expansionTile,
                     builder: (context, state) => const ExpansionTileDemoPage(),
+                  ),
+                  GoRoute(
+                    name: routes.blurView,
+                    path: routes.blurView,
+                    builder: (context, state) => const BlurViewDemoPage(),
                   ),
                 ],
               ),

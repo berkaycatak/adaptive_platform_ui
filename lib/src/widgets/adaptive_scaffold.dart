@@ -260,6 +260,8 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
             destinations: widget.bottomNavigationBar!.items!,
             minimizeBehavior: widget.minimizeBehavior,
             enableBlur: widget.enableBlur,
+            selectedItemColor: widget.bottomNavigationBar!.selectedItemColor,
+            unselectedItemColor: widget.bottomNavigationBar!.unselectedItemColor,
           );
         }
         // iOS 26+ with useNativeBottomBar=false OR iOS <26
@@ -273,6 +275,9 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
             tabBar = CupertinoTabBar(
               currentIndex: widget.bottomNavigationBar!.selectedIndex!,
               onTap: widget.bottomNavigationBar!.onTap!,
+              activeColor: widget.bottomNavigationBar!.selectedItemColor,
+              inactiveColor: widget.bottomNavigationBar!.unselectedItemColor ??
+                  CupertinoColors.inactiveGray,
               items: widget.bottomNavigationBar!.items!.map((dest) {
                 // Convert icon to IconData if it's a String (SF Symbol)
                 final IconData iconData = dest.icon is String
@@ -498,6 +503,7 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
         bottomNavBar = NavigationBar(
           selectedIndex: widget.bottomNavigationBar!.selectedIndex!,
           onDestinationSelected: widget.bottomNavigationBar!.onTap!,
+          indicatorColor: widget.bottomNavigationBar!.selectedItemColor,
           destinations: widget.bottomNavigationBar!.items!.map((dest) {
             // Convert icon to IconData if it's a String (SF Symbol - fallback to Icons)
             final IconData iconData = dest.icon is String
@@ -635,6 +641,8 @@ class _MinimizableTabBar extends StatefulWidget {
     required this.destinations,
     required this.minimizeBehavior,
     required this.enableBlur,
+    this.selectedItemColor,
+    this.unselectedItemColor,
   });
 
   final int selectedIndex;
@@ -642,6 +650,8 @@ class _MinimizableTabBar extends StatefulWidget {
   final List<AdaptiveNavigationDestination> destinations;
   final TabBarMinimizeBehavior minimizeBehavior;
   final bool enableBlur;
+  final Color? selectedItemColor;
+  final Color? unselectedItemColor;
 
   @override
   State<_MinimizableTabBar> createState() => _MinimizableTabBarState();
@@ -682,9 +692,11 @@ class _MinimizableTabBarState extends State<_MinimizableTabBar>
       // Check if we're in overscroll territory (pull-to-refresh or bottom bounce)
       // When pixels < minScrollExtent, user is pulling down beyond top (overscroll)
       // When pixels > maxScrollExtent, user is pulling up beyond bottom (overscroll)
+      // Add tolerance (50px) to make it more stable - ignore scroll events near boundaries
+      const overscrollTolerance = 50.0;
       final isOverscrolling =
-          metrics.pixels < metrics.minScrollExtent ||
-          metrics.pixels > metrics.maxScrollExtent;
+          metrics.pixels < (metrics.minScrollExtent + overscrollTolerance) ||
+          metrics.pixels > (metrics.maxScrollExtent - overscrollTolerance);
 
       // Ignore scroll events during overscroll to prevent tab bar animation during bounce
       if (isOverscrolling) {
@@ -745,7 +757,8 @@ class _MinimizableTabBarState extends State<_MinimizableTabBar>
         destinations: widget.destinations,
         selectedIndex: widget.selectedIndex,
         onTap: widget.onTap,
-        tint: CupertinoTheme.of(context).primaryColor,
+        tint: widget.selectedItemColor ?? CupertinoTheme.of(context).primaryColor,
+        unselectedItemTint: widget.unselectedItemColor,
         minimizeBehavior: widget.minimizeBehavior,
       ),
     );

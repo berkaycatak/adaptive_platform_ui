@@ -314,6 +314,16 @@ class _HomePageState extends State<HomePage> {
             items: [
               _DemoItem(
                 icon: PlatformInfo.isIOS
+                    ? CupertinoIcons.layers_alt
+                    : Icons.blur_on,
+                title: 'Blur View',
+                isCritical: true,
+                description: 'Native UIVisualEffectView with Liquid Glass',
+                routeName: RouterService.routes.blurView,
+                isNew: true,
+              ),
+              _DemoItem(
+                icon: PlatformInfo.isIOS
                     ? CupertinoIcons.search_circle_fill
                     : Icons.search,
                 title: 'Native Search Tab',

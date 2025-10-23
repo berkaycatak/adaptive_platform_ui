@@ -66,5 +66,12 @@ public class AdaptivePlatformUiPlugin: NSObject, FlutterPlugin {
             ios26ToolbarFactory,
             withId: "adaptive_platform_ui/ios26_toolbar"
         )
+
+        // Register iOS 26 Blur View platform view factory
+        let ios26BlurViewFactory = iOS26BlurViewFactory(messenger: registrar.messenger())
+        registrar.register(
+            ios26BlurViewFactory,
+            withId: "adaptive_platform_ui/ios26_blur_view"
+        )
     }
 }

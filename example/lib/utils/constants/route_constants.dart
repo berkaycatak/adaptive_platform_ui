@@ -31,4 +31,5 @@ class RouteConstants {
   String floatingActionButton = 'floating-action-button';
   String formSection = 'form-section';
   String expansionTile = 'expansion-tile';
+  String blurView = 'blur-view';
 }
