@@ -199,7 +199,7 @@ class AdaptivePopupMenuButton<T> {
 }
 
 /// Material implementation of popup menu button for Android
-class _MaterialPopupMenuButton<T> extends StatelessWidget {
+class _MaterialPopupMenuButton<T> extends StatefulWidget {
   const _MaterialPopupMenuButton({
     required this.label,
     required this.items,
@@ -243,14 +243,19 @@ class _MaterialPopupMenuButton<T> extends StatelessWidget {
   bool get isCustomWidget => child != null;
 
   @override
+  State<_MaterialPopupMenuButton<T>> createState() => _MaterialPopupMenuButtonState<T>();
+}
+
+class _MaterialPopupMenuButtonState<T> extends State<_MaterialPopupMenuButton<T>> {
+  @override
   Widget build(BuildContext context) {
     final menuItems = <PopupMenuEntry<int>>[];
 
-    for (var i = 0; i < items.length; i++) {
-      if (items[i] is AdaptivePopupMenuDivider) {
+    for (var i = 0; i < widget.items.length; i++) {
+      if (widget.items[i] is AdaptivePopupMenuDivider) {
         menuItems.add(const PopupMenuDivider());
-      } else if (items[i] is AdaptivePopupMenuItem<T>) {
-        final item = items[i] as AdaptivePopupMenuItem<T>;
+      } else if (widget.items[i] is AdaptivePopupMenuItem<T>) {
+        final item = widget.items[i] as AdaptivePopupMenuItem<T>;
         menuItems.add(
           PopupMenuItem<int>(
             value: i,
@@ -275,33 +280,33 @@ class _MaterialPopupMenuButton<T> extends StatelessWidget {
     }
 
     // Custom widget case
-    if (isCustomWidget) {
+    if (widget.isCustomWidget) {
       return PopupMenuButton<int>(
-        child: child!,
+        child: widget.child!,
         itemBuilder: (context) => menuItems,
         onSelected: (index) {
-          final selectedEntry = items[index];
+          final selectedEntry = widget.items[index];
           if (selectedEntry is AdaptivePopupMenuItem<T>) {
-            onSelected(index, selectedEntry);
+            widget.onSelected(index, selectedEntry);
           }
         },
       );
     }
 
-    if (isIconButton) {
+    if (widget.isIconButton) {
       return SizedBox(
-        width: size,
-        height: size,
+        width: widget.size,
+        height: widget.size,
         child: PopupMenuButton<int>(
           icon: Icon(
-            icon is IconData ? icon as IconData : Icons.more_vert,
-            color: tint,
+            widget.icon is IconData ? widget.icon as IconData : Icons.more_vert,
+            color: widget.tint,
           ),
           itemBuilder: (context) => menuItems,
           onSelected: (index) {
-            final selectedEntry = items[index];
+            final selectedEntry = widget.items[index];
             if (selectedEntry is AdaptivePopupMenuItem<T>) {
-              onSelected(index, selectedEntry);
+              widget.onSelected(index, selectedEntry);
             }
           },
         ),
@@ -309,23 +314,23 @@ class _MaterialPopupMenuButton<T> extends StatelessWidget {
     }
 
     return SizedBox(
-      height: height,
+      height: widget.height,
       child: TextButton(
         onPressed: () {},
         child: PopupMenuButton<int>(
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(label ?? ''),
+              Text(widget.label ?? ''),
               const SizedBox(width: 4),
               const Icon(Icons.arrow_drop_down, size: 20),
             ],
           ),
           itemBuilder: (context) => menuItems,
           onSelected: (index) {
-            final selectedEntry = items[index];
+            final selectedEntry = widget.items[index];
             if (selectedEntry is AdaptivePopupMenuItem<T>) {
-              onSelected(index, selectedEntry);
+              widget.onSelected(index, selectedEntry);
             }
           },
         ),

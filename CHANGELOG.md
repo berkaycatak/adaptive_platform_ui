@@ -5,6 +5,8 @@
   * iOS 26+: Icon colors via renderingMode (`.alwaysOriginal` for unselected, `.alwaysTemplate` for selected)
   * iOS <26 & Android: Native color properties
   * Customizable tab bar item colors for better UI flexibility
+* **FIX**: Fixed dynamic label updates not working in AdaptivePopupMenuItem
+  * Added proper state management and menu item update mechanism for all platforms
 
 ## [0.1.97]
 * **NEW**: Added `spacerAfter` parameter (ToolbarSpacerType) to AdaptiveAppBarAction for iOS 26+ Liquid Glass toolbar grouping

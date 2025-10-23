@@ -162,6 +162,87 @@ class _IOS26PopupMenuButtonState<T> extends State<IOS26PopupMenuButton<T>> {
     super.didUpdateWidget(oldWidget);
     // Sync any changes to brightness or tint
     _syncBrightnessIfNeeded();
+
+    // Check if menu items have changed
+    if (_hasMenuItemsChanged(oldWidget.items, widget.items)) {
+      _updateMenuItems();
+    }
+
+    // Check if button label or icon has changed
+    if (oldWidget.buttonLabel != widget.buttonLabel ||
+        oldWidget.buttonIcon != widget.buttonIcon) {
+      _updateButtonContent();
+    }
+  }
+
+  Future<void> _updateButtonContent() async {
+    final ch = _channel;
+    if (ch == null) return;
+
+    try {
+      await ch.invokeMethod('updateButtonContent', {
+        if (widget.buttonLabel != null) 'buttonTitle': widget.buttonLabel,
+        if (widget.buttonIcon != null) 'buttonIconName': widget.buttonIcon,
+      });
+    } catch (_) {}
+  }
+
+  bool _hasMenuItemsChanged(
+    List<AdaptivePopupMenuEntry> oldItems,
+    List<AdaptivePopupMenuEntry> newItems,
+  ) {
+    if (oldItems.length != newItems.length) return true;
+
+    for (int i = 0; i < oldItems.length; i++) {
+      final oldItem = oldItems[i];
+      final newItem = newItems[i];
+
+      if (oldItem.runtimeType != newItem.runtimeType) return true;
+
+      if (oldItem is AdaptivePopupMenuItem<T> && newItem is AdaptivePopupMenuItem<T>) {
+        if (oldItem.label != newItem.label ||
+            oldItem.icon != newItem.icon ||
+            oldItem.enabled != newItem.enabled ||
+            oldItem.value != newItem.value) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  Future<void> _updateMenuItems() async {
+    final ch = _channel;
+    if (ch == null) return;
+
+    // Flatten entries into parallel arrays for the platform view
+    final labels = <String>[];
+    final symbols = <String>[];
+    final isDivider = <bool>[];
+    final enabled = <bool>[];
+
+    for (final e in widget.items) {
+      if (e is AdaptivePopupMenuDivider) {
+        labels.add('');
+        symbols.add('');
+        isDivider.add(true);
+        enabled.add(false);
+      } else if (e is AdaptivePopupMenuItem<T>) {
+        labels.add(e.label);
+        symbols.add(e.icon is String ? e.icon as String : '');
+        isDivider.add(false);
+        enabled.add(e.enabled);
+      }
+    }
+
+    try {
+      await ch.invokeMethod('updateMenuItems', {
+        'labels': labels,
+        'sfSymbols': symbols,
+        'isDivider': isDivider,
+        'enabled': enabled,
+      });
+    } catch (_) {}
   }
 
   @override
@@ -217,9 +298,16 @@ class _IOS26PopupMenuButtonState<T> extends State<IOS26PopupMenuButton<T>> {
         if (_effectiveTint != null) 'tint': _colorToARGB(_effectiveTint!),
       };
 
-      // Create a unique key based on button label/icon to force recreation on change
+      // Create a unique key based on button label/icon and items to force recreation on change
+      final itemsKey = widget.items.map((item) {
+        if (item is AdaptivePopupMenuItem<T>) {
+          return '${item.label}_${item.icon}_${item.enabled}_${item.value}';
+        }
+        return 'divider';
+      }).join('_');
+
       final viewKey = ValueKey(
-        '${widget.buttonLabel}_${widget.buttonIcon}_${widget.child?.runtimeType}_${widget.items.length}',
+        '${widget.buttonLabel}_${widget.buttonIcon}_${widget.child?.runtimeType}_$itemsKey',
       );
 
       final platformView = UiKitView(

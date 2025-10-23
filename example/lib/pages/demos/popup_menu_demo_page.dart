@@ -12,6 +12,7 @@ class PopupMenuDemoPage extends StatefulWidget {
 class _PopupMenuDemoPageState extends State<PopupMenuDemoPage> {
   String _selectedAction = 'No selection';
   String _selectedValue = '';
+  bool _editMode = false;
 
   @override
   Widget build(BuildContext context) {
@@ -299,6 +300,75 @@ class _PopupMenuDemoPageState extends State<PopupMenuDemoPage> {
               ],
             ),
           ],
+        ),
+      ]),
+      const SizedBox(height: 24),
+
+      // Dynamic Label Test
+      _buildSection('Dynamic Label Test', [
+        _buildDemo(
+          'Toggle Edit Mode',
+          Row(
+            children: [
+              AdaptivePopupMenuButton.text<String>(
+                label: 'Mode',
+                items: [
+                  AdaptivePopupMenuItem(
+                    label: _editMode ? 'View mode' : 'Edit mode',
+                    value: 'toggle_mode',
+                    icon: PlatformInfo.isIOS26OrHigher()
+                        ? (_editMode ? 'eye' : 'pencil')
+                        : (_editMode ? Icons.visibility : Icons.edit),
+                  ),
+                  AdaptivePopupMenuItem(
+                    label: _editMode ? 'Save changes' : 'Start editing',
+                    value: 'action',
+                    icon: PlatformInfo.isIOS26OrHigher()
+                        ? (_editMode ? 'checkmark.circle' : 'pencil.circle')
+                        : (_editMode ? Icons.save : Icons.edit_note),
+                  ),
+                ],
+                onSelected: (index, item) {
+                  setState(() {
+                    if (item.value == 'toggle_mode') {
+                      _editMode = !_editMode;
+                      _selectedAction = 'Switched to ${_editMode ? "Edit" : "View"} mode';
+                    } else {
+                      _selectedAction = item.label;
+                    }
+                    _selectedValue = item.value ?? '';
+                  });
+                },
+                buttonStyle: PopupButtonStyle.tinted,
+              ),
+              const SizedBox(width: 16),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: _editMode
+                      ? CupertinoColors.systemYellow.withOpacity(0.2)
+                      : CupertinoColors.systemGreen.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: _editMode
+                        ? CupertinoColors.systemYellow
+                        : CupertinoColors.systemGreen,
+                    width: 1,
+                  ),
+                ),
+                child: Text(
+                  _editMode ? 'EDIT MODE' : 'VIEW MODE',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: _editMode
+                        ? CupertinoColors.systemYellow
+                        : CupertinoColors.systemGreen,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ]),
       const SizedBox(height: 24),

@@ -119,6 +119,22 @@ class iOS26PopupMenuButtonView: NSObject, FlutterPlatformView {
                     }
                     result(nil)
                 } else { result(FlutterError(code: "bad_args", message: "Missing style", details: nil)) }
+            case "updateMenuItems":
+                if let args = call.arguments as? [String: Any] {
+                    self.labels = (args["labels"] as? [String]) ?? []
+                    self.symbols = (args["sfSymbols"] as? [String]) ?? []
+                    self.dividers = ((args["isDivider"] as? [NSNumber]) ?? []).map { $0.boolValue }
+                    self.enabled = ((args["enabled"] as? [NSNumber]) ?? []).map { $0.boolValue }
+                    self.rebuildMenu()
+                    result(nil)
+                } else { result(FlutterError(code: "bad_args", message: "Missing menu items", details: nil)) }
+            case "updateButtonContent":
+                if let args = call.arguments as? [String: Any] {
+                    let title = args["buttonTitle"] as? String
+                    let iconName = args["buttonIconName"] as? String
+                    self.setButtonContent(title: title, icon: iconName)
+                    result(nil)
+                } else { result(FlutterError(code: "bad_args", message: "Missing button content", details: nil)) }
             default:
                 result(FlutterMethodNotImplemented)
             }
