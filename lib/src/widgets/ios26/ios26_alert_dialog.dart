@@ -224,13 +224,27 @@ class _IOS26AlertDialogState extends State<IOS26AlertDialog> {
       final textFieldValue = args?['textFieldValue'] as String?;
 
       if (idx != null && idx >= 0 && idx < widget.actions.length) {
-        // Dismiss the dialog first with the text field value
+        final action = widget.actions[idx];
+
+        // Dismiss the dialog with appropriate value
         if (mounted) {
-          Navigator.of(context).pop(textFieldValue);
+          if (widget.input != null) {
+            // Input dialog
+            if (action.style == AlertActionStyle.cancel) {
+              // Cancel button returns null for input dialogs
+              Navigator.of(context).pop<String?>(null);
+            } else {
+              // Other buttons return the text field value
+              Navigator.of(context).pop<String?>(textFieldValue);
+            }
+          } else {
+            // Normal dialog - just close without returning a value
+            Navigator.of(context).pop();
+          }
         }
 
         // Then call the action
-        widget.actions[idx].onPressed();
+        action.onPressed();
       }
     }
     return null;

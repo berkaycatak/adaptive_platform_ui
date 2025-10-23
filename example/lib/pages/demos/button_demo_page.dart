@@ -329,6 +329,7 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
             SizedBox(
               width: double.infinity,
               child: AdaptiveButton(
+                useSmoothRectangleBorder: false,
                 onPressed: () => _showMessage(context, 'Large button'),
                 style: AdaptiveButtonStyle.filled,
                 size: AdaptiveButtonSize.large,

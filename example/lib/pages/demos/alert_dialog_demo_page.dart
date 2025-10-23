@@ -621,7 +621,7 @@ class AlertDialogDemoPage extends StatelessWidget {
   // Text Input Examples
 
   void _showTextInputAlert(BuildContext context) async {
-    final result = await AdaptiveAlertDialog.show(
+    final result = await AdaptiveAlertDialog.inputShow(
       context: context,
       title: 'Enter Your Name',
       message: 'Please enter your full name below:',
@@ -646,7 +646,7 @@ class AlertDialogDemoPage extends StatelessWidget {
   }
 
   void _showPasswordInputAlert(BuildContext context) async {
-    final result = await AdaptiveAlertDialog.show(
+    final result = await AdaptiveAlertDialog.inputShow(
       context: context,
       title: 'Enter Password',
       message: 'Please enter your password to continue:',
@@ -682,7 +682,7 @@ class AlertDialogDemoPage extends StatelessWidget {
   }
 
   void _showEmailInputAlert(BuildContext context) async {
-    final result = await AdaptiveAlertDialog.show(
+    final result = await AdaptiveAlertDialog.inputShow(
       context: context,
       title: 'Enter Email',
       message: 'Please provide your email address:',
@@ -715,7 +715,7 @@ class AlertDialogDemoPage extends StatelessWidget {
   }
 
   void _showPhoneInputAlert(BuildContext context) async {
-    final result = await AdaptiveAlertDialog.show(
+    final result = await AdaptiveAlertDialog.inputShow(
       context: context,
       title: 'Enter Phone Number',
       message: 'Please provide your phone number:',
@@ -750,7 +750,7 @@ class AlertDialogDemoPage extends StatelessWidget {
   }
 
   void _showLimitedInputAlert(BuildContext context) async {
-    final result = await AdaptiveAlertDialog.show(
+    final result = await AdaptiveAlertDialog.inputShow(
       context: context,
       title: 'Enter Code',
       message: 'Please enter the 6-digit verification code:',

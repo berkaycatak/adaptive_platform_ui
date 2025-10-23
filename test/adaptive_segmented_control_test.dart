@@ -167,7 +167,7 @@ void main() {
             body: Builder(
               builder: (context) => ElevatedButton(
                 onPressed: () {
-                  AdaptiveAlertDialog.show(
+                  AdaptiveAlertDialog.inputShow(
                     context: context,
                     title: 'Enter Name',
                     input: const AdaptiveAlertDialogInput(

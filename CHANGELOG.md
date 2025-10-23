@@ -8,11 +8,14 @@
 * **NEW**: Added `useSmoothRectangleBorder` parameter to AdaptiveButton (iOS 26+)
   * Default `true`: Smooth rectangle corners
   * Set to `false`: Perfect circular/capsule shape for icon buttons
+* **BREAKING**: Split AdaptiveAlertDialog methods for different use cases
+  * `show()` - Standard dialog (returns void)
+  * `inputShow()` - Text input dialog (returns String?)
+  * Cancel button now correctly returns null for input dialogs
 * **FIX**: Fixed dynamic label updates not working in AdaptivePopupMenuItem
   * Labels now properly update when state changes
 * **FIX**: Fixed dark mode not updating in AdaptiveDatePicker and AdaptiveTimePicker
   * Pickers now respond to theme changes dynamically
-
 ## [0.1.97]
 * **NEW**: Added `spacerAfter` parameter (ToolbarSpacerType) to AdaptiveAppBarAction for iOS 26+ Liquid Glass toolbar grouping
   * `ToolbarSpacerType.fixed` - 12pt fixed space using UIBarButtonItem.fixedSpace() for spacing within groups
