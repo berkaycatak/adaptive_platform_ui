@@ -47,72 +47,16 @@ class AdaptiveTimePicker {
     final result = await showCupertinoModalPopup<DateTime>(
       context: context,
       builder: (BuildContext context) {
-        return Container(
-          height: 280,
-          color: CupertinoColors.systemBackground.resolveFrom(context),
-          child: Column(
-            children: [
-              // Header with Done button
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
-                decoration: BoxDecoration(
-                  border: Border(
-                    bottom: BorderSide(
-                      color: CupertinoColors.separator.resolveFrom(context),
-                      width: 0.5,
-                    ),
-                  ),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    CupertinoButton(
-                      padding: EdgeInsets.zero,
-                      onPressed: () => Navigator.of(context).pop(),
-                      child: Text(
-                        PlatformInfo.isIOS
-                            ? CupertinoLocalizations.of(
-                                context,
-                              ).cancelButtonLabel
-                            : MaterialLocalizations.of(
-                                context,
-                              ).cancelButtonLabel,
-                      ),
-                    ),
-                    CupertinoButton(
-                      padding: EdgeInsets.zero,
-                      onPressed: () =>
-                          Navigator.of(context).pop(selectedDateTime),
-                      child: Text(
-                        MaterialLocalizations.of(context).okButtonLabel,
-                        style: const TextStyle(fontWeight: FontWeight.w600),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              // Time picker
-              Expanded(
-                child: CupertinoDatePicker(
-                  mode: CupertinoDatePickerMode.time,
-                  use24hFormat: use24HourFormat,
-                  initialDateTime: selectedDateTime,
-                  onDateTimeChanged: (DateTime newDateTime) {
-                    selectedDateTime = newDateTime;
-                  },
-                ),
-              ),
-            ],
-          ),
+        return _CupertinoTimePickerContent(
+          initialDateTime: selectedDateTime,
+          use24HourFormat: use24HourFormat,
+          onTimeSelected: (dateTime) => selectedDateTime = dateTime,
         );
       },
     );
 
     if (result != null) {
-      return TimeOfDay(hour: result.hour, minute: result.minute);
+      return TimeOfDay(hour: selectedDateTime.hour, minute: selectedDateTime.minute);
     }
     return null;
   }
@@ -122,5 +66,108 @@ class AdaptiveTimePicker {
     required TimeOfDay initialTime,
   }) async {
     return showTimePicker(context: context, initialTime: initialTime);
+  }
+}
+
+/// Internal widget that properly updates when theme changes
+class _CupertinoTimePickerContent extends StatefulWidget {
+  const _CupertinoTimePickerContent({
+    required this.initialDateTime,
+    required this.use24HourFormat,
+    required this.onTimeSelected,
+  });
+
+  final DateTime initialDateTime;
+  final bool use24HourFormat;
+  final ValueChanged<DateTime> onTimeSelected;
+
+  @override
+  State<_CupertinoTimePickerContent> createState() =>
+      _CupertinoTimePickerContentState();
+}
+
+class _CupertinoTimePickerContentState
+    extends State<_CupertinoTimePickerContent> {
+  late DateTime selectedDateTime;
+
+  @override
+  void initState() {
+    super.initState();
+    selectedDateTime = widget.initialDateTime;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // Use CupertinoTheme to get dynamic colors that update with theme changes
+    final backgroundColor = CupertinoTheme.of(context).scaffoldBackgroundColor;
+    final separatorColor = CupertinoDynamicColor.resolve(
+      CupertinoColors.separator,
+      context,
+    );
+
+    return Container(
+      height: 280,
+      color: backgroundColor,
+      child: Column(
+        children: [
+          // Header with Done button
+          Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 8,
+            ),
+            decoration: BoxDecoration(
+              border: Border(
+                bottom: BorderSide(
+                  color: separatorColor,
+                  width: 0.5,
+                ),
+              ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                CupertinoButton(
+                  padding: EdgeInsets.zero,
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: Text(
+                    PlatformInfo.isIOS
+                        ? CupertinoLocalizations.of(
+                            context,
+                          ).cancelButtonLabel
+                        : MaterialLocalizations.of(
+                            context,
+                          ).cancelButtonLabel,
+                  ),
+                ),
+                CupertinoButton(
+                  padding: EdgeInsets.zero,
+                  onPressed: () =>
+                      Navigator.of(context).pop(selectedDateTime),
+                  child: Text(
+                    MaterialLocalizations.of(context).okButtonLabel,
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // Time picker
+          Expanded(
+            child: CupertinoDatePicker(
+              mode: CupertinoDatePickerMode.time,
+              use24hFormat: widget.use24HourFormat,
+              initialDateTime: widget.initialDateTime,
+              onDateTimeChanged: (DateTime newDateTime) {
+                setState(() {
+                  selectedDateTime = newDateTime;
+                });
+                widget.onTimeSelected(newDateTime);
+              },
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

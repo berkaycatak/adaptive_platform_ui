@@ -6,7 +6,9 @@
   * iOS <26 & Android: Native color properties
   * Customizable tab bar item colors for better UI flexibility
 * **FIX**: Fixed dynamic label updates not working in AdaptivePopupMenuItem
-  * Added proper state management and menu item update mechanism for all platforms
+  * Labels now properly update when state changes
+* **FIX**: Fixed dark mode not updating in AdaptiveDatePicker and AdaptiveTimePicker
+  * Pickers now respond to theme changes dynamically
 
 ## [0.1.97]
 * **NEW**: Added `spacerAfter` parameter (ToolbarSpacerType) to AdaptiveAppBarAction for iOS 26+ Liquid Glass toolbar grouping

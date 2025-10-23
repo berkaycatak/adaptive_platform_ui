@@ -55,69 +55,15 @@ class AdaptiveDatePicker {
     return showCupertinoModalPopup<DateTime>(
       context: context,
       builder: (BuildContext context) {
-        return Container(
-          height: 280,
-          color: CupertinoColors.systemBackground.resolveFrom(context),
-          child: Column(
-            children: [
-              // Header with Done button
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
-                decoration: BoxDecoration(
-                  border: Border(
-                    bottom: BorderSide(
-                      color: CupertinoColors.separator.resolveFrom(context),
-                      width: 0.5,
-                    ),
-                  ),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    CupertinoButton(
-                      padding: EdgeInsets.zero,
-                      onPressed: () => Navigator.of(context).pop(),
-                      child: Text(
-                        PlatformInfo.isIOS
-                            ? CupertinoLocalizations.of(
-                                context,
-                              ).cancelButtonLabel
-                            : MaterialLocalizations.of(
-                                context,
-                              ).cancelButtonLabel,
-                      ),
-                    ),
-                    CupertinoButton(
-                      padding: EdgeInsets.zero,
-                      onPressed: () => Navigator.of(context).pop(selectedDate),
-                      child: Text(
-                        MaterialLocalizations.of(context).okButtonLabel,
-                        style: const TextStyle(fontWeight: FontWeight.w600),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              // Date picker
-              Expanded(
-                child: CupertinoDatePicker(
-                  mode: mode,
-                  initialDateTime: initialDate,
-                  minimumDate: firstDate,
-                  maximumDate: lastDate,
-                  onDateTimeChanged: (DateTime newDate) {
-                    selectedDate = newDate;
-                  },
-                ),
-              ),
-            ],
-          ),
+        return _CupertinoDatePickerContent(
+          initialDate: initialDate,
+          firstDate: firstDate,
+          lastDate: lastDate,
+          mode: mode,
+          onDateSelected: (date) => selectedDate = date,
         );
       },
-    );
+    ).then((result) => result != null ? selectedDate : null);
   }
 
   static Future<DateTime?> _showMaterialDatePicker({
@@ -133,6 +79,113 @@ class AdaptiveDatePicker {
       firstDate: firstDate,
       lastDate: lastDate,
       initialDatePickerMode: initialDatePickerMode,
+    );
+  }
+}
+
+/// Internal widget that properly updates when theme changes
+class _CupertinoDatePickerContent extends StatefulWidget {
+  const _CupertinoDatePickerContent({
+    required this.initialDate,
+    required this.firstDate,
+    required this.lastDate,
+    required this.mode,
+    required this.onDateSelected,
+  });
+
+  final DateTime initialDate;
+  final DateTime firstDate;
+  final DateTime lastDate;
+  final CupertinoDatePickerMode mode;
+  final ValueChanged<DateTime> onDateSelected;
+
+  @override
+  State<_CupertinoDatePickerContent> createState() =>
+      _CupertinoDatePickerContentState();
+}
+
+class _CupertinoDatePickerContentState
+    extends State<_CupertinoDatePickerContent> {
+  late DateTime selectedDate;
+
+  @override
+  void initState() {
+    super.initState();
+    selectedDate = widget.initialDate;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // Use CupertinoTheme to get dynamic colors that update with theme changes
+    final backgroundColor = CupertinoTheme.of(context).scaffoldBackgroundColor;
+    final separatorColor = CupertinoDynamicColor.resolve(
+      CupertinoColors.separator,
+      context,
+    );
+
+    return Container(
+      height: 280,
+      color: backgroundColor,
+      child: Column(
+        children: [
+          // Header with Done button
+          Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 8,
+            ),
+            decoration: BoxDecoration(
+              border: Border(
+                bottom: BorderSide(
+                  color: separatorColor,
+                  width: 0.5,
+                ),
+              ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                CupertinoButton(
+                  padding: EdgeInsets.zero,
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: Text(
+                    PlatformInfo.isIOS
+                        ? CupertinoLocalizations.of(
+                            context,
+                          ).cancelButtonLabel
+                        : MaterialLocalizations.of(
+                            context,
+                          ).cancelButtonLabel,
+                  ),
+                ),
+                CupertinoButton(
+                  padding: EdgeInsets.zero,
+                  onPressed: () => Navigator.of(context).pop(true),
+                  child: Text(
+                    MaterialLocalizations.of(context).okButtonLabel,
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // Date picker
+          Expanded(
+            child: CupertinoDatePicker(
+              mode: widget.mode,
+              initialDateTime: widget.initialDate,
+              minimumDate: widget.firstDate,
+              maximumDate: widget.lastDate,
+              onDateTimeChanged: (DateTime newDate) {
+                setState(() {
+                  selectedDate = newDate;
+                });
+                widget.onDateSelected(newDate);
+              },
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

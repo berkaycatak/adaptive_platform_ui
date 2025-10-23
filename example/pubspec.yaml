@@ -7,6 +7,7 @@ environment:
   sdk: ^3.9.2
   flutter: ">=1.17.0"
 
+
 dependencies:
   go_router: ^15.1.2
   cupertino_icons: ^1.0.8
