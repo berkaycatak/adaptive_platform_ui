@@ -459,6 +459,48 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
                 ],
               ),
             ],
+            if (PlatformInfo.isIOS26OrHigher()) ...[
+              const SizedBox(height: 14),
+              Text(
+                'For iOS 26 or Higher (Circular)',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: PlatformInfo.isIOS
+                      ? (MediaQuery.platformBrightnessOf(context) ==
+                                Brightness.dark
+                            ? CupertinoColors.white
+                            : CupertinoColors.black)
+                      : Theme.of(context).colorScheme.onSurface,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _buildIos26CircularButton(
+                    context,
+                    icon: "heart",
+                    label: 'Like',
+                  ),
+                  _buildIos26CircularButton(
+                    context,
+                    icon: "square.and.arrow.up",
+                    label: 'Share',
+                  ),
+                  _buildIos26CircularButton(
+                    context,
+                    icon: "bookmark",
+                    label: 'Save',
+                  ),
+                  _buildIos26CircularButton(
+                    context,
+                    icon: "ellipsis",
+                    label: 'More',
+                  ),
+                ],
+              ),
+            ],
           ],
         ),
         SizedBox(height: 100),
@@ -559,6 +601,40 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
             onPressed: () => _showMessage(context, '$label pressed'),
             style: AdaptiveButtonStyle.prominentGlass,
             sfSymbol: SFSymbol(icon, size: 17, color: Colors.white),
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            color: PlatformInfo.isIOS
+                ? (MediaQuery.platformBrightnessOf(context) == Brightness.dark
+                      ? CupertinoColors.systemGrey
+                      : CupertinoColors.systemGrey2)
+                : Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildIos26CircularButton(
+    BuildContext context, {
+    required String icon,
+    required String label,
+  }) {
+    return Column(
+      children: [
+        SizedBox(
+          width: 38,
+          height: 38,
+          child: AdaptiveButton.sfSymbol(
+            useSmoothRectangleBorder: false,
+            borderRadius: BorderRadius.circular(1000),
+            onPressed: () => _showMessage(context, 'pressed'),
+            style: AdaptiveButtonStyle.prominentGlass,
+            sfSymbol: SFSymbol("xmark", size: 17, color: Colors.white),
           ),
         ),
         const SizedBox(height: 4),

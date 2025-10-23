@@ -46,6 +46,7 @@ class iOS26ButtonView: NSObject, FlutterPlatformView {
     private var iconName: String?
     private var iconSize: CGFloat?
     private var iconColor: UIColor?
+    private var useSmoothRectangleBorder: Bool = true
 
     init(
         frame: CGRect,
@@ -80,6 +81,9 @@ class iOS26ButtonView: NSObject, FlutterPlatformView {
             if let argb = config["iconColor"] as? Int {
                 iconColor = UIColor(argb: argb)
             }
+
+            // Use smooth rectangle border setting
+            useSmoothRectangleBorder = config["useSmoothRectangleBorder"] as? Bool ?? true
         } else {
             buttonId = 0
         }
@@ -206,8 +210,14 @@ class iOS26ButtonView: NSObject, FlutterPlatformView {
                 config.attributedTitle = attributedTitle
             }
 
-            // Set corner style for liquid glass effect
-            config.cornerStyle = .dynamic
+            // Set corner style based on useSmoothRectangleBorder
+            if useSmoothRectangleBorder {
+                // Use smooth rectangle border (default iOS style)
+                config.cornerStyle = .dynamic
+            } else {
+                // Use capsule (perfectly circular) shape
+                config.cornerStyle = .capsule
+            }
 
             // Set colors based on button style
             if let tint = button.tintColor {
@@ -352,6 +362,14 @@ class iOS26ButtonView: NSObject, FlutterPlatformView {
                 if let argb = args["iconColor"] as? Int {
                     iconColor = UIColor(argb: argb)
                 }
+                applyLiquidGlassStyle()
+            }
+            result(nil)
+
+        case "setUseSmoothRectangleBorder":
+            if let args = call.arguments as? [String: Any],
+               let useSmoothRect = args["useSmoothRectangleBorder"] as? Bool {
+                useSmoothRectangleBorder = useSmoothRect
                 applyLiquidGlassStyle()
             }
             result(nil)

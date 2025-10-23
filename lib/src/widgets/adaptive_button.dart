@@ -33,6 +33,7 @@ class AdaptiveButton extends StatelessWidget {
     this.borderRadius,
     this.minSize,
     this.enabled = true,
+    this.useSmoothRectangleBorder = true,
   }) : child = null,
        icon = null,
        iconColor = null,
@@ -50,6 +51,7 @@ class AdaptiveButton extends StatelessWidget {
     this.borderRadius,
     this.minSize,
     this.enabled = true,
+    this.useSmoothRectangleBorder = true,
   }) : label = null,
        textColor = null,
        icon = null,
@@ -69,6 +71,7 @@ class AdaptiveButton extends StatelessWidget {
     this.borderRadius,
     this.minSize,
     this.enabled = true,
+    this.useSmoothRectangleBorder = true,
   }) : label = null,
        textColor = null,
        child = null,
@@ -86,6 +89,7 @@ class AdaptiveButton extends StatelessWidget {
     this.borderRadius,
     this.minSize,
     this.enabled = true,
+    this.useSmoothRectangleBorder = true,
   }) : label = null,
        textColor = null,
        child = null,
@@ -137,6 +141,11 @@ class AdaptiveButton extends StatelessWidget {
   /// Whether the button is enabled
   final bool enabled;
 
+  /// Whether to use smooth rectangle border (iOS 26+ only)
+  /// When false, uses perfectly circular/capsule shape
+  /// Default is true for smooth rectangle, set to false for circular
+  final bool useSmoothRectangleBorder;
+
   @override
   Widget build(BuildContext context) {
     // iOS 26+ - Use native iOS 26 button design
@@ -153,6 +162,7 @@ class AdaptiveButton extends StatelessWidget {
           padding: padding,
           borderRadius: borderRadius,
           minSize: minSize,
+          useSmoothRectangleBorder: useSmoothRectangleBorder,
         );
       }
 
@@ -167,6 +177,7 @@ class AdaptiveButton extends StatelessWidget {
           padding: padding,
           borderRadius: borderRadius,
           minSize: minSize,
+          useSmoothRectangleBorder: useSmoothRectangleBorder,
           child: child!,
         );
       }
@@ -182,6 +193,7 @@ class AdaptiveButton extends StatelessWidget {
           padding: padding,
           borderRadius: borderRadius,
           minSize: minSize,
+          useSmoothRectangleBorder: useSmoothRectangleBorder,
           child: Icon(icon, color: iconColor, size: 24),
         );
       }
@@ -198,6 +210,7 @@ class AdaptiveButton extends StatelessWidget {
         padding: padding,
         borderRadius: borderRadius,
         minSize: minSize,
+        useSmoothRectangleBorder: useSmoothRectangleBorder,
       );
     }
 

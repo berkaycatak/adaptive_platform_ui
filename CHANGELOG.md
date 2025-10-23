@@ -5,6 +5,9 @@
   * iOS 26+: Icon colors via renderingMode (`.alwaysOriginal` for unselected, `.alwaysTemplate` for selected)
   * iOS <26 & Android: Native color properties
   * Customizable tab bar item colors for better UI flexibility
+* **NEW**: Added `useSmoothRectangleBorder` parameter to AdaptiveButton (iOS 26+)
+  * Default `true`: Smooth rectangle corners
+  * Set to `false`: Perfect circular/capsule shape for icon buttons
 * **FIX**: Fixed dynamic label updates not working in AdaptivePopupMenuItem
   * Labels now properly update when state changes
 * **FIX**: Fixed dark mode not updating in AdaptiveDatePicker and AdaptiveTimePicker
