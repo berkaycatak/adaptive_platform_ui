@@ -273,13 +273,12 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
           }
           // Priority 2: Build from items
           else {
+            final unselectedColor = widget.bottomNavigationBar!.unselectedItemColor;
+
             tabBar = CupertinoTabBar(
               currentIndex: widget.bottomNavigationBar!.selectedIndex!,
               onTap: widget.bottomNavigationBar!.onTap!,
               activeColor: widget.bottomNavigationBar!.selectedItemColor,
-              inactiveColor:
-                  widget.bottomNavigationBar!.unselectedItemColor ??
-                  CupertinoColors.inactiveGray,
               items: widget.bottomNavigationBar!.items!.map((dest) {
                 // Convert icon to IconData if it's a String (SF Symbol)
                 final IconData iconData = dest.icon is String
@@ -295,7 +294,10 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
                     : null;
 
                 // Wrap icons with badge if badgeCount is provided
-                Widget iconWidget = Icon(iconData);
+                // Only apply color if unselectedItemColor is provided
+                Widget iconWidget = unselectedColor != null
+                    ? Icon(iconData, color: unselectedColor)
+                    : Icon(iconData);
                 Widget activeIconWidget = selectedIconData != null
                     ? Icon(selectedIconData)
                     : Icon(iconData);
@@ -303,7 +305,9 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
                 if (dest.badgeCount != null && dest.badgeCount! > 0) {
                   iconWidget = AdaptiveBadge(
                     count: dest.badgeCount,
-                    child: Icon(iconData),
+                    child: unselectedColor != null
+                        ? Icon(iconData, color: unselectedColor)
+                        : Icon(iconData),
                   );
                   activeIconWidget = AdaptiveBadge(
                     count: dest.badgeCount,

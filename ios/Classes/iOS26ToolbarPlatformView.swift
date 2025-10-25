@@ -214,8 +214,8 @@ class iOS26ToolbarPlatformView: NSObject, FlutterPlatformView {
                 items.append(contentsOf: rightActions)
             } else {
                 // No flexible spacer - standard layout: Title on left, actions on right
-                // Add spacing after leading button if it exists
-                if hasLeading && (hasTitle || !leftActions.isEmpty) {
+                // Add spacing after leading button if it exists and there's a title
+                if hasLeading && hasTitle {
                     if #available(iOS 16.0, *) {
                         items.append(.fixedSpace(8))
                     }
@@ -232,23 +232,25 @@ class iOS26ToolbarPlatformView: NSObject, FlutterPlatformView {
                         let titleItem = UIBarButtonItem(customView: titleLabel)
                         items.append(titleItem)
                     }
-
-                    items.append(UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil))
                 }
+
+                // Always add flexible space to push actions to the right
+                items.append(UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil))
 
                 // Add all actions to the right
                 items.append(contentsOf: leftActions)
             }
         } else {
-            // No actions - just add title if exists
-            if hasTitle {
-                // Add spacing after leading button if it exists
-                if hasLeading {
-                    if #available(iOS 16.0, *) {
-                        items.append(.fixedSpace(8))
-                    }
+            // No actions
+            // Add spacing after leading button if it exists and there's a title
+            if hasLeading && hasTitle {
+                if #available(iOS 16.0, *) {
+                    items.append(.fixedSpace(8))
                 }
+            }
 
+            // Add title if exists
+            if hasTitle {
                 if let title = params["title"] as? String, !title.isEmpty {
                     let titleLabel = UILabel()
                     titleLabel.text = title
@@ -259,10 +261,10 @@ class iOS26ToolbarPlatformView: NSObject, FlutterPlatformView {
                     let titleItem = UIBarButtonItem(customView: titleLabel)
                     items.append(titleItem)
                 }
-
-                // Add flexible space to push everything to the left
-                items.append(UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil))
             }
+
+            // Always add flexible space to push everything to the left
+            items.append(UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil))
         }
 
         _toolbar.items = items
