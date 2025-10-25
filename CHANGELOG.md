@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.1.99]
+* **NEW**: Added `AdaptiveBlurView` widget - iOS 26+ Liquid Glass blur effects
+  * iOS 26+: Native UIVisualEffectView with system blur styles (systemMaterial, systemThick, systemThin, etc.)
+  * iOS <26 & Android: Flutter-based BackdropFilter with gaussian blur
+  * Supports custom blur styles and border radius
+  * Perfect for overlays, card backgrounds, and glassmorphic effects
+* **FIX**: Fixed `unselectedItemColor` behavior in AdaptiveBottomNavigationBar
+  * When `unselectedItemColor` is null, now uses theme's default color instead of forcing a color
+  * iOS 26+: Uses `.alwaysTemplate` rendering mode when no custom color provided
+  * CupertinoTabBar: Removed forced `CupertinoColors.inactiveGray` fallback
+* **FIX**: Fixed iOS 26 toolbar layout issues
+  * Back button now stays on the left when title is missing
+  * Actions now properly align to the right when title is missing
+  * Improved flexible space handling for all layout combinations
+
 ## [0.1.98]
 * **NEW**: Added `selectedItemColor` and `unselectedItemColor` support for AdaptiveBottomNavigationBar
   * iOS 26+: Icon colors via renderingMode (`.alwaysOriginal` for unselected, `.alwaysTemplate` for selected)

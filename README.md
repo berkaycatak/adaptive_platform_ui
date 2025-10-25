@@ -1118,7 +1118,7 @@ The example app includes:
 - Style and size comparisons
 - Dark mode support
 
-### IOS26NativeSearchTabBar (EXPERIMENTAL)
+### IOS26NativeSearchTabBar (EXPERIMENTAL) (Do not confuse it with a different widget, AdaptiveBottomNavigationBar.)
 
 ⚠️ **WARNING: This is a highly experimental feature with significant limitations. Only use for prototyping and demos.**
 

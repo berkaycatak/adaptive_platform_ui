@@ -273,7 +273,8 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
           }
           // Priority 2: Build from items
           else {
-            final unselectedColor = widget.bottomNavigationBar!.unselectedItemColor;
+            final unselectedColor =
+                widget.bottomNavigationBar!.unselectedItemColor;
 
             tabBar = CupertinoTabBar(
               currentIndex: widget.bottomNavigationBar!.selectedIndex!,
