@@ -125,20 +125,30 @@ class _IOS26ScaffoldState extends State<IOS26Scaffold>
         leadingText != null ||
         (widget.actions != null && widget.actions!.isNotEmpty);
 
+    // Get brightness and determine text color
+    final brightness = MediaQuery.platformBrightnessOf(context);
+    final textColor = brightness == Brightness.dark
+        ? CupertinoColors.white
+        : CupertinoColors.black;
+
     // Build the stack content
     final stackContent = Stack(
       children: [
         // Content - full screen - use KeepAlive to prevent rebuild
-        // If only one child, use it directly (e.g., StatefulNavigationShell from GoRouter)
-        // Otherwise use IndexedStack for tab switching
-        if (widget.children.length == 1)
-          widget.children.first
-        else
-          IndexedStack(
-            index: widget.bottomNavigationBar?.selectedIndex ?? 0,
-            sizing: StackFit.expand,
-            children: widget.children,
+        // Wrap content with DefaultTextStyle to ensure proper text color
+        DefaultTextStyle(
+          style: TextStyle(
+            color: textColor,
+            fontSize: 17, // iOS default
           ),
+          child: widget.children.length == 1
+              ? widget.children.first
+              : IndexedStack(
+                  index: widget.bottomNavigationBar?.selectedIndex ?? 0,
+                  sizing: StackFit.expand,
+                  children: widget.children,
+                ),
+        ),
         // Top toolbar - iOS 26 Liquid Glass style - only show if there's content
         if (hasToolbarContent)
           Positioned(

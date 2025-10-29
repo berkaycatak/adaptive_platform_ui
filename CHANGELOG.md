@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.1.100]
+* **FIX**: Theme color support across all components
+  * All adaptive components now properly use theme colors when no explicit color provided
+  * iOS: Uses `CupertinoTheme.of(context).primaryColor`
+  * Android: Uses `Theme.of(context).colorScheme.primary`
+  * Material button styles now respect `elevatedButtonTheme`, `textButtonTheme`, etc.
+* **FIX**: iOS button width handling in Row/Flex layouts
+  * iOS 26+ native buttons now properly size to content width
+  * Removed forced full-width constraint in Swift implementation
+  * Buttons work correctly with `mainAxisAlignment: MainAxisAlignment.spaceBetween`
+* **FIX**: Dark mode text color issues on iOS
+  * Text now automatically switches to white in dark mode, black in light mode
+  * Applied to all scaffold implementations (iOS 26+ and legacy)
+* **FIX**: Android TextField suffix spacing issue
+  * Suffix widget now uses `suffixIcon` internally to prevent extra vertical space
+  * Added `isDense: true` to reduce padding
+* **FIX**: Android AppBar back button visibility
+  * Back button now shows even when title is not provided
+* **FIX**: Material context issues in AdaptiveScaffold
+  * Scaffold now always used on Android to ensure Material context
+
 ## [0.1.99]
 * **NEW**: Added `AdaptiveBlurView` widget - iOS 26+ Liquid Glass blur effects
   * iOS 26+: Native UIVisualEffectView with system blur styles (systemMaterial, systemThick, systemThin, etc.)

@@ -377,6 +377,20 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
           );
         }
 
+        // Wrap body with DefaultTextStyle to ensure proper text color based on brightness
+        final brightness = MediaQuery.platformBrightnessOf(context);
+        final textColor = brightness == Brightness.dark
+            ? CupertinoColors.white
+            : CupertinoColors.black;
+
+        bodyWidget = DefaultTextStyle(
+          style: TextStyle(
+            color: textColor,
+            fontSize: 17, // iOS default
+          ),
+          child: bodyWidget,
+        );
+
         return CupertinoPageScaffold(
           navigationBar: navigationBar,
           child: bodyWidget,
@@ -433,11 +447,6 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
         );
       }
 
-      // If no navigation bar, just return body
-      if (navigationBar == null) {
-        return widget.body ?? const SizedBox.shrink();
-      }
-
       // Wrap body with Stack if floatingActionButton is provided
       Widget body = widget.body ?? const SizedBox.shrink();
       if (widget.floatingActionButton != null) {
@@ -453,6 +462,21 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
         );
       }
 
+      // Wrap body with DefaultTextStyle to ensure proper text color based on brightness
+      final brightness = MediaQuery.platformBrightnessOf(context);
+      final textColor = brightness == Brightness.dark
+          ? CupertinoColors.white
+          : CupertinoColors.black;
+
+      body = DefaultTextStyle(
+        style: TextStyle(
+          color: textColor,
+          fontSize: 17, // iOS default
+        ),
+        child: body,
+      );
+
+      // Always use CupertinoPageScaffold to ensure proper background color
       return CupertinoPageScaffold(navigationBar: navigationBar, child: body);
     }
 
@@ -570,12 +594,8 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
     if (widget.appBar?.appBar != null) {
       appBar = widget.appBar!.appBar;
     }
-    // Priority 2: Build from title, actions, leading (if appBar has content)
-    else if (widget.appBar != null &&
-        (widget.appBar!.title != null ||
-            (widget.appBar!.actions != null &&
-                widget.appBar!.actions!.isNotEmpty) ||
-            widget.appBar!.leading != null)) {
+    // Priority 2: Build AppBar if widget.appBar is provided (even if empty - for automatic back button)
+    else if (widget.appBar != null) {
       appBar = AppBar(
         title: widget.appBar!.title != null
             ? Text(widget.appBar!.title!)
@@ -595,14 +615,11 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
           );
         }).toList(),
         leading: widget.appBar!.leading,
+        // automaticallyImplyLeading defaults to true, so back button will show automatically
       );
     }
 
-    // If no app bar, just return body
-    if (appBar == null) {
-      return widget.body ?? const SizedBox.shrink();
-    }
-
+    // Always use Scaffold to ensure Material context
     return Scaffold(
       appBar: appBar,
       body: widget.body ?? const SizedBox.shrink(),

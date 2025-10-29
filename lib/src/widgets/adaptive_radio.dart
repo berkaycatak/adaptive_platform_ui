@@ -74,7 +74,7 @@ class AdaptiveRadio<T> extends StatelessWidget {
         value: value,
         groupValue: groupValue,
         onChanged: onChanged,
-        activeColor: activeColor ?? CupertinoColors.systemBlue,
+        activeColor: activeColor ?? CupertinoTheme.of(context).primaryColor,
         toggleable: toggleable,
       );
     }
@@ -153,13 +153,13 @@ class _IOSRadio<T> extends StatelessWidget {
               ? activeColor
               : (isDark
                     ? CupertinoColors.systemGrey5.darkColor
-                    : CupertinoColors.white),
+                    : CupertinoColors.systemBackground.color),
           border: Border.all(
             color: _selected
                 ? activeColor
                 : (isDark
-                      ? CupertinoColors.systemGrey3
-                      : CupertinoColors.systemGrey4),
+                      ? CupertinoColors.systemGrey3.darkColor
+                      : CupertinoColors.systemGrey4.color),
             width: _selected ? 6 : 1.5,
           ),
         ),

@@ -122,6 +122,8 @@ class iOS26ButtonView: NSObject, FlutterPlatformView {
 
         // Setup constraints
         _view.addSubview(button)
+
+        // Button should fill container width
         NSLayoutConstraint.activate([
             button.leadingAnchor.constraint(equalTo: _view.leadingAnchor),
             button.trailingAnchor.constraint(equalTo: _view.trailingAnchor),
@@ -129,6 +131,10 @@ class iOS26ButtonView: NSObject, FlutterPlatformView {
             button.bottomAnchor.constraint(equalTo: _view.bottomAnchor),
             button.heightAnchor.constraint(equalToConstant: getHeightForSize())
         ])
+
+        // Low content hugging - button can expand if container wants
+        button.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        button.setContentCompressionResistancePriority(.required, for: .horizontal)
 
         // Add tap action
         button.addTarget(self, action: #selector(buttonTapped), for: .touchUpInside)

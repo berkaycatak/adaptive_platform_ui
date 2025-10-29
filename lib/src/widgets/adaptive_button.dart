@@ -152,40 +152,64 @@ class AdaptiveButton extends StatelessWidget {
     if (PlatformInfo.isIOS26OrHigher()) {
       // SF Symbol mode - use native SF Symbol rendering
       if (sfSymbol != null) {
-        return IOS26Button.sfSymbol(
-          onPressed: onPressed,
-          sfSymbol: sfSymbol!,
-          style: _mapToIOS26Style(style),
-          size: _mapToIOS26Size(size),
-          color: color,
-          enabled: enabled,
-          padding: padding,
-          borderRadius: borderRadius,
-          minSize: minSize,
-          useSmoothRectangleBorder: useSmoothRectangleBorder,
+        return _wrapIOSButton(
+          IOS26Button.sfSymbol(
+            onPressed: onPressed,
+            sfSymbol: sfSymbol!,
+            style: _mapToIOS26Style(style),
+            size: _mapToIOS26Size(size),
+            color: color,
+            enabled: enabled,
+            padding: padding,
+            borderRadius: borderRadius,
+            minSize: minSize,
+            useSmoothRectangleBorder: useSmoothRectangleBorder,
+          ),
         );
       }
 
       // Child mode - overlay widget on native button
       if (child != null) {
-        return IOS26Button.child(
-          onPressed: onPressed,
-          style: _mapToIOS26Style(style),
-          size: _mapToIOS26Size(size),
-          color: color,
-          enabled: enabled,
-          padding: padding,
-          borderRadius: borderRadius,
-          minSize: minSize,
-          useSmoothRectangleBorder: useSmoothRectangleBorder,
-          child: child!,
+        return _wrapIOSButton(
+          IOS26Button.child(
+            onPressed: onPressed,
+            style: _mapToIOS26Style(style),
+            size: _mapToIOS26Size(size),
+            color: color,
+            enabled: enabled,
+            padding: padding,
+            borderRadius: borderRadius,
+            minSize: minSize,
+            useSmoothRectangleBorder: useSmoothRectangleBorder,
+            child: child!,
+          ),
         );
       }
 
       // Icon mode - use child mode with Icon widget
       if (icon != null) {
-        return IOS26Button.child(
+        return _wrapIOSButton(
+          IOS26Button.child(
+            onPressed: onPressed,
+            style: _mapToIOS26Style(style),
+            size: _mapToIOS26Size(size),
+            color: color,
+            enabled: enabled,
+            padding: padding,
+            borderRadius: borderRadius,
+            minSize: minSize,
+            useSmoothRectangleBorder: useSmoothRectangleBorder,
+            child: Icon(icon, color: iconColor, size: 24),
+          ),
+        );
+      }
+
+      // Label mode
+      return _wrapIOSButton(
+        IOS26Button(
           onPressed: onPressed,
+          label: label!,
+          textColor: textColor,
           style: _mapToIOS26Style(style),
           size: _mapToIOS26Size(size),
           color: color,
@@ -194,23 +218,7 @@ class AdaptiveButton extends StatelessWidget {
           borderRadius: borderRadius,
           minSize: minSize,
           useSmoothRectangleBorder: useSmoothRectangleBorder,
-          child: Icon(icon, color: iconColor, size: 24),
-        );
-      }
-
-      // Label mode
-      return IOS26Button(
-        onPressed: onPressed,
-        label: label!,
-        textColor: textColor,
-        style: _mapToIOS26Style(style),
-        size: _mapToIOS26Size(size),
-        color: color,
-        enabled: enabled,
-        padding: padding,
-        borderRadius: borderRadius,
-        minSize: minSize,
-        useSmoothRectangleBorder: useSmoothRectangleBorder,
+        ),
       );
     }
 
@@ -228,78 +236,165 @@ class AdaptiveButton extends StatelessWidget {
     return _buildMaterialButton(context);
   }
 
-  Widget _buildCupertinoButton(BuildContext context) {
-    final buttonColor = color ?? CupertinoColors.systemBlue;
-    final effectiveOnPressed = enabled ? onPressed : null;
-
-    // Build child widget based on mode
-    Widget buttonChild;
-    if (sfSymbol != null) {
-      // SF Symbol fallback - use CupertinoIcons or Icon
-      buttonChild = Icon(
-        CupertinoIcons.circle_fill, // Default fallback icon
-        color: sfSymbol!.color,
-        size: sfSymbol!.size,
+  // Wrap iOS buttons to prevent infinite width in Row/Flex
+  Widget _wrapIOSButton(Widget button) {
+    // Apply minSize constraint if provided
+    if (minSize != null) {
+      return ConstrainedBox(
+        constraints: BoxConstraints(
+          minWidth: minSize!.width,
+          minHeight: minSize!.height,
+        ),
+        child: button,
       );
-    } else if (icon != null) {
-      buttonChild = Icon(icon, color: iconColor);
-    } else if (child != null) {
-      buttonChild = child!;
-    } else {
-      buttonChild = Text(label ?? '', style: TextStyle(color: textColor));
     }
+
+    // No wrapper - button sizes itself to content
+    // User must wrap with Flexible in Row if needed
+    return button;
+  }
+
+  Widget _buildCupertinoButton(BuildContext context) {
+    final effectiveOnPressed = enabled ? onPressed : null;
 
     switch (style) {
       case AdaptiveButtonStyle.filled:
-        return CupertinoButton.filled(
-          onPressed: effectiveOnPressed,
-          padding: padding,
-          borderRadius:
-              borderRadius ?? const BorderRadius.all(Radius.circular(8.0)),
-          child: buttonChild,
+        // Build child widget for filled button
+        Widget buttonChild;
+        if (sfSymbol != null) {
+          buttonChild = Icon(
+            CupertinoIcons.circle_fill,
+            color: sfSymbol!.color,
+            size: sfSymbol!.size,
+          );
+        } else if (icon != null) {
+          buttonChild = Icon(icon, color: iconColor);
+        } else if (child != null) {
+          buttonChild = child!;
+        } else {
+          buttonChild = Text(label ?? '', style: TextStyle(color: textColor));
+        }
+
+        return _wrapIOSButton(
+          CupertinoButton.filled(
+            onPressed: effectiveOnPressed,
+            padding: padding,
+            borderRadius:
+                borderRadius ?? const BorderRadius.all(Radius.circular(8.0)),
+            child: buttonChild,
+          ),
         );
 
       case AdaptiveButtonStyle.plain:
+        // For plain style, color parameter affects text/icon color
+        final effectiveColor = color ?? textColor ?? CupertinoTheme.of(context).primaryColor;
+
+        Widget buttonChild;
+        if (sfSymbol != null) {
+          buttonChild = Icon(
+            CupertinoIcons.circle_fill,
+            color: effectiveColor,
+            size: sfSymbol!.size,
+          );
+        } else if (icon != null) {
+          buttonChild = Icon(icon, color: iconColor ?? effectiveColor);
+        } else if (child != null) {
+          buttonChild = DefaultTextStyle(
+            style: TextStyle(color: effectiveColor),
+            child: child!,
+          );
+        } else {
+          buttonChild = Text(
+            label ?? '',
+            style: TextStyle(color: effectiveColor),
+          );
+        }
+
         return CupertinoButton(
           onPressed: effectiveOnPressed,
           padding: padding ?? const EdgeInsets.symmetric(horizontal: 16.0),
           color: null,
-          child: DefaultTextStyle(
-            style: TextStyle(color: textColor ?? buttonColor),
-            child: buttonChild,
-          ),
+          child: buttonChild,
         );
 
       case AdaptiveButtonStyle.glass:
       case AdaptiveButtonStyle.prominentGlass:
         // Cupertino doesn't have glass effects on old iOS, fallback to tinted
-        return CupertinoButton(
-          onPressed: effectiveOnPressed,
-          padding: padding,
-          borderRadius:
-              borderRadius ?? const BorderRadius.all(Radius.circular(8.0)),
-          color: buttonColor.withValues(alpha: 0.15),
-          child: DefaultTextStyle(
-            style: TextStyle(color: textColor ?? buttonColor),
+        final effectiveColor = color ?? CupertinoTheme.of(context).primaryColor;
+        final textColorValue = textColor ?? effectiveColor;
+
+        Widget buttonChild;
+        if (sfSymbol != null) {
+          buttonChild = Icon(
+            CupertinoIcons.circle_fill,
+            color: textColorValue,
+            size: sfSymbol!.size,
+          );
+        } else if (icon != null) {
+          buttonChild = Icon(icon, color: iconColor ?? textColorValue);
+        } else if (child != null) {
+          buttonChild = DefaultTextStyle(
+            style: TextStyle(color: textColorValue),
+            child: child!,
+          );
+        } else {
+          buttonChild = Text(
+            label ?? '',
+            style: TextStyle(color: textColorValue),
+          );
+        }
+
+        return _wrapIOSButton(
+          CupertinoButton(
+            onPressed: effectiveOnPressed,
+            padding: padding,
+            borderRadius:
+                borderRadius ?? const BorderRadius.all(Radius.circular(8.0)),
+            color: effectiveColor.withValues(alpha: 0.15),
             child: buttonChild,
           ),
         );
 
       default:
-        // For other styles, use regular CupertinoButton with color
-        return CupertinoButton(
-          onPressed: effectiveOnPressed,
-          padding: padding,
-          borderRadius:
-              borderRadius ?? const BorderRadius.all(Radius.circular(8.0)),
-          color: buttonColor,
-          child: buttonChild,
+        // For other styles (tinted, bordered, gray), use regular CupertinoButton with color
+        final buttonColor = color ?? CupertinoTheme.of(context).primaryColor;
+        final textColorValue = textColor ?? CupertinoColors.white;
+
+        Widget buttonChild;
+        if (sfSymbol != null) {
+          buttonChild = Icon(
+            CupertinoIcons.circle_fill,
+            color: textColorValue,
+            size: sfSymbol!.size,
+          );
+        } else if (icon != null) {
+          buttonChild = Icon(icon, color: iconColor ?? textColorValue);
+        } else if (child != null) {
+          buttonChild = DefaultTextStyle(
+            style: TextStyle(color: textColorValue),
+            child: child!,
+          );
+        } else {
+          buttonChild = Text(
+            label ?? '',
+            style: TextStyle(color: textColorValue),
+          );
+        }
+
+        return _wrapIOSButton(
+          CupertinoButton(
+            onPressed: effectiveOnPressed,
+            padding: padding,
+            borderRadius:
+                borderRadius ?? const BorderRadius.all(Radius.circular(8.0)),
+            color: buttonColor,
+            child: buttonChild,
+          ),
         );
     }
   }
 
   Widget _buildMaterialButton(BuildContext context) {
-    final buttonColor = color ?? Theme.of(context).colorScheme.primary;
     final effectiveOnPressed = enabled ? onPressed : null;
 
     // Build child widget based on mode
@@ -321,16 +416,17 @@ class AdaptiveButton extends StatelessWidget {
 
     switch (style) {
       case AdaptiveButtonStyle.filled:
+        // Use theme's ElevatedButton style and only override explicitly provided values
         return ElevatedButton(
           onPressed: effectiveOnPressed,
           style: ElevatedButton.styleFrom(
-            backgroundColor: buttonColor,
-            foregroundColor: textColor ?? Colors.white,
-            padding: padding ?? _getDefaultPadding(),
-            minimumSize: minSize ?? Size.zero,
-            shape: RoundedRectangleBorder(
-              borderRadius: borderRadius ?? BorderRadius.circular(8.0),
-            ),
+            backgroundColor: color, // null = use theme
+            foregroundColor: textColor, // null = use theme
+            padding: padding, // null = use theme
+            minimumSize: minSize, // null = use theme
+            shape: borderRadius != null
+                ? RoundedRectangleBorder(borderRadius: borderRadius!)
+                : null, // null = use theme
           ),
           child: buttonChild,
         );
@@ -339,13 +435,13 @@ class AdaptiveButton extends StatelessWidget {
         return FilledButton.tonal(
           onPressed: effectiveOnPressed,
           style: FilledButton.styleFrom(
-            backgroundColor: buttonColor.withValues(alpha: 0.15),
-            foregroundColor: buttonColor,
-            padding: padding ?? _getDefaultPadding(),
-            minimumSize: minSize ?? Size.zero,
-            shape: RoundedRectangleBorder(
-              borderRadius: borderRadius ?? BorderRadius.circular(8.0),
-            ),
+            backgroundColor: color?.withValues(alpha: 0.15),
+            foregroundColor: textColor ?? color,
+            padding: padding,
+            minimumSize: minSize,
+            shape: borderRadius != null
+                ? RoundedRectangleBorder(borderRadius: borderRadius!)
+                : null,
           ),
           child: buttonChild,
         );
@@ -354,38 +450,48 @@ class AdaptiveButton extends StatelessWidget {
         return OutlinedButton(
           onPressed: effectiveOnPressed,
           style: OutlinedButton.styleFrom(
-            foregroundColor: buttonColor,
-            side: BorderSide(color: buttonColor),
-            padding: padding ?? _getDefaultPadding(),
-            minimumSize: minSize ?? Size.zero,
-            shape: RoundedRectangleBorder(
-              borderRadius: borderRadius ?? BorderRadius.circular(8.0),
-            ),
+            foregroundColor: textColor ?? color,
+            side: color != null ? BorderSide(color: color!) : null,
+            padding: padding,
+            minimumSize: minSize,
+            shape: borderRadius != null
+                ? RoundedRectangleBorder(borderRadius: borderRadius!)
+                : null,
           ),
           child: buttonChild,
         );
 
       case AdaptiveButtonStyle.plain:
+        // Explicitly use primary color if no color is provided
+        final effectiveColor = color ?? textColor ?? Theme.of(context).colorScheme.primary;
         return TextButton(
           onPressed: effectiveOnPressed,
-          style: TextButton.styleFrom(
-            foregroundColor: buttonColor,
-            padding: padding ?? _getDefaultPadding(),
-            minimumSize: minSize ?? Size.zero,
-            shape: RoundedRectangleBorder(
-              borderRadius: borderRadius ?? BorderRadius.circular(8.0),
-            ),
+          style: ButtonStyle(
+            foregroundColor: WidgetStateProperty.all(effectiveColor),
+            padding: padding != null
+                ? WidgetStateProperty.all(padding)
+                : null,
+            minimumSize: minSize != null
+                ? WidgetStateProperty.all(minSize)
+                : null,
+            shape: borderRadius != null
+                ? WidgetStateProperty.all(
+                    RoundedRectangleBorder(borderRadius: borderRadius!),
+                  )
+                : null,
           ),
           child: buttonChild,
         );
 
       case AdaptiveButtonStyle.gray:
         // Material doesn't have a direct "gray" style, use filled button with gray color
+        // Use theme-aware gray colors
+        final isDark = Theme.of(context).brightness == Brightness.dark;
         return FilledButton(
           onPressed: effectiveOnPressed,
           style: FilledButton.styleFrom(
-            backgroundColor: Colors.grey.shade300,
-            foregroundColor: Colors.grey.shade800,
+            backgroundColor: isDark ? Colors.grey.shade800 : Colors.grey.shade300,
+            foregroundColor: isDark ? Colors.grey.shade300 : Colors.grey.shade800,
             padding: padding ?? _getDefaultPadding(),
             minimumSize: minSize ?? Size.zero,
             shape: RoundedRectangleBorder(
@@ -401,13 +507,13 @@ class AdaptiveButton extends StatelessWidget {
         return FilledButton.tonal(
           onPressed: effectiveOnPressed,
           style: FilledButton.styleFrom(
-            backgroundColor: buttonColor.withValues(alpha: 0.15),
-            foregroundColor: buttonColor,
-            padding: padding ?? _getDefaultPadding(),
-            minimumSize: minSize ?? Size.zero,
-            shape: RoundedRectangleBorder(
-              borderRadius: borderRadius ?? BorderRadius.circular(8.0),
-            ),
+            backgroundColor: color?.withValues(alpha: 0.15),
+            foregroundColor: textColor ?? color,
+            padding: padding,
+            minimumSize: minSize,
+            shape: borderRadius != null
+                ? RoundedRectangleBorder(borderRadius: borderRadius!)
+                : null,
           ),
           child: buttonChild,
         );

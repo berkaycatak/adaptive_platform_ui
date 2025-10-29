@@ -317,7 +317,8 @@ class _IOS26ButtonState extends State<IOS26Button> {
         creationParamsCodec: const StandardMessageCodec(),
       );
 
-      return SizedBox(
+      // Wrap in SizedBox for height constraint
+      Widget buttonWidget = SizedBox(
         height: _height,
         child: widget.isChildMode
             ? Stack(
@@ -328,6 +329,24 @@ class _IOS26ButtonState extends State<IOS26Button> {
               )
             : platformView,
       );
+
+      // Apply width constraint if minSize is provided
+      if (widget.minSize != null) {
+        buttonWidget = SizedBox(
+          width: widget.minSize!.width,
+          height: _height,
+          child: widget.isChildMode
+              ? Stack(
+                  children: [
+                    Positioned.fill(child: platformView),
+                    Center(child: IgnorePointer(child: widget.child!)),
+                  ],
+                )
+              : platformView,
+        );
+      }
+
+      return buttonWidget;
     }
 
     // Fallback to CupertinoButton on other platforms

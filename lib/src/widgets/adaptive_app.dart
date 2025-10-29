@@ -253,88 +253,119 @@ class AdaptiveApp extends StatelessWidget {
     final config =
         cupertino?.call(context, platform) ?? const CupertinoAppData();
 
-    // We need to wrap CupertinoApp in a builder to get system brightness
-    // CupertinoApp doesn't have themeMode like MaterialApp, so we manually
-    // detect brightness and apply the appropriate theme
-    return Builder(
-      builder: (context) {
-        // Get system brightness to determine which theme to use
-        final brightness = MediaQuery.platformBrightnessOf(context);
-        final isDark =
-            themeMode == ThemeMode.dark ||
-            (themeMode != ThemeMode.light && brightness == Brightness.dark);
-
-        // Use dark theme if dark mode, otherwise light theme
-        final effectiveLightTheme =
-            cupertinoLightTheme ??
-            const CupertinoThemeData(brightness: Brightness.light);
-        final effectiveDarkTheme =
-            cupertinoDarkTheme ??
-            const CupertinoThemeData(brightness: Brightness.dark);
-
-        final theme = isDark ? effectiveDarkTheme : effectiveLightTheme;
-
-        if (isRouter) {
-          return CupertinoApp.router(
-            key: key,
-            routerConfig: routerConfig,
-            routeInformationProvider: routeInformationProvider,
-            routeInformationParser: routeInformationParser,
-            routerDelegate: routerDelegate,
-            backButtonDispatcher: backButtonDispatcher,
-            builder: builder,
-            title: title,
-            onGenerateTitle: onGenerateTitle,
-            color: config.color,
-            theme: theme,
-            locale: locale,
-            localizationsDelegates: localizationsDelegates,
-            localeListResolutionCallback: localeListResolutionCallback,
-            localeResolutionCallback: localeResolutionCallback,
-            supportedLocales: supportedLocales,
-            showPerformanceOverlay: config.showPerformanceOverlay,
-            checkerboardRasterCacheImages: config.checkerboardRasterCacheImages,
-            checkerboardOffscreenLayers: config.checkerboardOffscreenLayers,
-            showSemanticsDebugger: config.showSemanticsDebugger,
-            debugShowCheckedModeBanner: config.debugShowCheckedModeBanner,
-            shortcuts: config.shortcuts,
-            actions: config.actions,
-            restorationScopeId: config.restorationScopeId,
-            scrollBehavior: config.scrollBehavior,
-          );
-        }
-
-        return CupertinoApp(
-          key: key,
-          navigatorKey: navigatorKey,
-          home: home,
-          routes: routes,
-          initialRoute: initialRoute,
-          onGenerateRoute: onGenerateRoute,
-          onGenerateInitialRoutes: onGenerateInitialRoutes,
-          onUnknownRoute: onUnknownRoute,
-          navigatorObservers: navigatorObservers,
-          builder: builder,
-          title: title,
-          onGenerateTitle: onGenerateTitle,
-          color: config.color,
-          theme: theme,
-          locale: locale,
-          localizationsDelegates: localizationsDelegates,
-          localeListResolutionCallback: localeListResolutionCallback,
-          localeResolutionCallback: localeResolutionCallback,
-          supportedLocales: supportedLocales,
-          showPerformanceOverlay: config.showPerformanceOverlay,
-          checkerboardRasterCacheImages: config.checkerboardRasterCacheImages,
-          checkerboardOffscreenLayers: config.checkerboardOffscreenLayers,
-          showSemanticsDebugger: config.showSemanticsDebugger,
-          debugShowCheckedModeBanner: config.debugShowCheckedModeBanner,
-          shortcuts: config.shortcuts,
-          actions: config.actions,
-          restorationScopeId: config.restorationScopeId,
-          scrollBehavior: config.scrollBehavior,
+    // Prepare light and dark themes
+    // If Cupertino theme is not provided, try to derive primaryColor from Material theme
+    final effectiveLightTheme = cupertinoLightTheme ??
+        CupertinoThemeData(
+          brightness: Brightness.light,
+          primaryColor: materialLightTheme?.colorScheme.primary,
         );
-      },
+    final effectiveDarkTheme = cupertinoDarkTheme ??
+        CupertinoThemeData(
+          brightness: Brightness.dark,
+          primaryColor: materialDarkTheme?.colorScheme.primary,
+        );
+
+    // CupertinoApp doesn't have themeMode like MaterialApp
+    // We need to wrap the app content in a builder to detect brightness and apply the theme
+    Widget wrapWithThemeMode(BuildContext context, Widget? child) {
+      // Determine if we should use dark mode
+      Brightness effectiveBrightness;
+
+      if (themeMode == ThemeMode.dark) {
+        effectiveBrightness = Brightness.dark;
+      } else if (themeMode == ThemeMode.light) {
+        effectiveBrightness = Brightness.light;
+      } else {
+        // ThemeMode.system - get from platform
+        effectiveBrightness = MediaQuery.platformBrightnessOf(context);
+      }
+
+      final isDark = effectiveBrightness == Brightness.dark;
+
+      // Apply the appropriate theme and ensure MediaQuery has correct brightness
+      final theme = isDark ? effectiveDarkTheme : effectiveLightTheme;
+
+      return MediaQuery(
+        data: MediaQuery.of(context).copyWith(
+          platformBrightness: effectiveBrightness,
+        ),
+        child: CupertinoTheme(
+          data: theme,
+          child: child!,
+        ),
+      );
+    }
+
+    // Combine user's builder with our theme builder
+    final effectiveBuilder = builder != null
+        ? (BuildContext context, Widget? child) {
+            // First apply our theme wrapper
+            final themedChild = wrapWithThemeMode(context, child);
+            // Then apply user's builder
+            return builder!(context, themedChild);
+          }
+        : wrapWithThemeMode;
+
+    if (isRouter) {
+      return CupertinoApp.router(
+        key: key,
+        routerConfig: routerConfig,
+        routeInformationProvider: routeInformationProvider,
+        routeInformationParser: routeInformationParser,
+        routerDelegate: routerDelegate,
+        backButtonDispatcher: backButtonDispatcher,
+        builder: effectiveBuilder,
+        title: title,
+        onGenerateTitle: onGenerateTitle,
+        color: config.color,
+        theme: effectiveLightTheme, // Default theme (will be overridden by builder)
+        locale: locale,
+        localizationsDelegates: localizationsDelegates,
+        localeListResolutionCallback: localeListResolutionCallback,
+        localeResolutionCallback: localeResolutionCallback,
+        supportedLocales: supportedLocales,
+        showPerformanceOverlay: config.showPerformanceOverlay,
+        checkerboardRasterCacheImages: config.checkerboardRasterCacheImages,
+        checkerboardOffscreenLayers: config.checkerboardOffscreenLayers,
+        showSemanticsDebugger: config.showSemanticsDebugger,
+        debugShowCheckedModeBanner: config.debugShowCheckedModeBanner,
+        shortcuts: config.shortcuts,
+        actions: config.actions,
+        restorationScopeId: config.restorationScopeId,
+        scrollBehavior: config.scrollBehavior,
+      );
+    }
+
+    return CupertinoApp(
+      key: key,
+      navigatorKey: navigatorKey,
+      home: home,
+      routes: routes,
+      initialRoute: initialRoute,
+      onGenerateRoute: onGenerateRoute,
+      onGenerateInitialRoutes: onGenerateInitialRoutes,
+      onUnknownRoute: onUnknownRoute,
+      navigatorObservers: navigatorObservers,
+      builder: effectiveBuilder,
+      title: title,
+      onGenerateTitle: onGenerateTitle,
+      color: config.color,
+      theme: effectiveLightTheme, // Default theme (will be overridden by builder)
+      locale: locale,
+      localizationsDelegates: localizationsDelegates,
+      localeListResolutionCallback: localeListResolutionCallback,
+      localeResolutionCallback: localeResolutionCallback,
+      supportedLocales: supportedLocales,
+      showPerformanceOverlay: config.showPerformanceOverlay,
+      checkerboardRasterCacheImages: config.checkerboardRasterCacheImages,
+      checkerboardOffscreenLayers: config.checkerboardOffscreenLayers,
+      showSemanticsDebugger: config.showSemanticsDebugger,
+      debugShowCheckedModeBanner: config.debugShowCheckedModeBanner,
+      shortcuts: config.shortcuts,
+      actions: config.actions,
+      restorationScopeId: config.restorationScopeId,
+      scrollBehavior: config.scrollBehavior,
     );
   }
 

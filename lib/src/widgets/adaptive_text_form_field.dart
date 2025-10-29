@@ -264,9 +264,18 @@ class AdaptiveTextFormField extends StatelessWidget {
           InputDecoration(
             hintText: placeholder,
             prefixIcon: prefixIcon,
-            suffixIcon: suffixIcon,
+            // Use suffixIcon instead of suffix to prevent extra vertical space
+            // Priority: suffixIcon parameter, then suffix parameter (mapped to suffixIcon)
+            suffixIcon: suffixIcon ?? suffix,
             prefix: prefix,
-            suffix: suffix,
+            // Don't use suffix in InputDecoration - causes spacing issues
+            isDense: true, // Critical for reducing extra space
+            suffixIconConstraints: (suffixIcon ?? suffix) != null
+                ? const BoxConstraints(minWidth: 48, minHeight: 48)
+                : null,
+            prefixIconConstraints: prefixIcon != null
+                ? const BoxConstraints(minWidth: 48, minHeight: 48)
+                : null,
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
             contentPadding:
                 padding ??

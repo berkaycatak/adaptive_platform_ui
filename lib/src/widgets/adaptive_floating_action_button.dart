@@ -82,7 +82,7 @@ class AdaptiveFloatingActionButton extends StatelessWidget {
 
   Widget _buildIOSButton(BuildContext context) {
     final defaultBackgroundColor =
-        backgroundColor ?? CupertinoColors.systemBlue;
+        backgroundColor ?? CupertinoTheme.of(context).primaryColor;
     final defaultForegroundColor = foregroundColor ?? CupertinoColors.white;
     final buttonSize = mini ? 40.0 : 56.0;
     final iconSize = mini ? 20.0 : 24.0;

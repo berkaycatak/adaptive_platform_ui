@@ -78,8 +78,8 @@ class AdaptiveCheckbox extends StatelessWidget {
         value: value,
         tristate: tristate,
         onChanged: onChanged,
-        activeColor: activeColor ?? CupertinoColors.systemBlue,
-        checkColor: checkColor ?? CupertinoColors.white,
+        activeColor: activeColor ?? CupertinoTheme.of(context).primaryColor,
+        checkColor: checkColor,
       );
     }
 
@@ -116,19 +116,26 @@ class _IOSCheckbox extends StatelessWidget {
     required this.tristate,
     required this.onChanged,
     required this.activeColor,
-    required this.checkColor,
+    this.checkColor,
   });
 
   final bool? value;
   final bool tristate;
   final ValueChanged<bool?>? onChanged;
   final Color activeColor;
-  final Color checkColor;
+  final Color? checkColor;
 
   @override
   Widget build(BuildContext context) {
     final brightness = MediaQuery.platformBrightnessOf(context);
     final isDark = brightness == Brightness.dark;
+    final effectiveCheckColor = checkColor ?? CupertinoColors.white;
+    final backgroundColor = isDark
+        ? CupertinoColors.systemGrey5.darkColor
+        : CupertinoColors.systemBackground.color;
+    final borderColor = isDark
+        ? CupertinoColors.systemGrey3.darkColor
+        : CupertinoColors.systemGrey4.color;
 
     return GestureDetector(
       onTap: onChanged == null
@@ -151,23 +158,15 @@ class _IOSCheckbox extends StatelessWidget {
         width: 22,
         height: 22,
         decoration: BoxDecoration(
-          color: value == true
-              ? activeColor
-              : (isDark
-                    ? CupertinoColors.systemGrey5.darkColor
-                    : CupertinoColors.white),
+          color: value == true ? activeColor : backgroundColor,
           border: Border.all(
-            color: value == true
-                ? activeColor
-                : (isDark
-                      ? CupertinoColors.systemGrey3
-                      : CupertinoColors.systemGrey4),
+            color: value == true ? activeColor : borderColor,
             width: value == true ? 0 : 1.5,
           ),
           borderRadius: BorderRadius.circular(6),
         ),
         child: value == true
-            ? Icon(CupertinoIcons.checkmark, size: 14, color: checkColor)
+            ? Icon(CupertinoIcons.checkmark, size: 14, color: effectiveCheckColor)
             : value == null
             ? Center(
                 child: Container(
