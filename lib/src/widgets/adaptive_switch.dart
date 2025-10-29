@@ -73,7 +73,8 @@ class AdaptiveSwitch extends StatelessWidget {
       return CupertinoSwitch(
         value: value,
         onChanged: onChanged,
-        activeTrackColor: activeColor ?? CupertinoTheme.of(context).primaryColor,
+        activeTrackColor:
+            activeColor ?? CupertinoTheme.of(context).primaryColor,
         thumbColor: thumbColor,
       );
     }

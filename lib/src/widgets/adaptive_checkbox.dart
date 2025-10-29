@@ -166,7 +166,11 @@ class _IOSCheckbox extends StatelessWidget {
           borderRadius: BorderRadius.circular(6),
         ),
         child: value == true
-            ? Icon(CupertinoIcons.checkmark, size: 14, color: effectiveCheckColor)
+            ? Icon(
+                CupertinoIcons.checkmark,
+                size: 14,
+                color: effectiveCheckColor,
+              )
             : value == null
             ? Center(
                 child: Container(

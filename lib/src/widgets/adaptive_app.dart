@@ -255,12 +255,14 @@ class AdaptiveApp extends StatelessWidget {
 
     // Prepare light and dark themes
     // If Cupertino theme is not provided, try to derive primaryColor from Material theme
-    final effectiveLightTheme = cupertinoLightTheme ??
+    final effectiveLightTheme =
+        cupertinoLightTheme ??
         CupertinoThemeData(
           brightness: Brightness.light,
           primaryColor: materialLightTheme?.colorScheme.primary,
         );
-    final effectiveDarkTheme = cupertinoDarkTheme ??
+    final effectiveDarkTheme =
+        cupertinoDarkTheme ??
         CupertinoThemeData(
           brightness: Brightness.dark,
           primaryColor: materialDarkTheme?.colorScheme.primary,
@@ -287,13 +289,10 @@ class AdaptiveApp extends StatelessWidget {
       final theme = isDark ? effectiveDarkTheme : effectiveLightTheme;
 
       return MediaQuery(
-        data: MediaQuery.of(context).copyWith(
-          platformBrightness: effectiveBrightness,
-        ),
-        child: CupertinoTheme(
-          data: theme,
-          child: child!,
-        ),
+        data: MediaQuery.of(
+          context,
+        ).copyWith(platformBrightness: effectiveBrightness),
+        child: CupertinoTheme(data: theme, child: child!),
       );
     }
 
@@ -319,7 +318,8 @@ class AdaptiveApp extends StatelessWidget {
         title: title,
         onGenerateTitle: onGenerateTitle,
         color: config.color,
-        theme: effectiveLightTheme, // Default theme (will be overridden by builder)
+        theme:
+            effectiveLightTheme, // Default theme (will be overridden by builder)
         locale: locale,
         localizationsDelegates: localizationsDelegates,
         localeListResolutionCallback: localeListResolutionCallback,
@@ -351,7 +351,8 @@ class AdaptiveApp extends StatelessWidget {
       title: title,
       onGenerateTitle: onGenerateTitle,
       color: config.color,
-      theme: effectiveLightTheme, // Default theme (will be overridden by builder)
+      theme:
+          effectiveLightTheme, // Default theme (will be overridden by builder)
       locale: locale,
       localizationsDelegates: localizationsDelegates,
       localeListResolutionCallback: localeListResolutionCallback,

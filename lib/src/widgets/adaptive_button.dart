@@ -287,7 +287,8 @@ class AdaptiveButton extends StatelessWidget {
 
       case AdaptiveButtonStyle.plain:
         // For plain style, color parameter affects text/icon color
-        final effectiveColor = color ?? textColor ?? CupertinoTheme.of(context).primaryColor;
+        final effectiveColor =
+            color ?? textColor ?? CupertinoTheme.of(context).primaryColor;
 
         Widget buttonChild;
         if (sfSymbol != null) {
@@ -463,14 +464,13 @@ class AdaptiveButton extends StatelessWidget {
 
       case AdaptiveButtonStyle.plain:
         // Explicitly use primary color if no color is provided
-        final effectiveColor = color ?? textColor ?? Theme.of(context).colorScheme.primary;
+        final effectiveColor =
+            color ?? textColor ?? Theme.of(context).colorScheme.primary;
         return TextButton(
           onPressed: effectiveOnPressed,
           style: ButtonStyle(
             foregroundColor: WidgetStateProperty.all(effectiveColor),
-            padding: padding != null
-                ? WidgetStateProperty.all(padding)
-                : null,
+            padding: padding != null ? WidgetStateProperty.all(padding) : null,
             minimumSize: minSize != null
                 ? WidgetStateProperty.all(minSize)
                 : null,
@@ -490,8 +490,12 @@ class AdaptiveButton extends StatelessWidget {
         return FilledButton(
           onPressed: effectiveOnPressed,
           style: FilledButton.styleFrom(
-            backgroundColor: isDark ? Colors.grey.shade800 : Colors.grey.shade300,
-            foregroundColor: isDark ? Colors.grey.shade300 : Colors.grey.shade800,
+            backgroundColor: isDark
+                ? Colors.grey.shade800
+                : Colors.grey.shade300,
+            foregroundColor: isDark
+                ? Colors.grey.shade300
+                : Colors.grey.shade800,
             padding: padding ?? _getDefaultPadding(),
             minimumSize: minSize ?? Size.zero,
             shape: RoundedRectangleBorder(
