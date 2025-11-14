@@ -150,7 +150,7 @@ class _CupertinoDatePickerContentState
                 ),
                 CupertinoButton(
                   padding: EdgeInsets.zero,
-                  onPressed: () => Navigator.of(context).pop(true),
+                  onPressed: () => Navigator.of(context).pop(selectedDate),
                   child: Text(
                     MaterialLocalizations.of(context).okButtonLabel,
                     style: const TextStyle(fontWeight: FontWeight.w600),
