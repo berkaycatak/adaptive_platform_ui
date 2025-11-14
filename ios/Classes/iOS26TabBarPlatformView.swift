@@ -141,19 +141,37 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
 
                 let item: UITabBarItem
 
-                // Use UITabBarSystemItem.search for search tabs (iOS 26+ Liquid Glass)
                 if isSearch {
+                    // --- START MOD 1 (Custom Search Icon) ---
+                    let customSymbol = (i < symbols.count && !symbols[i].isEmpty) ? symbols[i] : nil
                     if #available(iOS 26.0, *) {
-                        item = UITabBarItem(tabBarSystemItem: .search, tag: i)
+                        if let symbolName = customSymbol, symbolName != "magnifyingglass" {
+                            // Build custom item
+                            var image: UIImage? = nil
+                            var selectedImage: UIImage? = nil
+                            if let unselTint = unselectedTint { // Use unselectedTint from init's scope
+                                if let originalImage = UIImage(systemName: symbolName) {
+                                    image = originalImage.withTintColor(unselTint, renderingMode: .alwaysOriginal)
+                                }
+                            } else {
+                                image = UIImage(systemName: symbolName)?.withRenderingMode(.alwaysTemplate)
+                            }
+                            selectedImage = UIImage(systemName: symbolName)?.withRenderingMode(.alwaysTemplate)
+                            item = UITabBarItem(title: title, image: image, selectedImage: selectedImage)
+                            item.tag = i
+                        } else {
+                            // Default system search item
+                            item = UITabBarItem(tabBarSystemItem: .search, tag: i)
+                        }
                         if let title = title {
                             item.title = title
                         }
-
                     } else {
                         // Fallback for older iOS versions
                         let searchImage = UIImage(systemName: "magnifyingglass")
                         item = UITabBarItem(title: title, image: searchImage, selectedImage: searchImage)
                     }
+                    // --- END MOD 1 ---
                 } else {
                     var image: UIImage? = nil
                     var selectedImage: UIImage? = nil
@@ -194,6 +212,14 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
                 }
 
                 items.append(item)
+
+                // --- START MOD 2 (Spacer) ---
+                if isSearch {
+                    let spacerItem = UITabBarItem()
+                    spacerItem.isEnabled = false // Make it unclickable
+                    items.append(spacerItem)
+                }
+                // --- END MOD 2 ---
             }
             return items
         }
@@ -270,7 +296,7 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
             if let badgeData = args["badgeCounts"] as? [NSNumber?] {
                 badgeCounts = badgeData.map { $0?.intValue }
             }
-            
+
             self.currentLabels = labels
             self.currentSymbols = symbols
             self.currentSearchFlags = searchFlags
@@ -288,19 +314,38 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
 
                     let item: UITabBarItem
 
-                    // Use UITabBarSystemItem.search for search tabs (iOS 26+ Liquid Glass)
                     if isSearch {
+                        // --- START MOD 1 (Custom Search Icon) ---
+                        let customSymbol = (i < symbols.count && !symbols[i].isEmpty) ? symbols[i] : nil
                         if #available(iOS 26.0, *) {
-                            item = UITabBarItem(tabBarSystemItem: .search, tag: i)
+                            if let symbolName = customSymbol, symbolName != "magnifyingglass" {
+                                // Build custom item
+                                var image: UIImage? = nil
+                                var selectedImage: UIImage? = nil
+                                let unselTint = self.tabBar?.unselectedItemTintColor // Use correct unselTint
+                                if let unselTint = unselTint {
+                                    if let originalImage = UIImage(systemName: symbolName) {
+                                        image = originalImage.withTintColor(unselTint, renderingMode: .alwaysOriginal)
+                                    }
+                                } else {
+                                    image = UIImage(systemName: symbolName)?.withRenderingMode(.alwaysTemplate)
+                                }
+                                selectedImage = UIImage(systemName: symbolName)?.withRenderingMode(.alwaysTemplate)
+                                item = UITabBarItem(title: title, image: image, selectedImage: selectedImage)
+                                item.tag = i
+                            } else {
+                                // Default system search item
+                                item = UITabBarItem(tabBarSystemItem: .search, tag: i)
+                            }
                             if let title = title {
                                 item.title = title
                             }
-
                         } else {
                             // Fallback for older iOS versions
                             let searchImage = UIImage(systemName: "magnifyingglass")
                             item = UITabBarItem(title: title, image: searchImage, selectedImage: searchImage)
                         }
+                        // --- END MOD 1 ---
                     } else {
                         var image: UIImage? = nil
                         var selectedImage: UIImage? = nil
@@ -343,6 +388,14 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
                     }
 
                     items.append(item)
+
+                    // --- START MOD 2 (Spacer) ---
+                    if isSearch {
+                        let spacerItem = UITabBarItem()
+                        spacerItem.isEnabled = false // Make it unclickable
+                        items.append(spacerItem)
+                    }
+                    // --- END MOD 2 ---
                 }
                 return items
             }
@@ -471,13 +524,35 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
             let item: UITabBarItem
 
             if isSearch {
+                // --- START MOD 1 (Custom Search Icon) ---
+                let customSymbol = (i < currentSymbols.count && !currentSymbols[i].isEmpty) ? currentSymbols[i] : nil // Use currentSymbols
                 if #available(iOS 26.0, *) {
-                    item = UITabBarItem(tabBarSystemItem: .search, tag: i)
-                    item.title = title
+                    if let symbolName = customSymbol, symbolName != "magnifyingglass" {
+                        // Build custom item
+                        var image: UIImage? = nil
+                        var selectedImage: UIImage? = nil
+                        // let unselTint = bar.unselectedItemTintColor // Already defined above
+                        if let unselTint = unselTint {
+                            if let originalImage = UIImage(systemName: symbolName) {
+                                image = originalImage.withTintColor(unselTint, renderingMode: .alwaysOriginal)
+                            }
+                        } else {
+                            image = UIImage(systemName: symbolName)?.withRenderingMode(.alwaysTemplate)
+                        }
+                        selectedImage = UIImage(systemName: symbolName)?.withRenderingMode(.alwaysTemplate)
+                        item = UITabBarItem(title: title, image: image, selectedImage: selectedImage)
+                        item.tag = i
+                    } else {
+                        // Default system search item
+                        item = UITabBarItem(tabBarSystemItem: .search, tag: i)
+                    }
+                    item.title = title // Apply title in both cases
                 } else {
+                    // Fallback for older iOS versions
                     let searchImage = UIImage(systemName: "magnifyingglass")
                     item = UITabBarItem(title: title, image: searchImage, selectedImage: searchImage)
                 }
+                // --- END MOD 1 ---
             } else {
                 var image: UIImage? = nil
                 var selectedImage: UIImage? = nil
@@ -511,6 +586,14 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
             }
 
             items.append(item)
+
+            // --- START MOD 2 (Spacer) ---
+            if isSearch {
+                let spacerItem = UITabBarItem()
+                spacerItem.isEnabled = false // Make it unclickable
+                items.append(spacerItem)
+            }
+            // --- END MOD 2 ---
         }
 
         bar.items = items
