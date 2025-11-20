@@ -138,8 +138,8 @@ class _IOS26SwitchState extends State<IOS26Switch> {
       );
 
       return SizedBox(
-        width: 51, // Standard iOS switch width
-        height: 31, // Standard iOS switch height
+        width: 63, // Standard iOS switch width
+        height: 29, // Standard iOS switch height
         child: platformView,
       );
     }
