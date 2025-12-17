@@ -69,6 +69,7 @@ class AdaptiveScaffold extends StatefulWidget {
     this.floatingActionButton,
     this.minimizeBehavior = TabBarMinimizeBehavior.automatic,
     this.enableBlur = true,
+    this.enableToolbarGradient = true,
   });
 
   /// App bar configuration
@@ -92,6 +93,10 @@ class AdaptiveScaffold extends StatefulWidget {
   /// Enable Liquid Glass blur effect behind tab bar (iOS 26+ only)
   /// When enabled, content behind the tab bar will be blurred
   final bool enableBlur;
+
+  /// Enable gradient at the top of the toolbar (iOS 26+ only)
+  /// When enabled, a gradient fade effect is applied to the top toolbar
+  final bool enableToolbarGradient;
 
   @override
   State<AdaptiveScaffold> createState() => _AdaptiveScaffoldState();
@@ -163,6 +168,7 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
         leading: widget.appBar?.leading,
         minimizeBehavior: widget.minimizeBehavior,
         enableBlur: widget.enableBlur,
+        enableToolbarGradient: widget.enableToolbarGradient,
         children: childrenList,
       );
     }
