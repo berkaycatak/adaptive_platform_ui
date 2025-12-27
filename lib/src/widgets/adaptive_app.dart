@@ -232,6 +232,8 @@ class AdaptiveApp extends StatelessWidget {
   /// ```
   final CupertinoAppData Function(BuildContext, PlatformTarget)? cupertino;
 
+  /// Global key used to access the [ScaffoldMessengerState], for example
+  /// to show SnackBars or material banners from outside the widget tree.
   final GlobalKey<ScaffoldMessengerState>? scaffoldMessengerKey;
 
   @override
