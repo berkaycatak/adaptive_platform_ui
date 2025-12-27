@@ -137,7 +137,7 @@ class AdaptiveTextFormField extends StatelessWidget {
   final AutovalidateMode? autovalidateMode;
 
   /// Called when a tap is detected outside the text field.
-  final VoidCallback? onTapOutside;
+  final TapRegionCallback? onTapOutside;
 
   @override
   Widget build(BuildContext context) {
@@ -175,11 +175,7 @@ class AdaptiveTextFormField extends StatelessWidget {
               autofocus: autofocus,
               enabled: enabled,
               readOnly: readOnly,
-              onTapOutside: onTapOutside != null
-                  ? (event) {
-                      onTapOutside!();
-                    }
-                  : null,
+              onTapOutside: onTapOutside,
               prefix:
                   prefix ??
                   (prefixIcon != null
@@ -268,11 +264,7 @@ class AdaptiveTextFormField extends StatelessWidget {
       validator: validator,
       inputFormatters: inputFormatters,
       autovalidateMode: autovalidateMode,
-      onTapOutside: onTapOutside != null
-          ? (event) {
-              onTapOutside!();
-            }
-          : null,
+      onTapOutside: onTapOutside,
       decoration:
           decoration ??
           InputDecoration(
