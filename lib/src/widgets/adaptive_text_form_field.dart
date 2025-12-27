@@ -136,7 +136,7 @@ class AdaptiveTextFormField extends StatelessWidget {
   /// Used to enable/disable this form field auto validation and update its error text.
   final AutovalidateMode? autovalidateMode;
 
-  // Called when a tap is detected outside the text field.
+  /// Called when a tap is detected outside the text field.
   final VoidCallback? onTapOutside;
 
   @override
