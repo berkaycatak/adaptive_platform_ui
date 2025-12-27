@@ -42,6 +42,7 @@ class AdaptiveTextFormField extends StatelessWidget {
     this.decoration,
     this.autovalidateMode,
     this.onTapOutside,
+    this.autofillHints,
   });
 
   /// Controls the text being edited.
@@ -139,6 +140,9 @@ class AdaptiveTextFormField extends StatelessWidget {
   /// Called when a tap is detected outside the text field.
   final TapRegionCallback? onTapOutside;
 
+  /// Optional autofill hints for the text field.
+  final List<String>? autofillHints;
+
   @override
   Widget build(BuildContext context) {
     if (PlatformInfo.isIOS) {
@@ -176,6 +180,7 @@ class AdaptiveTextFormField extends StatelessWidget {
               enabled: enabled,
               readOnly: readOnly,
               onTapOutside: onTapOutside,
+              autofillHints: autofillHints,
               prefix:
                   prefix ??
                   (prefixIcon != null
@@ -265,6 +270,7 @@ class AdaptiveTextFormField extends StatelessWidget {
       inputFormatters: inputFormatters,
       autovalidateMode: autovalidateMode,
       onTapOutside: onTapOutside,
+      autofillHints: autofillHints,
       decoration:
           decoration ??
           InputDecoration(
