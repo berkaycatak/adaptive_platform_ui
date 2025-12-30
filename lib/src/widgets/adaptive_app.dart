@@ -101,6 +101,7 @@ class AdaptiveApp extends StatelessWidget {
     this.supportedLocales = const <Locale>[Locale('en', 'US')],
     this.material,
     this.cupertino,
+    this.scaffoldMessengerKey,
   }) : routerConfig = null,
        routeInformationProvider = null,
        routeInformationParser = null,
@@ -130,6 +131,7 @@ class AdaptiveApp extends StatelessWidget {
     this.supportedLocales = const <Locale>[Locale('en', 'US')],
     this.material,
     this.cupertino,
+    this.scaffoldMessengerKey,
   }) : navigatorKey = null,
        home = null,
        routes = const <String, WidgetBuilder>{},
@@ -229,6 +231,10 @@ class AdaptiveApp extends StatelessWidget {
   /// }
   /// ```
   final CupertinoAppData Function(BuildContext, PlatformTarget)? cupertino;
+
+  /// Global key used to access the [ScaffoldMessengerState], for example
+  /// to show SnackBars or material banners from outside the widget tree.
+  final GlobalKey<ScaffoldMessengerState>? scaffoldMessengerKey;
 
   @override
   Widget build(BuildContext context) {
@@ -409,6 +415,7 @@ class AdaptiveApp extends StatelessWidget {
         scrollBehavior: config.scrollBehavior,
         highContrastTheme: config.highContrastTheme,
         highContrastDarkTheme: config.highContrastDarkTheme,
+        scaffoldMessengerKey: scaffoldMessengerKey,
       );
     }
 
@@ -446,6 +453,7 @@ class AdaptiveApp extends StatelessWidget {
       scrollBehavior: config.scrollBehavior,
       highContrastTheme: config.highContrastTheme,
       highContrastDarkTheme: config.highContrastDarkTheme,
+      scaffoldMessengerKey: scaffoldMessengerKey,
     );
   }
 
