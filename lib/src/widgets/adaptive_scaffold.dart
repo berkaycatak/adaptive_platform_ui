@@ -69,6 +69,7 @@ class AdaptiveScaffold extends StatefulWidget {
     this.floatingActionButton,
     this.minimizeBehavior = TabBarMinimizeBehavior.automatic,
     this.enableBlur = true,
+    this.extendBodyBehindAppBar = false,
   });
 
   /// App bar configuration
@@ -92,6 +93,11 @@ class AdaptiveScaffold extends StatefulWidget {
   /// Enable Liquid Glass blur effect behind tab bar (iOS 26+ only)
   /// When enabled, content behind the tab bar will be blurred
   final bool enableBlur;
+
+  /// Whether to extend the body behind the app bar (iOS only)
+  /// When true, the body will extend behind the app bar, allowing for
+  /// immersive content. When false, the body will start below the app bar.
+  final bool extendBodyBehindAppBar;
 
   @override
   State<AdaptiveScaffold> createState() => _AdaptiveScaffoldState();
@@ -582,6 +588,7 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
         body: widget.body ?? const SizedBox.shrink(),
         bottomNavigationBar: bottomNavBar,
         floatingActionButton: widget.floatingActionButton,
+        extendBodyBehindAppBar: widget.extendBodyBehindAppBar,
       );
     }
 
@@ -624,6 +631,7 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
       appBar: appBar,
       body: widget.body ?? const SizedBox.shrink(),
       floatingActionButton: widget.floatingActionButton,
+      extendBodyBehindAppBar: widget.extendBodyBehindAppBar,
     );
   }
 
