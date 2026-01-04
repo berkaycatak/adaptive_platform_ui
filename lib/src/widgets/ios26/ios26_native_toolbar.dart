@@ -18,6 +18,7 @@ class IOS26NativeToolbar extends StatefulWidget {
     this.onLeadingTap,
     this.onActionTap,
     this.height = 44.0,
+    this.enableGradient = true,
   });
 
   final String? title;
@@ -27,6 +28,7 @@ class IOS26NativeToolbar extends StatefulWidget {
   final VoidCallback? onLeadingTap;
   final ValueChanged<int>? onActionTap;
   final double height;
+  final bool enableGradient;
 
   @override
   State<IOS26NativeToolbar> createState() => _IOS26NativeToolbarState();
@@ -58,26 +60,28 @@ class _IOS26NativeToolbarState extends State<IOS26NativeToolbar> {
 
     final toolbar = Container(
       height: widget.height + safePadding,
-      decoration: BoxDecoration(
-        gradient: Theme.brightnessOf(context) == Brightness.light
-            ? const LinearGradient(
-                colors: [
-                  Color.fromARGB(229, 255, 255, 255),
-                  Color.fromARGB(0, 255, 255, 255),
-                ],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              )
-            : const LinearGradient(
-                colors: [
-                  Color.fromARGB(234, 0, 0, 0),
-                  Color.fromARGB(137, 0, 0, 0),
-                  Color.fromARGB(0, 0, 0, 0),
-                ],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              ),
-      ),
+      decoration: widget.enableGradient
+          ? BoxDecoration(
+              gradient: Theme.brightnessOf(context) == Brightness.light
+                  ? const LinearGradient(
+                      colors: [
+                        Color.fromARGB(229, 255, 255, 255),
+                        Color.fromARGB(0, 255, 255, 255),
+                      ],
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                    )
+                  : const LinearGradient(
+                      colors: [
+                        Color.fromARGB(234, 0, 0, 0),
+                        Color.fromARGB(137, 0, 0, 0),
+                        Color.fromARGB(0, 0, 0, 0),
+                      ],
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                    ),
+            )
+          : null,
       child: UiKitView(
         viewType: 'adaptive_platform_ui/ios26_toolbar',
         creationParams: creationParams,
