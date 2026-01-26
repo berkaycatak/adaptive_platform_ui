@@ -1273,6 +1273,14 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - Design guidelines from Apple's Human Interface Guidelines
 - Material Design guidelines from Google
 
+## Contributors
+
+Thanks to all contributors who helped improve this package!
+
+<a href="https://github.com/berkaycatak/adaptive_platform_ui/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=berkaycatak/adaptive_platform_ui" />
+</a>
+
 ## Author
 
 Berkay Çatak

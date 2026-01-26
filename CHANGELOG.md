@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.1.101]
+* **NEW**: Added `enableToolbarGradient` option to AdaptiveScaffold for iOS 26+ toolbar gradient customization (@nadavfima)
+* **NEW**: Added `extendBodyBehindAppBar` option to AdaptiveScaffold (@Crucialjun)
+* **NEW**: Added `scaffoldMessengerKey` parameter to AdaptiveApp (@Crucialjun)
+* **NEW**: Added `autofillHints` support to AdaptiveTextFormField (@Crucialjun)
+* **NEW**: Added `onTapOutside` callback to AdaptiveTextFormField
+* **FIX**: Fixed missing return result from AdaptiveDatePicker (@obrunsmann)
+* **FIX**: Fixed AdaptiveSwitch iOS 26 flutter container size (@PetrKubes97)
+* **FIX**: Improved AdaptiveButton icon alignment and sizing
+
 ## [0.1.100]
 * **FIX**: Theme color support across all components
   * All adaptive components now properly use theme colors when no explicit color provided
