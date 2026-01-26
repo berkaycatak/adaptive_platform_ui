@@ -34,6 +34,7 @@ class AdaptiveButton extends StatelessWidget {
     this.minSize,
     this.enabled = true,
     this.useSmoothRectangleBorder = true,
+    this.useNative = true,
   }) : child = null,
        icon = null,
        iconColor = null,
@@ -52,6 +53,7 @@ class AdaptiveButton extends StatelessWidget {
     this.minSize,
     this.enabled = true,
     this.useSmoothRectangleBorder = true,
+    this.useNative = true,
   }) : label = null,
        textColor = null,
        icon = null,
@@ -72,6 +74,7 @@ class AdaptiveButton extends StatelessWidget {
     this.minSize,
     this.enabled = true,
     this.useSmoothRectangleBorder = true,
+    this.useNative = true,
   }) : label = null,
        textColor = null,
        child = null,
@@ -90,6 +93,7 @@ class AdaptiveButton extends StatelessWidget {
     this.minSize,
     this.enabled = true,
     this.useSmoothRectangleBorder = true,
+    this.useNative = true,
   }) : label = null,
        textColor = null,
        child = null,
@@ -146,10 +150,16 @@ class AdaptiveButton extends StatelessWidget {
   /// Default is true for smooth rectangle, set to false for circular
   final bool useSmoothRectangleBorder;
 
+  /// Whether to use native iOS 26+ button (default: true)
+  /// When true, uses native iOS 26 button on iOS 26+
+  /// When false, uses Cupertino button for iOS regardless of version
+  /// Android always uses Material button regardless of this setting
+  final bool useNative;
+
   @override
   Widget build(BuildContext context) {
-    // iOS 26+ - Use native iOS 26 button design
-    if (PlatformInfo.isIOS26OrHigher()) {
+    // iOS 26+ - Use native iOS 26 button design (only if useNative is true)
+    if (useNative && PlatformInfo.isIOS26OrHigher()) {
       // SF Symbol mode - use native SF Symbol rendering
       if (sfSymbol != null) {
         return _wrapIOSButton(
@@ -260,27 +270,38 @@ class AdaptiveButton extends StatelessWidget {
     switch (style) {
       case AdaptiveButtonStyle.filled:
         // Build child widget for filled button
+        // Use theme color if no color is provided
+        final filledColor = color ?? CupertinoTheme.of(context).primaryColor;
+        final filledTextColor = textColor ?? CupertinoColors.white;
+
         Widget buttonChild;
         if (sfSymbol != null) {
           buttonChild = Icon(
             CupertinoIcons.circle_fill,
-            color: sfSymbol!.color,
+            color: sfSymbol!.color ?? filledTextColor,
             size: sfSymbol!.size,
           );
         } else if (icon != null) {
-          buttonChild = Icon(icon, color: iconColor);
+          buttonChild = Icon(icon, color: iconColor ?? filledTextColor);
         } else if (child != null) {
-          buttonChild = child!;
+          buttonChild = DefaultTextStyle(
+            style: TextStyle(color: filledTextColor),
+            child: child!,
+          );
         } else {
-          buttonChild = Text(label ?? '', style: TextStyle(color: textColor));
+          buttonChild = Text(
+            label ?? '',
+            style: TextStyle(color: filledTextColor),
+          );
         }
 
         return _wrapIOSButton(
-          CupertinoButton.filled(
+          CupertinoButton(
             onPressed: effectiveOnPressed,
-            padding: padding,
+            padding: padding ?? const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
             borderRadius:
                 borderRadius ?? const BorderRadius.all(Radius.circular(8.0)),
+            color: filledColor,
             child: buttonChild,
           ),
         );
