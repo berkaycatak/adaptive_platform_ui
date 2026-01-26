@@ -19,6 +19,7 @@ class AdaptiveDatePicker {
     DateTime? lastDate,
     CupertinoDatePickerMode mode = CupertinoDatePickerMode.date,
     DatePickerMode initialDatePickerMode = DatePickerMode.day,
+    bool use24HourFormat = false,
   }) async {
     final effectiveFirstDate = firstDate ?? DateTime(1900);
     final effectiveLastDate = lastDate ?? DateTime(2100);
@@ -30,6 +31,7 @@ class AdaptiveDatePicker {
         firstDate: effectiveFirstDate,
         lastDate: effectiveLastDate,
         mode: mode,
+        use24HourFormat: use24HourFormat,
       );
     }
 
@@ -49,6 +51,7 @@ class AdaptiveDatePicker {
     required DateTime firstDate,
     required DateTime lastDate,
     required CupertinoDatePickerMode mode,
+    required bool use24HourFormat,
   }) async {
     DateTime selectedDate = initialDate;
 
@@ -60,6 +63,7 @@ class AdaptiveDatePicker {
           firstDate: firstDate,
           lastDate: lastDate,
           mode: mode,
+          use24HourFormat: use24HourFormat,
           onDateSelected: (date) => selectedDate = date,
         );
       },
@@ -90,6 +94,7 @@ class _CupertinoDatePickerContent extends StatefulWidget {
     required this.firstDate,
     required this.lastDate,
     required this.mode,
+    required this.use24HourFormat,
     required this.onDateSelected,
   });
 
@@ -97,6 +102,7 @@ class _CupertinoDatePickerContent extends StatefulWidget {
   final DateTime firstDate;
   final DateTime lastDate;
   final CupertinoDatePickerMode mode;
+  final bool use24HourFormat;
   final ValueChanged<DateTime> onDateSelected;
 
   @override
@@ -163,6 +169,7 @@ class _CupertinoDatePickerContentState
           Expanded(
             child: CupertinoDatePicker(
               mode: widget.mode,
+              use24hFormat: widget.use24HourFormat,
               initialDateTime: widget.initialDate,
               minimumDate: widget.firstDate,
               maximumDate: widget.lastDate,
