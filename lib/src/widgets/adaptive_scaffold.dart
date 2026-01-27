@@ -95,8 +95,8 @@ class AdaptiveScaffold extends StatefulWidget {
   /// When enabled, content behind the tab bar will be blurred
   final bool enableBlur;
 
-  /// Enable gradient at the top of the toolbar (iOS 26+ only)
-  /// When enabled, a gradient fade effect is applied to the top toolbar
+  /// @deprecated No longer used. iOS 26+ uses native scroll edge effects.
+  /// This parameter is kept for backwards compatibility but has no effect.
   final bool enableToolbarGradient;
   /// Whether to extend the body behind the app bar (iOS only)
   /// When true, the body will extend behind the app bar, allowing for
@@ -173,7 +173,6 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
         leading: widget.appBar?.leading,
         minimizeBehavior: widget.minimizeBehavior,
         enableBlur: widget.enableBlur,
-        enableToolbarGradient: widget.enableToolbarGradient,
         children: childrenList,
       );
     }

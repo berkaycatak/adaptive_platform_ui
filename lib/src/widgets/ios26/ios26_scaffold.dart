@@ -15,7 +15,6 @@ class IOS26Scaffold extends StatefulWidget {
     this.leading,
     this.minimizeBehavior = TabBarMinimizeBehavior.automatic,
     this.enableBlur = true,
-    this.enableToolbarGradient = true,
     required this.children,
   });
 
@@ -25,7 +24,6 @@ class IOS26Scaffold extends StatefulWidget {
   final Widget? leading;
   final TabBarMinimizeBehavior minimizeBehavior;
   final bool enableBlur;
-  final bool enableToolbarGradient;
   final List<Widget> children;
 
   @override
@@ -171,7 +169,6 @@ class _IOS26ScaffoldState extends State<IOS26Scaffold>
                   widget.actions![index].onPressed();
                 }
               },
-              enableGradient: widget.enableToolbarGradient,
             ),
           ),
         // Tab bar - only show if destinations exist

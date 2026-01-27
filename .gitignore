@@ -30,3 +30,6 @@ migrate_working_dir/
 /build/
 /coverage/
 .github/DISCUSSIONS_SETUP.md
+.agent/
+.agents/
+.claude/

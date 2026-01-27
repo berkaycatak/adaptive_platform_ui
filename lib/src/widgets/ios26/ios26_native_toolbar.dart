@@ -1,13 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import '../adaptive_app_bar_action.dart';
 
-/// Native iOS 26 UIToolbar widget using platform views
-/// Implements Liquid Glass design with blur effects
+/// Native iOS 26 UINavigationBar widget using platform views
+/// Implements Liquid Glass design with native blur effects
 class IOS26NativeToolbar extends StatefulWidget {
   const IOS26NativeToolbar({
     super.key,
@@ -18,7 +16,6 @@ class IOS26NativeToolbar extends StatefulWidget {
     this.onLeadingTap,
     this.onActionTap,
     this.height = 44.0,
-    this.enableGradient = true,
   });
 
   final String? title;
@@ -28,7 +25,6 @@ class IOS26NativeToolbar extends StatefulWidget {
   final VoidCallback? onLeadingTap;
   final ValueChanged<int>? onActionTap;
   final double height;
-  final bool enableGradient;
 
   @override
   State<IOS26NativeToolbar> createState() => _IOS26NativeToolbarState();
@@ -39,7 +35,7 @@ class _IOS26NativeToolbarState extends State<IOS26NativeToolbar> {
 
   @override
   Widget build(BuildContext context) {
-    // Only use native toolbar on iOS 26+
+    // Only use native toolbar on iOS
     if (defaultTargetPlatform != TargetPlatform.iOS) {
       return _buildFallbackToolbar();
     }
@@ -53,68 +49,35 @@ class _IOS26NativeToolbarState extends State<IOS26NativeToolbar> {
       if (widget.leading == null && widget.leadingText != null)
         'leading': widget.leadingText!,
       if (widget.actions != null && widget.actions!.isNotEmpty)
-        'actions': widget.actions!
-            .map((action) => action.toNativeMap())
-            .toList(),
+        'actions': widget.actions!.map((a) => a.toNativeMap()).toList(),
     };
 
-    final toolbar = Container(
+    // iOS 26 native scroll edge effect - no manual gradient needed
+    return SizedBox(
       height: widget.height + safePadding,
-      decoration: widget.enableGradient
-          ? BoxDecoration(
-              gradient: Theme.brightnessOf(context) == Brightness.light
-                  ? const LinearGradient(
-                      colors: [
-                        Color.fromARGB(229, 255, 255, 255),
-                        Color.fromARGB(0, 255, 255, 255),
-                      ],
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                    )
-                  : const LinearGradient(
-                      colors: [
-                        Color.fromARGB(234, 0, 0, 0),
-                        Color.fromARGB(137, 0, 0, 0),
-                        Color.fromARGB(0, 0, 0, 0),
-                      ],
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                    ),
-            )
-          : null,
-      child: UiKitView(
-        viewType: 'adaptive_platform_ui/ios26_toolbar',
-        creationParams: creationParams,
-        creationParamsCodec: const StandardMessageCodec(),
-        onPlatformViewCreated: _onPlatformViewCreated,
-        hitTestBehavior: PlatformViewHitTestBehavior.translucent,
-        // Enable Hybrid Composition mode for better layer integration
-        gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
-      ),
-    );
-
-    // If custom leading widget provided, overlay it on top of native toolbar
-    if (widget.leading != null) {
-      return SizedBox(
-        height: widget.height + safePadding,
-        child: Stack(
-          children: [
-            toolbar,
+      child: Stack(
+        children: [
+          UiKitView(
+            viewType: 'adaptive_platform_ui/ios26_toolbar',
+            creationParams: creationParams,
+            creationParamsCodec: const StandardMessageCodec(),
+            onPlatformViewCreated: _onPlatformViewCreated,
+            hitTestBehavior: PlatformViewHitTestBehavior.translucent,
+          ),
+          // Custom leading widget overlay
+          if (widget.leading != null)
             Positioned(
               left: 8,
               top: safePadding,
               bottom: 0,
               child: Align(
                 alignment: Alignment.centerLeft,
-                child: IgnorePointer(ignoring: false, child: widget.leading!),
+                child: widget.leading!,
               ),
             ),
-          ],
-        ),
-      );
-    }
-
-    return toolbar;
+        ],
+      ),
+    );
   }
 
   void _onPlatformViewCreated(int id) {
@@ -129,59 +92,32 @@ class _IOS26NativeToolbarState extends State<IOS26NativeToolbar> {
         break;
       case 'onActionTapped':
         if (call.arguments is Map) {
-          final args = call.arguments as Map;
-          final index = args['index'] as int?;
-          if (index != null) {
-            widget.onActionTap?.call(index);
-          }
+          final index = (call.arguments as Map)['index'] as int?;
+          if (index != null) widget.onActionTap?.call(index);
         }
         break;
     }
   }
 
-  /// Fallback toolbar for non-iOS platforms or older iOS versions
+  /// Fallback toolbar using CupertinoNavigationBar for non-iOS or older iOS
   Widget _buildFallbackToolbar() {
-    return Container(
-      height: widget.height + MediaQuery.of(context).padding.top,
-      padding: EdgeInsets.only(
-        top: MediaQuery.of(context).padding.top,
-        left: 16,
-        right: 16,
-      ),
-      decoration: BoxDecoration(
-        color: CupertinoColors.systemBackground.resolveFrom(context),
-        border: Border(
-          bottom: BorderSide(
-            color: CupertinoColors.separator.resolveFrom(context),
-            width: 0.5,
-          ),
-        ),
-      ),
-      child: Row(
-        children: [
-          if (widget.leading != null) widget.leading!,
-          const Spacer(),
-          if (widget.title != null)
-            Text(
-              widget.title!,
-              style: CupertinoTheme.of(context).textTheme.navTitleTextStyle,
-            ),
-          const Spacer(),
-          if (widget.actions != null && widget.actions!.isNotEmpty)
-            Row(
+    return CupertinoNavigationBar(
+      middle: widget.title != null ? Text(widget.title!) : null,
+      leading: widget.leading,
+      trailing: widget.actions != null && widget.actions!.isNotEmpty
+          ? Row(
               mainAxisSize: MainAxisSize.min,
               children: widget.actions!.map((action) {
                 return CupertinoButton(
                   padding: EdgeInsets.zero,
                   onPressed: action.onPressed,
-                  child: action.title != null
-                      ? Text(action.title!)
-                      : const Icon(CupertinoIcons.circle),
+                  child: action.icon != null
+                      ? Icon(action.icon)
+                      : Text(action.title ?? ''),
                 );
               }).toList(),
-            ),
-        ],
-      ),
+            )
+          : null,
     );
   }
 }

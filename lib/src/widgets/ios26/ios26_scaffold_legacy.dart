@@ -30,6 +30,8 @@ class IOS26ScaffoldLegacy extends StatefulWidget {
   final Widget? leading;
   final TabBarMinimizeBehavior minimizeBehavior;
   final bool enableBlur;
+  /// @deprecated No longer used. iOS 26+ uses native scroll edge effects.
+  /// This parameter is kept for backwards compatibility but has no effect.
   final bool enableToolbarGradient;
   final List<Widget> children;
 
@@ -148,7 +150,6 @@ class _IOS26ScaffoldLegacyState extends State<IOS26ScaffoldLegacy>
                     widget.actions![index].onPressed();
                   }
                 },
-                enableGradient: widget.enableToolbarGradient,
               ),
             ),
             // Tab bar - only show if destinations exist

@@ -1,7 +1,7 @@
 import UIKit
 import Flutter
 
-/// Factory for creating iOS 26 native UIToolbar platform views
+// MARK: - Factory
 class iOS26ToolbarFactory: NSObject, FlutterPlatformViewFactory {
     private var messenger: FlutterBinaryMessenger
 
@@ -28,12 +28,31 @@ class iOS26ToolbarFactory: NSObject, FlutterPlatformViewFactory {
     }
 }
 
-/// Native iOS 26 UIToolbar platform view
+// MARK: - Container View with Gradient
+class ToolbarContainerView: UIView {
+    var gradientLayer: CAGradientLayer?
+    var onTraitChange: (() -> Void)?
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        // Extend gradient below the container bounds for smooth fade
+        gradientLayer?.frame = CGRect(x: 0, y: 0, width: bounds.width, height: bounds.height + 30)
+    }
+
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
+            onTraitChange?()
+        }
+    }
+}
+
+// MARK: - Platform View
 class iOS26ToolbarPlatformView: NSObject, FlutterPlatformView {
-    private var _containerView: UIView
-    private var _toolbar: UIToolbar
-    private var _viewId: Int64
-    private var _channel: FlutterMethodChannel
+    private var containerView: ToolbarContainerView
+    private var navigationBar: UINavigationBar
+    private var navigationItem: UINavigationItem
+    private var channel: FlutterMethodChannel
 
     init(
         frame: CGRect,
@@ -41,81 +60,103 @@ class iOS26ToolbarPlatformView: NSObject, FlutterPlatformView {
         arguments args: Any?,
         binaryMessenger messenger: FlutterBinaryMessenger
     ) {
-        _containerView = UIView(frame: frame)
-        _toolbar = UIToolbar()
-        _viewId = viewId
-        _channel = FlutterMethodChannel(
+        containerView = ToolbarContainerView(frame: frame)
+        navigationBar = UINavigationBar()
+        navigationItem = UINavigationItem()
+        channel = FlutterMethodChannel(
             name: "adaptive_platform_ui/ios26_toolbar_\(viewId)",
             binaryMessenger: messenger
         )
 
         super.init()
 
-        // Add toolbar to container
-        _containerView.addSubview(_toolbar)
+        setupGradient()
+        setupNavigationBar()
 
-        // Setup constraints for toolbar with SafeArea
-        _toolbar.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            _toolbar.topAnchor.constraint(equalTo: _containerView.safeAreaLayoutGuide.topAnchor),
-            _toolbar.leadingAnchor.constraint(equalTo: _containerView.leadingAnchor),
-            _toolbar.trailingAnchor.constraint(equalTo: _containerView.trailingAnchor),
-            _toolbar.bottomAnchor.constraint(equalTo: _containerView.bottomAnchor)
-        ])
-
-        // iOS 26+ Liquid Glass appearance with blur effect
-        if #available(iOS 13.0, *) {
-            let appearance = UIToolbarAppearance()
-
-            // Use transparent background with blur (Liquid Glass effect)
-            appearance.configureWithTransparentBackground()
-            appearance.backgroundColor = UIColor.systemBackground.withAlphaComponent(0.8)
-
-            // Apply system material blur effect for iOS 26+
-            if #available(iOS 26.0, *) {
-                appearance.backgroundEffect = UIBlurEffect(style: .systemMaterial)
-            } else {
-                // Fallback for older iOS versions
-                appearance.backgroundEffect = UIBlurEffect(style: .systemMaterial)
-            }
-
-            _toolbar.standardAppearance = appearance
-            if #available(iOS 15.0, *) {
-                _toolbar.scrollEdgeAppearance = appearance
-                _toolbar.compactAppearance = appearance
-            }
-        }
-
-        // Enable blur and translucency
-        _toolbar.isTranslucent = true
-
-        // Parse arguments
         if let params = args as? [String: Any] {
-            configureToolbar(params)
+            configureItems(params)
         }
 
-        // Setup method channel
-        _channel.setMethodCallHandler { [weak self] (call: FlutterMethodCall, result: @escaping FlutterResult) in
+        channel.setMethodCallHandler { [weak self] call, result in
             self?.handleMethodCall(call, result: result)
         }
     }
 
     func view() -> UIView {
-        return _containerView
+        return containerView
     }
 
-    private func configureToolbar(_ params: [String: Any]) {
-        var items: [UIBarButtonItem] = []
+    private func setupGradient() {
+        containerView.clipsToBounds = false
 
-        let hasTitle = params["title"] as? String != nil && !(params["title"] as? String ?? "").isEmpty
-        let hasActions = params["actions"] as? [[String: Any]] != nil && !(params["actions"] as? [[String: Any]] ?? []).isEmpty
-        let hasLeading = params["leading"] != nil
+        // Add gradient layer for better text readability
+        let gradientLayer = CAGradientLayer()
+        gradientLayer.startPoint = CGPoint(x: 0.5, y: 0.0)
+        gradientLayer.endPoint = CGPoint(x: 0.5, y: 1.0)
+        containerView.layer.insertSublayer(gradientLayer, at: 0)
+        containerView.gradientLayer = gradientLayer
+        containerView.onTraitChange = { [weak self] in
+            self?.updateGradientColors()
+        }
+        updateGradientColors()
+    }
 
-        // Leading button (left side)
-        if let leadingTitle = params["leading"] as? String {
+    private func setupNavigationBar() {
+        containerView.backgroundColor = .clear
+
+        // Make navigation bar transparent to show gradient behind
+        navigationBar.translatesAutoresizingMaskIntoConstraints = false
+        navigationBar.items = [navigationItem]
+
+        // Configure transparent appearance
+        if #available(iOS 13.0, *) {
+            let appearance = UINavigationBarAppearance()
+            appearance.configureWithTransparentBackground()
+            appearance.backgroundColor = .clear
+            appearance.shadowColor = .clear
+            navigationBar.standardAppearance = appearance
+            navigationBar.scrollEdgeAppearance = appearance
+            if #available(iOS 15.0, *) {
+                navigationBar.compactAppearance = appearance
+            }
+        }
+
+        containerView.addSubview(navigationBar)
+
+        NSLayoutConstraint.activate([
+            navigationBar.topAnchor.constraint(equalTo: containerView.safeAreaLayoutGuide.topAnchor),
+            navigationBar.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
+            navigationBar.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
+            navigationBar.bottomAnchor.constraint(equalTo: containerView.bottomAnchor)
+        ])
+    }
+
+    private func updateGradientColors() {
+        let isDarkMode = containerView.traitCollection.userInterfaceStyle == .dark
+        let baseColor = isDarkMode ? UIColor.black : UIColor.white
+
+        // Subtle gradient for text readability
+        containerView.gradientLayer?.colors = [
+            baseColor.withAlphaComponent(0.85).cgColor,  // 0% - slightly transparent top
+            baseColor.withAlphaComponent(0.6).cgColor,   // 40% - fade
+            baseColor.withAlphaComponent(0.2).cgColor,   // 70% - more fade
+            baseColor.withAlphaComponent(0.0).cgColor    // 100% - transparent
+        ]
+        containerView.gradientLayer?.locations = [0.0, 0.4, 0.7, 1.0]
+    }
+
+    private func configureItems(_ params: [String: Any]) {
+        // Title
+        if let title = params["title"] as? String {
+            navigationItem.title = title
+        }
+
+        // Leading/Back button
+        var leadingItems: [UIBarButtonItem] = []
+
+        if let leading = params["leading"] as? String {
             let leadingButton: UIBarButtonItem
-            if leadingTitle.isEmpty {
-                // Empty string = show back chevron icon
+            if leading.isEmpty {
                 leadingButton = UIBarButtonItem(
                     image: UIImage(systemName: "chevron.left"),
                     style: .plain,
@@ -123,164 +164,105 @@ class iOS26ToolbarPlatformView: NSObject, FlutterPlatformView {
                     action: #selector(leadingTapped)
                 )
             } else {
-                // Show text
                 leadingButton = UIBarButtonItem(
-                    title: leadingTitle,
+                    title: leading,
                     style: .plain,
                     target: self,
                     action: #selector(leadingTapped)
                 )
             }
-            items.append(leadingButton)
+            leadingItems.append(leadingButton)
         }
 
-        // Actions - process and split into left/right groups if flexible spacer exists
-        if let actions = params["actions"] as? [[String: Any]], !actions.isEmpty {
-            var leftActions: [UIBarButtonItem] = []
-            var rightActions: [UIBarButtonItem] = []
-            var foundFlexibleSpacer = false
+        // Process actions
+        var leftGroup: [UIBarButtonItem] = []
+        var rightGroup: [UIBarButtonItem] = []
+
+        if let actions = params["actions"] as? [[String: Any]] {
+            // First pass: check if any flexible spacer exists
+            let hasFlexible = actions.contains { ($0["spacerAfter"] as? Int) == 2 }
+
+            // Second pass: build buttons
+            var foundFlexible = false
 
             for (index, action) in actions.enumerated() {
-                var actionButton: UIBarButtonItem?
+                var button: UIBarButtonItem?
 
-                if let actionTitle = action["title"] as? String {
-                    actionButton = UIBarButtonItem(
-                        title: actionTitle,
+                if let icon = action["icon"] as? String {
+                    button = UIBarButtonItem(
+                        image: UIImage(systemName: icon),
                         style: .plain,
                         target: self,
                         action: #selector(actionTapped(_:))
                     )
-                    actionButton?.tag = index
-                } else if let actionIcon = action["icon"] as? String {
-                    actionButton = UIBarButtonItem(
-                        image: UIImage(systemName: actionIcon),
+                } else if let title = action["title"] as? String {
+                    button = UIBarButtonItem(
+                        title: title,
                         style: .plain,
                         target: self,
                         action: #selector(actionTapped(_:))
                     )
-                    actionButton?.tag = index
                 }
 
-                if let btn = actionButton {
-                    if foundFlexibleSpacer {
-                        rightActions.append(btn)
+                if let btn = button {
+                    btn.tag = index
+
+                    // If no flexible spacer exists, all go to right
+                    // If flexible exists, split by it
+                    if !hasFlexible {
+                        rightGroup.append(btn)
+                    } else if !foundFlexible {
+                        leftGroup.append(btn)
                     } else {
-                        leftActions.append(btn)
+                        rightGroup.append(btn)
                     }
-                }
 
-                // Check for spacer after this action
-                if let spacerAfter = action["spacerAfter"] as? Int {
-                    if spacerAfter == 1 { // Fixed space
-                        if #available(iOS 16.0, *) {
-                            if foundFlexibleSpacer {
-                                rightActions.append(.fixedSpace(12))
-                            } else {
-                                leftActions.append(.fixedSpace(12))
+                    // Check for spacers
+                    if let spacerAfter = action["spacerAfter"] as? Int {
+                        if spacerAfter == 1 {
+                            // Fixed space
+                            if #available(iOS 16.0, *) {
+                                if !hasFlexible {
+                                    rightGroup.append(.fixedSpace(12))
+                                } else if !foundFlexible {
+                                    leftGroup.append(.fixedSpace(12))
+                                } else {
+                                    rightGroup.append(.fixedSpace(12))
+                                }
                             }
+                        } else if spacerAfter == 2 {
+                            // Flexible spacer - mark split point
+                            foundFlexible = true
                         }
-                    } else if spacerAfter == 2 { // Flexible space - marks split point
-                        foundFlexibleSpacer = true
                     }
                 }
             }
-
-            // If we found a flexible spacer, split actions into left/right groups
-            if foundFlexibleSpacer {
-                // Add left actions
-                items.append(contentsOf: leftActions)
-
-                items.append(UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil))
-
-                // Add title in center if exists
-                if hasTitle {
-                    if let title = params["title"] as? String, !title.isEmpty {
-                        let titleLabel = UILabel()
-                        titleLabel.text = title
-                        titleLabel.font = UIFont.systemFont(ofSize: 17, weight: .semibold)
-                        titleLabel.textAlignment = .center
-
-                        let titleSize = (title as NSString).size(withAttributes: [.font: UIFont.systemFont(ofSize: 17, weight: .semibold)])
-                        titleLabel.frame = CGRect(x: 0, y: 0, width: max(titleSize.width, 200), height: 44)
-
-                        let titleItem = UIBarButtonItem(customView: titleLabel)
-                        items.append(titleItem)
-                    }
-
-                    items.append(UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil))
-                }
-
-                // Add right actions
-                items.append(contentsOf: rightActions)
-            } else {
-                // No flexible spacer - standard layout: Title on left, actions on right
-                // Add spacing after leading button if it exists and there's a title
-                if hasLeading && hasTitle {
-                    if #available(iOS 16.0, *) {
-                        items.append(.fixedSpace(8))
-                    }
-                }
-
-                if hasTitle {
-                    if let title = params["title"] as? String, !title.isEmpty {
-                        let titleLabel = UILabel()
-                        titleLabel.text = title
-                        titleLabel.font = UIFont.systemFont(ofSize: 17, weight: .semibold)
-                        titleLabel.textAlignment = .left
-                        titleLabel.sizeToFit()
-
-                        let titleItem = UIBarButtonItem(customView: titleLabel)
-                        items.append(titleItem)
-                    }
-                }
-
-                // Always add flexible space to push actions to the right
-                items.append(UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil))
-
-                // Add all actions to the right
-                items.append(contentsOf: leftActions)
-            }
-        } else {
-            // No actions
-            // Add spacing after leading button if it exists and there's a title
-            if hasLeading && hasTitle {
-                if #available(iOS 16.0, *) {
-                    items.append(.fixedSpace(8))
-                }
-            }
-
-            // Add title if exists
-            if hasTitle {
-                if let title = params["title"] as? String, !title.isEmpty {
-                    let titleLabel = UILabel()
-                    titleLabel.text = title
-                    titleLabel.font = UIFont.systemFont(ofSize: 17, weight: .semibold)
-                    titleLabel.textAlignment = .left
-                    titleLabel.sizeToFit()
-
-                    let titleItem = UIBarButtonItem(customView: titleLabel)
-                    items.append(titleItem)
-                }
-            }
-
-            // Always add flexible space to push everything to the left
-            items.append(UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil))
         }
 
-        _toolbar.items = items
+        // Assign to navigation item
+        navigationItem.leftBarButtonItems = leadingItems + leftGroup
+        navigationItem.rightBarButtonItems = rightGroup.reversed()
     }
 
     @objc private func leadingTapped() {
-        _channel.invokeMethod("onLeadingTapped", arguments: nil)
+        channel.invokeMethod("onLeadingTapped", arguments: nil)
     }
 
     @objc private func actionTapped(_ sender: UIBarButtonItem) {
-        // Use the tag to get the action index
-        let actionIndex = sender.tag
-        _channel.invokeMethod("onActionTapped", arguments: ["index": actionIndex])
+        channel.invokeMethod("onActionTapped", arguments: ["index": sender.tag])
     }
 
     private func handleMethodCall(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
-        result(FlutterMethodNotImplemented)
+        switch call.method {
+        case "updateTitle":
+            if let args = call.arguments as? [String: Any], let title = args["title"] as? String {
+                navigationItem.title = title
+                result(nil)
+            } else {
+                result(FlutterMethodNotImplemented)
+            }
+        default:
+            result(FlutterMethodNotImplemented)
+        }
     }
 }
