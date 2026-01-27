@@ -59,14 +59,14 @@ class _DatePickerDemoPageState extends State<DatePickerDemoPage> {
             child: _buildDatePickerButton(
               context,
               isDark,
-              label: 'Select Date (2020-2025)',
+              label: 'Select Date (2020-2030)',
               selectedDate: _selectedDateWithRange,
               onPressed: () async {
                 final result = await AdaptiveDatePicker.show(
                   context: context,
                   initialDate: _selectedDateWithRange ?? DateTime.now(),
                   firstDate: DateTime(2020, 1, 1),
-                  lastDate: DateTime(2025, 12, 31),
+                  lastDate: DateTime(2030, 12, 31),
                 );
                 if (result != null) {
                   setState(() => _selectedDateWithRange = result);
