@@ -298,7 +298,9 @@ class AdaptiveButton extends StatelessWidget {
         return _wrapIOSButton(
           CupertinoButton(
             onPressed: effectiveOnPressed,
-            padding: padding ?? const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+            padding:
+                padding ??
+                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
             borderRadius:
                 borderRadius ?? const BorderRadius.all(Radius.circular(8.0)),
             color: filledColor,
@@ -439,9 +441,9 @@ class AdaptiveButton extends StatelessWidget {
     switch (style) {
       case AdaptiveButtonStyle.filled:
         // Use theme's ElevatedButton style and only override explicitly provided values
-        return ElevatedButton(
+        return FilledButton(
           onPressed: effectiveOnPressed,
-          style: ElevatedButton.styleFrom(
+          style: FilledButton.styleFrom(
             backgroundColor: color, // null = use theme
             foregroundColor: textColor, // null = use theme
             padding: padding, // null = use theme
