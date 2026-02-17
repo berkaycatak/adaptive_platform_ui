@@ -46,6 +46,7 @@ class iOS26SwitchView: NSObject, FlutterPlatformView {
         binaryMessenger messenger: FlutterBinaryMessenger
     ) {
         _view = UIView(frame: frame)
+        _view.backgroundColor = .clear
 
         // Extract configuration from arguments
         if let config = args as? [String: Any] {
