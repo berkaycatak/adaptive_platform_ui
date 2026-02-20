@@ -222,6 +222,11 @@ class _IOS26ScaffoldState extends State<IOS26Scaffold>
         widget.bottomNavigationBar!.items!.isNotEmpty;
 
     return CupertinoPageScaffold(
+      // When a native tab bar is present it sits in Positioned(bottom: 0)
+      // inside a Stack. If the scaffold resizes for the keyboard the tab bar
+      // floats above it — non-standard on iOS. Disable the resize so the
+      // keyboard window (higher z-order) covers the tab bar naturally.
+      resizeToAvoidBottomInset: !hasBottomNav,
       child: hasBottomNav
           ? NotificationListener<ScrollNotification>(
               onNotification: _handleScrollNotification,
