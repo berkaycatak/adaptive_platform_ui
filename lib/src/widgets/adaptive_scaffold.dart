@@ -477,8 +477,17 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
           child: bodyWidget,
         );
 
+        // When the native tab bar is rendered via Stack + Positioned(bottom:0),
+        // disable resizeToAvoidBottomInset so the keyboard covers the tab bar
+        // instead of pushing it above.
+        final hasNativeTabBar =
+            PlatformInfo.isIOS26OrHigher() &&
+            useNativeBottomBar &&
+            tabBar != null;
+
         return _wrapWithDrawerIfNeeded(
           CupertinoPageScaffold(
+            resizeToAvoidBottomInset: !hasNativeTabBar,
             navigationBar: navigationBar,
             child: bodyWidget,
           ),
