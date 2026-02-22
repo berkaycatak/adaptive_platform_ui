@@ -5,6 +5,7 @@
 * **NEW**: Added brightness synchronization for iOS 26+ components — native buttons, switches, sliders, segmented controls, toolbar, and blur view now react to light/dark mode changes
 * **NEW**: Added `cupertinoDecoration` property to AdaptiveTextField and AdaptiveTextFormField for customizable iOS styling
 * **NEW**: Added drawer and endDrawer support to AdaptiveScaffold with full Material drawer behavior on all platforms
+* **FIX**: Prevented native tab bar from floating above keyboard on iOS 26+ (@marcofucito)
 
 ## [0.1.101]
 * **NEW**: Added `enableToolbarGradient` option to AdaptiveScaffold for iOS 26+ toolbar gradient customization (@nadavfima)
