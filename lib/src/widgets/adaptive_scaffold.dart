@@ -79,6 +79,7 @@ class AdaptiveScaffold extends StatefulWidget {
     this.drawerEnableOpenDragGesture = true,
     this.endDrawerEnableOpenDragGesture = true,
     this.scaffoldKey,
+    this.useHeroBackButton = true,
   });
 
   /// App bar configuration
@@ -140,6 +141,11 @@ class AdaptiveScaffold extends StatefulWidget {
   /// Use this to open the drawer programmatically via
   /// `scaffoldKey.currentState?.openDrawer()`.
   final GlobalKey<ScaffoldState>? scaffoldKey;
+
+  /// Whether to use Hero animation for the back button on iOS 26+
+  /// When true, the back button stays pinned during page transitions.
+  /// Only affects iOS 26+. Defaults to true.
+  final bool useHeroBackButton;
 
   @override
   State<AdaptiveScaffold> createState() => _AdaptiveScaffoldState();
@@ -230,6 +236,7 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
           leading: widget.appBar?.leading,
           minimizeBehavior: widget.minimizeBehavior,
           enableBlur: widget.enableBlur,
+          useHeroBackButton: widget.useHeroBackButton,
           children: childrenList,
         ),
       );
@@ -251,13 +258,26 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
 
         if (canPop) {
           if (isCurrent) {
-            // Active route: show animated back button
-            effectiveLeading = _AnimatedBackButton(
+            final backButton = _AnimatedBackButton(
               onPressed: () => Navigator.of(context).pop(),
             );
+            effectiveLeading = widget.useHeroBackButton
+                ? Hero(
+                    tag: 'adaptive_back_button',
+                    flightShuttleBuilder: (_, __, ___, ____, toHeroContext) {
+                      return toHeroContext.widget;
+                    },
+                    child: backButton,
+                  )
+                : backButton;
           } else {
-            // Transition/background route: show empty SizedBox to prevent native back button
-            effectiveLeading = const SizedBox(height: 38, width: 38);
+            const placeholder = SizedBox(height: 38, width: 38);
+            effectiveLeading = widget.useHeroBackButton
+                ? const Hero(
+                    tag: 'adaptive_back_button',
+                    child: placeholder,
+                  )
+                : placeholder;
           }
         }
       }

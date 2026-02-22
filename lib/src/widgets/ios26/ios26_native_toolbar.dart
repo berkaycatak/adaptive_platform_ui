@@ -89,7 +89,7 @@ class _IOS26NativeToolbarState extends State<IOS26NativeToolbar> {
           // Custom leading widget overlay
           if (widget.leading != null)
             Positioned(
-              left: 8,
+              left: 16,
               top: safePadding,
               bottom: 0,
               child: Align(

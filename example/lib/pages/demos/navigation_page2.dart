@@ -8,6 +8,7 @@ class NavigationPage2 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AdaptiveScaffold(
+      useHeroBackButton: true,
       appBar: AdaptiveAppBar(title: 'Page 2'),
       body: Center(
         child: Column(

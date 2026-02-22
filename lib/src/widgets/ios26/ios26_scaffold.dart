@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
+import '../../style/sf_symbol.dart';
 import '../adaptive_app_bar_action.dart';
 import '../adaptive_bottom_navigation_bar.dart';
+import '../adaptive_button.dart';
 import '../adaptive_scaffold.dart';
 import 'ios26_native_tab_bar.dart';
 import 'ios26_native_toolbar.dart';
@@ -15,6 +17,7 @@ class IOS26Scaffold extends StatefulWidget {
     this.leading,
     this.minimizeBehavior = TabBarMinimizeBehavior.automatic,
     this.enableBlur = true,
+    this.useHeroBackButton = true,
     required this.children,
   });
 
@@ -24,6 +27,7 @@ class IOS26Scaffold extends StatefulWidget {
   final Widget? leading;
   final TabBarMinimizeBehavior minimizeBehavior;
   final bool enableBlur;
+  final bool useHeroBackButton;
   final List<Widget> children;
 
   @override
@@ -101,9 +105,8 @@ class _IOS26ScaffoldState extends State<IOS26Scaffold>
   @override
   Widget build(BuildContext context) {
     // Auto back button logic
-    // Priority: custom leading widget > auto back button
-    String? leadingText;
-    VoidCallback? leadingCallback;
+    // Priority: custom leading widget > Hero back button
+    Widget? heroLeading;
 
     final canPop = Navigator.of(context).canPop();
 
@@ -112,17 +115,40 @@ class _IOS26ScaffoldState extends State<IOS26Scaffold>
         (widget.bottomNavigationBar?.items == null ||
             widget.bottomNavigationBar!.items!.isEmpty) &&
         canPop) {
-      leadingText = ''; // Empty string = native chevron
-      leadingCallback = () {
-        Navigator.of(context).pop();
-      };
+      final isCurrent = ModalRoute.of(context)?.isCurrent ?? true;
+      if (isCurrent) {
+        final backButton = SizedBox(
+          height: 38,
+          width: 38,
+          child: AdaptiveButton.sfSymbol(
+            onPressed: () => Navigator.of(context).pop(),
+            sfSymbol: SFSymbol("chevron.left", size: 20),
+          ),
+        );
+        heroLeading = widget.useHeroBackButton
+            ? Hero(
+                tag: 'adaptive_back_button',
+                flightShuttleBuilder: (_, __, ___, ____, toHeroContext) =>
+                    toHeroContext.widget,
+                child: backButton,
+              )
+            : backButton;
+      } else {
+        const placeholder = SizedBox(height: 38, width: 38);
+        heroLeading = widget.useHeroBackButton
+            ? const Hero(
+                tag: 'adaptive_back_button',
+                child: placeholder,
+              )
+            : placeholder;
+      }
     }
 
     // Determine if toolbar should be shown
     final hasToolbarContent =
         widget.title != null ||
         widget.leading != null ||
-        leadingText != null ||
+        heroLeading != null ||
         (widget.actions != null && widget.actions!.isNotEmpty);
 
     // Get brightness and determine text color
@@ -157,10 +183,8 @@ class _IOS26ScaffoldState extends State<IOS26Scaffold>
             top: 0,
             child: IOS26NativeToolbar(
               title: widget.title,
-              leading: widget.leading, // Custom leading widget has priority
-              leadingText: leadingText,
+              leading: widget.leading ?? heroLeading,
               actions: widget.actions,
-              onLeadingTap: leadingCallback,
               onActionTap: (index) {
                 // Call the appropriate action callback
                 if (widget.actions != null &&
