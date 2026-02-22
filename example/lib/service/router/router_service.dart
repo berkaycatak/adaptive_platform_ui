@@ -27,6 +27,7 @@ import 'package:adaptive_platform_ui_example/pages/demos/floating_action_button_
 import 'package:adaptive_platform_ui_example/pages/demos/form_section_demo_page.dart';
 import 'package:adaptive_platform_ui_example/pages/demos/expansion_tile_demo_page.dart';
 import 'package:adaptive_platform_ui_example/pages/demos/blur_view_demo_page.dart';
+import 'package:adaptive_platform_ui_example/pages/demos/drawer_demo_page.dart';
 import 'package:adaptive_platform_ui_example/utils/constants/route_constants.dart';
 import 'package:adaptive_platform_ui_example/utils/global_variables.dart';
 import 'package:flutter/material.dart';
@@ -240,6 +241,11 @@ class RouterService {
                     name: routes.blurView,
                     path: routes.blurView,
                     builder: (context, state) => const BlurViewDemoPage(),
+                  ),
+                  GoRoute(
+                    name: routes.drawer,
+                    path: routes.drawer,
+                    builder: (context, state) => const DrawerDemoPage(),
                   ),
                 ],
               ),

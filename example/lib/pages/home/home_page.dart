@@ -305,6 +305,16 @@ class _HomePageState extends State<HomePage> {
                 routeName: RouterService.routes.expansionTile,
                 isNew: true,
               ),
+              _DemoItem(
+                icon: PlatformInfo.isIOS
+                    ? CupertinoIcons.sidebar_left
+                    : Icons.menu,
+                title: 'Drawer',
+                description:
+                    'Navigation drawers with adaptive scaffold support',
+                routeName: RouterService.routes.drawer,
+                isNew: true,
+              ),
             ],
           ),
           const SizedBox(height: 12),

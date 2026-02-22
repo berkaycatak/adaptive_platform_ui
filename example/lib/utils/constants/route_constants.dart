@@ -32,4 +32,5 @@ class RouteConstants {
   String formSection = 'form-section';
   String expansionTile = 'expansion-tile';
   String blurView = 'blur-view';
+  String drawer = 'drawer';
 }
