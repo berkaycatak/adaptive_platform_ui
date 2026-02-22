@@ -315,6 +315,16 @@ class _HomePageState extends State<HomePage> {
                 routeName: RouterService.routes.drawer,
                 isNew: true,
               ),
+              _DemoItem(
+                icon: PlatformInfo.isIOS
+                    ? CupertinoIcons.arrow_right_arrow_left
+                    : Icons.navigation,
+                title: 'Navigation',
+                description:
+                    'Multi-page navigation chain (Page 1 → 2 → 3)',
+                routeName: RouterService.routes.navigationPage1,
+                isNew: true,
+              ),
             ],
           ),
           const SizedBox(height: 12),

@@ -33,4 +33,7 @@ class RouteConstants {
   String expansionTile = 'expansion-tile';
   String blurView = 'blur-view';
   String drawer = 'drawer';
+  String navigationPage1 = 'navigation-page1';
+  String navigationPage2 = 'navigation-page2';
+  String navigationPage3 = 'navigation-page3';
 }
