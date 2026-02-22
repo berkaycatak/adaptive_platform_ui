@@ -107,6 +107,7 @@ class AdaptiveScaffold extends StatefulWidget {
   /// @deprecated No longer used. iOS 26+ uses native scroll edge effects.
   /// This parameter is kept for backwards compatibility but has no effect.
   final bool enableToolbarGradient;
+
   /// Whether to extend the body behind the app bar (iOS only)
   /// When true, the body will extend behind the app bar, allowing for
   /// immersive content. When false, the body will start below the app bar.
@@ -273,10 +274,7 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
           } else {
             const placeholder = SizedBox(height: 38, width: 38);
             effectiveLeading = widget.useHeroBackButton
-                ? const Hero(
-                    tag: 'adaptive_back_button',
-                    child: placeholder,
-                  )
+                ? const Hero(tag: 'adaptive_back_button', child: placeholder)
                 : placeholder;
           }
         }
@@ -479,8 +477,17 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
           child: bodyWidget,
         );
 
+        // When the native tab bar is rendered via Stack + Positioned(bottom:0),
+        // disable resizeToAvoidBottomInset so the keyboard covers the tab bar
+        // instead of pushing it above.
+        final hasNativeTabBar =
+            PlatformInfo.isIOS26OrHigher() &&
+            useNativeBottomBar &&
+            tabBar != null;
+
         return _wrapWithDrawerIfNeeded(
           CupertinoPageScaffold(
+            resizeToAvoidBottomInset: !hasNativeTabBar,
             navigationBar: navigationBar,
             child: bodyWidget,
           ),
