@@ -189,7 +189,8 @@ class AdaptiveTextField extends StatelessWidget {
       inputFormatters: inputFormatters,
       padding:
           padding ?? const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: cupertinoDecoration ??
+      decoration:
+          cupertinoDecoration ??
           BoxDecoration(
             color: enabled
                 ? CupertinoColors.tertiarySystemBackground

@@ -298,7 +298,9 @@ class AdaptiveButton extends StatelessWidget {
         return _wrapIOSButton(
           CupertinoButton(
             onPressed: effectiveOnPressed,
-            padding: padding ?? const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+            padding:
+                padding ??
+                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
             borderRadius:
                 borderRadius ?? const BorderRadius.all(Radius.circular(8.0)),
             color: filledColor,

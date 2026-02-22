@@ -320,8 +320,7 @@ class _HomePageState extends State<HomePage> {
                     ? CupertinoIcons.arrow_right_arrow_left
                     : Icons.navigation,
                 title: 'Navigation',
-                description:
-                    'Multi-page navigation chain (Page 1 → 2 → 3)',
+                description: 'Multi-page navigation chain (Page 1 → 2 → 3)',
                 routeName: RouterService.routes.navigationPage1,
                 isNew: true,
               ),

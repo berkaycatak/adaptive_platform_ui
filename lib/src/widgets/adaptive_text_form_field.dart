@@ -228,14 +228,14 @@ class AdaptiveTextFormField extends StatelessWidget {
               padding:
                   padding ??
                   const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: cupertinoDecoration ??
+              decoration:
+                  cupertinoDecoration ??
                   BoxDecoration(
                     color: enabled
                         ? CupertinoColors.tertiarySystemBackground
                         : CupertinoColors.quaternarySystemFill,
                     border: field.hasError
-                        ? Border.all(
-                            color: CupertinoColors.systemRed, width: 1)
+                        ? Border.all(color: CupertinoColors.systemRed, width: 1)
                         : null,
                     borderRadius: BorderRadius.circular(8),
                   ),

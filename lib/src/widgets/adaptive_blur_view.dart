@@ -335,8 +335,8 @@ class Ios26NativeBlurViewState extends State<Ios26NativeBlurView> {
               viewType: 'adaptive_platform_ui/ios26_blur_view',
               creationParams: {
                 'blurStyle': widget.blurStyle.toUIBlurEffectStyle(),
-                'isDark': MediaQuery.platformBrightnessOf(context) ==
-                    Brightness.dark,
+                'isDark':
+                    MediaQuery.platformBrightnessOf(context) == Brightness.dark,
               },
               creationParamsCodec: const StandardMessageCodec(),
               onPlatformViewCreated: (int id) {

@@ -52,18 +52,14 @@ void main() {
       WidgetTester tester,
     ) async {
       await tester.pumpWidget(
-        MaterialApp(
-          home: AdaptiveScaffold(body: const Text('Body')),
-        ),
+        MaterialApp(home: AdaptiveScaffold(body: const Text('Body'))),
       );
 
       // Should have exactly one Scaffold (the Android path Scaffold)
       expect(find.byType(Scaffold), findsOneWidget);
     });
 
-    testWidgets('onDrawerChanged callback fires', (
-      WidgetTester tester,
-    ) async {
+    testWidgets('onDrawerChanged callback fires', (WidgetTester tester) async {
       bool? drawerOpened;
 
       await tester.pumpWidget(

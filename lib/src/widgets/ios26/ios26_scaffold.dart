@@ -136,10 +136,7 @@ class _IOS26ScaffoldState extends State<IOS26Scaffold>
       } else {
         const placeholder = SizedBox(height: 38, width: 38);
         heroLeading = widget.useHeroBackButton
-            ? const Hero(
-                tag: 'adaptive_back_button',
-                child: placeholder,
-              )
+            ? const Hero(tag: 'adaptive_back_button', child: placeholder)
             : placeholder;
       }
     }
