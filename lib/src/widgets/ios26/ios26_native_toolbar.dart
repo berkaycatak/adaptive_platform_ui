@@ -16,6 +16,7 @@ class IOS26NativeToolbar extends StatefulWidget {
     this.onLeadingTap,
     this.onActionTap,
     this.height = 44.0,
+    this.showNativeView = true,
   });
 
   final String? title;
@@ -25,6 +26,7 @@ class IOS26NativeToolbar extends StatefulWidget {
   final VoidCallback? onLeadingTap;
   final ValueChanged<int>? onActionTap;
   final double height;
+  final bool showNativeView;
 
   @override
   State<IOS26NativeToolbar> createState() => _IOS26NativeToolbarState();
@@ -56,15 +58,12 @@ class _IOS26NativeToolbarState extends State<IOS26NativeToolbar> {
 
   @override
   Widget build(BuildContext context) {
-    // Only use native toolbar on iOS
     if (defaultTargetPlatform != TargetPlatform.iOS) {
       return _buildFallbackToolbar();
     }
 
     final safePadding = MediaQuery.of(context).padding.top;
 
-    // Priority: custom leading widget > leadingText
-    // If custom leading widget provided, don't send leadingText to native
     final creationParams = <String, dynamic>{
       if (widget.title != null) 'title': widget.title!,
       if (widget.leading == null && widget.leadingText != null)
@@ -74,19 +73,18 @@ class _IOS26NativeToolbarState extends State<IOS26NativeToolbar> {
       'isDark': MediaQuery.platformBrightnessOf(context) == Brightness.dark,
     };
 
-    // iOS 26 native scroll edge effect - no manual gradient needed
     return SizedBox(
       height: widget.height + safePadding,
       child: Stack(
         children: [
-          UiKitView(
-            viewType: 'adaptive_platform_ui/ios26_toolbar',
-            creationParams: creationParams,
-            creationParamsCodec: const StandardMessageCodec(),
-            onPlatformViewCreated: _onPlatformViewCreated,
-            hitTestBehavior: PlatformViewHitTestBehavior.translucent,
-          ),
-          // Custom leading widget overlay
+          if (widget.showNativeView)
+            UiKitView(
+              viewType: 'adaptive_platform_ui/ios26_toolbar',
+              creationParams: creationParams,
+              creationParamsCodec: const StandardMessageCodec(),
+              onPlatformViewCreated: _onPlatformViewCreated,
+              hitTestBehavior: PlatformViewHitTestBehavior.translucent,
+            ),
           if (widget.leading != null)
             Positioned(
               left: 16,
@@ -121,7 +119,6 @@ class _IOS26NativeToolbarState extends State<IOS26NativeToolbar> {
     }
   }
 
-  /// Fallback toolbar using CupertinoNavigationBar for non-iOS or older iOS
   Widget _buildFallbackToolbar() {
     return CupertinoNavigationBar(
       middle: widget.title != null ? Text(widget.title!) : null,

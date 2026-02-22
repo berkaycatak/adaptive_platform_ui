@@ -17,6 +17,7 @@ class IOS26NativeTabBar extends StatefulWidget {
     this.backgroundColor,
     this.height,
     this.minimizeBehavior = TabBarMinimizeBehavior.automatic,
+    this.showNativeView = true,
   });
 
   final List<AdaptiveNavigationDestination> destinations;
@@ -26,6 +27,7 @@ class IOS26NativeTabBar extends StatefulWidget {
   final Color? unselectedItemTint;
   final Color? backgroundColor;
   final double? height;
+  final bool showNativeView;
 
   /// Tab bar minimize behavior (iOS 26+)
   /// Controls how the tab bar minimizes when scrolling
@@ -121,7 +123,7 @@ class _IOS26NativeTabBarState extends State<IOS26NativeTabBar> {
           'backgroundColor': _colorToARGB(widget.backgroundColor!),
       };
 
-      final platformView = UiKitView(
+      final platformView = widget.showNativeView ? UiKitView(
         viewType: 'adaptive_platform_ui/ios26_tab_bar',
         creationParams: creationParams,
         creationParamsCodec: const StandardMessageCodec(),
@@ -129,7 +131,7 @@ class _IOS26NativeTabBarState extends State<IOS26NativeTabBar> {
         gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
           Factory<TapGestureRecognizer>(() => TapGestureRecognizer()),
         },
-      );
+      ) : const SizedBox.shrink();
 
       final h = widget.height ?? _intrinsicHeight ?? 50.0;
       return SizedBox(height: h, child: platformView);

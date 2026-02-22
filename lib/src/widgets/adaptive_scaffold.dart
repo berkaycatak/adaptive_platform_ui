@@ -246,39 +246,7 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
     // iOS <26 (iOS 18 and below) OR iOS 26+ with useNativeToolbar: false
     // Use CupertinoPageScaffold with CupertinoTabBar if destinations provided
     if (PlatformInfo.isIOS) {
-      // Auto back button for iOS 26+ when useNativeToolbar is false
       Widget? effectiveLeading = widget.appBar?.leading;
-      if (PlatformInfo.isIOS26OrHigher() &&
-          !useNativeToolbar &&
-          widget.appBar?.leading == null &&
-          (widget.bottomNavigationBar?.items == null ||
-              widget.bottomNavigationBar!.items!.isEmpty)) {
-        // Check if we can pop AND this is the current route (to prevent showing on previous page during transition)
-        final canPop = Navigator.maybeOf(context)?.canPop() ?? false;
-        final isCurrent = ModalRoute.of(context)?.isCurrent ?? true;
-
-        if (canPop) {
-          if (isCurrent) {
-            final backButton = _AnimatedBackButton(
-              onPressed: () => Navigator.of(context).pop(),
-            );
-            effectiveLeading = widget.useHeroBackButton
-                ? Hero(
-                    tag: 'adaptive_back_button',
-                    flightShuttleBuilder: (_, __, ___, ____, toHeroContext) {
-                      return toHeroContext.widget;
-                    },
-                    child: backButton,
-                  )
-                : backButton;
-          } else {
-            const placeholder = SizedBox(height: 38, width: 38);
-            effectiveLeading = widget.useHeroBackButton
-                ? const Hero(tag: 'adaptive_back_button', child: placeholder)
-                : placeholder;
-          }
-        }
-      }
 
       if (widget.bottomNavigationBar?.items != null &&
           widget.bottomNavigationBar!.items!.isNotEmpty &&
@@ -300,11 +268,13 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
             (widget.appBar!.title != null ||
                 (widget.appBar!.actions != null &&
                     widget.appBar!.actions!.isNotEmpty) ||
-                effectiveLeading != null)) {
+                effectiveLeading != null ||
+                (Navigator.maybeOf(context)?.canPop() ?? false))) {
           navigationBar = CupertinoNavigationBar(
-            automaticallyImplyLeading: PlatformInfo.isIOS26OrHigher()
+            automaticallyImplyLeading:
+                PlatformInfo.isIOS26OrHigher() && useNativeToolbar
                 ? false
-                : true, // Let CupertinoNavigationBar handle back button for iOS < 26
+                : true, // Let CupertinoNavigationBar handle back button naturally
             middle: widget.appBar!.title != null
                 ? Text(widget.appBar!.title!)
                 : null,
@@ -510,11 +480,13 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
           (widget.appBar!.title != null ||
               (widget.appBar!.actions != null &&
                   widget.appBar!.actions!.isNotEmpty) ||
-              effectiveLeading != null)) {
+              effectiveLeading != null ||
+              (Navigator.maybeOf(context)?.canPop() ?? false))) {
         navigationBar = CupertinoNavigationBar(
-          automaticallyImplyLeading: PlatformInfo.isIOS26OrHigher()
+          automaticallyImplyLeading:
+              PlatformInfo.isIOS26OrHigher() && useNativeToolbar
               ? false
-              : true, // Let CupertinoNavigationBar handle back button for iOS < 26
+              : true, // Let CupertinoNavigationBar handle back button naturally
           middle: widget.appBar!.title != null
               ? Text(widget.appBar!.title!)
               : null,

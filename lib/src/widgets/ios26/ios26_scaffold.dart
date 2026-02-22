@@ -141,12 +141,22 @@ class _IOS26ScaffoldState extends State<IOS26Scaffold>
       }
     }
 
-    // Determine if toolbar should be shown
+    // Determine if toolbar/tab bar's underlying UiKitView should be shown.
+    // Hide native platform views when another route is pushed on top to prevent bleed-through.
+    final isCurrentRoute = ModalRoute.of(context)?.isCurrent ?? true;
+    final isPopping =
+        ModalRoute.of(context)?.animation?.status == AnimationStatus.reverse;
+
+    // The Flutter widgets (like Hero) should ALWAYS stay in the tree during transitions.
+    // Only the underlying UiKitView should be hidden.
     final hasToolbarContent =
-        widget.title != null ||
+        (widget.title != null ||
         widget.leading != null ||
         heroLeading != null ||
-        (widget.actions != null && widget.actions!.isNotEmpty);
+        (widget.actions != null && widget.actions!.isNotEmpty));
+
+    // Show native view only if it's the current route OR it's popping
+    final showNativeView = isCurrentRoute || isPopping;
 
     // Get brightness and determine text color
     final brightness = MediaQuery.platformBrightnessOf(context);
@@ -181,6 +191,7 @@ class _IOS26ScaffoldState extends State<IOS26Scaffold>
             child: IOS26NativeToolbar(
               title: widget.title,
               leading: widget.leading ?? heroLeading,
+              showNativeView: showNativeView,
               actions: widget.actions,
               onActionTap: (index) {
                 // Call the appropriate action callback
@@ -223,6 +234,7 @@ class _IOS26ScaffoldState extends State<IOS26Scaffold>
                       onTap: widget.bottomNavigationBar!.onTap!,
                       tint: CupertinoTheme.of(context).primaryColor,
                       minimizeBehavior: widget.minimizeBehavior,
+                      showNativeView: showNativeView,
                     )
                   : IOS26NativeTabBar(
                       destinations: widget.bottomNavigationBar!.items!,
@@ -230,6 +242,7 @@ class _IOS26ScaffoldState extends State<IOS26Scaffold>
                       onTap: widget.bottomNavigationBar!.onTap!,
                       tint: CupertinoTheme.of(context).primaryColor,
                       minimizeBehavior: widget.minimizeBehavior,
+                      showNativeView: showNativeView,
                     ),
             ),
           ),
