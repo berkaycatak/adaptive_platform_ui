@@ -1,5 +1,8 @@
 # Changelog
 
+## [0.1.103]
+* **FIX**: Fixed iOS 18 navigation bar not being displayed (@adrianorios)
+
 ## [0.1.102]
 * **IMPROVEMENT**: Adjusted back button leading position on iOS 26+ native toolbar for better alignment
 * **NEW**: Added brightness synchronization for iOS 26+ components — native buttons, switches, sliders, segmented controls, toolbar, and blur view now react to light/dark mode changes
