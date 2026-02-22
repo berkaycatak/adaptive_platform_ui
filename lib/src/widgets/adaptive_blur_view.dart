@@ -283,12 +283,33 @@ class Ios26NativeBlurView extends StatefulWidget {
 
 class Ios26NativeBlurViewState extends State<Ios26NativeBlurView> {
   MethodChannel? _channel;
+  bool? _lastIsDark;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _syncBrightnessIfNeeded();
+  }
 
   @override
   void didUpdateWidget(Ios26NativeBlurView oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.blurStyle != widget.blurStyle && _channel != null) {
       _updateBlurStyle();
+    }
+  }
+
+  Future<void> _syncBrightnessIfNeeded() async {
+    final ch = _channel;
+    if (ch == null) return;
+    final isDark = MediaQuery.platformBrightnessOf(context) == Brightness.dark;
+    if (_lastIsDark != isDark) {
+      try {
+        await ch.invokeMethod('setBrightness', {'isDark': isDark});
+        _lastIsDark = isDark;
+      } catch (e) {
+        // Ignore errors if platform view is not yet ready
+      }
     }
   }
 
@@ -314,6 +335,8 @@ class Ios26NativeBlurViewState extends State<Ios26NativeBlurView> {
               viewType: 'adaptive_platform_ui/ios26_blur_view',
               creationParams: {
                 'blurStyle': widget.blurStyle.toUIBlurEffectStyle(),
+                'isDark': MediaQuery.platformBrightnessOf(context) ==
+                    Brightness.dark,
               },
               creationParamsCodec: const StandardMessageCodec(),
               onPlatformViewCreated: (int id) {

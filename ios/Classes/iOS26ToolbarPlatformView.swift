@@ -54,6 +54,8 @@ class iOS26ToolbarPlatformView: NSObject, FlutterPlatformView {
     private var navigationItem: UINavigationItem
     private var channel: FlutterMethodChannel
 
+    private var isDark: Bool = false
+
     init(
         frame: CGRect,
         viewIdentifier viewId: Int64,
@@ -68,7 +70,16 @@ class iOS26ToolbarPlatformView: NSObject, FlutterPlatformView {
             binaryMessenger: messenger
         )
 
+        if let params = args as? [String: Any] {
+            isDark = params["isDark"] as? Bool ?? false
+        }
+
         super.init()
+
+        // Apply Flutter's brightness override
+        if #available(iOS 13.0, *) {
+            containerView.overrideUserInterfaceStyle = isDark ? .dark : .light
+        }
 
         setupGradient()
         setupNavigationBar()
@@ -261,6 +272,15 @@ class iOS26ToolbarPlatformView: NSObject, FlutterPlatformView {
             } else {
                 result(FlutterMethodNotImplemented)
             }
+        case "setBrightness":
+            if let args = call.arguments as? [String: Any],
+               let dark = args["isDark"] as? Bool {
+                isDark = dark
+                if #available(iOS 13.0, *) {
+                    containerView.overrideUserInterfaceStyle = dark ? .dark : .light
+                }
+            }
+            result(nil)
         default:
             result(FlutterMethodNotImplemented)
         }
