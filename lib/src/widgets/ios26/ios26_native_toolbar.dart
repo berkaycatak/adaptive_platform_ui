@@ -32,6 +32,27 @@ class IOS26NativeToolbar extends StatefulWidget {
 
 class _IOS26NativeToolbarState extends State<IOS26NativeToolbar> {
   MethodChannel? _channel;
+  bool? _lastIsDark;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _syncBrightnessIfNeeded();
+  }
+
+  Future<void> _syncBrightnessIfNeeded() async {
+    final ch = _channel;
+    if (ch == null) return;
+    final isDark = MediaQuery.platformBrightnessOf(context) == Brightness.dark;
+    if (_lastIsDark != isDark) {
+      try {
+        await ch.invokeMethod('setBrightness', {'isDark': isDark});
+        _lastIsDark = isDark;
+      } catch (e) {
+        // Ignore errors if platform view is not yet ready
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,6 +71,7 @@ class _IOS26NativeToolbarState extends State<IOS26NativeToolbar> {
         'leading': widget.leadingText!,
       if (widget.actions != null && widget.actions!.isNotEmpty)
         'actions': widget.actions!.map((a) => a.toNativeMap()).toList(),
+      'isDark': MediaQuery.platformBrightnessOf(context) == Brightness.dark,
     };
 
     // iOS 26 native scroll edge effect - no manual gradient needed
@@ -67,7 +89,7 @@ class _IOS26NativeToolbarState extends State<IOS26NativeToolbar> {
           // Custom leading widget overlay
           if (widget.leading != null)
             Positioned(
-              left: 8,
+              left: 16,
               top: safePadding,
               bottom: 0,
               child: Align(

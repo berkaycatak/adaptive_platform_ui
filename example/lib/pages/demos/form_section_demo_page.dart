@@ -322,6 +322,7 @@ class _FormSectionDemoPageState extends State<FormSectionDemoPage> {
           keyboardType: keyboardType,
           maxLines: maxLines,
           textAlign: TextAlign.end,
+          cupertinoDecoration: const BoxDecoration(),
         ),
       );
     }

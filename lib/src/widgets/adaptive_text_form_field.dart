@@ -40,6 +40,7 @@ class AdaptiveTextFormField extends StatelessWidget {
     this.inputFormatters,
     this.padding,
     this.decoration,
+    this.cupertinoDecoration,
     this.autovalidateMode,
     this.onTapOutside,
     this.autofillHints,
@@ -134,6 +135,16 @@ class AdaptiveTextFormField extends StatelessWidget {
   /// The decoration to show around the text field (Material only).
   final InputDecoration? decoration;
 
+  /// The box decoration for the iOS text field.
+  ///
+  /// Use this to override the default iOS styling, for example to make the
+  /// field transparent when used inside a [CupertinoFormRow] or
+  /// an inset grouped form section.
+  ///
+  /// When null, defaults to a rounded rect with
+  /// [CupertinoColors.tertiarySystemBackground].
+  final BoxDecoration? cupertinoDecoration;
+
   /// Used to enable/disable this form field auto validation and update its error text.
   final AutovalidateMode? autovalidateMode;
 
@@ -217,15 +228,17 @@ class AdaptiveTextFormField extends StatelessWidget {
               padding:
                   padding ??
                   const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: BoxDecoration(
-                color: enabled
-                    ? CupertinoColors.tertiarySystemBackground
-                    : CupertinoColors.quaternarySystemFill,
-                border: field.hasError
-                    ? Border.all(color: CupertinoColors.systemRed, width: 1)
-                    : null,
-                borderRadius: BorderRadius.circular(8),
-              ),
+              decoration: cupertinoDecoration ??
+                  BoxDecoration(
+                    color: enabled
+                        ? CupertinoColors.tertiarySystemBackground
+                        : CupertinoColors.quaternarySystemFill,
+                    border: field.hasError
+                        ? Border.all(
+                            color: CupertinoColors.systemRed, width: 1)
+                        : null,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
             ),
             if (field.hasError && field.errorText != null)
               Padding(

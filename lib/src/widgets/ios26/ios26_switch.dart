@@ -44,6 +44,7 @@ class _IOS26SwitchState extends State<IOS26Switch> {
   static int _nextId = 0;
   late final int _id;
   late final MethodChannel _channel;
+  bool? _lastIsDark;
 
   @override
   void initState() {
@@ -54,9 +55,27 @@ class _IOS26SwitchState extends State<IOS26Switch> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _syncBrightnessIfNeeded();
+  }
+
+  @override
   void dispose() {
     _channel.setMethodCallHandler(null);
     super.dispose();
+  }
+
+  Future<void> _syncBrightnessIfNeeded() async {
+    final isDark = MediaQuery.platformBrightnessOf(context) == Brightness.dark;
+    if (_lastIsDark != isDark) {
+      try {
+        await _channel.invokeMethod('setBrightness', {'isDark': isDark});
+        _lastIsDark = isDark;
+      } catch (e) {
+        // Ignore errors if platform view is not yet ready
+      }
+    }
   }
 
   Future<dynamic> _handleMethod(MethodCall call) async {

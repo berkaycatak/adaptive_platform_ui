@@ -1,3 +1,4 @@
+import 'package:adaptive_platform_ui_example/utils/extensions/extensions.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
@@ -350,8 +351,8 @@ class _PopupMenuDemoPageState extends State<PopupMenuDemoPage> {
                 ),
                 decoration: BoxDecoration(
                   color: _editMode
-                      ? CupertinoColors.systemYellow.withOpacity(0.2)
-                      : CupertinoColors.systemGreen.withOpacity(0.2),
+                      ? CupertinoColors.systemYellow.withOpacityValue(0.2)
+                      : CupertinoColors.systemGreen.withOpacityValue(0.2),
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
                     color: _editMode
@@ -681,7 +682,7 @@ class _PopupMenuDemoPageState extends State<PopupMenuDemoPage> {
                     width: 36,
                     height: 36,
                     decoration: BoxDecoration(
-                      color: CupertinoColors.systemPurple.withOpacity(0.1),
+                      color: CupertinoColors.systemPurple.withOpacityValue(0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Icon(
@@ -760,7 +761,7 @@ class _PopupMenuDemoPageState extends State<PopupMenuDemoPage> {
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: CupertinoColors.systemBlue.withOpacity(0.3),
+                    color: CupertinoColors.systemBlue.withOpacityValue(0.3),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),

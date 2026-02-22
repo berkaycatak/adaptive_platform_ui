@@ -175,6 +175,16 @@ class iOS26SegmentedControlView: NSObject, FlutterPlatformView {
             }
             result(nil)
 
+        case "setBrightness":
+            if let args = call.arguments as? [String: Any],
+               let dark = args["isDark"] as? Bool {
+                isDark = dark
+                if #available(iOS 13.0, *) {
+                    _view.overrideUserInterfaceStyle = dark ? .dark : .light
+                }
+            }
+            result(nil)
+
         default:
             result(FlutterMethodNotImplemented)
         }

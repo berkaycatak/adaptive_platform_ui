@@ -71,6 +71,15 @@ class AdaptiveScaffold extends StatefulWidget {
     this.enableBlur = true,
     this.enableToolbarGradient = true,
     this.extendBodyBehindAppBar = false,
+    this.drawer,
+    this.endDrawer,
+    this.drawerScrimColor,
+    this.onDrawerChanged,
+    this.onEndDrawerChanged,
+    this.drawerEnableOpenDragGesture = true,
+    this.endDrawerEnableOpenDragGesture = true,
+    this.scaffoldKey,
+    this.useHeroBackButton = true,
   });
 
   /// App bar configuration
@@ -104,6 +113,41 @@ class AdaptiveScaffold extends StatefulWidget {
   /// immersive content. When false, the body will start below the app bar.
   final bool extendBodyBehindAppBar;
 
+  /// A panel displayed to the side of the body, often hidden on mobile.
+  /// On Android, passed directly to the Material Scaffold.
+  /// On iOS/iOS 26+, wrapped with a transparent Material Scaffold for drawer behavior.
+  /// Open programmatically via `Scaffold.of(context).openDrawer()`.
+  final Widget? drawer;
+
+  /// A panel displayed on the opposite side of the drawer.
+  /// Open programmatically via `Scaffold.of(context).openEndDrawer()`.
+  final Widget? endDrawer;
+
+  /// The color to use for the scrim that obscures the content behind the drawer.
+  final Color? drawerScrimColor;
+
+  /// Called when the drawer is opened or closed.
+  final DrawerCallback? onDrawerChanged;
+
+  /// Called when the end drawer is opened or closed.
+  final DrawerCallback? onEndDrawerChanged;
+
+  /// Whether to enable the drag gesture to open the drawer.
+  final bool drawerEnableOpenDragGesture;
+
+  /// Whether to enable the drag gesture to open the end drawer.
+  final bool endDrawerEnableOpenDragGesture;
+
+  /// A key to use for the internal [Scaffold] that provides drawer behavior.
+  /// Use this to open the drawer programmatically via
+  /// `scaffoldKey.currentState?.openDrawer()`.
+  final GlobalKey<ScaffoldState>? scaffoldKey;
+
+  /// Whether to use Hero animation for the back button on iOS 26+
+  /// When true, the back button stays pinned during page transitions.
+  /// Only affects iOS 26+. Defaults to true.
+  final bool useHeroBackButton;
+
   @override
   State<AdaptiveScaffold> createState() => _AdaptiveScaffoldState();
 }
@@ -111,6 +155,24 @@ class AdaptiveScaffold extends StatefulWidget {
 class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
   final GlobalKey<_MinimizableTabBarState> _tabBarKey =
       GlobalKey<_MinimizableTabBarState>();
+
+  Widget _wrapWithDrawerIfNeeded(Widget child) {
+    if (widget.drawer == null && widget.endDrawer == null) {
+      return child;
+    }
+    return Scaffold(
+      key: widget.scaffoldKey,
+      backgroundColor: Colors.transparent,
+      body: child,
+      drawer: widget.drawer,
+      endDrawer: widget.endDrawer,
+      drawerScrimColor: widget.drawerScrimColor,
+      onDrawerChanged: widget.onDrawerChanged,
+      onEndDrawerChanged: widget.onEndDrawerChanged,
+      drawerEnableOpenDragGesture: widget.drawerEnableOpenDragGesture,
+      endDrawerEnableOpenDragGesture: widget.endDrawerEnableOpenDragGesture,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -164,17 +226,20 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
         }).toList();
       }
 
-      return IOS26Scaffold(
-        key: ValueKey(
-          'ios26_scaffold_${widget.bottomNavigationBar?.selectedIndex ?? 0}_${widget.body?.runtimeType.toString() ?? "empty"}',
+      return _wrapWithDrawerIfNeeded(
+        IOS26Scaffold(
+          key: ValueKey(
+            'ios26_scaffold_${widget.bottomNavigationBar?.selectedIndex ?? 0}_${widget.body?.runtimeType.toString() ?? "empty"}',
+          ),
+          bottomNavigationBar: widget.bottomNavigationBar,
+          title: widget.appBar?.title,
+          actions: widget.appBar?.actions,
+          leading: widget.appBar?.leading,
+          minimizeBehavior: widget.minimizeBehavior,
+          enableBlur: widget.enableBlur,
+          useHeroBackButton: widget.useHeroBackButton,
+          children: childrenList,
         ),
-        bottomNavigationBar: widget.bottomNavigationBar,
-        title: widget.appBar?.title,
-        actions: widget.appBar?.actions,
-        leading: widget.appBar?.leading,
-        minimizeBehavior: widget.minimizeBehavior,
-        enableBlur: widget.enableBlur,
-        children: childrenList,
       );
     }
 
@@ -194,13 +259,23 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
 
         if (canPop) {
           if (isCurrent) {
-            // Active route: show animated back button
-            effectiveLeading = _AnimatedBackButton(
+            final backButton = _AnimatedBackButton(
               onPressed: () => Navigator.of(context).pop(),
             );
+            effectiveLeading = widget.useHeroBackButton
+                ? Hero(
+                    tag: 'adaptive_back_button',
+                    flightShuttleBuilder: (_, __, ___, ____, toHeroContext) {
+                      return toHeroContext.widget;
+                    },
+                    child: backButton,
+                  )
+                : backButton;
           } else {
-            // Transition/background route: show empty SizedBox to prevent native back button
-            effectiveLeading = const SizedBox(height: 38, width: 38);
+            const placeholder = SizedBox(height: 38, width: 38);
+            effectiveLeading = widget.useHeroBackButton
+                ? const Hero(tag: 'adaptive_back_button', child: placeholder)
+                : placeholder;
           }
         }
       }
@@ -410,10 +485,12 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
             useNativeBottomBar &&
             tabBar != null;
 
-        return CupertinoPageScaffold(
-          resizeToAvoidBottomInset: !hasNativeTabBar,
-          navigationBar: navigationBar,
-          child: bodyWidget,
+        return _wrapWithDrawerIfNeeded(
+          CupertinoPageScaffold(
+            resizeToAvoidBottomInset: !hasNativeTabBar,
+            navigationBar: navigationBar,
+            child: bodyWidget,
+          ),
         );
       }
 
@@ -497,7 +574,9 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
       );
 
       // Always use CupertinoPageScaffold to ensure proper background color
-      return CupertinoPageScaffold(navigationBar: navigationBar, child: body);
+      return _wrapWithDrawerIfNeeded(
+        CupertinoPageScaffold(navigationBar: navigationBar, child: body),
+      );
     }
 
     // Android - Use NavigationBar if destinations provided
@@ -598,11 +677,19 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
       }
 
       return Scaffold(
+        key: widget.scaffoldKey,
         appBar: appBar,
         body: widget.body ?? const SizedBox.shrink(),
         bottomNavigationBar: bottomNavBar,
         floatingActionButton: widget.floatingActionButton,
         extendBodyBehindAppBar: widget.extendBodyBehindAppBar,
+        drawer: widget.drawer,
+        endDrawer: widget.endDrawer,
+        drawerScrimColor: widget.drawerScrimColor,
+        onDrawerChanged: widget.onDrawerChanged,
+        onEndDrawerChanged: widget.onEndDrawerChanged,
+        drawerEnableOpenDragGesture: widget.drawerEnableOpenDragGesture,
+        endDrawerEnableOpenDragGesture: widget.endDrawerEnableOpenDragGesture,
       );
     }
 
@@ -642,10 +729,18 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
 
     // Always use Scaffold to ensure Material context
     return Scaffold(
+      key: widget.scaffoldKey,
       appBar: appBar,
       body: widget.body ?? const SizedBox.shrink(),
       floatingActionButton: widget.floatingActionButton,
       extendBodyBehindAppBar: widget.extendBodyBehindAppBar,
+      drawer: widget.drawer,
+      endDrawer: widget.endDrawer,
+      drawerScrimColor: widget.drawerScrimColor,
+      onDrawerChanged: widget.onDrawerChanged,
+      onEndDrawerChanged: widget.onEndDrawerChanged,
+      drawerEnableOpenDragGesture: widget.drawerEnableOpenDragGesture,
+      endDrawerEnableOpenDragGesture: widget.endDrawerEnableOpenDragGesture,
     );
   }
 
