@@ -440,10 +440,10 @@ class AdaptiveButton extends StatelessWidget {
 
     switch (style) {
       case AdaptiveButtonStyle.filled:
-        // Use theme's ElevatedButton style and only override explicitly provided values
-        return ElevatedButton(
+        // Use theme's FilledButton style and only override explicitly provided values
+        return FilledButton(
           onPressed: effectiveOnPressed,
-          style: ElevatedButton.styleFrom(
+          style: FilledButton.styleFrom(
             backgroundColor: color, // null = use theme
             foregroundColor: textColor, // null = use theme
             padding: padding, // null = use theme
