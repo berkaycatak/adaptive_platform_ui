@@ -85,6 +85,10 @@ class iOS26ToolbarPlatformView: NSObject, FlutterPlatformView {
         setupNavigationBar()
 
         if let params = args as? [String: Any] {
+            // Apply tint color before configuring items so buttons inherit it
+            if let n = params["tint"] as? NSNumber {
+                navigationBar.tintColor = Self.colorFromARGB(n.intValue)
+            }
             configureItems(params)
         }
 
@@ -281,8 +285,25 @@ class iOS26ToolbarPlatformView: NSObject, FlutterPlatformView {
                 }
             }
             result(nil)
+        case "setStyle":
+            if let args = call.arguments as? [String: Any] {
+                if let n = args["tint"] as? NSNumber {
+                    navigationBar.tintColor = Self.colorFromARGB(n.intValue)
+                }
+            }
+            result(nil)
         default:
             result(FlutterMethodNotImplemented)
         }
+    }
+
+    // MARK: - Color Helpers
+
+    private static func colorFromARGB(_ argb: Int) -> UIColor {
+        let a = CGFloat((argb >> 24) & 0xFF) / 255.0
+        let r = CGFloat((argb >> 16) & 0xFF) / 255.0
+        let g = CGFloat((argb >> 8) & 0xFF) / 255.0
+        let b = CGFloat(argb & 0xFF) / 255.0
+        return UIColor(red: r, green: g, blue: b, alpha: a)
     }
 }
