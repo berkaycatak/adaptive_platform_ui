@@ -328,8 +328,6 @@ class iOS26ToolbarPlatformView: NSObject, FlutterPlatformView {
         }
     }
 
-    // MARK: - Color Helpers
-
     private static func colorFromARGB(_ argb: Int) -> UIColor {
         let a = CGFloat((argb >> 24) & 0xFF) / 255.0
         let r = CGFloat((argb >> 16) & 0xFF) / 255.0
