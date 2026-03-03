@@ -85,11 +85,17 @@ class iOS26ToolbarPlatformView: NSObject, FlutterPlatformView {
         setupNavigationBar()
 
         if let params = args as? [String: Any] {
-            // Apply tint color before configuring items so buttons inherit it
-            if let n = params["tint"] as? NSNumber {
-                navigationBar.tintColor = Self.colorFromARGB(n.intValue)
-            }
             configureItems(params)
+            // Apply tint color after configuring items
+            if let n = params["tint"] as? NSNumber {
+                let color = Self.colorFromARGB(n.intValue)
+                containerView.tintColor = color
+                navigationBar.tintColor = color
+                // Also tint individual items directly
+                for item in (navigationItem.leftBarButtonItems ?? []) + (navigationItem.rightBarButtonItems ?? []) {
+                    item.tintColor = color
+                }
+            }
         }
 
         channel.setMethodCallHandler { [weak self] call, result in
@@ -222,6 +228,18 @@ class iOS26ToolbarPlatformView: NSObject, FlutterPlatformView {
                 if let btn = button {
                     btn.tag = index
 
+                    // Apply prominent style (iOS 26+)
+                    if action["prominent"] as? Bool == true {
+                        if #available(iOS 26.0, *) {
+                            btn.style = .prominent
+                        }
+                    }
+
+                    // Apply per-action tint color
+                    if let n = action["tint"] as? NSNumber {
+                        btn.tintColor = Self.colorFromARGB(n.intValue)
+                    }
+
                     // If no flexible spacer exists, all go to right
                     // If flexible exists, split by it
                     if !hasFlexible {
@@ -287,8 +305,21 @@ class iOS26ToolbarPlatformView: NSObject, FlutterPlatformView {
             result(nil)
         case "setStyle":
             if let args = call.arguments as? [String: Any] {
-                if let n = args["tint"] as? NSNumber {
-                    navigationBar.tintColor = Self.colorFromARGB(n.intValue)
+                if let tintValue = args["tint"] {
+                    if let n = tintValue as? NSNumber {
+                        let color = Self.colorFromARGB(n.intValue)
+                        containerView.tintColor = color
+                        navigationBar.tintColor = color
+                        for item in (navigationItem.leftBarButtonItems ?? []) + (navigationItem.rightBarButtonItems ?? []) {
+                            item.tintColor = color
+                        }
+                    } else if tintValue is NSNull {
+                        containerView.tintColor = nil
+                        navigationBar.tintColor = nil
+                        for item in (navigationItem.leftBarButtonItems ?? []) + (navigationItem.rightBarButtonItems ?? []) {
+                            item.tintColor = nil
+                        }
+                    }
                 }
             }
             result(nil)

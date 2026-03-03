@@ -170,9 +170,7 @@ class _IOSCard extends StatelessWidget {
         color: backgroundColor,
         borderRadius: radius,
         border: Border.all(
-          color: isDark
-              ? CupertinoColors.systemGrey6
-              : CupertinoColors.separator,
+          color: CupertinoColors.separator.resolveFrom(context),
           width: 0.5,
         ),
         boxShadow: isDark

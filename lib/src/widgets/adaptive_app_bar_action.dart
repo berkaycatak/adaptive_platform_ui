@@ -25,6 +25,8 @@ class AdaptiveAppBarAction {
     this.title,
     required this.onPressed,
     this.spacerAfter = ToolbarSpacerType.none,
+    this.prominent = false,
+    this.tintColor,
   }) : assert(
          iosSymbol != null || icon != null || title != null,
          'At least one of iosSymbol, icon, or title must be provided',
@@ -65,17 +67,30 @@ class AdaptiveAppBarAction {
   /// ```
   final ToolbarSpacerType spacerAfter;
 
+  /// Display this action with a prominent glass background (iOS 26+ only)
+  /// - iOS 26+: Uses UIBarButtonItem.Style.prominent for a tinted glass bubble
+  /// - iOS <26 / Android: Ignored
+  final bool prominent;
+
+  /// Per-action tint color (iOS 26+ only)
+  /// Overrides the global AdaptiveAppBar.tintColor for this specific action.
+  /// Useful for highlighting individual buttons (e.g., green call button).
+  /// - iOS <26 / Android: Ignored
+  final Color? tintColor;
+
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
     return other is AdaptiveAppBarAction &&
         other.iosSymbol == iosSymbol &&
         other.icon == icon &&
-        other.title == title;
+        other.title == title &&
+        other.prominent == prominent &&
+        other.tintColor == tintColor;
   }
 
   @override
-  int get hashCode => Object.hash(iosSymbol, icon, title);
+  int get hashCode => Object.hash(iosSymbol, icon, title, prominent, tintColor);
 
   /// Convert action to map for native platform channel (iOS 26+ only)
   Map<String, dynamic> toNativeMap() {
@@ -83,6 +98,8 @@ class AdaptiveAppBarAction {
       if (iosSymbol != null) 'icon': iosSymbol!,
       if (title != null) 'title': title!,
       'spacerAfter': spacerAfter.index, // 0=none, 1=fixed, 2=flexible
+      if (prominent) 'prominent': true,
+      if (tintColor != null) 'tint': tintColor!.toARGB32(),
     };
   }
 }

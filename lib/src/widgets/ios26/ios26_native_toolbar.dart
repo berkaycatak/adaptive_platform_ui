@@ -94,7 +94,7 @@ class _IOS26NativeToolbarState extends State<IOS26NativeToolbar> {
     // Sync tint color
     final tint =
         widget.tintColor != null ? _colorToARGB(widget.tintColor!) : null;
-    if (tint != null && _lastTint != tint) {
+    if (_lastTint != tint) {
       try {
         await ch.invokeMethod('setStyle', {'tint': tint});
         _lastTint = tint;
