@@ -343,6 +343,16 @@ class _HomePageState extends State<HomePage> {
               ),
               _DemoItem(
                 icon: PlatformInfo.isIOS
+                    ? CupertinoIcons.paintbrush
+                    : Icons.color_lens,
+                title: 'Toolbar Tint',
+                description:
+                    'Tint color and prominent buttons for native toolbar',
+                routeName: RouterService.routes.toolbarTint,
+                isNew: true,
+              ),
+              _DemoItem(
+                icon: PlatformInfo.isIOS
                     ? CupertinoIcons.search_circle_fill
                     : Icons.search,
                 title: 'Native Search Tab',

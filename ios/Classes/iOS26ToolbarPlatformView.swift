@@ -55,6 +55,7 @@ class iOS26ToolbarPlatformView: NSObject, FlutterPlatformView {
     private var channel: FlutterMethodChannel
 
     private var isDark: Bool = false
+    private var perActionTintTags: Set<Int> = []
 
     init(
         frame: CGRect,
@@ -86,14 +87,16 @@ class iOS26ToolbarPlatformView: NSObject, FlutterPlatformView {
 
         if let params = args as? [String: Any] {
             configureItems(params)
-            // Apply tint color after configuring items
+            // Apply global tint color after configuring items
             if let n = params["tint"] as? NSNumber {
                 let color = Self.colorFromARGB(n.intValue)
                 containerView.tintColor = color
                 navigationBar.tintColor = color
-                // Also tint individual items directly
+                // Apply to items that don't have their own per-action tint
                 for item in (navigationItem.leftBarButtonItems ?? []) + (navigationItem.rightBarButtonItems ?? []) {
-                    item.tintColor = color
+                    if !perActionTintTags.contains(item.tag) {
+                        item.tintColor = color
+                    }
                 }
             }
         }
@@ -238,6 +241,7 @@ class iOS26ToolbarPlatformView: NSObject, FlutterPlatformView {
                     // Apply per-action tint color
                     if let n = action["tint"] as? NSNumber {
                         btn.tintColor = Self.colorFromARGB(n.intValue)
+                        perActionTintTags.insert(index)
                     }
 
                     // If no flexible spacer exists, all go to right
@@ -303,6 +307,20 @@ class iOS26ToolbarPlatformView: NSObject, FlutterPlatformView {
                 }
             }
             result(nil)
+        case "updateActions":
+            if let args = call.arguments as? [String: Any] {
+                perActionTintTags.removeAll()
+                configureItems(args)
+                // Re-apply global tint to items without per-action tint
+                if let globalTint = navigationBar.tintColor {
+                    for item in (navigationItem.leftBarButtonItems ?? []) + (navigationItem.rightBarButtonItems ?? []) {
+                        if !perActionTintTags.contains(item.tag) {
+                            item.tintColor = globalTint
+                        }
+                    }
+                }
+            }
+            result(nil)
         case "setStyle":
             if let args = call.arguments as? [String: Any] {
                 if let tintValue = args["tint"] {
@@ -311,13 +329,17 @@ class iOS26ToolbarPlatformView: NSObject, FlutterPlatformView {
                         containerView.tintColor = color
                         navigationBar.tintColor = color
                         for item in (navigationItem.leftBarButtonItems ?? []) + (navigationItem.rightBarButtonItems ?? []) {
-                            item.tintColor = color
+                            if !perActionTintTags.contains(item.tag) {
+                                item.tintColor = color
+                            }
                         }
                     } else if tintValue is NSNull {
                         containerView.tintColor = nil
                         navigationBar.tintColor = nil
                         for item in (navigationItem.leftBarButtonItems ?? []) + (navigationItem.rightBarButtonItems ?? []) {
-                            item.tintColor = nil
+                            if !perActionTintTags.contains(item.tag) {
+                                item.tintColor = nil
+                            }
                         }
                     }
                 }

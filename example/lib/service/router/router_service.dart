@@ -28,6 +28,7 @@ import 'package:adaptive_platform_ui_example/pages/demos/form_section_demo_page.
 import 'package:adaptive_platform_ui_example/pages/demos/expansion_tile_demo_page.dart';
 import 'package:adaptive_platform_ui_example/pages/demos/blur_view_demo_page.dart';
 import 'package:adaptive_platform_ui_example/pages/demos/drawer_demo_page.dart';
+import 'package:adaptive_platform_ui_example/pages/demos/toolbar_tint_demo_page.dart';
 import 'package:adaptive_platform_ui_example/pages/demos/navigation_page1.dart';
 import 'package:adaptive_platform_ui_example/pages/demos/navigation_page2.dart';
 import 'package:adaptive_platform_ui_example/pages/demos/navigation_page3.dart';
@@ -249,6 +250,12 @@ class RouterService {
                     name: routes.drawer,
                     path: routes.drawer,
                     builder: (context, state) => const DrawerDemoPage(),
+                  ),
+                  GoRoute(
+                    name: routes.toolbarTint,
+                    path: routes.toolbarTint,
+                    builder: (context, state) =>
+                        const ToolbarTintDemoPage(),
                   ),
                   GoRoute(
                     name: routes.navigationPage1,

@@ -45,6 +45,7 @@ class _IOS26NativeToolbarState extends State<IOS26NativeToolbar> {
   MethodChannel? _channel;
   bool? _lastIsDark;
   int? _lastTint;
+  List<AdaptiveAppBarAction>? _lastActions;
 
   bool get _isDark =>
       MediaQuery.platformBrightnessOf(context) == Brightness.dark;
@@ -91,6 +92,21 @@ class _IOS26NativeToolbarState extends State<IOS26NativeToolbar> {
       }
     }
 
+    // Sync actions (per-action tint, prominent, etc.)
+    final actions = widget.actions;
+    if (_lastActions != null && !_actionsEqual(_lastActions!, actions)) {
+      try {
+        final params = <String, dynamic>{
+          if (actions != null && actions.isNotEmpty)
+            'actions': actions.map((a) => a.toNativeMap()).toList(),
+        };
+        await ch.invokeMethod('updateActions', params);
+        _lastActions = actions != null ? List.of(actions) : null;
+      } catch (e) {
+        // Ignore errors if platform view is not yet ready
+      }
+    }
+
     // Sync tint color
     final tint =
         widget.tintColor != null ? _colorToARGB(widget.tintColor!) : null;
@@ -102,6 +118,17 @@ class _IOS26NativeToolbarState extends State<IOS26NativeToolbar> {
         // Ignore errors if platform view is not yet ready
       }
     }
+  }
+
+  bool _actionsEqual(
+      List<AdaptiveAppBarAction>? a, List<AdaptiveAppBarAction>? b) {
+    if (identical(a, b)) return true;
+    if (a == null || b == null) return false;
+    if (a.length != b.length) return false;
+    for (int i = 0; i < a.length; i++) {
+      if (a[i] != b[i]) return false;
+    }
+    return true;
   }
 
   @override
@@ -155,6 +182,8 @@ class _IOS26NativeToolbarState extends State<IOS26NativeToolbar> {
     _lastIsDark = _isDark;
     _lastTint =
         widget.tintColor != null ? _colorToARGB(widget.tintColor!) : null;
+    _lastActions =
+        widget.actions != null ? List.of(widget.actions!) : null;
   }
 
   Future<dynamic> _handleMethodCall(MethodCall call) async {
