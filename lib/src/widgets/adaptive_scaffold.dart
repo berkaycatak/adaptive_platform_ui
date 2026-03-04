@@ -235,6 +235,7 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
           title: widget.appBar?.title,
           actions: widget.appBar?.actions,
           leading: widget.appBar?.leading,
+          tintColor: widget.appBar?.tintColor,
           minimizeBehavior: widget.minimizeBehavior,
           enableBlur: widget.enableBlur,
           useHeroBackButton: widget.useHeroBackButton,

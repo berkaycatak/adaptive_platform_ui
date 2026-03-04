@@ -15,6 +15,7 @@ class IOS26Scaffold extends StatefulWidget {
     this.title,
     this.actions,
     this.leading,
+    this.tintColor,
     this.minimizeBehavior = TabBarMinimizeBehavior.automatic,
     this.enableBlur = true,
     this.useHeroBackButton = true,
@@ -25,6 +26,7 @@ class IOS26Scaffold extends StatefulWidget {
   final String? title;
   final List<AdaptiveAppBarAction>? actions;
   final Widget? leading;
+  final Color? tintColor;
   final TabBarMinimizeBehavior minimizeBehavior;
   final bool enableBlur;
   final bool useHeroBackButton;
@@ -193,6 +195,7 @@ class _IOS26ScaffoldState extends State<IOS26Scaffold>
               leading: widget.leading ?? heroLeading,
               showNativeView: showNativeView,
               actions: widget.actions,
+              tintColor: widget.tintColor,
               onActionTap: (index) {
                 // Call the appropriate action callback
                 if (widget.actions != null &&

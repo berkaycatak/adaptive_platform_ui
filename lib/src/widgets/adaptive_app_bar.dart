@@ -21,6 +21,7 @@ class AdaptiveAppBar {
     this.actions,
     this.leading,
     this.useNativeToolbar = true,
+    this.tintColor,
     this.cupertinoNavigationBar,
     this.appBar,
   });
@@ -48,6 +49,13 @@ class AdaptiveAppBar {
   /// If true, [cupertinoNavigationBar] will be ignored and native toolbar will be shown.
   final bool useNativeToolbar;
 
+  /// Tint color for toolbar action buttons (iOS 26+ native toolbar only)
+  ///
+  /// When set, this color is applied to the navigation bar's tintColor,
+  /// which colors all bar button items (action buttons and back button).
+  /// If null, the system default tint color is used.
+  final Color? tintColor;
+
   /// Custom CupertinoNavigationBar for iOS
   ///
   /// When provided and [useNativeToolbar] is false, this custom navigation bar will be used
@@ -70,6 +78,7 @@ class AdaptiveAppBar {
     List<AdaptiveAppBarAction>? actions,
     Widget? leading,
     bool? useNativeToolbar,
+    Color? tintColor,
     PreferredSizeWidget? cupertinoNavigationBar,
     PreferredSizeWidget? appBar,
   }) {
@@ -78,6 +87,7 @@ class AdaptiveAppBar {
       actions: actions ?? this.actions,
       leading: leading ?? this.leading,
       useNativeToolbar: useNativeToolbar ?? this.useNativeToolbar,
+      tintColor: tintColor ?? this.tintColor,
       cupertinoNavigationBar:
           cupertinoNavigationBar ?? this.cupertinoNavigationBar,
       appBar: appBar ?? this.appBar,
