@@ -424,6 +424,16 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
             self.applyMinimizeBehavior()
             result(nil)
 
+        case "setHidden":
+            guard let args = call.arguments as? [String: Any],
+                  let hidden = (args["hidden"] as? NSNumber)?.boolValue else {
+                result(FlutterError(code: "bad_args", message: "Missing hidden", details: nil))
+                return
+            }
+
+            self.container.isHidden = hidden
+            result(nil)
+
         case "setBadgeCounts":
             guard let args = call.arguments as? [String: Any],
                   let badgeData = args["badgeCounts"] as? [NSNumber?] else {
