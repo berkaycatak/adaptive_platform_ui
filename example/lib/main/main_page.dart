@@ -18,9 +18,12 @@ class MainPage extends StatefulWidget {
 class _MainPageState extends State<MainPage> {
   @override
   Widget build(BuildContext context) {
-    return Stack(
+    return ValueListenableBuilder<bool>(
+      valueListenable: tabBarHiddenNotifier,
+      builder: (context, isTabBarHidden, _) => Stack(
       children: [
         AdaptiveScaffold(
+          tabBarHidden: isTabBarHidden,
           minimizeBehavior: TabBarMinimizeBehavior.automatic,
           body: widget.navigationShell,
           bottomNavigationBar:
@@ -69,6 +72,7 @@ class _MainPageState extends State<MainPage> {
                 ),
         ),
       ],
+    ),
     );
   }
 
