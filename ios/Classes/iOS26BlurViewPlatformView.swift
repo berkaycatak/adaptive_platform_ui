@@ -33,6 +33,7 @@ class iOS26BlurViewPlatformView: NSObject, FlutterPlatformView {
     private var _blurView: UIVisualEffectView
     private var _channel: FlutterMethodChannel
     private var _viewId: Int64
+    private var isDark: Bool = false
 
     init(
         frame: CGRect,
@@ -42,11 +43,13 @@ class iOS26BlurViewPlatformView: NSObject, FlutterPlatformView {
     ) {
         _viewId = viewId
 
-        // Parse blur style from arguments
+        // Parse blur style and brightness from arguments
         var blurStyle: UIBlurEffect.Style = .systemUltraThinMaterial
-        if let params = args as? [String: Any],
-           let styleString = params["blurStyle"] as? String {
-            blurStyle = iOS26BlurViewPlatformView.parseBlurStyle(styleString)
+        if let params = args as? [String: Any] {
+            if let styleString = params["blurStyle"] as? String {
+                blurStyle = iOS26BlurViewPlatformView.parseBlurStyle(styleString)
+            }
+            isDark = params["isDark"] as? Bool ?? false
         }
 
         // Create blur effect and view
@@ -54,6 +57,11 @@ class iOS26BlurViewPlatformView: NSObject, FlutterPlatformView {
         _blurView = UIVisualEffectView(effect: blurEffect)
         _blurView.frame = frame
         _blurView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+
+        // Apply Flutter's brightness override
+        if #available(iOS 13.0, *) {
+            _blurView.overrideUserInterfaceStyle = isDark ? .dark : .light
+        }
 
         // Setup method channel
         _channel = FlutterMethodChannel(
@@ -85,6 +93,15 @@ class iOS26BlurViewPlatformView: NSObject, FlutterPlatformView {
             } else {
                 result(FlutterError(code: "INVALID_ARGS", message: "Invalid arguments", details: nil))
             }
+        case "setBrightness":
+            if let args = call.arguments as? [String: Any],
+               let dark = args["isDark"] as? Bool {
+                isDark = dark
+                if #available(iOS 13.0, *) {
+                    _blurView.overrideUserInterfaceStyle = dark ? .dark : .light
+                }
+            }
+            result(nil)
         default:
             result(FlutterMethodNotImplemented)
         }

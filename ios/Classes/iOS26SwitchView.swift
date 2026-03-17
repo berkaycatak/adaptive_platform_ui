@@ -67,6 +67,11 @@ class iOS26SwitchView: NSObject, FlutterPlatformView {
         // Create the native switch
         createNativeSwitch(with: args)
 
+        // Apply Flutter's brightness override
+        if #available(iOS 13.0, *) {
+            _view.overrideUserInterfaceStyle = isDark ? .dark : .light
+        }
+
         // Setup method call handler
         channel.setMethodCallHandler { [weak self] (call, result) in
             self?.handleMethodCall(call, result: result)
@@ -158,6 +163,16 @@ class iOS26SwitchView: NSObject, FlutterPlatformView {
             if let args = call.arguments as? [String: Any],
                let argb = args["color"] as? Int {
                 switchControl.thumbTintColor = UIColor(argb: argb)
+            }
+            result(nil)
+
+        case "setBrightness":
+            if let args = call.arguments as? [String: Any],
+               let dark = args["isDark"] as? Bool {
+                isDark = dark
+                if #available(iOS 13.0, *) {
+                    _view.overrideUserInterfaceStyle = dark ? .dark : .light
+                }
             }
             result(nil)
 

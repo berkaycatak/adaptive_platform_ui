@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
+import '../../style/sf_symbol.dart';
 import '../adaptive_app_bar_action.dart';
 import '../adaptive_bottom_navigation_bar.dart';
+import '../adaptive_button.dart';
 import '../adaptive_scaffold.dart';
 import 'ios26_native_tab_bar.dart';
 import 'ios26_native_toolbar.dart';
@@ -15,6 +17,7 @@ class IOS26Scaffold extends StatefulWidget {
     this.leading,
     this.minimizeBehavior = TabBarMinimizeBehavior.automatic,
     this.enableBlur = true,
+    this.useHeroBackButton = true,
     required this.children,
   });
 
@@ -24,6 +27,7 @@ class IOS26Scaffold extends StatefulWidget {
   final Widget? leading;
   final TabBarMinimizeBehavior minimizeBehavior;
   final bool enableBlur;
+  final bool useHeroBackButton;
   final List<Widget> children;
 
   @override
@@ -101,9 +105,8 @@ class _IOS26ScaffoldState extends State<IOS26Scaffold>
   @override
   Widget build(BuildContext context) {
     // Auto back button logic
-    // Priority: custom leading widget > auto back button
-    String? leadingText;
-    VoidCallback? leadingCallback;
+    // Priority: custom leading widget > Hero back button
+    Widget? heroLeading;
 
     final canPop = Navigator.of(context).canPop();
 
@@ -112,18 +115,48 @@ class _IOS26ScaffoldState extends State<IOS26Scaffold>
         (widget.bottomNavigationBar?.items == null ||
             widget.bottomNavigationBar!.items!.isEmpty) &&
         canPop) {
-      leadingText = ''; // Empty string = native chevron
-      leadingCallback = () {
-        Navigator.of(context).pop();
-      };
+      final isCurrent = ModalRoute.of(context)?.isCurrent ?? true;
+      if (isCurrent) {
+        final backButton = SizedBox(
+          height: 38,
+          width: 38,
+          child: AdaptiveButton.sfSymbol(
+            onPressed: () => Navigator.of(context).pop(),
+            sfSymbol: SFSymbol("chevron.left", size: 20),
+          ),
+        );
+        heroLeading = widget.useHeroBackButton
+            ? Hero(
+                tag: 'adaptive_back_button',
+                flightShuttleBuilder: (_, __, ___, ____, toHeroContext) =>
+                    toHeroContext.widget,
+                child: backButton,
+              )
+            : backButton;
+      } else {
+        const placeholder = SizedBox(height: 38, width: 38);
+        heroLeading = widget.useHeroBackButton
+            ? const Hero(tag: 'adaptive_back_button', child: placeholder)
+            : placeholder;
+      }
     }
 
-    // Determine if toolbar should be shown
+    // Determine if toolbar/tab bar's underlying UiKitView should be shown.
+    // Hide native platform views when another route is pushed on top to prevent bleed-through.
+    final isCurrentRoute = ModalRoute.of(context)?.isCurrent ?? true;
+    final isPopping =
+        ModalRoute.of(context)?.animation?.status == AnimationStatus.reverse;
+
+    // The Flutter widgets (like Hero) should ALWAYS stay in the tree during transitions.
+    // Only the underlying UiKitView should be hidden.
     final hasToolbarContent =
-        widget.title != null ||
+        (widget.title != null ||
         widget.leading != null ||
-        leadingText != null ||
-        (widget.actions != null && widget.actions!.isNotEmpty);
+        heroLeading != null ||
+        (widget.actions != null && widget.actions!.isNotEmpty));
+
+    // Show native view only if it's the current route OR it's popping
+    final showNativeView = isCurrentRoute || isPopping;
 
     // Get brightness and determine text color
     final brightness = MediaQuery.platformBrightnessOf(context);
@@ -157,10 +190,9 @@ class _IOS26ScaffoldState extends State<IOS26Scaffold>
             top: 0,
             child: IOS26NativeToolbar(
               title: widget.title,
-              leading: widget.leading, // Custom leading widget has priority
-              leadingText: leadingText,
+              leading: widget.leading ?? heroLeading,
+              showNativeView: showNativeView,
               actions: widget.actions,
-              onLeadingTap: leadingCallback,
               onActionTap: (index) {
                 // Call the appropriate action callback
                 if (widget.actions != null &&
@@ -202,6 +234,7 @@ class _IOS26ScaffoldState extends State<IOS26Scaffold>
                       onTap: widget.bottomNavigationBar!.onTap!,
                       tint: CupertinoTheme.of(context).primaryColor,
                       minimizeBehavior: widget.minimizeBehavior,
+                      showNativeView: showNativeView,
                     )
                   : IOS26NativeTabBar(
                       destinations: widget.bottomNavigationBar!.items!,
@@ -209,6 +242,7 @@ class _IOS26ScaffoldState extends State<IOS26Scaffold>
                       onTap: widget.bottomNavigationBar!.onTap!,
                       tint: CupertinoTheme.of(context).primaryColor,
                       minimizeBehavior: widget.minimizeBehavior,
+                      showNativeView: showNativeView,
                     ),
             ),
           ),
@@ -222,6 +256,11 @@ class _IOS26ScaffoldState extends State<IOS26Scaffold>
         widget.bottomNavigationBar!.items!.isNotEmpty;
 
     return CupertinoPageScaffold(
+      // When a native tab bar is present it sits in Positioned(bottom: 0)
+      // inside a Stack. If the scaffold resizes for the keyboard the tab bar
+      // floats above it — non-standard on iOS. Disable the resize so the
+      // keyboard window (higher z-order) covers the tab bar naturally.
+      resizeToAvoidBottomInset: !hasBottomNav,
       child: hasBottomNav
           ? NotificationListener<ScrollNotification>(
               onNotification: _handleScrollNotification,
