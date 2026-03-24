@@ -118,8 +118,8 @@ class _IOS26ScaffoldState extends State<IOS26Scaffold>
       final isCurrent = ModalRoute.of(context)?.isCurrent ?? true;
       if (isCurrent) {
         final backButton = SizedBox(
-          height: 38,
-          width: 38,
+          height: 36,
+          width: 36,
           child: AdaptiveButton.sfSymbol(
             onPressed: () => Navigator.of(context).pop(),
             sfSymbol: SFSymbol("chevron.left", size: 20),
@@ -134,7 +134,7 @@ class _IOS26ScaffoldState extends State<IOS26Scaffold>
               )
             : backButton;
       } else {
-        const placeholder = SizedBox(height: 38, width: 38);
+        const placeholder = SizedBox(height: 36, width: 36);
         heroLeading = widget.useHeroBackButton
             ? const Hero(tag: 'adaptive_back_button', child: placeholder)
             : placeholder;

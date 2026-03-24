@@ -938,8 +938,8 @@ class _AnimatedBackButtonState extends State<_AnimatedBackButton>
         );
       },
       child: SizedBox(
-        height: 38,
-        width: 38,
+        height: 36,
+        width: 36,
         child: AdaptiveButton.sfSymbol(
           onPressed: _handlePressed,
           sfSymbol: SFSymbol("chevron.left", size: 20),
