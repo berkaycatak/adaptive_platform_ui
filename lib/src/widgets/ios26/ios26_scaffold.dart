@@ -102,6 +102,11 @@ class _IOS26ScaffoldState extends State<IOS26Scaffold>
     }
   }
 
+  /// Determines if the current window is in a windowed mode.
+  ///
+  /// This method compares the display size of the device with the viewport size
+  /// calculated from the logical size and device pixel ratio. 
+  /// It returns true if the sizes do not match, indicating that the application is not in full-screen mode.
   bool _getIsWindowed() {
     final displaySize = View.of(context).display.size;
     final logicalSize = MediaQuery.sizeOf(context);
