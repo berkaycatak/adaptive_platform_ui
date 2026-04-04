@@ -43,6 +43,17 @@ class _IOS26NativeToolbarState extends State<IOS26NativeToolbar> {
     _syncBrightnessIfNeeded();
   }
 
+  @override
+  void didUpdateWidget(IOS26NativeToolbar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.title != oldWidget.title) {
+      final ch = _channel;
+      if (ch != null && widget.title != null) {
+        ch.invokeMethod('updateTitle', {'title': widget.title!});
+      }
+    }
+  }
+
   Future<void> _syncBrightnessIfNeeded() async {
     final ch = _channel;
     if (ch == null) return;
