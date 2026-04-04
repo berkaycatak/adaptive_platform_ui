@@ -28,7 +28,6 @@ import 'package:adaptive_platform_ui_example/pages/demos/form_section_demo_page.
 import 'package:adaptive_platform_ui_example/pages/demos/expansion_tile_demo_page.dart';
 import 'package:adaptive_platform_ui_example/pages/demos/blur_view_demo_page.dart';
 import 'package:adaptive_platform_ui_example/pages/demos/drawer_demo_page.dart';
-import 'package:adaptive_platform_ui_example/pages/demos/tab_bar_hidden_demo_page.dart';
 import 'package:adaptive_platform_ui_example/pages/demos/navigation_page1.dart';
 import 'package:adaptive_platform_ui_example/pages/demos/navigation_page2.dart';
 import 'package:adaptive_platform_ui_example/pages/demos/navigation_page3.dart';
@@ -250,12 +249,6 @@ class RouterService {
                     name: routes.drawer,
                     path: routes.drawer,
                     builder: (context, state) => const DrawerDemoPage(),
-                  ),
-                  GoRoute(
-                    name: routes.tabBarHidden,
-                    path: routes.tabBarHidden,
-                    builder: (context, state) =>
-                        const TabBarHiddenDemoPage(),
                   ),
                   GoRoute(
                     name: routes.navigationPage1,

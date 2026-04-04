@@ -351,16 +351,6 @@ class _HomePageState extends State<HomePage> {
                 routeName: RouterService.routes.nativeSearchTab,
                 isCritical: true,
               ),
-              _DemoItem(
-                icon: PlatformInfo.isIOS
-                    ? CupertinoIcons.eye_slash_fill
-                    : Icons.visibility_off,
-                title: 'Tab Bar setHidden',
-                description:
-                    'Hide/show native tab bar via platform channel (for bottom sheets)',
-                routeName: RouterService.routes.tabBarHidden,
-                isNew: true,
-              ),
             ],
           ),
 
