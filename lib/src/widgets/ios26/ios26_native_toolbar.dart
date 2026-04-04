@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import '../../utils/animation.dart';
 import '../adaptive_app_bar_action.dart';
 
 /// Native iOS 26 UINavigationBar widget using platform views
@@ -156,8 +157,10 @@ class _IOS26NativeToolbarState extends State<IOS26NativeToolbar> {
       if (widget.tintColor != null) 'tint': _colorToARGB(widget.tintColor!),
     };
 
-    return SizedBox(
+    return AnimatedContainer(
       height: widget.height + safePadding,
+      duration: const Duration(milliseconds: 1000),
+      curve: const IOSSpringCurve(),
       child: Stack(
         children: [
           if (widget.showNativeView)
@@ -171,8 +174,7 @@ class _IOS26NativeToolbarState extends State<IOS26NativeToolbar> {
           if (widget.leading != null)
             Positioned(
               left: 16,
-              top: safePadding,
-              bottom: 0,
+              bottom: 3,
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: widget.leading!,

@@ -80,6 +80,7 @@ class AdaptiveScaffold extends StatefulWidget {
     this.endDrawerEnableOpenDragGesture = true,
     this.scaffoldKey,
     this.useHeroBackButton = true,
+    this.tabBarHidden = false,
   });
 
   /// App bar configuration
@@ -147,6 +148,11 @@ class AdaptiveScaffold extends StatefulWidget {
   /// When true, the back button stays pinned during page transitions.
   /// Only affects iOS 26+. Defaults to true.
   final bool useHeroBackButton;
+
+  /// Whether to hide the native tab bar (iOS 26+ only).
+  /// Use this to hide the tab bar when showing modal bottom sheets
+  /// to prevent native platform views from bleeding through.
+  final bool tabBarHidden;
 
   @override
   State<AdaptiveScaffold> createState() => _AdaptiveScaffoldState();
@@ -239,6 +245,7 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
           minimizeBehavior: widget.minimizeBehavior,
           enableBlur: widget.enableBlur,
           useHeroBackButton: widget.useHeroBackButton,
+          tabBarHidden: widget.tabBarHidden,
           children: childrenList,
         ),
       );
@@ -320,6 +327,7 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
             selectedItemColor: widget.bottomNavigationBar!.selectedItemColor,
             unselectedItemColor:
                 widget.bottomNavigationBar!.unselectedItemColor,
+            hidden: widget.tabBarHidden,
           );
         }
         // iOS 26+ with useNativeBottomBar=false OR iOS <26
@@ -757,6 +765,7 @@ class _MinimizableTabBar extends StatefulWidget {
     required this.enableBlur,
     this.selectedItemColor,
     this.unselectedItemColor,
+    this.hidden = false,
   });
 
   final int selectedIndex;
@@ -766,6 +775,7 @@ class _MinimizableTabBar extends StatefulWidget {
   final bool enableBlur;
   final Color? selectedItemColor;
   final Color? unselectedItemColor;
+  final bool hidden;
 
   @override
   State<_MinimizableTabBar> createState() => _MinimizableTabBarState();
@@ -875,6 +885,7 @@ class _MinimizableTabBarState extends State<_MinimizableTabBar>
             widget.selectedItemColor ?? CupertinoTheme.of(context).primaryColor,
         unselectedItemTint: widget.unselectedItemColor,
         minimizeBehavior: widget.minimizeBehavior,
+        hidden: widget.hidden,
       ),
     );
   }
