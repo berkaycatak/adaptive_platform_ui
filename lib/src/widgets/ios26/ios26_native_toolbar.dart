@@ -75,6 +75,13 @@ class _IOS26NativeToolbarState extends State<IOS26NativeToolbar> {
   void didUpdateWidget(IOS26NativeToolbar oldWidget) {
     super.didUpdateWidget(oldWidget);
     _syncPropsToNativeIfNeeded();
+
+    if (widget.title != oldWidget.title) {
+      final ch = _channel;
+      if (ch != null && widget.title != null) {
+        ch.invokeMethod('updateTitle', {'title': widget.title!});
+      }
+    }
   }
 
   Future<void> _syncPropsToNativeIfNeeded() async {
