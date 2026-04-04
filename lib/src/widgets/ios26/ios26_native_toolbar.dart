@@ -76,8 +76,8 @@ class _IOS26NativeToolbarState extends State<IOS26NativeToolbar> {
 
     return AnimatedContainer(
       height: widget.height + safePadding,
-      duration: Duration(milliseconds: 1000),
-      curve: IOSSpringCurve(),
+      duration: const Duration(milliseconds: 1000),
+      curve: const IOSSpringCurve(),
       child: Stack(
         children: [
           if (widget.showNativeView)

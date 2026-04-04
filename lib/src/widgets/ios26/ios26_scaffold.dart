@@ -111,9 +111,13 @@ class _IOS26ScaffoldState extends State<IOS26Scaffold>
     final displaySize = View.of(context).display.size;
     final logicalSize = MediaQuery.sizeOf(context);
     final devicePixelRatio = MediaQuery.devicePixelRatioOf(context);
-    final viewportSize = Size(logicalSize.width * devicePixelRatio, logicalSize.height * devicePixelRatio);
+    final viewportSize = Size(
+      logicalSize.width * devicePixelRatio,
+      logicalSize.height * devicePixelRatio,
+    );
 
-    return (displaySize.longestSide != viewportSize.longestSide) || (displaySize.shortestSide != viewportSize.shortestSide);
+    return (displaySize.longestSide != viewportSize.longestSide) ||
+        (displaySize.shortestSide != viewportSize.shortestSide);
   }
 
   @override
@@ -132,6 +136,7 @@ class _IOS26ScaffoldState extends State<IOS26Scaffold>
       final isCurrent = ModalRoute.of(context)?.isCurrent ?? true;
       if (isCurrent) {
         final backButton = Container(
+          // 62px accounts for the iPadOS system window toolbar width in windowed mode
           margin: EdgeInsets.only(left: _getIsWindowed() ? 62 : 0),
           height: 38,
           width: 38,
