@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.104]
+* **NEW**: Added `tabBarHidden` prop to `AdaptiveScaffold` to hide the native iOS 26+ tab bar
+  * Prevents native `UITabBar` from bleeding through `showModalBottomSheet`
+  * Prop-driven API — flows through `AdaptiveScaffold` → `IOS26NativeTabBar` → native `setHidden` channel
+  * Added `hidden` prop to `IOS26NativeTabBar` for direct usage
+  * Added demo page in example app showing usage with bottom sheets
+
 ## [0.1.103]
 * **FIX**: Fixed iOS 18 navigation bar not being displayed (@adrianorios)
 

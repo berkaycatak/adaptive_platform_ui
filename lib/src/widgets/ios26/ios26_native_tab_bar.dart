@@ -18,6 +18,7 @@ class IOS26NativeTabBar extends StatefulWidget {
     this.height,
     this.minimizeBehavior = TabBarMinimizeBehavior.automatic,
     this.showNativeView = true,
+    this.hidden = false,
   });
 
   final List<AdaptiveNavigationDestination> destinations;
@@ -28,6 +29,11 @@ class IOS26NativeTabBar extends StatefulWidget {
   final Color? backgroundColor;
   final double? height;
   final bool showNativeView;
+
+  /// Whether the native tab bar is hidden.
+  /// Use this to hide the tab bar when showing modal bottom sheets
+  /// to prevent native platform views from bleeding through.
+  final bool hidden;
 
   /// Tab bar minimize behavior (iOS 26+)
   /// Controls how the tab bar minimizes when scrolling
@@ -49,6 +55,7 @@ class _IOS26NativeTabBarState extends State<IOS26NativeTabBar> {
   List<String>? _lastSymbols;
   List<int?>? _lastBadgeCounts;
   TabBarMinimizeBehavior? _lastMinimizeBehavior;
+  bool? _lastHidden;
 
   bool get _isDark =>
       MediaQuery.platformBrightnessOf(context) == Brightness.dark;
@@ -287,6 +294,9 @@ class _IOS26NativeTabBarState extends State<IOS26NativeTabBar> {
       });
       _lastMinimizeBehavior = widget.minimizeBehavior;
     }
+
+    // Hidden state update
+    await _syncHiddenIfNeeded();
   }
 
   Future<void> _syncBrightnessIfNeeded() async {
@@ -307,6 +317,15 @@ class _IOS26NativeTabBarState extends State<IOS26NativeTabBar> {
       return '';
     }).toList();
     _lastBadgeCounts = widget.destinations.map((e) => e.badgeCount).toList();
+  }
+
+  Future<void> _syncHiddenIfNeeded() async {
+    final ch = _channel;
+    if (ch == null) return;
+    final hidden = widget.hidden;
+    if (_lastHidden == hidden) return;
+    await ch.invokeMethod('setHidden', {'hidden': hidden});
+    _lastHidden = hidden;
   }
 
   Future<void> _requestIntrinsicSize() async {

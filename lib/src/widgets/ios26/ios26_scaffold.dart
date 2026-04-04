@@ -18,6 +18,7 @@ class IOS26Scaffold extends StatefulWidget {
     this.minimizeBehavior = TabBarMinimizeBehavior.automatic,
     this.enableBlur = true,
     this.useHeroBackButton = true,
+    this.tabBarHidden = false,
     required this.children,
   });
 
@@ -28,6 +29,7 @@ class IOS26Scaffold extends StatefulWidget {
   final TabBarMinimizeBehavior minimizeBehavior;
   final bool enableBlur;
   final bool useHeroBackButton;
+  final bool tabBarHidden;
   final List<Widget> children;
 
   @override
@@ -255,6 +257,7 @@ class _IOS26ScaffoldState extends State<IOS26Scaffold>
                       tint: CupertinoTheme.of(context).primaryColor,
                       minimizeBehavior: widget.minimizeBehavior,
                       showNativeView: showNativeView,
+                      hidden: widget.tabBarHidden,
                     )
                   : IOS26NativeTabBar(
                       destinations: widget.bottomNavigationBar!.items!,
@@ -263,6 +266,7 @@ class _IOS26ScaffoldState extends State<IOS26Scaffold>
                       tint: CupertinoTheme.of(context).primaryColor,
                       minimizeBehavior: widget.minimizeBehavior,
                       showNativeView: showNativeView,
+                      hidden: widget.tabBarHidden,
                     ),
             ),
           ),
