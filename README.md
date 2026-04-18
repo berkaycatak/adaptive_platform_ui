@@ -615,6 +615,7 @@ if (selectedTime != null) {
 AdaptiveListTile(
   title: Text('Profile'),
   subtitle: Text('View your profile'),
+  showDivider: true, // Toggle bottom border (IOS only)
   onTap: () {
     // Handle tap
   },
