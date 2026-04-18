@@ -53,6 +53,8 @@ class _IOS26NativeTabBarState extends State<IOS26NativeTabBar> {
   double? _intrinsicHeight;
   List<String>? _lastLabels;
   List<String>? _lastSymbols;
+  List<String>? _lastAssetIcons;
+  List<String>? _lastSelectedAssetIcons;
   List<int?>? _lastBadgeCounts;
   TabBarMinimizeBehavior? _lastMinimizeBehavior;
   bool? _lastHidden;
@@ -104,7 +106,27 @@ class _IOS26NativeTabBarState extends State<IOS26NativeTabBar> {
       final labels = widget.destinations.map((e) => e.label).toList();
       final symbols = widget.destinations.map((e) {
         final icon = e.icon;
-        if (icon is String) return icon;
+        if (icon is String && !icon.contains('/')) return icon;
+        return '';
+      }).toList();
+
+      final assetIcons = widget.destinations.map((e) {
+        final icon = e.icon;
+        if (icon is AssetImage) return icon.assetName;
+        if (icon is ImageIcon && icon.image is AssetImage) {
+           return (icon.image as AssetImage).assetName;
+        }
+        if (icon is String && icon.contains('/')) return icon;
+        return '';
+      }).toList();
+
+      final selectedAssetIcons = widget.destinations.map((e) {
+        final selectedIcon = e.selectedIcon ?? e.icon;
+        if (selectedIcon is AssetImage) return selectedIcon.assetName;
+        if (selectedIcon is ImageIcon && selectedIcon.image is AssetImage) {
+           return (selectedIcon.image as AssetImage).assetName;
+        }
+        if (selectedIcon is String && selectedIcon.contains('/')) return selectedIcon;
         return '';
       }).toList();
 
@@ -117,6 +139,8 @@ class _IOS26NativeTabBarState extends State<IOS26NativeTabBar> {
       final creationParams = <String, dynamic>{
         'labels': labels,
         'sfSymbols': symbols,
+        'assetIcons': assetIcons,
+        'selectedAssetIcons': selectedAssetIcons,
         'searchFlags': searchFlags,
         'badgeCounts': badgeCounts,
         'spacerFlags': spacerFlags,
@@ -256,23 +280,47 @@ class _IOS26NativeTabBarState extends State<IOS26NativeTabBar> {
     final labels = widget.destinations.map((e) => e.label).toList();
     final symbols = widget.destinations.map((e) {
       final icon = e.icon;
-      if (icon is String) return icon;
+      if (icon is String && !icon.contains('/')) return icon;
+      return '';
+    }).toList();
+    final assetIcons = widget.destinations.map((e) {
+      final icon = e.icon;
+      if (icon is AssetImage) return icon.assetName;
+      if (icon is ImageIcon && icon.image is AssetImage) {
+         return (icon.image as AssetImage).assetName;
+      }
+      if (icon is String && icon.contains('/')) return icon;
+      return '';
+    }).toList();
+    final selectedAssetIcons = widget.destinations.map((e) {
+      final selectedIcon = e.selectedIcon ?? e.icon;
+      if (selectedIcon is AssetImage) return selectedIcon.assetName;
+      if (selectedIcon is ImageIcon && selectedIcon.image is AssetImage) {
+         return (selectedIcon.image as AssetImage).assetName;
+      }
+      if (selectedIcon is String && selectedIcon.contains('/')) return selectedIcon;
       return '';
     }).toList();
     final searchFlags = widget.destinations.map((e) => e.isSearch).toList();
     final badgeCounts = widget.destinations.map((e) => e.badgeCount).toList();
 
     if (_lastLabels?.join('|') != labels.join('|') ||
-        _lastSymbols?.join('|') != symbols.join('|')) {
+        _lastSymbols?.join('|') != symbols.join('|') ||
+        _lastAssetIcons?.join('|') != assetIcons.join('|') ||
+        _lastSelectedAssetIcons?.join('|') != selectedAssetIcons.join('|')) {
       await ch.invokeMethod('setItems', {
         'labels': labels,
         'sfSymbols': symbols,
+        'assetIcons': assetIcons,
+        'selectedAssetIcons': selectedAssetIcons,
         'searchFlags': searchFlags,
         'badgeCounts': badgeCounts,
         'selectedIndex': widget.selectedIndex,
       });
       _lastLabels = labels;
       _lastSymbols = symbols;
+      _lastAssetIcons = assetIcons;
+      _lastSelectedAssetIcons = selectedAssetIcons;
       _requestIntrinsicSize();
     }
 
@@ -313,7 +361,25 @@ class _IOS26NativeTabBarState extends State<IOS26NativeTabBar> {
     _lastLabels = widget.destinations.map((e) => e.label).toList();
     _lastSymbols = widget.destinations.map((e) {
       final icon = e.icon;
-      if (icon is String) return icon;
+      if (icon is String && !icon.contains('/')) return icon;
+      return '';
+    }).toList();
+    _lastAssetIcons = widget.destinations.map((e) {
+      final icon = e.icon;
+      if (icon is AssetImage) return icon.assetName;
+      if (icon is ImageIcon && icon.image is AssetImage) {
+         return (icon.image as AssetImage).assetName;
+      }
+      if (icon is String && icon.contains('/')) return icon;
+      return '';
+    }).toList();
+    _lastSelectedAssetIcons = widget.destinations.map((e) {
+      final selectedIcon = e.selectedIcon ?? e.icon;
+      if (selectedIcon is AssetImage) return selectedIcon.assetName;
+      if (selectedIcon is ImageIcon && selectedIcon.image is AssetImage) {
+         return (selectedIcon.image as AssetImage).assetName;
+      }
+      if (selectedIcon is String && selectedIcon.contains('/')) return selectedIcon;
       return '';
     }).toList();
     _lastBadgeCounts = widget.destinations.map((e) => e.badgeCount).toList();
