@@ -90,19 +90,26 @@ class AdaptiveAlertDialog {
         context: context,
         builder: (context) {
           Widget? contentWidget;
+          final hasLegacyIcon =
+              icon != null && icon is IconData && iconSize != null;
+          final hasOtpCode = oneTimeCode != null;
+          final hasContentBelowMessage = hasOtpCode;
+          final hasScrollableLegacyContent =
+              hasLegacyIcon || hasOtpCode || message != null;
 
           // Build custom content if icon or OTP is present
-          if (icon != null || oneTimeCode != null || message != null) {
+          if (hasScrollableLegacyContent) {
             contentWidget = ConstrainedBox(
-              constraints: const BoxConstraints(minHeight: 60, maxHeight: 300),
+              constraints: BoxConstraints(
+                minHeight: hasContentBelowMessage ? 60 : 0,
+                maxHeight: 300,
+              ),
               child: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    if (icon != null &&
-                        icon is IconData &&
-                        iconSize != null) ...[
+                    if (hasLegacyIcon) ...[
                       Icon(
                         icon,
                         size: iconSize,
@@ -116,9 +123,9 @@ class AdaptiveAlertDialog {
                         textAlign: TextAlign.center,
                         style: const TextStyle(fontSize: 13),
                       ),
-                      const SizedBox(height: 12),
+                      if (hasContentBelowMessage) const SizedBox(height: 12),
                     ],
-                    if (oneTimeCode != null) ...[
+                    if (hasOtpCode) ...[
                       Container(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 16,
@@ -336,6 +343,11 @@ class AdaptiveAlertDialog {
       builder: (context) {
         // Build custom content if icon, OTP, or textfield is present
         Widget? contentWidget;
+        final hasMaterialIcon =
+            icon != null && icon is IconData && iconSize != null;
+        final hasOtpCode = oneTimeCode != null;
+        final hasInput = input != null;
+        final hasContentBelowMessage = hasOtpCode || hasInput;
         if (icon != null ||
             oneTimeCode != null ||
             message != null ||
@@ -343,15 +355,15 @@ class AdaptiveAlertDialog {
           contentWidget = Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (icon != null && icon is IconData && iconSize != null) ...[
+              if (hasMaterialIcon) ...[
                 Icon(icon, size: iconSize, color: iconColor ?? Colors.blue),
                 const SizedBox(height: 12),
               ],
               if (message != null) ...[
                 Text(message, textAlign: TextAlign.center),
-                const SizedBox(height: 16),
+                if (hasContentBelowMessage) const SizedBox(height: 16),
               ],
-              if (oneTimeCode != null) ...[
+              if (hasOtpCode) ...[
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 20,
