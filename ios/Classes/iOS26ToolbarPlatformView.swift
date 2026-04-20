@@ -55,6 +55,7 @@ class iOS26ToolbarPlatformView: NSObject, FlutterPlatformView {
     private var channel: FlutterMethodChannel
 
     private var isDark: Bool = false
+    private var perActionTintTags: Set<Int> = []
 
     init(
         frame: CGRect,
@@ -86,6 +87,18 @@ class iOS26ToolbarPlatformView: NSObject, FlutterPlatformView {
 
         if let params = args as? [String: Any] {
             configureItems(params)
+            // Apply global tint color after configuring items
+            if let n = params["tint"] as? NSNumber {
+                let color = Self.colorFromARGB(n.intValue)
+                containerView.tintColor = color
+                navigationBar.tintColor = color
+                // Apply to items that don't have their own per-action tint
+                for item in (navigationItem.leftBarButtonItems ?? []) + (navigationItem.rightBarButtonItems ?? []) {
+                    if !perActionTintTags.contains(item.tag) {
+                        item.tintColor = color
+                    }
+                }
+            }
         }
 
         channel.setMethodCallHandler { [weak self] call, result in
@@ -218,6 +231,19 @@ class iOS26ToolbarPlatformView: NSObject, FlutterPlatformView {
                 if let btn = button {
                     btn.tag = index
 
+                    // Apply prominent style (iOS 26+)
+                    if action["prominent"] as? Bool == true {
+                        if #available(iOS 26.0, *) {
+                            btn.style = .prominent
+                        }
+                    }
+
+                    // Apply per-action tint color
+                    if let n = action["tint"] as? NSNumber {
+                        btn.tintColor = Self.colorFromARGB(n.intValue)
+                        perActionTintTags.insert(index)
+                    }
+
                     // If no flexible spacer exists, all go to right
                     // If flexible exists, split by it
                     if !hasFlexible {
@@ -281,8 +307,54 @@ class iOS26ToolbarPlatformView: NSObject, FlutterPlatformView {
                 }
             }
             result(nil)
+        case "updateActions":
+            if let args = call.arguments as? [String: Any] {
+                perActionTintTags.removeAll()
+                configureItems(args)
+                // Re-apply global tint to items without per-action tint
+                if let globalTint = navigationBar.tintColor {
+                    for item in (navigationItem.leftBarButtonItems ?? []) + (navigationItem.rightBarButtonItems ?? []) {
+                        if !perActionTintTags.contains(item.tag) {
+                            item.tintColor = globalTint
+                        }
+                    }
+                }
+            }
+            result(nil)
+        case "setStyle":
+            if let args = call.arguments as? [String: Any] {
+                if let tintValue = args["tint"] {
+                    if let n = tintValue as? NSNumber {
+                        let color = Self.colorFromARGB(n.intValue)
+                        containerView.tintColor = color
+                        navigationBar.tintColor = color
+                        for item in (navigationItem.leftBarButtonItems ?? []) + (navigationItem.rightBarButtonItems ?? []) {
+                            if !perActionTintTags.contains(item.tag) {
+                                item.tintColor = color
+                            }
+                        }
+                    } else if tintValue is NSNull {
+                        containerView.tintColor = nil
+                        navigationBar.tintColor = nil
+                        for item in (navigationItem.leftBarButtonItems ?? []) + (navigationItem.rightBarButtonItems ?? []) {
+                            if !perActionTintTags.contains(item.tag) {
+                                item.tintColor = nil
+                            }
+                        }
+                    }
+                }
+            }
+            result(nil)
         default:
             result(FlutterMethodNotImplemented)
         }
+    }
+
+    private static func colorFromARGB(_ argb: Int) -> UIColor {
+        let a = CGFloat((argb >> 24) & 0xFF) / 255.0
+        let r = CGFloat((argb >> 16) & 0xFF) / 255.0
+        let g = CGFloat((argb >> 8) & 0xFF) / 255.0
+        let b = CGFloat(argb & 0xFF) / 255.0
+        return UIColor(red: r, green: g, blue: b, alpha: a)
     }
 }

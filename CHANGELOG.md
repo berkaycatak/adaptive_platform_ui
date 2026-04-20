@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.1.104]
+* **NEW**: Added `tabBarHidden` prop to `AdaptiveScaffold` to hide the native iOS 26+ tab bar — prevents native `UITabBar` from bleeding through `showModalBottomSheet` (@DmitriiSer)
+* **NEW**: Added `tintColor` support for iOS 26+ native toolbar and `prominent` button style for `AdaptiveAppBarAction` (@luflow)
+* **FIX**: Fixed dynamic title updates not reflecting on iOS 26+ native toolbar (@Qian-Samuel)
+* **FIX**: Fixed back button being obscured by window toolbar in iPadOS 26 windowed mode (@rivafarabi)
+
 ## [0.1.103]
 * **FIX**: Fixed iOS 18 navigation bar not being displayed (@adrianorios)
 

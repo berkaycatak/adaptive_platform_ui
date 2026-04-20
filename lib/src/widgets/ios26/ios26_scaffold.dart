@@ -15,9 +15,11 @@ class IOS26Scaffold extends StatefulWidget {
     this.title,
     this.actions,
     this.leading,
+    this.tintColor,
     this.minimizeBehavior = TabBarMinimizeBehavior.automatic,
     this.enableBlur = true,
     this.useHeroBackButton = true,
+    this.tabBarHidden = false,
     required this.children,
   });
 
@@ -25,9 +27,11 @@ class IOS26Scaffold extends StatefulWidget {
   final String? title;
   final List<AdaptiveAppBarAction>? actions;
   final Widget? leading;
+  final Color? tintColor;
   final TabBarMinimizeBehavior minimizeBehavior;
   final bool enableBlur;
   final bool useHeroBackButton;
+  final bool tabBarHidden;
   final List<Widget> children;
 
   @override
@@ -102,6 +106,24 @@ class _IOS26ScaffoldState extends State<IOS26Scaffold>
     }
   }
 
+  /// Determines if the current window is in a windowed mode.
+  ///
+  /// This method compares the display size of the device with the viewport size
+  /// calculated from the logical size and device pixel ratio. 
+  /// It returns true if the sizes do not match, indicating that the application is not in full-screen mode.
+  bool _getIsWindowed() {
+    final displaySize = View.of(context).display.size;
+    final logicalSize = MediaQuery.sizeOf(context);
+    final devicePixelRatio = MediaQuery.devicePixelRatioOf(context);
+    final viewportSize = Size(
+      logicalSize.width * devicePixelRatio,
+      logicalSize.height * devicePixelRatio,
+    );
+
+    return (displaySize.longestSide != viewportSize.longestSide) ||
+        (displaySize.shortestSide != viewportSize.shortestSide);
+  }
+
   @override
   Widget build(BuildContext context) {
     // Auto back button logic
@@ -117,7 +139,9 @@ class _IOS26ScaffoldState extends State<IOS26Scaffold>
         canPop) {
       final isCurrent = ModalRoute.of(context)?.isCurrent ?? true;
       if (isCurrent) {
-        final backButton = SizedBox(
+        final backButton = Container(
+          // 62px accounts for the iPadOS system window toolbar width in windowed mode
+          margin: EdgeInsets.only(left: _getIsWindowed() ? 62 : 0),
           height: 38,
           width: 38,
           child: AdaptiveButton.sfSymbol(
@@ -193,6 +217,7 @@ class _IOS26ScaffoldState extends State<IOS26Scaffold>
               leading: widget.leading ?? heroLeading,
               showNativeView: showNativeView,
               actions: widget.actions,
+              tintColor: widget.tintColor,
               onActionTap: (index) {
                 // Call the appropriate action callback
                 if (widget.actions != null &&
@@ -235,6 +260,7 @@ class _IOS26ScaffoldState extends State<IOS26Scaffold>
                       tint: CupertinoTheme.of(context).primaryColor,
                       minimizeBehavior: widget.minimizeBehavior,
                       showNativeView: showNativeView,
+                      hidden: widget.tabBarHidden,
                     )
                   : IOS26NativeTabBar(
                       destinations: widget.bottomNavigationBar!.items!,
@@ -243,6 +269,7 @@ class _IOS26ScaffoldState extends State<IOS26Scaffold>
                       tint: CupertinoTheme.of(context).primaryColor,
                       minimizeBehavior: widget.minimizeBehavior,
                       showNativeView: showNativeView,
+                      hidden: widget.tabBarHidden,
                     ),
             ),
           ),
