@@ -20,6 +20,7 @@ class AdaptiveListTile extends StatelessWidget {
     this.selected = false,
     this.hideBottomDivider = false,
     this.backgroundColor,
+    this.separatorColor,
     this.padding,
   });
 
@@ -54,6 +55,12 @@ class AdaptiveListTile extends StatelessWidget {
   /// The background color of the tile.
   final Color? backgroundColor;
 
+  /// The color of the iOS bottom separator.
+  ///
+  /// If null, uses the platform default separator color. This only affects iOS;
+  /// Android uses Material [ListTile], which does not render a bottom separator.
+  final Color? separatorColor;
+
   /// The tile's internal padding.
   final EdgeInsetsGeometry? padding;
 
@@ -87,9 +94,11 @@ class AdaptiveListTile extends StatelessWidget {
             ? null
             : Border(
                 bottom: BorderSide(
-                  color: isDark
-                      ? CupertinoColors.systemGrey4
-                      : CupertinoColors.separator,
+                  color:
+                      separatorColor ??
+                      (isDark
+                          ? CupertinoColors.systemGrey4
+                          : CupertinoColors.separator),
                   width: 0.5,
                 ),
               ),

@@ -353,6 +353,28 @@ void main() {
       expect(find.text('Disabled'), findsOneWidget);
     });
 
+    testWidgets('accepts custom separator color', (WidgetTester tester) async {
+      const separatorColor = Color(0xFF123456);
+
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: AdaptiveListTile(
+              title: Text('Custom Separator'),
+              separatorColor: separatorColor,
+            ),
+          ),
+        ),
+      );
+
+      final tile = tester.widget<AdaptiveListTile>(
+        find.byType(AdaptiveListTile),
+      );
+
+      expect(tile.separatorColor, separatorColor);
+      expect(find.text('Custom Separator'), findsOneWidget);
+    });
+
     testWidgets('calls onLongPress when long pressed', (
       WidgetTester tester,
     ) async {
