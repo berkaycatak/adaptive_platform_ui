@@ -29,6 +29,7 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
         var spacerFlags: [Bool] = []
         var selectedIndex: Int = 0
         var isDark: Bool = false
+        var isRtl: Bool = false
         var tint: UIColor? = nil
         var bg: UIColor? = nil
         var minimize: Int = 3 // automatic
@@ -48,6 +49,7 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
             }
             if let v = dict["selectedIndex"] as? NSNumber { selectedIndex = v.intValue }
             if let v = dict["isDark"] as? NSNumber { isDark = v.boolValue }
+            if let v = dict["isRtl"] as? NSNumber { isRtl = v.boolValue }
             if let n = dict["tint"] as? NSNumber { tint = Self.colorFromARGB(n.intValue) }
             if let n = dict["unselectedItemTint"] as? NSNumber {
                 unselectedTint = Self.colorFromARGB(n.intValue)
@@ -70,6 +72,8 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
         tabBar = bar
         bar.delegate = self
         bar.translatesAutoresizingMaskIntoConstraints = false
+        bar.semanticContentAttribute = isRtl ? .forceRightToLeft : .forceLeftToRight
+        container.semanticContentAttribute = isRtl ? .forceRightToLeft : .forceLeftToRight
 
         // iOS 26+ special handling - Skip appearance, use direct properties only
         if #available(iOS 26.0, *) {
@@ -477,6 +481,18 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
             if #available(iOS 13.0, *) {
                 self.container.overrideUserInterfaceStyle = isDark ? .dark : .light
             }
+            result(nil)
+
+        case "setDirectionality":
+            guard let args = call.arguments as? [String: Any],
+                  let isRtl = (args["isRtl"] as? NSNumber)?.boolValue else {
+                result(FlutterError(code: "bad_args", message: "Missing isRtl", details: nil))
+                return
+            }
+
+            let attribute: UISemanticContentAttribute = isRtl ? .forceRightToLeft : .forceLeftToRight
+            self.tabBar?.semanticContentAttribute = attribute
+            self.container.semanticContentAttribute = attribute
             result(nil)
 
         case "setMinimizeBehavior":
