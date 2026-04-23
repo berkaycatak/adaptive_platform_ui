@@ -50,6 +50,7 @@ class _IOS26NativeTabBarState extends State<IOS26NativeTabBar> {
   int? _lastUnselectedTint;
   int? _lastBg;
   bool? _lastIsDark;
+  bool? _lastIsRtl;
   double? _intrinsicHeight;
   List<String>? _lastLabels;
   List<String>? _lastSymbols;
@@ -61,6 +62,7 @@ class _IOS26NativeTabBarState extends State<IOS26NativeTabBar> {
 
   bool get _isDark =>
       MediaQuery.platformBrightnessOf(context) == Brightness.dark;
+  bool get _isRtl => Directionality.of(context) == TextDirection.rtl;
   Color? get _effectiveTint =>
       widget.tint ?? CupertinoTheme.of(context).primaryColor;
 
@@ -74,6 +76,7 @@ class _IOS26NativeTabBarState extends State<IOS26NativeTabBar> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _syncBrightnessIfNeeded();
+    _syncDirectionalityIfNeeded();
     _syncPropsToNativeIfNeeded();
   }
 
@@ -153,6 +156,7 @@ class _IOS26NativeTabBarState extends State<IOS26NativeTabBar> {
         'spacerFlags': spacerFlags,
         'selectedIndex': widget.selectedIndex,
         'isDark': _isDark,
+        'isRtl': _isRtl,
         'minimizeBehavior': widget.minimizeBehavior.index,
         if (_effectiveTint != null) 'tint': _colorToARGB(_effectiveTint!),
         if (widget.unselectedItemTint != null)
@@ -231,6 +235,7 @@ class _IOS26NativeTabBarState extends State<IOS26NativeTabBar> {
         ? _colorToARGB(widget.backgroundColor!)
         : null;
     _lastIsDark = _isDark;
+    _lastIsRtl = _isRtl;
     _lastMinimizeBehavior = widget.minimizeBehavior;
     _requestIntrinsicSize();
     _cacheItems();
@@ -341,6 +346,16 @@ class _IOS26NativeTabBarState extends State<IOS26NativeTabBar> {
     if (_lastIsDark != isDark) {
       await ch.invokeMethod('setBrightness', {'isDark': isDark});
       _lastIsDark = isDark;
+    }
+  }
+
+  Future<void> _syncDirectionalityIfNeeded() async {
+    final ch = _channel;
+    if (ch == null) return;
+    final isRtl = _isRtl;
+    if (_lastIsRtl != isRtl) {
+      await ch.invokeMethod('setDirectionality', {'isRtl': isRtl});
+      _lastIsRtl = isRtl;
     }
   }
 
