@@ -35,6 +35,7 @@ class iOS26SegmentedControlView: NSObject, FlutterPlatformView {
     private var channel: FlutterMethodChannel
     private var controlId: Int
     private var isDark: Bool = false
+    private var textColor: UIColor?
 
     init(
         frame: CGRect,
@@ -123,6 +124,10 @@ class iOS26SegmentedControlView: NSObject, FlutterPlatformView {
                 segmentedControl.selectedSegmentTintColor = tintColor
             }
 
+            if let textColorValue = config["textColor"] as? Int {
+                textColor = colorFromARGB(textColorValue)
+            }
+
             // Set selected index
             if let selectedIndex = config["selectedIndex"] as? Int, selectedIndex >= 0 {
                 segmentedControl.selectedSegmentIndex = selectedIndex
@@ -135,6 +140,8 @@ class iOS26SegmentedControlView: NSObject, FlutterPlatformView {
                 }
             }
         }
+
+        applyTheme()
 
         _view.addSubview(segmentedControl)
         NSLayoutConstraint.activate([
@@ -153,6 +160,18 @@ class iOS26SegmentedControlView: NSObject, FlutterPlatformView {
         let g = CGFloat((argb >> 8) & 0xFF) / 255.0
         let b = CGFloat(argb & 0xFF) / 255.0
         return UIColor(red: r, green: g, blue: b, alpha: a)
+    }
+
+    private func applyTheme() {
+        let normalTextColor = textColor ?? .label
+        segmentedControl.setTitleTextAttributes(
+            [.foregroundColor: normalTextColor],
+            for: .normal
+        )
+        segmentedControl.setTitleTextAttributes(
+            [.foregroundColor: normalTextColor.withAlphaComponent(0.5)],
+            for: .disabled
+        )
     }
 
     @objc private func segmentChanged() {
@@ -176,12 +195,19 @@ class iOS26SegmentedControlView: NSObject, FlutterPlatformView {
             result(nil)
 
         case "setBrightness":
-            if let args = call.arguments as? [String: Any],
-               let dark = args["isDark"] as? Bool {
-                isDark = dark
-                if #available(iOS 13.0, *) {
-                    _view.overrideUserInterfaceStyle = dark ? .dark : .light
+            if let args = call.arguments as? [String: Any] {
+                if let dark = args["isDark"] as? Bool {
+                    isDark = dark
+                    if #available(iOS 13.0, *) {
+                        _view.overrideUserInterfaceStyle = dark ? .dark : .light
+                    }
                 }
+
+                if let textColorValue = args["textColor"] as? Int {
+                    textColor = colorFromARGB(textColorValue)
+                }
+
+                applyTheme()
             }
             result(nil)
 

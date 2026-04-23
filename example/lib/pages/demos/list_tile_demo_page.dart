@@ -54,6 +54,7 @@ class _ListTileDemoPageState extends State<ListTileDemoPage> {
                 },
               ),
               AdaptiveListTile(
+                hideBottomDivider: true,
                 title: const Text('Disabled List Tile'),
                 subtitle: const Text('This tile is not interactive'),
                 enabled: false,
@@ -115,6 +116,7 @@ class _ListTileDemoPageState extends State<ListTileDemoPage> {
                 },
               ),
               AdaptiveListTile(
+                hideBottomDivider: true,
                 leading: Icon(
                   PlatformInfo.isIOS
                       ? CupertinoIcons.bell
@@ -151,6 +153,7 @@ class _ListTileDemoPageState extends State<ListTileDemoPage> {
               ...List.generate(
                 3,
                 (index) => AdaptiveListTile(
+                  hideBottomDivider: index == 2,
                   leading: Container(
                     width: 40,
                     height: 40,
@@ -210,6 +213,7 @@ class _ListTileDemoPageState extends State<ListTileDemoPage> {
                 ),
               ),
               AdaptiveListTile(
+                hideBottomDivider: true,
                 title: const Text('Badge Notification'),
                 subtitle: const Text('3 unread messages'),
                 trailing: AdaptiveBadge(
@@ -331,7 +335,7 @@ class _ListTileDemoPageState extends State<ListTileDemoPage> {
           ),
         ),
         AdaptiveCard(
-          padding: EdgeInsets.zero,
+          padding: EdgeInsets.all(3),
           child: Column(children: children),
         ),
       ],

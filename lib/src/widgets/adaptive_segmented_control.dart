@@ -126,11 +126,16 @@ class AdaptiveSegmentedControl extends StatelessWidget {
       },
     );
 
+    control = ConstrainedBox(
+      constraints: BoxConstraints(minHeight: height),
+      child: control,
+    );
+
     if (shrinkWrap) {
       control = Center(child: IntrinsicWidth(child: control));
     }
 
-    return SizedBox(height: height, child: control);
+    return control;
   }
 
   Widget _buildMaterialSegmentedButton(BuildContext context) {

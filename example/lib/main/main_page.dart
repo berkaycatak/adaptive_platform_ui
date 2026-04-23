@@ -56,6 +56,11 @@ class _MainPageState extends State<MainPage> {
                           : Icons.info,
                       label: 'Info',
                     ),
+
+                    const AdaptiveNavigationDestination(
+                      icon: ImageIcon(AssetImage('assets/icons/user.png')),
+                      label: 'Profile',
+                    ),
                     AdaptiveNavigationDestination(
                       icon: PlatformInfo.isIOS26OrHigher()
                           ? "magnifyingglass"
