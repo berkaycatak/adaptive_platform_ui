@@ -363,12 +363,12 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
 
                 // Determine selected icon widget
                 Widget activeIconWidget;
-                final dynamic selectedIconRaw = dest.selectedIcon ?? dest.icon;
+                final selectedIconRaw = dest.selectedIcon ?? dest.icon;
                 if (selectedIconRaw is Widget) {
                   activeIconWidget = selectedIconRaw;
                 } else {
                   final IconData iconData = selectedIconRaw is String
-                      ? _sfSymbolToCupertinoIcon(selectedIconRaw as String)
+                      ? _sfSymbolToCupertinoIcon(selectedIconRaw)
                       : selectedIconRaw as IconData;
                   activeIconWidget = Icon(iconData);
                 }
@@ -626,9 +626,9 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
             }
 
             Widget selectedIconWidget;
-            final dynamic selectedIconRaw = dest.selectedIcon ?? dest.icon;
+            final selectedIconRaw = dest.selectedIcon ?? dest.icon;
             if (selectedIconRaw is Widget) {
-              selectedIconWidget = selectedIconRaw as Widget;
+              selectedIconWidget = selectedIconRaw;
             } else {
               final IconData iconData = selectedIconRaw is String ? Icons.circle : selectedIconRaw as IconData;
               selectedIconWidget = Icon(iconData);

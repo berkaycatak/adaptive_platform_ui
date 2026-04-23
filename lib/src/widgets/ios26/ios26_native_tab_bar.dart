@@ -100,35 +100,42 @@ class _IOS26NativeTabBarState extends State<IOS26NativeTabBar> {
         ((resolvedColor.b * 255.0).round() & 0xff);
   }
 
+  /// Extract SF Symbol name from an icon value.
+  /// Returns empty string for non-SF-Symbol icons (asset paths, IconData, widgets).
+  String _extractSymbol(Object? icon) {
+    if (icon is String && !icon.contains('/')) return icon;
+    return '';
+  }
+
+  /// Extract asset path from an icon value.
+  /// Supports AssetImage, ImageIcon(AssetImage), and string paths containing '/'.
+  /// Returns empty string for SF Symbols or other icon types.
+  String _extractAssetPath(Object? icon) {
+    if (icon is AssetImage) return icon.assetName;
+    if (icon is ImageIcon && icon.image is AssetImage) {
+      return (icon.image as AssetImage).assetName;
+    }
+    if (icon is String && icon.contains('/')) return icon;
+    return '';
+  }
+
+  List<String> _mapSymbols() =>
+      widget.destinations.map((e) => _extractSymbol(e.icon)).toList();
+
+  List<String> _mapAssetIcons() =>
+      widget.destinations.map((e) => _extractAssetPath(e.icon)).toList();
+
+  List<String> _mapSelectedAssetIcons() => widget.destinations
+      .map((e) => _extractAssetPath(e.selectedIcon ?? e.icon))
+      .toList();
+
   @override
   Widget build(BuildContext context) {
     if (!kIsWeb && Platform.isIOS) {
       final labels = widget.destinations.map((e) => e.label).toList();
-      final symbols = widget.destinations.map((e) {
-        final icon = e.icon;
-        if (icon is String && !icon.contains('/')) return icon;
-        return '';
-      }).toList();
-
-      final assetIcons = widget.destinations.map((e) {
-        final icon = e.icon;
-        if (icon is AssetImage) return icon.assetName;
-        if (icon is ImageIcon && icon.image is AssetImage) {
-           return (icon.image as AssetImage).assetName;
-        }
-        if (icon is String && icon.contains('/')) return icon;
-        return '';
-      }).toList();
-
-      final selectedAssetIcons = widget.destinations.map((e) {
-        final selectedIcon = e.selectedIcon ?? e.icon;
-        if (selectedIcon is AssetImage) return selectedIcon.assetName;
-        if (selectedIcon is ImageIcon && selectedIcon.image is AssetImage) {
-           return (selectedIcon.image as AssetImage).assetName;
-        }
-        if (selectedIcon is String && selectedIcon.contains('/')) return selectedIcon;
-        return '';
-      }).toList();
+      final symbols = _mapSymbols();
+      final assetIcons = _mapAssetIcons();
+      final selectedAssetIcons = _mapSelectedAssetIcons();
 
       final searchFlags = widget.destinations.map((e) => e.isSearch).toList();
       final badgeCounts = widget.destinations.map((e) => e.badgeCount).toList();
@@ -278,29 +285,9 @@ class _IOS26NativeTabBarState extends State<IOS26NativeTabBar> {
 
     // Items update (for hot reload or dynamic changes)
     final labels = widget.destinations.map((e) => e.label).toList();
-    final symbols = widget.destinations.map((e) {
-      final icon = e.icon;
-      if (icon is String && !icon.contains('/')) return icon;
-      return '';
-    }).toList();
-    final assetIcons = widget.destinations.map((e) {
-      final icon = e.icon;
-      if (icon is AssetImage) return icon.assetName;
-      if (icon is ImageIcon && icon.image is AssetImage) {
-         return (icon.image as AssetImage).assetName;
-      }
-      if (icon is String && icon.contains('/')) return icon;
-      return '';
-    }).toList();
-    final selectedAssetIcons = widget.destinations.map((e) {
-      final selectedIcon = e.selectedIcon ?? e.icon;
-      if (selectedIcon is AssetImage) return selectedIcon.assetName;
-      if (selectedIcon is ImageIcon && selectedIcon.image is AssetImage) {
-         return (selectedIcon.image as AssetImage).assetName;
-      }
-      if (selectedIcon is String && selectedIcon.contains('/')) return selectedIcon;
-      return '';
-    }).toList();
+    final symbols = _mapSymbols();
+    final assetIcons = _mapAssetIcons();
+    final selectedAssetIcons = _mapSelectedAssetIcons();
     final searchFlags = widget.destinations.map((e) => e.isSearch).toList();
     final badgeCounts = widget.destinations.map((e) => e.badgeCount).toList();
 
@@ -359,29 +346,9 @@ class _IOS26NativeTabBarState extends State<IOS26NativeTabBar> {
 
   void _cacheItems() {
     _lastLabels = widget.destinations.map((e) => e.label).toList();
-    _lastSymbols = widget.destinations.map((e) {
-      final icon = e.icon;
-      if (icon is String && !icon.contains('/')) return icon;
-      return '';
-    }).toList();
-    _lastAssetIcons = widget.destinations.map((e) {
-      final icon = e.icon;
-      if (icon is AssetImage) return icon.assetName;
-      if (icon is ImageIcon && icon.image is AssetImage) {
-         return (icon.image as AssetImage).assetName;
-      }
-      if (icon is String && icon.contains('/')) return icon;
-      return '';
-    }).toList();
-    _lastSelectedAssetIcons = widget.destinations.map((e) {
-      final selectedIcon = e.selectedIcon ?? e.icon;
-      if (selectedIcon is AssetImage) return selectedIcon.assetName;
-      if (selectedIcon is ImageIcon && selectedIcon.image is AssetImage) {
-         return (selectedIcon.image as AssetImage).assetName;
-      }
-      if (selectedIcon is String && selectedIcon.contains('/')) return selectedIcon;
-      return '';
-    }).toList();
+    _lastSymbols = _mapSymbols();
+    _lastAssetIcons = _mapAssetIcons();
+    _lastSelectedAssetIcons = _mapSelectedAssetIcons();
     _lastBadgeCounts = widget.destinations.map((e) => e.badgeCount).toList();
   }
 
