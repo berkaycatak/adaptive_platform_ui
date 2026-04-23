@@ -404,19 +404,6 @@ class iOS26AlertDialogView: NSObject, FlutterPlatformView {
 
         // Add actions
         var primaryAction: UIAlertAction?
-        var cancelAction: UIAlertAction?
-
-        // Determine preferred action
-        var preferredActionStyle: String?
-        for (index, _) in actionTitles.enumerated() {
-            let style = index < actionStyles.count ? actionStyles[index] : "defaultAction"
-
-            if style == "primary" && preferredActionStyle == nil {
-                preferredActionStyle = "primary"
-            } else if style == "cancel" && preferredActionStyle != "primary" {
-                preferredActionStyle = "cancel"
-            }
-        }
 
         for (index, actionTitle) in actionTitles.enumerated() {
             let style = index < actionStyles.count ? actionStyles[index] : "defaultAction"
@@ -511,24 +498,17 @@ class iOS26AlertDialogView: NSObject, FlutterPlatformView {
 
             action.isEnabled = enabled && style != "disabled"
             alert.addAction(action)
-
-            switch style {
-            case "cancel":
-                cancelAction = action
-            case "primary":
+            if style == "primary" {
                 primaryAction = action
-            default:
-                break
             }
         }
 
-        // Set preferred action
+        // Only promote explicit primary actions.
+        // A cancel action should remain neutral and must not force the
+        // alert tint to red when no primary action is present.
         if let action = primaryAction {
             alert.preferredAction = action
             alert.view.tintColor = UIColor.systemBlue
-        } else if let action = cancelAction {
-            alert.preferredAction = action
-            alert.view.tintColor = UIColor.systemRed
         }
 
         // Present the alert
