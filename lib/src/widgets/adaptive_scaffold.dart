@@ -20,7 +20,13 @@ class AdaptiveNavigationDestination {
     this.addSpacerAfter = false,
   });
 
-  /// Icon to display (SF Symbol name for iOS, IconData for cross-platform)
+  /// Icon to display.
+  ///
+  /// Supported values include:
+  /// - SF Symbol name `String` for iOS native paths
+  /// - `IconData`
+  /// - `Widget`
+  /// - `ImageProvider` such as `AssetImage`, `FileImage`, or `NetworkImage`
   final dynamic icon;
 
   /// Label text for the destination
@@ -346,32 +352,16 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
               onTap: widget.bottomNavigationBar!.onTap!,
               activeColor: widget.bottomNavigationBar!.selectedItemColor,
               items: widget.bottomNavigationBar!.items!.map((dest) {
-                // Determine icon widget
-                Widget iconWidget;
-                if (dest.icon is Widget) {
-                  iconWidget = unselectedColor != null && dest.icon is ImageIcon
-                      ? ImageIcon((dest.icon as ImageIcon).image, color: unselectedColor)
-                      : (dest.icon as Widget);
-                } else {
-                  final IconData iconData = dest.icon is String
-                      ? _sfSymbolToCupertinoIcon(dest.icon as String)
-                      : dest.icon as IconData;
-                  iconWidget = unselectedColor != null
-                      ? Icon(iconData, color: unselectedColor)
-                      : Icon(iconData);
-                }
+                Widget iconWidget = _buildNavigationIconWidget(
+                  rawIcon: dest.icon,
+                  color: unselectedColor,
+                  platform: TargetPlatform.iOS,
+                );
 
-                // Determine selected icon widget
-                Widget activeIconWidget;
-                final selectedIconRaw = dest.selectedIcon ?? dest.icon;
-                if (selectedIconRaw is Widget) {
-                  activeIconWidget = selectedIconRaw;
-                } else {
-                  final IconData iconData = selectedIconRaw is String
-                      ? _sfSymbolToCupertinoIcon(selectedIconRaw)
-                      : selectedIconRaw as IconData;
-                  activeIconWidget = Icon(iconData);
-                }
+                Widget activeIconWidget = _buildNavigationIconWidget(
+                  rawIcon: dest.selectedIcon ?? dest.icon,
+                  platform: TargetPlatform.iOS,
+                );
 
                 if (dest.badgeCount != null && dest.badgeCount! > 0) {
                   iconWidget = AdaptiveBadge(
@@ -617,22 +607,15 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
           onDestinationSelected: widget.bottomNavigationBar!.onTap!,
           indicatorColor: widget.bottomNavigationBar!.selectedItemColor,
           destinations: widget.bottomNavigationBar!.items!.map((dest) {
-            Widget iconWidget;
-            if (dest.icon is Widget) {
-              iconWidget = dest.icon as Widget;
-            } else {
-              final IconData iconData = dest.icon is String ? Icons.circle : dest.icon as IconData;
-              iconWidget = Icon(iconData);
-            }
+            Widget iconWidget = _buildNavigationIconWidget(
+              rawIcon: dest.icon,
+              platform: TargetPlatform.android,
+            );
 
-            Widget selectedIconWidget;
-            final selectedIconRaw = dest.selectedIcon ?? dest.icon;
-            if (selectedIconRaw is Widget) {
-              selectedIconWidget = selectedIconRaw;
-            } else {
-              final IconData iconData = selectedIconRaw is String ? Icons.circle : selectedIconRaw as IconData;
-              selectedIconWidget = Icon(iconData);
-            }
+            Widget selectedIconWidget = _buildNavigationIconWidget(
+              rawIcon: dest.selectedIcon ?? dest.icon,
+              platform: TargetPlatform.android,
+            );
 
             if (dest.badgeCount != null && dest.badgeCount! > 0) {
               iconWidget = AdaptiveBadge(
@@ -747,6 +730,55 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
       'checkmark.circle': CupertinoIcons.checkmark_circle,
     };
     return iconMap[sfSymbol] ?? CupertinoIcons.circle;
+  }
+
+  Widget _buildNavigationIconWidget({
+    required dynamic rawIcon,
+    Color? color,
+    required TargetPlatform platform,
+  }) {
+    if (rawIcon is Widget) {
+      return color != null && rawIcon is ImageIcon
+          ? ImageIcon(rawIcon.image, color: color)
+          : rawIcon;
+    }
+
+    if (rawIcon is ImageProvider) {
+      return _NavigationImageIcon(image: rawIcon);
+    }
+
+    final IconData iconData;
+    if (rawIcon is String) {
+      iconData = platform == TargetPlatform.iOS
+          ? _sfSymbolToCupertinoIcon(rawIcon)
+          : Icons.circle;
+    } else {
+      iconData = rawIcon as IconData;
+    }
+
+    return color != null ? Icon(iconData, color: color) : Icon(iconData);
+  }
+}
+
+class _NavigationImageIcon extends StatelessWidget {
+  const _NavigationImageIcon({required this.image});
+
+  final ImageProvider image;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 26,
+      height: 26,
+      child: ClipOval(
+        child: Image(
+          image: image,
+          fit: BoxFit.cover,
+          errorBuilder: (_, __, ___) =>
+              const Icon(CupertinoIcons.person_crop_circle),
+        ),
+      ),
+    );
   }
 }
 
