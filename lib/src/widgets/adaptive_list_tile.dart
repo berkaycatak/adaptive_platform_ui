@@ -18,7 +18,7 @@ class AdaptiveListTile extends StatelessWidget {
     this.onLongPress,
     this.enabled = true,
     this.selected = false,
-    this.showDivider = true,
+    this.hideBottomDivider = false,
     this.backgroundColor,
     this.padding,
   });
@@ -47,8 +47,9 @@ class AdaptiveListTile extends StatelessWidget {
   /// Whether this list tile is selected.
   final bool selected;
 
-  /// Whether the bottom divider should be shown.
-  final bool showDivider;
+  /// Whether to hide the bottom divider (iOS only).
+  /// Useful for the last tile in a grouped list to avoid a double border.
+  final bool hideBottomDivider;
 
   /// The background color of the tile.
   final Color? backgroundColor;
@@ -82,7 +83,7 @@ class AdaptiveListTile extends StatelessWidget {
                 : (isDark
                       ? CupertinoColors.darkBackgroundGray
                       : CupertinoColors.white)),
-        border: !showDivider
+        border: hideBottomDivider
             ? null
             : Border(
                 bottom: BorderSide(
