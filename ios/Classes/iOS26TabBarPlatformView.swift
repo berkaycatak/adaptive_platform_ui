@@ -10,8 +10,13 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
     private var currentSymbols: [String] = []
     private var currentAssetIcons: [String] = []
     private var currentSelectedAssetIcons: [String] = []
+    private var currentFileIcons: [String] = []
+    private var currentSelectedFileIcons: [String] = []
+    private var currentNetworkIcons: [String] = []
+    private var currentSelectedNetworkIcons: [String] = []
     private var currentSearchFlags: [Bool] = []
     private var currentBadgeCounts: [Int?] = []
+    private let imageCache = NSCache<NSString, UIImage>()
 
     init(frame: CGRect, viewId: Int64, args: Any?, messenger: FlutterBinaryMessenger) {
         self.channel = FlutterMethodChannel(
@@ -24,6 +29,10 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
         var symbols: [String] = []
         var assetIcons: [String] = []
         var selectedAssetIcons: [String] = []
+        var fileIcons: [String] = []
+        var selectedFileIcons: [String] = []
+        var networkIcons: [String] = []
+        var selectedNetworkIcons: [String] = []
         var searchFlags: [Bool] = []
         var badgeCounts: [Int?] = []
         var spacerFlags: [Bool] = []
@@ -42,6 +51,10 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
             symbols = (dict["sfSymbols"] as? [String]) ?? []
             assetIcons = (dict["assetIcons"] as? [String]) ?? []
             selectedAssetIcons = (dict["selectedAssetIcons"] as? [String]) ?? []
+            fileIcons = (dict["fileIcons"] as? [String]) ?? []
+            selectedFileIcons = (dict["selectedFileIcons"] as? [String]) ?? []
+            networkIcons = (dict["networkIcons"] as? [String]) ?? []
+            selectedNetworkIcons = (dict["selectedNetworkIcons"] as? [String]) ?? []
             searchFlags = (dict["searchFlags"] as? [Bool]) ?? []
             spacerFlags = (dict["spacerFlags"] as? [Bool]) ?? []
             if let badgeData = dict["badgeCounts"] as? [NSNumber?] {
@@ -168,58 +181,62 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
                     var image: UIImage? = nil
                     var selectedImage: UIImage? = nil
 
-                    if i < assetIcons.count && !assetIcons[i].isEmpty {
-                        let assetName = assetIcons[i]
-                        let key = FlutterDartProject.lookupKey(forAsset: assetName)
-                        let rawImageOriginal = UIImage(named: key)
-                        let rawImage = rawImageOriginal != nil ? self.resizeImage(image: rawImageOriginal!) : nil
-                        
-                        var selRawImage = rawImage
-                        if i < selectedAssetIcons.count && !selectedAssetIcons[i].isEmpty {
-                            let selKey = FlutterDartProject.lookupKey(forAsset: selectedAssetIcons[i])
-                            let selRawOriginal = UIImage(named: selKey)
-                            if selRawOriginal != nil {
-                                selRawImage = self.resizeImage(image: selRawOriginal!)
-                            }
-                        }
-                        
-                        if #available(iOS 26.0, *) {
-                            if let unselTint = unselectedTint {
-                                image = rawImage?.withTintColor(unselTint, renderingMode: .alwaysOriginal)
-                            } else {
-                                image = rawImage?.withRenderingMode(.alwaysTemplate)
-                            }
-                            selectedImage = selRawImage?.withRenderingMode(.alwaysTemplate)
-                        } else {
-                            image = rawImage
-                            selectedImage = selRawImage
-                        }
-                    } else if i < symbols.count && !symbols[i].isEmpty {
-                        // iOS 26+: Use different rendering modes for selected/unselected
-                        if #available(iOS 26.0, *) {
-                            // Unselected: Only apply custom color if unselectedTint is provided
-                            if let unselTint = unselectedTint {
-                                // Create colored image for unselected state
-                                if let originalImage = UIImage(systemName: symbols[i]) {
-                                    image = originalImage.withTintColor(unselTint, renderingMode: .alwaysOriginal)
-                                }
-                            } else {
-                                // No custom color - use template mode to respect theme
-                                image = UIImage(systemName: symbols[i])?.withRenderingMode(.alwaysTemplate)
-                            }
-
-                            // Selected: Use template rendering so tintColor applies
-                            selectedImage = UIImage(systemName: symbols[i])?.withRenderingMode(.alwaysTemplate)
-                        } else {
-                            // iOS <26: Use default behavior
-                            image = UIImage(systemName: symbols[i])
-                            selectedImage = image
-                        }
-                    }
-
-                    // Create item with title
-                    item = UITabBarItem(title: title ?? "Tab \(i+1)", image: image, selectedImage: selectedImage)
+                    item = UITabBarItem(title: title ?? "Tab \(i+1)", image: nil, selectedImage: nil)
                     item.tag = i
+
+                    if !self.configureRuntimeImages(for: item, index: i) {
+                        if i < assetIcons.count && !assetIcons[i].isEmpty {
+                            let assetName = assetIcons[i]
+                            let key = FlutterDartProject.lookupKey(forAsset: assetName)
+                            let rawImageOriginal = UIImage(named: key)
+                            let rawImage = rawImageOriginal != nil ? self.resizeImage(image: rawImageOriginal!) : nil
+
+                            var selRawImage = rawImage
+                            if i < selectedAssetIcons.count && !selectedAssetIcons[i].isEmpty {
+                                let selKey = FlutterDartProject.lookupKey(forAsset: selectedAssetIcons[i])
+                                let selRawOriginal = UIImage(named: selKey)
+                                if selRawOriginal != nil {
+                                    selRawImage = self.resizeImage(image: selRawOriginal!)
+                                }
+                            }
+
+                            if #available(iOS 26.0, *) {
+                                if let unselTint = unselectedTint {
+                                    image = rawImage?.withTintColor(unselTint, renderingMode: .alwaysOriginal)
+                                } else {
+                                    image = rawImage?.withRenderingMode(.alwaysTemplate)
+                                }
+                                selectedImage = selRawImage?.withRenderingMode(.alwaysTemplate)
+                            } else {
+                                image = rawImage
+                                selectedImage = selRawImage
+                            }
+                        } else if i < symbols.count && !symbols[i].isEmpty {
+                            // iOS 26+: Use different rendering modes for selected/unselected
+                            if #available(iOS 26.0, *) {
+                                // Unselected: Only apply custom color if unselectedTint is provided
+                                if let unselTint = unselectedTint {
+                                    // Create colored image for unselected state
+                                    if let originalImage = UIImage(systemName: symbols[i]) {
+                                        image = originalImage.withTintColor(unselTint, renderingMode: .alwaysOriginal)
+                                    }
+                                } else {
+                                    // No custom color - use template mode to respect theme
+                                    image = UIImage(systemName: symbols[i])?.withRenderingMode(.alwaysTemplate)
+                                }
+
+                                // Selected: Use template rendering so tintColor applies
+                                selectedImage = UIImage(systemName: symbols[i])?.withRenderingMode(.alwaysTemplate)
+                            } else {
+                                // iOS <26: Use default behavior
+                                image = UIImage(systemName: symbols[i])
+                                selectedImage = image
+                            }
+                        }
+
+                        item.image = image
+                        item.selectedImage = selectedImage
+                    }
                 }
 
                 // Set badge value if provided
@@ -234,7 +251,10 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
             return items
         }
 
-        let count = max(labels.count, symbols.count)
+        let count = max(
+            max(labels.count, symbols.count),
+            max(max(assetIcons.count, fileIcons.count), networkIcons.count)
+        )
         bar.items = buildItems(0..<count)
 
         // Note: spacerFlags are received but not yet implemented for UITabBar
@@ -259,9 +279,12 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
         self.currentSymbols = symbols
         self.currentAssetIcons = assetIcons
         self.currentSelectedAssetIcons = selectedAssetIcons
+        self.currentFileIcons = fileIcons
+        self.currentSelectedFileIcons = selectedFileIcons
+        self.currentNetworkIcons = networkIcons
+        self.currentSelectedNetworkIcons = selectedNetworkIcons
         self.currentSearchFlags = searchFlags
         self.currentBadgeCounts = badgeCounts
-
         // Apply minimize behavior if available
         self.applyMinimizeBehavior()
 
@@ -304,6 +327,10 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
 
             let assetIcons = (args["assetIcons"] as? [String]) ?? []
             let selectedAssetIcons = (args["selectedAssetIcons"] as? [String]) ?? []
+            let fileIcons = (args["fileIcons"] as? [String]) ?? []
+            let selectedFileIcons = (args["selectedFileIcons"] as? [String]) ?? []
+            let networkIcons = (args["networkIcons"] as? [String]) ?? []
+            let selectedNetworkIcons = (args["selectedNetworkIcons"] as? [String]) ?? []
             let searchFlags = (args["searchFlags"] as? [Bool]) ?? []
             let selectedIndex = (args["selectedIndex"] as? NSNumber)?.intValue ?? 0
             var badgeCounts: [Int?] = []
@@ -315,13 +342,18 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
             self.currentSymbols = symbols
             self.currentAssetIcons = assetIcons
             self.currentSelectedAssetIcons = selectedAssetIcons
+            self.currentFileIcons = fileIcons
+            self.currentSelectedFileIcons = selectedFileIcons
+            self.currentNetworkIcons = networkIcons
+            self.currentSelectedNetworkIcons = selectedNetworkIcons
             self.currentSearchFlags = searchFlags
             self.currentBadgeCounts = badgeCounts
 
-            let maxCount = max(labels.count, symbols.count)
-            let count = max(maxCount, assetIcons.count)
+            let count = max(
+                max(labels.count, symbols.count),
+                max(max(assetIcons.count, fileIcons.count), networkIcons.count)
+            )
 
-            // Reuse the same buildItems function with rendering mode logic
             let buildItems: (Range<Int>) -> [UITabBarItem] = { range in
                 var items: [UITabBarItem] = []
                 for i in range {
@@ -348,61 +380,65 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
                         var image: UIImage? = nil
                         var selectedImage: UIImage? = nil
 
-                        if i < assetIcons.count && !assetIcons[i].isEmpty {
-                            let assetName = assetIcons[i]
-                            let key = FlutterDartProject.lookupKey(forAsset: assetName)
-                            let rawImageOriginal = UIImage(named: key)
-                            let rawImage = rawImageOriginal != nil ? self.resizeImage(image: rawImageOriginal!) : nil
-                            
-                            var selRawImage = rawImage
-                            if i < selectedAssetIcons.count && !selectedAssetIcons[i].isEmpty {
-                                let selKey = FlutterDartProject.lookupKey(forAsset: selectedAssetIcons[i])
-                                let selRawOriginal = UIImage(named: selKey)
-                                if selRawOriginal != nil {
-                                    selRawImage = self.resizeImage(image: selRawOriginal!)
-                                }
-                            }
-                            
-                            if #available(iOS 26.0, *) {
-                                let unselTint = self.tabBar?.unselectedItemTintColor
-                                if let unselTint = unselTint {
-                                    image = rawImage?.withTintColor(unselTint, renderingMode: .alwaysOriginal)
-                                } else {
-                                    image = rawImage?.withRenderingMode(.alwaysTemplate)
-                                }
-                                selectedImage = selRawImage?.withRenderingMode(.alwaysTemplate)
-                            } else {
-                                image = rawImage
-                                selectedImage = selRawImage
-                            }
-                        } else if i < symbols.count && !symbols[i].isEmpty {
-                            // iOS 26+: Use different rendering modes for selected/unselected
-                            if #available(iOS 26.0, *) {
-                                // Get current unselected color from tab bar
-                                let unselTint = self.tabBar?.unselectedItemTintColor
-
-                                // Unselected: Only apply custom color if unselectedTint is set
-                                if let unselTint = unselTint {
-                                    if let originalImage = UIImage(systemName: symbols[i]) {
-                                        image = originalImage.withTintColor(unselTint, renderingMode: .alwaysOriginal)
-                                    }
-                                } else {
-                                    // No custom color - use template mode to respect theme
-                                    image = UIImage(systemName: symbols[i])?.withRenderingMode(.alwaysTemplate)
-                                }
-
-                                // Selected: Use template rendering so tintColor applies
-                                selectedImage = UIImage(systemName: symbols[i])?.withRenderingMode(.alwaysTemplate)
-                            } else {
-                                // iOS <26: Use default behavior
-                                image = UIImage(systemName: symbols[i])
-                                selectedImage = image
-                            }
-                        }
-
-                        // Create item with title
-                        item = UITabBarItem(title: title ?? "Tab \(i+1)", image: image, selectedImage: selectedImage)
+                        item = UITabBarItem(title: title ?? "Tab \(i+1)", image: nil, selectedImage: nil)
                         item.tag = i
+
+                        if !self.configureRuntimeImages(for: item, index: i) {
+                            if i < assetIcons.count && !assetIcons[i].isEmpty {
+                                let assetName = assetIcons[i]
+                                let key = FlutterDartProject.lookupKey(forAsset: assetName)
+                                let rawImageOriginal = UIImage(named: key)
+                                let rawImage = rawImageOriginal != nil ? self.resizeImage(image: rawImageOriginal!) : nil
+
+                                var selRawImage = rawImage
+                                if i < selectedAssetIcons.count && !selectedAssetIcons[i].isEmpty {
+                                    let selKey = FlutterDartProject.lookupKey(forAsset: selectedAssetIcons[i])
+                                    let selRawOriginal = UIImage(named: selKey)
+                                    if selRawOriginal != nil {
+                                        selRawImage = self.resizeImage(image: selRawOriginal!)
+                                    }
+                                }
+
+                                if #available(iOS 26.0, *) {
+                                    let unselTint = self.tabBar?.unselectedItemTintColor
+                                    if let unselTint = unselTint {
+                                        image = rawImage?.withTintColor(unselTint, renderingMode: .alwaysOriginal)
+                                    } else {
+                                        image = rawImage?.withRenderingMode(.alwaysTemplate)
+                                    }
+                                    selectedImage = selRawImage?.withRenderingMode(.alwaysTemplate)
+                                } else {
+                                    image = rawImage
+                                    selectedImage = selRawImage
+                                }
+                            } else if i < symbols.count && !symbols[i].isEmpty {
+                                // iOS 26+: Use different rendering modes for selected/unselected
+                                if #available(iOS 26.0, *) {
+                                    // Get current unselected color from tab bar
+                                    let unselTint = self.tabBar?.unselectedItemTintColor
+
+                                    // Unselected: Only apply custom color if unselectedTint is set
+                                    if let unselTint = unselTint {
+                                        if let originalImage = UIImage(systemName: symbols[i]) {
+                                            image = originalImage.withTintColor(unselTint, renderingMode: .alwaysOriginal)
+                                        }
+                                    } else {
+                                        // No custom color - use template mode to respect theme
+                                        image = UIImage(systemName: symbols[i])?.withRenderingMode(.alwaysTemplate)
+                                    }
+
+                                    // Selected: Use template rendering so tintColor applies
+                                    selectedImage = UIImage(systemName: symbols[i])?.withRenderingMode(.alwaysTemplate)
+                                } else {
+                                    // iOS <26: Use default behavior
+                                    image = UIImage(systemName: symbols[i])
+                                    selectedImage = image
+                                }
+                            }
+
+                            item.image = image
+                            item.selectedImage = selectedImage
+                        }
                     }
 
                     // Set badge value if provided
@@ -551,15 +587,17 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
         guard let bar = self.tabBar else { return }
 
         let currentSelectedIndex = bar.items?.firstIndex { $0 == bar.selectedItem } ?? 0
-        let unselTint = bar.unselectedItemTintColor
 
         // Rebuild items with new colors
         var items: [UITabBarItem] = []
-        for i in 0..<currentLabels.count {
-            let title = currentLabels[i]
+        let itemCount = max(
+            max(currentLabels.count, currentSymbols.count),
+            max(max(currentAssetIcons.count, currentFileIcons.count), currentNetworkIcons.count)
+        )
+        for i in 0..<itemCount {
+            let title = i < currentLabels.count ? currentLabels[i] : nil
             let isSearch = (i < currentSearchFlags.count) && currentSearchFlags[i]
             let badgeCount = (i < currentBadgeCounts.count) ? currentBadgeCounts[i] : nil
-
             let item: UITabBarItem
 
             if isSearch {
@@ -574,68 +612,71 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
                 var image: UIImage? = nil
                 var selectedImage: UIImage? = nil
 
-                if i < currentAssetIcons.count && !currentAssetIcons[i].isEmpty {
-                    if #available(iOS 26.0, *) {
-                        let key = FlutterDartProject.lookupKey(forAsset: currentAssetIcons[i])
-                        let rawImageOriginal = UIImage(named: key)
-                        let rawImage = rawImageOriginal != nil ? self.resizeImage(image: rawImageOriginal!) : nil
-                        
-                        var selRawImage = rawImage
-                        if i < currentSelectedAssetIcons.count && !currentSelectedAssetIcons[i].isEmpty {
-                            let selKey = FlutterDartProject.lookupKey(forAsset: currentSelectedAssetIcons[i])
-                            let selRawOriginal = UIImage(named: selKey)
-                            if selRawOriginal != nil {
-                                selRawImage = self.resizeImage(image: selRawOriginal!)
+                item = UITabBarItem(title: title, image: nil, selectedImage: nil)
+                item.tag = i
+
+                if !configureRuntimeImages(for: item, index: i) {
+                    if i < currentAssetIcons.count && !currentAssetIcons[i].isEmpty {
+                        if #available(iOS 26.0, *) {
+                            let key = FlutterDartProject.lookupKey(forAsset: currentAssetIcons[i])
+                            let rawImageOriginal = UIImage(named: key)
+                            let rawImage = rawImageOriginal != nil ? self.resizeImage(image: rawImageOriginal!) : nil
+
+                            var selRawImage = rawImage
+                            if i < currentSelectedAssetIcons.count && !currentSelectedAssetIcons[i].isEmpty {
+                                let selKey = FlutterDartProject.lookupKey(forAsset: currentSelectedAssetIcons[i])
+                                let selRawOriginal = UIImage(named: selKey)
+                                if selRawOriginal != nil {
+                                    selRawImage = self.resizeImage(image: selRawOriginal!)
+                                }
                             }
-                        }
-                        
-                        if let unselTint = unselTint {
-                            image = rawImage?.withTintColor(unselTint, renderingMode: .alwaysOriginal)
+
+                            if let unselTint = bar.unselectedItemTintColor {
+                                image = rawImage?.withTintColor(unselTint, renderingMode: .alwaysOriginal)
+                            } else {
+                                image = rawImage?.withRenderingMode(.alwaysTemplate)
+                            }
+                            selectedImage = selRawImage?.withRenderingMode(.alwaysTemplate)
                         } else {
-                            image = rawImage?.withRenderingMode(.alwaysTemplate)
-                        }
-                        selectedImage = selRawImage?.withRenderingMode(.alwaysTemplate)
-                    } else {
-                        let key = FlutterDartProject.lookupKey(forAsset: currentAssetIcons[i])
-                        let rawImageOriginal = UIImage(named: key)
-                        image = rawImageOriginal != nil ? self.resizeImage(image: rawImageOriginal!) : nil
-                        
-                        if i < currentSelectedAssetIcons.count && !currentSelectedAssetIcons[i].isEmpty {
-                            let selKey = FlutterDartProject.lookupKey(forAsset: currentSelectedAssetIcons[i])
-                            let selRawOriginal = UIImage(named: selKey)
-                            if selRawOriginal != nil {
-                                selectedImage = self.resizeImage(image: selRawOriginal!)
+                            let key = FlutterDartProject.lookupKey(forAsset: currentAssetIcons[i])
+                            let rawImageOriginal = UIImage(named: key)
+                            image = rawImageOriginal != nil ? self.resizeImage(image: rawImageOriginal!) : nil
+
+                            if i < currentSelectedAssetIcons.count && !currentSelectedAssetIcons[i].isEmpty {
+                                let selKey = FlutterDartProject.lookupKey(forAsset: currentSelectedAssetIcons[i])
+                                let selRawOriginal = UIImage(named: selKey)
+                                if selRawOriginal != nil {
+                                    selectedImage = self.resizeImage(image: selRawOriginal!)
+                                } else {
+                                    selectedImage = image
+                                }
                             } else {
                                 selectedImage = image
                             }
+                        }
+                    } else if i < currentSymbols.count && !currentSymbols[i].isEmpty {
+                        if #available(iOS 26.0, *) {
+                            let unselTint = bar.unselectedItemTintColor
+
+                            if let unselTint = unselTint {
+                                if let originalImage = UIImage(systemName: currentSymbols[i]) {
+                                    image = originalImage.withTintColor(unselTint, renderingMode: .alwaysOriginal)
+                                }
+                            } else {
+                                image = UIImage(systemName: currentSymbols[i])?.withRenderingMode(.alwaysTemplate)
+                            }
+                            selectedImage = UIImage(systemName: currentSymbols[i])?.withRenderingMode(.alwaysTemplate)
                         } else {
+                            image = UIImage(systemName: currentSymbols[i])
                             selectedImage = image
                         }
                     }
-                } else if i < currentSymbols.count && !currentSymbols[i].isEmpty {
-                    if #available(iOS 26.0, *) {
-                        // Unselected: Only apply custom color if unselectedTint is set
-                        if let unselTint = unselTint {
-                            if let originalImage = UIImage(systemName: currentSymbols[i]) {
-                                image = originalImage.withTintColor(unselTint, renderingMode: .alwaysOriginal)
-                            }
-                        } else {
-                            // No custom color - use template mode to respect theme
-                            image = UIImage(systemName: currentSymbols[i])?.withRenderingMode(.alwaysTemplate)
-                        }
-                        // Selected: Use template rendering so tintColor applies
-                        selectedImage = UIImage(systemName: currentSymbols[i])?.withRenderingMode(.alwaysTemplate)
-                    } else {
-                        image = UIImage(systemName: currentSymbols[i])
-                        selectedImage = image
-                    }
-                }
 
-                item = UITabBarItem(title: title, image: image, selectedImage: selectedImage)
-                item.tag = i
+                    item.image = image
+                    item.selectedImage = selectedImage
+                }
             }
 
-            // Set badge value if provided
             if let count = badgeCount, count > 0 {
                 item.badgeValue = count > 99 ? "99+" : String(count)
             }
@@ -665,6 +706,120 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
         return UIColor(red: r, green: g, blue: b, alpha: a)
     }
 
+    private func runtimeFilePath(for index: Int, selected: Bool) -> String {
+        let paths = selected ? currentSelectedFileIcons : currentFileIcons
+        if index < paths.count, !paths[index].isEmpty {
+            return paths[index]
+        }
+        if selected, index < currentFileIcons.count {
+            return currentFileIcons[index]
+        }
+        return ""
+    }
+
+    private func runtimeNetworkURL(for index: Int, selected: Bool) -> String {
+        let urls = selected ? currentSelectedNetworkIcons : currentNetworkIcons
+        if index < urls.count, !urls[index].isEmpty {
+            return urls[index]
+        }
+        if selected, index < currentNetworkIcons.count {
+            return currentNetworkIcons[index]
+        }
+        return ""
+    }
+
+    private func hasRuntimeImage(for index: Int) -> Bool {
+        return !runtimeFilePath(for: index, selected: false).isEmpty ||
+            !runtimeNetworkURL(for: index, selected: false).isEmpty ||
+            !runtimeFilePath(for: index, selected: true).isEmpty ||
+            !runtimeNetworkURL(for: index, selected: true).isEmpty
+    }
+
+    private func placeholderAvatarImage() -> UIImage? {
+        return UIImage(systemName: "person.crop.circle")
+    }
+
+    private func loadRuntimeImage(filePath: String, networkURL: String) -> UIImage? {
+        if !filePath.isEmpty, let image = UIImage(contentsOfFile: filePath) {
+            return avatarImage(from: image)
+        }
+
+        if !networkURL.isEmpty, let cached = imageCache.object(forKey: networkURL as NSString) {
+            return avatarImage(from: cached)
+        }
+
+        return nil
+    }
+
+    private func fetchNetworkImageIfNeeded(
+        urlString: String,
+        completion: @escaping (UIImage?) -> Void
+    ) {
+        guard !urlString.isEmpty else {
+            completion(nil)
+            return
+        }
+
+        if let cached = imageCache.object(forKey: urlString as NSString) {
+            completion(avatarImage(from: cached))
+            return
+        }
+
+        guard let url = URL(string: urlString) else {
+            completion(nil)
+            return
+        }
+
+        URLSession.shared.dataTask(with: url) { [weak self] data, _, _ in
+            guard let self = self,
+                  let data = data,
+                  let image = UIImage(data: data) else {
+                DispatchQueue.main.async { completion(nil) }
+                return
+            }
+
+            self.imageCache.setObject(image, forKey: urlString as NSString)
+            let avatar = self.avatarImage(from: image)
+            DispatchQueue.main.async {
+                completion(avatar)
+            }
+        }.resume()
+    }
+
+    private func configureRuntimeImages(for item: UITabBarItem, index: Int) -> Bool {
+        guard hasRuntimeImage(for: index) else { return false }
+
+        let unselectedFile = runtimeFilePath(for: index, selected: false)
+        let selectedFile = runtimeFilePath(for: index, selected: true)
+        let unselectedNetwork = runtimeNetworkURL(for: index, selected: false)
+        let selectedNetwork = runtimeNetworkURL(for: index, selected: true)
+
+        let unselectedImage = loadRuntimeImage(filePath: unselectedFile, networkURL: unselectedNetwork)
+        let selectedImage = loadRuntimeImage(filePath: selectedFile, networkURL: selectedNetwork)
+
+        item.image = (unselectedImage ?? placeholderAvatarImage())?.withRenderingMode(.alwaysOriginal)
+        item.selectedImage = (selectedImage ?? unselectedImage ?? placeholderAvatarImage())?.withRenderingMode(.alwaysOriginal)
+
+        if unselectedImage == nil && !unselectedNetwork.isEmpty {
+            fetchNetworkImageIfNeeded(urlString: unselectedNetwork) { [weak item] avatar in
+                guard let item = item, let avatar = avatar else { return }
+                item.image = avatar.withRenderingMode(.alwaysOriginal)
+                if selectedImage == nil && selectedNetwork.isEmpty && selectedFile.isEmpty {
+                    item.selectedImage = avatar.withRenderingMode(.alwaysOriginal)
+                }
+            }
+        }
+
+        if selectedImage == nil && !selectedNetwork.isEmpty {
+            fetchNetworkImageIfNeeded(urlString: selectedNetwork) { [weak item] avatar in
+                guard let item = item, let avatar = avatar else { return }
+                item.selectedImage = avatar.withRenderingMode(.alwaysOriginal)
+            }
+        }
+
+        return true
+    }
+
     private func resizeImage(image: UIImage, targetSize: CGSize = CGSize(width: 26, height: 26)) -> UIImage {
         let size = image.size
         if size.width <= targetSize.width && size.height <= targetSize.height {
@@ -691,6 +846,22 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
             let newImage = UIGraphicsGetImageFromCurrentImageContext()
             UIGraphicsEndImageContext()
             return newImage ?? image
+        }
+    }
+
+    private func avatarImage(from image: UIImage, targetSize: CGSize = CGSize(width: 26, height: 26)) -> UIImage {
+        let renderer = UIGraphicsImageRenderer(size: targetSize)
+        return renderer.image { _ in
+            UIBezierPath(ovalIn: CGRect(origin: .zero, size: targetSize)).addClip()
+
+            let aspectFillScale = max(targetSize.width / image.size.width, targetSize.height / image.size.height)
+            let scaledSize = CGSize(width: image.size.width * aspectFillScale, height: image.size.height * aspectFillScale)
+            let origin = CGPoint(
+                x: (targetSize.width - scaledSize.width) / 2.0,
+                y: (targetSize.height - scaledSize.height) / 2.0
+            )
+
+            image.draw(in: CGRect(origin: origin, size: scaledSize))
         }
     }
 }
