@@ -346,40 +346,41 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
               onTap: widget.bottomNavigationBar!.onTap!,
               activeColor: widget.bottomNavigationBar!.selectedItemColor,
               items: widget.bottomNavigationBar!.items!.map((dest) {
-                // Convert icon to IconData if it's a String (SF Symbol)
-                final IconData iconData = dest.icon is String
-                    ? _sfSymbolToCupertinoIcon(dest.icon as String)
-                    : dest.icon as IconData;
+                // Determine icon widget
+                Widget iconWidget;
+                if (dest.icon is Widget) {
+                  iconWidget = unselectedColor != null && dest.icon is ImageIcon
+                      ? ImageIcon((dest.icon as ImageIcon).image, color: unselectedColor)
+                      : (dest.icon as Widget);
+                } else {
+                  final IconData iconData = dest.icon is String
+                      ? _sfSymbolToCupertinoIcon(dest.icon as String)
+                      : dest.icon as IconData;
+                  iconWidget = unselectedColor != null
+                      ? Icon(iconData, color: unselectedColor)
+                      : Icon(iconData);
+                }
 
-                final IconData? selectedIconData = dest.selectedIcon != null
-                    ? (dest.selectedIcon is String
-                          ? _sfSymbolToCupertinoIcon(
-                              dest.selectedIcon as String,
-                            )
-                          : dest.selectedIcon as IconData)
-                    : null;
-
-                // Wrap icons with badge if badgeCount is provided
-                // Only apply color if unselectedItemColor is provided
-                Widget iconWidget = unselectedColor != null
-                    ? Icon(iconData, color: unselectedColor)
-                    : Icon(iconData);
-                Widget activeIconWidget = selectedIconData != null
-                    ? Icon(selectedIconData)
-                    : Icon(iconData);
+                // Determine selected icon widget
+                Widget activeIconWidget;
+                final selectedIconRaw = dest.selectedIcon ?? dest.icon;
+                if (selectedIconRaw is Widget) {
+                  activeIconWidget = selectedIconRaw;
+                } else {
+                  final IconData iconData = selectedIconRaw is String
+                      ? _sfSymbolToCupertinoIcon(selectedIconRaw)
+                      : selectedIconRaw as IconData;
+                  activeIconWidget = Icon(iconData);
+                }
 
                 if (dest.badgeCount != null && dest.badgeCount! > 0) {
                   iconWidget = AdaptiveBadge(
                     count: dest.badgeCount,
-                    child: unselectedColor != null
-                        ? Icon(iconData, color: unselectedColor)
-                        : Icon(iconData),
+                    child: iconWidget,
                   );
                   activeIconWidget = AdaptiveBadge(
                     count: dest.badgeCount,
-                    child: selectedIconData != null
-                        ? Icon(selectedIconData)
-                        : Icon(iconData),
+                    child: activeIconWidget,
                   );
                 }
 
@@ -616,35 +617,31 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
           onDestinationSelected: widget.bottomNavigationBar!.onTap!,
           indicatorColor: widget.bottomNavigationBar!.selectedItemColor,
           destinations: widget.bottomNavigationBar!.items!.map((dest) {
-            // Convert icon to IconData if it's a String (SF Symbol - fallback to Icons)
-            final IconData iconData = dest.icon is String
-                ? Icons
-                      .circle // Fallback for Android if SF Symbol is provided
-                : dest.icon as IconData;
+            Widget iconWidget;
+            if (dest.icon is Widget) {
+              iconWidget = dest.icon as Widget;
+            } else {
+              final IconData iconData = dest.icon is String ? Icons.circle : dest.icon as IconData;
+              iconWidget = Icon(iconData);
+            }
 
-            final IconData? selectedIconData = dest.selectedIcon != null
-                ? (dest.selectedIcon is String
-                      ? Icons
-                            .circle // Fallback for Android
-                      : dest.selectedIcon as IconData)
-                : null;
-
-            // Wrap icons with badge if badgeCount is provided
-            Widget iconWidget = Icon(iconData);
-            Widget selectedIconWidget = selectedIconData != null
-                ? Icon(selectedIconData)
-                : Icon(iconData);
+            Widget selectedIconWidget;
+            final selectedIconRaw = dest.selectedIcon ?? dest.icon;
+            if (selectedIconRaw is Widget) {
+              selectedIconWidget = selectedIconRaw;
+            } else {
+              final IconData iconData = selectedIconRaw is String ? Icons.circle : selectedIconRaw as IconData;
+              selectedIconWidget = Icon(iconData);
+            }
 
             if (dest.badgeCount != null && dest.badgeCount! > 0) {
               iconWidget = AdaptiveBadge(
                 count: dest.badgeCount,
-                child: Icon(iconData),
+                child: iconWidget,
               );
               selectedIconWidget = AdaptiveBadge(
                 count: dest.badgeCount,
-                child: selectedIconData != null
-                    ? Icon(selectedIconData)
-                    : Icon(iconData),
+                child: selectedIconWidget,
               );
             }
 
