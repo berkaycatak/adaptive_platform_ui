@@ -42,14 +42,16 @@ class _AdaptivePlatformUIDemoState extends State<AdaptivePlatformUIDemo> {
         brightness: Brightness.dark,
       ),
       localizationsDelegates: [
+        // Important!
         GlobalMaterialLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate, // Important!
-        DefaultWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
       ],
       locale: const Locale('en'),
       supportedLocales: [
         const Locale('en'), // English
         const Locale('tr'), // Turkish
+        const Locale('ar'), // Arabic
         // ... other locales the app supports
       ],
       routerConfig: routerService.router,
