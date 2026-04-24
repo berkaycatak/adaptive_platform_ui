@@ -71,6 +71,7 @@ class AdaptiveAlertDialog {
 
       return showCupertinoDialog<void>(
         context: context,
+        barrierColor: CupertinoColors.transparent,
         builder: (context) => IOS26AlertDialog(
           title: title,
           message: message,
