@@ -19,6 +19,8 @@ class IOS26SegmentedControl extends StatefulWidget {
     this.icons,
     this.iconSize,
     this.iconColor,
+    this.textColor,
+    this.selectedTextColor,
   });
 
   /// Segment labels to display, in order
@@ -51,6 +53,12 @@ class IOS26SegmentedControl extends StatefulWidget {
   /// Icon color (when using icons)
   final Color? iconColor;
 
+  /// Optional text color for unselected segments.
+  final Color? textColor;
+
+  /// Optional text color for the selected segment.
+  final Color? selectedTextColor;
+
   @override
   State<IOS26SegmentedControl> createState() => _IOS26SegmentedControlState();
 }
@@ -60,7 +68,9 @@ class _IOS26SegmentedControlState extends State<IOS26SegmentedControl> {
   late final int _id;
   late final MethodChannel _channel;
   bool? _lastIsDark;
+  int? _lastTintColor;
   int? _lastTextColor;
+  int? _lastSelectedTextColor;
 
   @override
   void initState() {
@@ -92,16 +102,24 @@ class _IOS26SegmentedControlState extends State<IOS26SegmentedControl> {
   Future<void> _syncThemeIfNeeded() async {
     final isDark = _effectiveBrightness() == Brightness.dark;
     final themeParams = _buildThemeParams();
+    final tintColor = widget.color != null ? _colorToARGB(widget.color!) : null;
     final textColor = themeParams['textColor'] as int;
+    final selectedTextColor = themeParams['selectedTextColor'] as int;
 
-    if (_lastIsDark != isDark || _lastTextColor != textColor) {
+    if (_lastIsDark != isDark ||
+        _lastTintColor != tintColor ||
+        _lastTextColor != textColor ||
+        _lastSelectedTextColor != selectedTextColor) {
       try {
         await _channel.invokeMethod('setBrightness', {
           'isDark': isDark,
+          if (tintColor != null) 'tintColor': tintColor,
           ...themeParams,
         });
         _lastIsDark = isDark;
+        _lastTintColor = tintColor;
         _lastTextColor = textColor;
+        _lastSelectedTextColor = selectedTextColor;
       } catch (e) {
         // Ignore errors if platform view is not yet ready
       }
@@ -130,6 +148,8 @@ class _IOS26SegmentedControlState extends State<IOS26SegmentedControl> {
         'index': widget.selectedIndex,
       });
     }
+
+    _syncThemeIfNeeded();
   }
 
   int _colorToARGB(Color color) {
@@ -147,13 +167,23 @@ class _IOS26SegmentedControlState extends State<IOS26SegmentedControl> {
     final themeTextStyle = cupertinoTheme.textTheme.textStyle;
 
     final effectiveTextColor =
+        widget.textColor ??
         baseTextStyle.color ??
         themeTextStyle.color ??
         (brightness == Brightness.dark
             ? CupertinoColors.white
             : CupertinoColors.black);
 
-    return <String, dynamic>{'textColor': _colorToARGB(effectiveTextColor)};
+    final effectiveSelectedTextColor =
+        widget.selectedTextColor ??
+        (widget.color != null
+            ? CupertinoColors.white
+            : effectiveTextColor);
+
+    return <String, dynamic>{
+      'textColor': _colorToARGB(effectiveTextColor),
+      'selectedTextColor': _colorToARGB(effectiveSelectedTextColor),
+    };
   }
 
   Map<String, dynamic> _buildCreationParams() {
