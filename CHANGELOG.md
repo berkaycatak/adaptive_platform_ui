@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.1.106]
+* **NEW**: Added `ImageProvider` support (`AssetImage`, `FileImage`, `NetworkImage`) for `AdaptiveBottomNavigationBar` icons — including async network image loading with caching and circular avatar rendering for iOS 26+ native tab bar (@philasmar)
+* **NEW**: Added `textColor` and `selectedTextColor` props to `AdaptiveSegmentedControl` for explicit label color customization across iOS 26+, iOS <26, and Android (@philasmar)
+* **FIX**: Fixed dimmed background removal delay when closing iOS 26+ alert dialogs — removed redundant Flutter-side overlays so only the native `UIAlertController` dim is used (@ctrl-Felix)
+
 ## [0.1.105]
 * **NEW**: Added `ImageIcon` / `AssetImage` support for iOS 26+ native tab bar — custom asset icons (with optional per-state selected icon) can now be used alongside SF Symbols (@Mohamed-7018)
 * **NEW**: Added automatic RTL (right-to-left) layout support for iOS 26+ native tab bar — mirrors automatically based on `Directionality.of(context)` (@Mohamed-7018)

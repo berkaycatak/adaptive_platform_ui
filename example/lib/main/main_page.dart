@@ -58,7 +58,7 @@ class _MainPageState extends State<MainPage> {
                     ),
 
                     const AdaptiveNavigationDestination(
-                      icon: ImageIcon(AssetImage('assets/icons/user.png')),
+                      icon: NetworkImage('https://i.pravatar.cc/100'),
                       label: 'Profile',
                     ),
                     AdaptiveNavigationDestination(
