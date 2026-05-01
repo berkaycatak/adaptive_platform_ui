@@ -179,14 +179,11 @@ class _IOS26AlertDialogState extends State<IOS26AlertDialog> {
       );
 
       // Alert dialogs are modal and should fill the screen
-      return Container(
-        color: const Color(0x42000000), // Semi-transparent overlay
-        child: Center(
-          child: SizedBox(
-            width: 270, // Standard iOS alert width
-            height: 200, // Approximate height, will be adjusted by native
-            child: platformView,
-          ),
+      return Center(
+        child: SizedBox(
+          width: 270, // Standard iOS alert width
+          height: 200, // Approximate height, will be adjusted by native
+          child: platformView,
         ),
       );
     }
