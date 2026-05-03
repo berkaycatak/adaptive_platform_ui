@@ -72,6 +72,7 @@ class AdaptiveScaffold extends StatefulWidget {
     this.appBar,
     this.bottomNavigationBar,
     this.body,
+    this.resizeToAvoidBottomInset,
     this.floatingActionButton,
     this.minimizeBehavior = TabBarMinimizeBehavior.automatic,
     this.enableBlur = true,
@@ -99,6 +100,13 @@ class AdaptiveScaffold extends StatefulWidget {
 
   /// Body widget
   final Widget? body;
+
+  /// Whether the scaffold should resize when the on-screen keyboard appears.
+  ///
+  /// When null, each platform path uses its existing default behavior.
+  /// Set to `false` to keep bottom navigation pinned while the keyboard
+  /// overlays content, such as on iOS tab-based layouts.
+  final bool? resizeToAvoidBottomInset;
 
   /// Floating action button (Material only)
   final Widget? floatingActionButton;
@@ -238,23 +246,24 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
         }).toList();
       }
 
-      return _wrapWithDrawerIfNeeded(
-        IOS26Scaffold(
-          key: ValueKey(
-            'ios26_scaffold_${widget.bottomNavigationBar?.selectedIndex ?? 0}_${widget.body?.runtimeType.toString() ?? "empty"}',
-          ),
+        return _wrapWithDrawerIfNeeded(
+          IOS26Scaffold(
+            key: ValueKey(
+              'ios26_scaffold_${widget.bottomNavigationBar?.selectedIndex ?? 0}_${widget.body?.runtimeType.toString() ?? "empty"}',
+            ),
           bottomNavigationBar: widget.bottomNavigationBar,
           title: widget.appBar?.title,
           actions: widget.appBar?.actions,
           leading: widget.appBar?.leading,
           tintColor: widget.appBar?.tintColor,
-          minimizeBehavior: widget.minimizeBehavior,
-          enableBlur: widget.enableBlur,
-          useHeroBackButton: widget.useHeroBackButton,
-          tabBarHidden: widget.tabBarHidden,
-          children: childrenList,
-        ),
-      );
+            minimizeBehavior: widget.minimizeBehavior,
+            enableBlur: widget.enableBlur,
+            useHeroBackButton: widget.useHeroBackButton,
+            tabBarHidden: widget.tabBarHidden,
+            resizeToAvoidBottomInset: widget.resizeToAvoidBottomInset,
+            children: childrenList,
+          ),
+        );
     }
 
     // iOS <26 (iOS 18 and below) OR iOS 26+ with useNativeToolbar: false
@@ -457,7 +466,8 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
 
         return _wrapWithDrawerIfNeeded(
           CupertinoPageScaffold(
-            resizeToAvoidBottomInset: !hasNativeTabBar,
+            resizeToAvoidBottomInset:
+                widget.resizeToAvoidBottomInset ?? !hasNativeTabBar,
             navigationBar: navigationBar,
             child: bodyWidget,
           ),
@@ -641,6 +651,7 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
         key: widget.scaffoldKey,
         appBar: appBar,
         body: widget.body ?? const SizedBox.shrink(),
+        resizeToAvoidBottomInset: widget.resizeToAvoidBottomInset,
         bottomNavigationBar: bottomNavBar,
         floatingActionButton: widget.floatingActionButton,
         extendBodyBehindAppBar: widget.extendBodyBehindAppBar,
@@ -693,6 +704,7 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
       key: widget.scaffoldKey,
       appBar: appBar,
       body: widget.body ?? const SizedBox.shrink(),
+      resizeToAvoidBottomInset: widget.resizeToAvoidBottomInset,
       floatingActionButton: widget.floatingActionButton,
       extendBodyBehindAppBar: widget.extendBodyBehindAppBar,
       drawer: widget.drawer,

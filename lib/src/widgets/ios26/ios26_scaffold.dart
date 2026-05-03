@@ -20,6 +20,7 @@ class IOS26Scaffold extends StatefulWidget {
     this.enableBlur = true,
     this.useHeroBackButton = true,
     this.tabBarHidden = false,
+    this.resizeToAvoidBottomInset,
     required this.children,
   });
 
@@ -32,6 +33,7 @@ class IOS26Scaffold extends StatefulWidget {
   final bool enableBlur;
   final bool useHeroBackButton;
   final bool tabBarHidden;
+  final bool? resizeToAvoidBottomInset;
   final List<Widget> children;
 
   @override
@@ -287,7 +289,7 @@ class _IOS26ScaffoldState extends State<IOS26Scaffold>
       // inside a Stack. If the scaffold resizes for the keyboard the tab bar
       // floats above it — non-standard on iOS. Disable the resize so the
       // keyboard window (higher z-order) covers the tab bar naturally.
-      resizeToAvoidBottomInset: !hasBottomNav,
+      resizeToAvoidBottomInset: widget.resizeToAvoidBottomInset ?? !hasBottomNav,
       child: hasBottomNav
           ? NotificationListener<ScrollNotification>(
               onNotification: _handleScrollNotification,
