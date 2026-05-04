@@ -9,7 +9,7 @@ class iOS26PopupMenuButtonView: NSObject, FlutterPlatformView {
     private var currentButtonStyle: String = "plain"
     private var isRoundButton: Bool = false
     private var labels: [String] = []
-    private var symbols: [String] = []
+    private var symbols: [Any] = []
     private var dividers: [Bool] = []
     private var enabled: [Bool] = []
 
@@ -25,7 +25,7 @@ class iOS26PopupMenuButtonView: NSObject, FlutterPlatformView {
         var tint: UIColor? = nil
         var buttonStyle: String = "plain"
         var labels: [String] = []
-        var symbols: [String] = []
+        var symbols: [Any] = []
         var dividers: [NSNumber] = []
         var enabled: [NSNumber] = []
         var isCustomWidget: Bool = false
@@ -39,7 +39,7 @@ class iOS26PopupMenuButtonView: NSObject, FlutterPlatformView {
             if let bs = dict["buttonStyle"] as? String { buttonStyle = bs }
             if let cw = dict["customWidget"] as? NSNumber { isCustomWidget = cw.boolValue }
             labels = (dict["labels"] as? [String]) ?? []
-            symbols = (dict["sfSymbols"] as? [String]) ?? []
+            symbols = (dict["sfSymbols"] as? [Any]) ?? []
             dividers = (dict["isDivider"] as? [NSNumber]) ?? []
             enabled = (dict["enabled"] as? [NSNumber]) ?? []
         }
@@ -74,7 +74,17 @@ class iOS26PopupMenuButtonView: NSObject, FlutterPlatformView {
         // Set button content (hide if custom widget is used)
         if !isCustomWidget {
             applyButtonStyle(buttonStyle: buttonStyle, round: makeRound)
-            setButtonContent(title: title, icon: iconName)
+            
+            var buttonImage: UIImage?
+            if let iconName = iconName {
+                buttonImage = UIImage(systemName: iconName)
+            } else if let dict = args as? [String: Any],
+                      let codePoint = dict["buttonIconCodePoint"] as? Int,
+                      let fontFamily = dict["buttonIconFontFamily"] as? String {
+                buttonImage = FlutterIconRenderer.imageFromIconData(codePoint: codePoint, fontFamily: fontFamily, size: 24)
+            }
+            
+            setButtonContent(title: title, image: buttonImage)
         } else {
             // Make button fully transparent but functional
             button.backgroundColor = .clear
@@ -122,7 +132,7 @@ class iOS26PopupMenuButtonView: NSObject, FlutterPlatformView {
             case "updateMenuItems":
                 if let args = call.arguments as? [String: Any] {
                     self.labels = (args["labels"] as? [String]) ?? []
-                    self.symbols = (args["sfSymbols"] as? [String]) ?? []
+                    self.symbols = (args["sfSymbols"] as? [Any]) ?? []
                     self.dividers = ((args["isDivider"] as? [NSNumber]) ?? []).map { $0.boolValue }
                     self.enabled = ((args["enabled"] as? [NSNumber]) ?? []).map { $0.boolValue }
                     self.rebuildMenu()
@@ -131,8 +141,14 @@ class iOS26PopupMenuButtonView: NSObject, FlutterPlatformView {
             case "updateButtonContent":
                 if let args = call.arguments as? [String: Any] {
                     let title = args["buttonTitle"] as? String
-                    let iconName = args["buttonIconName"] as? String
-                    self.setButtonContent(title: title, icon: iconName)
+                    var image: UIImage?
+                    if let iconName = args["buttonIconName"] as? String {
+                        image = UIImage(systemName: iconName)
+                    } else if let codePoint = args["buttonIconCodePoint"] as? Int,
+                              let fontFamily = args["buttonIconFontFamily"] as? String {
+                        image = FlutterIconRenderer.imageFromIconData(codePoint: codePoint, fontFamily: fontFamily, size: 24)
+                    }
+                    self.setButtonContent(title: title, image: image)
                     result(nil)
                 } else { result(FlutterError(code: "bad_args", message: "Missing button content", details: nil)) }
             default:
@@ -163,8 +179,14 @@ class iOS26PopupMenuButtonView: NSObject, FlutterPlatformView {
 
                 let title = i < labels.count ? labels[i] : ""
                 var image: UIImage? = nil
-                if i < symbols.count, !symbols[i].isEmpty {
-                    image = UIImage(systemName: symbols[i])
+                if i < symbols.count {
+                    if let symbolName = symbols[i] as? String, !symbolName.isEmpty {
+                        image = UIImage(systemName: symbolName)
+                    } else if let iconData = symbols[i] as? [String: Any],
+                              let codePoint = iconData["codePoint"] as? Int,
+                              let fontFamily = iconData["fontFamily"] as? String {
+                        image = FlutterIconRenderer.imageFromIconData(codePoint: codePoint, fontFamily: fontFamily, size: 20)
+                    }
                 }
 
                 let isEnabled = i < enabled.count ? enabled[i] : true
@@ -210,8 +232,19 @@ class iOS26PopupMenuButtonView: NSObject, FlutterPlatformView {
             if i < enabled.count { action.isEnabled = enabled[i] }
 
             // Optional: set image where supported
-            if i < symbols.count, !symbols[i].isEmpty, let img = UIImage(systemName: symbols[i]) {
-                if #available(iOS 13.0, *) { action.setValue(img, forKey: "image") }
+            if i < symbols.count {
+                var img: UIImage? = nil
+                if let symbolName = symbols[i] as? String, !symbolName.isEmpty {
+                    img = UIImage(systemName: symbolName)
+                } else if let iconData = symbols[i] as? [String: Any],
+                          let codePoint = iconData["codePoint"] as? Int,
+                          let fontFamily = iconData["fontFamily"] as? String {
+                    img = FlutterIconRenderer.imageFromIconData(codePoint: codePoint, fontFamily: fontFamily, size: 20)
+                }
+                
+                if let finalImg = img {
+                    if #available(iOS 13.0, *) { action.setValue(finalImg, forKey: "image") }
+                }
             }
             ac.addAction(action)
         }
@@ -285,18 +318,16 @@ class iOS26PopupMenuButtonView: NSObject, FlutterPlatformView {
         }
     }
 
-    private func setButtonContent(title: String?, icon: String?) {
+    private func setButtonContent(title: String?, image: UIImage?) {
         if #available(iOS 15.0, *) {
             var cfg = button.configuration ?? .plain()
             cfg.title = title
-            if let iconName = icon, let image = UIImage(systemName: iconName) {
-                cfg.image = image
-            }
+            cfg.image = image
             button.configuration = cfg
         } else {
             button.setTitle(title, for: .normal)
-            if let iconName = icon, let image = UIImage(systemName: iconName) {
-                button.setImage(image, for: .normal)
+            if let img = image {
+                button.setImage(img, for: .normal)
             }
         }
     }

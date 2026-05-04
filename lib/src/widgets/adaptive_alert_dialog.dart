@@ -58,32 +58,23 @@ class AdaptiveAlertDialog {
     Color? iconColor,
     String? oneTimeCode,
   }) {
-    // iOS 26+ - Use native iOS 26 alert dialog
-    if (PlatformInfo.isIOS26OrHigher()) {
-      // Convert icon to String if needed for iOS 26 (expects SF Symbol)
-      String? iconString;
-      if (icon != null) {
-        if (icon is String) {
-          iconString = icon;
-        }
-        // If IconData is provided on iOS 26+, ignore it (iOS 26 uses SF Symbols)
+      // iOS 26+ - Use native iOS 26 alert dialog
+      if (PlatformInfo.isIOS26OrHigher()) {
+        return showCupertinoDialog<void>(
+          context: context,
+          barrierColor: CupertinoColors.transparent,
+          builder: (context) => IOS26AlertDialog(
+            title: title,
+            message: message,
+            actions: actions,
+            icon: icon,
+            iconSize: iconSize,
+            iconColor: iconColor,
+            oneTimeCode: oneTimeCode,
+            input: null, // No input for standard dialog
+          ),
+        );
       }
-
-      return showCupertinoDialog<void>(
-        context: context,
-        barrierColor: CupertinoColors.transparent,
-        builder: (context) => IOS26AlertDialog(
-          title: title,
-          message: message,
-          actions: actions,
-          icon: iconString,
-          iconSize: iconSize,
-          iconColor: iconColor,
-          oneTimeCode: oneTimeCode,
-          input: null, // No input for standard dialog
-        ),
-      );
-    }
 
     // iOS 18 and below - Use CupertinoAlertDialog
     if (PlatformInfo.isIOS) {
@@ -209,21 +200,13 @@ class AdaptiveAlertDialog {
   }) {
     // iOS 26+ - Use native iOS 26 alert dialog with input
     if (PlatformInfo.isIOS26OrHigher()) {
-      // Convert icon to String if needed for iOS 26 (expects SF Symbol)
-      String? iconString;
-      if (icon != null) {
-        if (icon is String) {
-          iconString = icon;
-        }
-      }
-
       return showCupertinoDialog<String?>(
         context: context,
         builder: (context) => IOS26AlertDialog(
           title: title,
           message: message,
           actions: actions,
-          icon: iconString,
+          icon: icon,
           iconSize: iconSize,
           iconColor: iconColor,
           oneTimeCode: null,

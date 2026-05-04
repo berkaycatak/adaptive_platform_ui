@@ -198,9 +198,17 @@ class _IOS26SegmentedControlState extends State<IOS26SegmentedControl> {
       ..._buildThemeParams(),
     };
 
-    // Add SF symbols if provided
+    // Add SF symbols or IconData if provided
     if (widget.icons != null && widget.icons!.isNotEmpty) {
-      params['sfSymbols'] = widget.icons!;
+      params['sfSymbols'] = widget.icons!.map((icon) {
+        if (icon is IconData) {
+          return {
+            'codePoint': icon.codePoint,
+            'fontFamily': _extractIconFontFamily(icon),
+          };
+        }
+        return icon; // String for SF Symbol
+      }).toList();
     }
 
     // Add color if provided
@@ -271,5 +279,12 @@ class _IOS26SegmentedControlState extends State<IOS26SegmentedControl> {
     }
 
     return SizedBox(height: widget.height, child: control);
+  }
+
+  String _extractIconFontFamily(IconData iconData) {
+    if (iconData.fontPackage != null) {
+      return 'packages/${iconData.fontPackage}/${iconData.fontFamily}';
+    }
+    return iconData.fontFamily ?? '';
   }
 }

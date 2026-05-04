@@ -102,8 +102,8 @@ class IOS26PopupMenuButton<T> extends StatefulWidget {
   /// Text for the button (null when using icon)
   final String? buttonLabel;
 
-  /// Icon for the button (non-null in icon mode)
-  final String? buttonIcon;
+  /// Icon for the button (non-null in icon mode). Accepts SF Symbol String or IconData.
+  final dynamic buttonIcon;
 
   /// Custom child widget (non-null in widget mode)
   final Widget? child;
@@ -180,10 +180,21 @@ class _IOS26PopupMenuButtonState<T> extends State<IOS26PopupMenuButton<T>> {
     if (ch == null) return;
 
     try {
-      await ch.invokeMethod('updateButtonContent', {
+      final params = <String, dynamic>{
         if (widget.buttonLabel != null) 'buttonTitle': widget.buttonLabel,
-        if (widget.buttonIcon != null) 'buttonIconName': widget.buttonIcon,
-      });
+      };
+
+      if (widget.buttonIcon is IconData) {
+        params['buttonIconCodePoint'] =
+            (widget.buttonIcon as IconData).codePoint;
+        params['buttonIconFontFamily'] = _extractIconFontFamily(
+          widget.buttonIcon as IconData,
+        );
+      } else if (widget.buttonIcon is String) {
+        params['buttonIconName'] = widget.buttonIcon;
+      }
+
+      await ch.invokeMethod('updateButtonContent', params);
     } catch (_) {}
   }
 
@@ -218,7 +229,7 @@ class _IOS26PopupMenuButtonState<T> extends State<IOS26PopupMenuButton<T>> {
 
     // Flatten entries into parallel arrays for the platform view
     final labels = <String>[];
-    final symbols = <String>[];
+    final symbols = <dynamic>[];
     final isDivider = <bool>[];
     final enabled = <bool>[];
 
@@ -230,7 +241,14 @@ class _IOS26PopupMenuButtonState<T> extends State<IOS26PopupMenuButton<T>> {
         enabled.add(false);
       } else if (e is AdaptivePopupMenuItem<T>) {
         labels.add(e.label);
-        symbols.add(e.icon is String ? e.icon as String : '');
+        if (e.icon is IconData) {
+          symbols.add({
+            'codePoint': (e.icon as IconData).codePoint,
+            'fontFamily': _extractIconFontFamily(e.icon as IconData),
+          });
+        } else {
+          symbols.add(e.icon is String ? e.icon as String : '');
+        }
         isDivider.add(false);
         enabled.add(e.enabled);
       }
@@ -267,7 +285,7 @@ class _IOS26PopupMenuButtonState<T> extends State<IOS26PopupMenuButton<T>> {
     if (!kIsWeb && Platform.isIOS) {
       // Flatten entries into parallel arrays for the platform view
       final labels = <String>[];
-      final symbols = <String>[];
+      final symbols = <dynamic>[];
       final isDivider = <bool>[];
       final enabled = <bool>[];
 
@@ -279,7 +297,14 @@ class _IOS26PopupMenuButtonState<T> extends State<IOS26PopupMenuButton<T>> {
           enabled.add(false);
         } else if (e is AdaptivePopupMenuItem<T>) {
           labels.add(e.label);
-          symbols.add(e.icon is String ? e.icon as String : '');
+          if (e.icon is IconData) {
+            symbols.add({
+              'codePoint': (e.icon as IconData).codePoint,
+              'fontFamily': _extractIconFontFamily(e.icon as IconData),
+            });
+          } else {
+            symbols.add(e.icon is String ? e.icon as String : '');
+          }
           isDivider.add(false);
           enabled.add(e.enabled);
         }
@@ -287,9 +312,9 @@ class _IOS26PopupMenuButtonState<T> extends State<IOS26PopupMenuButton<T>> {
 
       final creationParams = <String, dynamic>{
         if (widget.buttonLabel != null) 'buttonTitle': widget.buttonLabel,
-        if (widget.buttonIcon != null) 'buttonIconName': widget.buttonIcon,
+        if (widget.buttonIcon != null && widget.buttonIcon is String) 'buttonIconName': widget.buttonIcon,
         if (widget.isIconButton) 'round': true,
-        if (isCustomWidget) 'customWidget': true, // Hide native button content
+        if (isCustomWidget) 'customWidget': true,
         'buttonStyle': widget.buttonStyle.name,
         'labels': labels,
         'sfSymbols': symbols,
@@ -298,6 +323,16 @@ class _IOS26PopupMenuButtonState<T> extends State<IOS26PopupMenuButton<T>> {
         'isDark': _isDark,
         if (_effectiveTint != null) 'tint': _colorToARGB(_effectiveTint!),
       };
+
+      if (widget.buttonIcon is IconData) {
+        creationParams['buttonIconCodePoint'] =
+            (widget.buttonIcon as IconData).codePoint;
+        creationParams['buttonIconFontFamily'] = _extractIconFontFamily(
+          widget.buttonIcon as IconData,
+        );
+      } else if (widget.buttonIcon is String) {
+        creationParams['buttonIconName'] = widget.buttonIcon;
+      }
 
       // Create a unique key based on button label/icon and items to force recreation on change
       final itemsKey = widget.items
@@ -326,42 +361,52 @@ class _IOS26PopupMenuButtonState<T> extends State<IOS26PopupMenuButton<T>> {
 
       // Custom widget mode: Stack with custom widget determining size
       if (isCustomWidget) {
-        return Stack(
-          fit: StackFit.passthrough,
-          children: [
-            widget.child!, // Determines size and is visible
-            Positioned.fill(
-              child:
-                  platformView, // Native button overlay (transparent but catches touches)
-            ),
-          ],
+        return SizedBox(
+          height: widget.height,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [widget.child!, platformView],
+          ),
         );
       }
 
-      // Standard mode: Use LayoutBuilder for sizing
-      return LayoutBuilder(
-        builder: (context, constraints) {
-          final hasBoundedWidth = constraints.hasBoundedWidth;
-          final preferIntrinsic = widget.shrinkWrap || !hasBoundedWidth;
+      // Standard mode: Use Container with explicit constraints
+      // The key fix: Always provide concrete width constraints, never infinite
+      Widget sizedView;
 
-          double? width;
-          if (widget.isIconButton) {
-            width = widget.width ?? widget.height;
-          } else if (preferIntrinsic) {
-            width = _intrinsicWidth;
-          }
+      if (widget.isIconButton) {
+        // Icon button has fixed dimensions
+        sizedView = SizedBox(
+          height: widget.height,
+          width: widget.width ?? widget.height,
+          child: platformView,
+        );
+      } else if (widget.shrinkWrap) {
+        // Shrink wrap mode - use the intrinsic width if available
+        sizedView = SizedBox(
+          height: widget.height,
+          width: _intrinsicWidth ?? 100, // Fallback to default width
+          child: platformView,
+        );
+      } else {
+        // Normal mode - need to get width from parent, but ensure it's bounded
+        sizedView = LayoutBuilder(
+          builder: (context, constraints) {
+            // Ensure we don't pass infinite width to SizedBox
+            final maxWidth = constraints.hasBoundedWidth
+                ? constraints.maxWidth
+                : MediaQuery.of(context).size.width; // Fallback to screen width
 
-          return SizedBox(
-            height: widget.height,
-            width:
-                widget.width ??
-                (preferIntrinsic
-                    ? width
-                    : (hasBoundedWidth ? constraints.maxWidth : null)),
-            child: platformView,
-          );
-        },
-      );
+            return SizedBox(
+              height: widget.height,
+              width: maxWidth,
+              child: platformView,
+            );
+          },
+        );
+      }
+
+      return sizedView;
     }
 
     // Fallback to CupertinoButton with action sheet
@@ -501,4 +546,11 @@ class _IOS26PopupMenuButtonState<T> extends State<IOS26PopupMenuButton<T>> {
       }
     }
   }
+}
+
+String _extractIconFontFamily(IconData iconData) {
+  if (iconData.fontPackage != null) {
+    return 'packages/${iconData.fontPackage}/${iconData.fontFamily}';
+  }
+  return iconData.fontFamily ?? '';
 }

@@ -79,6 +79,13 @@ class iOS26AlertDialogView: NSObject, FlutterPlatformView {
     private let container: UIView
     private var alertController: TintAdjustingAlertController?
     private var alertStyle: String = "glass"
+    
+    // Icon configuration
+    private var iconName: String?
+    private var iconSize: CGFloat?
+    private var iconColor: UIColor?
+    private var iconCodePoint: Int?
+    private var iconFontFamily: String = ""
 
     init(frame: CGRect, viewId: Int64, args: Any?, messenger: FlutterBinaryMessenger) {
         self.channel = FlutterMethodChannel(name: "adaptive_platform_ui/ios26_alert_dialog_\(viewId)", binaryMessenger: messenger)
@@ -89,9 +96,11 @@ class iOS26AlertDialogView: NSObject, FlutterPlatformView {
         var actionTitles: [String] = []
         var actionStyles: [String] = []
         var actionEnabled: [Bool] = []
-        var iconName: String? = nil
-        var iconSize: CGFloat? = nil
-        var iconColor: UIColor? = nil
+        var initIconName: String? = nil
+        var initIconSize: CGFloat? = nil
+        var initIconColor: UIColor? = nil
+        var initIconCodePoint: Int? = nil
+        var initIconFontFamily: String = ""
         var oneTimeCode: String? = nil
         var isDark: Bool = false
         var tint: UIColor? = nil
@@ -108,9 +117,11 @@ class iOS26AlertDialogView: NSObject, FlutterPlatformView {
             if let at = dict["actionTitles"] as? [String] { actionTitles = at }
             if let ast = dict["actionStyles"] as? [String] { actionStyles = ast }
             if let ae = dict["actionEnabled"] as? [Bool] { actionEnabled = ae }
-            if let iconNameValue = dict["iconName"] as? String { iconName = iconNameValue }
-            if let iconSizeValue = dict["iconSize"] as? NSNumber { iconSize = CGFloat(truncating: iconSizeValue) }
-            if let ic = dict["iconColor"] as? NSNumber { iconColor = UIColor(argb: ic.intValue) }
+            if let iconNameValue = dict["iconName"] as? String { initIconName = iconNameValue }
+            if let icp = dict["iconCodePoint"] as? Int { initIconCodePoint = icp }
+            if let iff = dict["iconFontFamily"] as? String { initIconFontFamily = iff }
+            if let iconSizeValue = dict["iconSize"] as? NSNumber { initIconSize = CGFloat(truncating: iconSizeValue) }
+            if let ic = dict["iconColor"] as? NSNumber { initIconColor = UIColor(argb: ic.intValue) }
             if let otc = dict["oneTimeCode"] as? String { oneTimeCode = otc }
             if let v = dict["isDark"] as? NSNumber { isDark = v.boolValue }
             if let t = dict["tint"] as? NSNumber { tint = UIColor(argb: t.intValue) }
@@ -126,15 +137,18 @@ class iOS26AlertDialogView: NSObject, FlutterPlatformView {
 
         super.init()
 
+        self.iconName = initIconName
+        self.iconSize = initIconSize
+        self.iconColor = initIconColor
+        self.iconCodePoint = initIconCodePoint
+        self.iconFontFamily = initIconFontFamily
+
         setupAlert(
             title: title,
             message: message,
             actionTitles: actionTitles,
             actionStyles: actionStyles,
             actionEnabled: actionEnabled,
-            iconName: iconName,
-            iconSize: iconSize,
-            iconColor: iconColor,
             oneTimeCode: oneTimeCode,
             isDark: isDark,
             tint: tint,
@@ -158,9 +172,6 @@ class iOS26AlertDialogView: NSObject, FlutterPlatformView {
         actionTitles: [String],
         actionStyles: [String],
         actionEnabled: [Bool],
-        iconName: String?,
-        iconSize: CGFloat?,
-        iconColor: UIColor?,
         oneTimeCode: String?,
         isDark: Bool,
         tint: UIColor?,
@@ -216,13 +227,22 @@ class iOS26AlertDialogView: NSObject, FlutterPlatformView {
             var currentTopConstant: CGFloat = 16
 
             // 1. Icon (if provided)
-            if let iconName = iconName, let image = UIImage(systemName: iconName) {
+            var iconImage: UIImage?
+            if let iconName = iconName {
+                iconImage = UIImage(systemName: iconName)
+            } else if let iconCodePoint = iconCodePoint {
+                iconImage = FlutterIconRenderer.imageFromIconData(codePoint: iconCodePoint, fontFamily: iconFontFamily, size: iconSize ?? 32.0)
+            }
+
+            if let image = iconImage {
                 var finalImage = image
 
                 // Apply icon styling
                 if let size = iconSize {
-                    let config = UIImage.SymbolConfiguration(pointSize: size)
-                    finalImage = finalImage.withConfiguration(config)
+                    if iconName != nil {
+                        let config = UIImage.SymbolConfiguration(pointSize: size)
+                        finalImage = finalImage.withConfiguration(config)
+                    }
                 }
                 if let color = iconColor {
                     finalImage = finalImage.withTintColor(color, renderingMode: .alwaysOriginal)
@@ -312,20 +332,30 @@ class iOS26AlertDialogView: NSObject, FlutterPlatformView {
             alert.message = nil
             alert.setValue(contentViewController, forKey: "contentViewController")
 
-        } else if let iconName = iconName, let image = UIImage(systemName: iconName) {
+        } else {
             // Icon without OTP
-            var finalImage = image
-
-            if let size = iconSize {
-                let config = UIImage.SymbolConfiguration(pointSize: size)
-                finalImage = finalImage.withConfiguration(config)
-            }
-            if let color = iconColor {
-                finalImage = finalImage.withTintColor(color, renderingMode: .alwaysOriginal)
+            var iconImage: UIImage?
+            if let iconName = iconName {
+                iconImage = UIImage(systemName: iconName)
+            } else if let iconCodePoint = iconCodePoint {
+                iconImage = FlutterIconRenderer.imageFromIconData(codePoint: iconCodePoint, fontFamily: iconFontFamily, size: iconSize ?? 32.0)
             }
 
-            let contentViewController = UIViewController()
-            let imageView = UIImageView(image: finalImage)
+            if let image = iconImage {
+                var finalImage = image
+
+                if let size = iconSize {
+                    if iconName != nil {
+                        let config = UIImage.SymbolConfiguration(pointSize: size)
+                        finalImage = finalImage.withConfiguration(config)
+                    }
+                }
+                if let color = iconColor {
+                    finalImage = finalImage.withTintColor(color, renderingMode: .alwaysOriginal)
+                }
+
+                let contentViewController = UIViewController()
+                let imageView = UIImageView(image: finalImage)
             imageView.translatesAutoresizingMaskIntoConstraints = false
             imageView.contentMode = .scaleAspectFit
             contentViewController.view.addSubview(imageView)
@@ -370,6 +400,7 @@ class iOS26AlertDialogView: NSObject, FlutterPlatformView {
 
             alert.setValue(contentViewController, forKey: "contentViewController")
         }
+    }
 
         // Add text field if placeholder is provided
         if let placeholder = textFieldPlaceholder {
@@ -602,4 +633,7 @@ class iOS26AlertDialogViewFactory: NSObject, FlutterPlatformViewFactory {
     func createArgsCodec() -> FlutterMessageCodec & NSObjectProtocol {
         return FlutterStandardMessageCodec.sharedInstance()
     }
+    
+    // MARK: - Icon Font Support
+    
 }
