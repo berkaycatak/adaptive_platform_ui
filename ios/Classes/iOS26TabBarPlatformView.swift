@@ -14,6 +14,10 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
     private var currentSelectedFileIcons: [String] = []
     private var currentNetworkIcons: [String] = []
     private var currentSelectedNetworkIcons: [String] = []
+    private var currentIconCodePoints: [Int] = []
+    private var currentIconFontFamilies: [String] = []
+    private var currentSelectedIconCodePoints: [Int] = []
+    private var currentSelectedIconFontFamilies: [String] = []
     private var currentSearchFlags: [Bool] = []
     private var currentBadgeCounts: [Int?] = []
     private let imageCache = NSCache<NSString, UIImage>()
@@ -36,6 +40,10 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
         var searchFlags: [Bool] = []
         var badgeCounts: [Int?] = []
         var spacerFlags: [Bool] = []
+        var iconCodePoints: [Int] = []
+        var iconFontFamilies: [String] = []
+        var selectedIconCodePoints: [Int] = []
+        var selectedIconFontFamilies: [String] = []
         var selectedIndex: Int = 0
         var isDark: Bool = false
         var isRtl: Bool = false
@@ -60,6 +68,10 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
             if let badgeData = dict["badgeCounts"] as? [NSNumber?] {
                 badgeCounts = badgeData.map { $0?.intValue }
             }
+            if let arr = dict["iconCodePoints"] as? [NSNumber] { iconCodePoints = arr.map { $0.intValue } }
+            iconFontFamilies = (dict["iconFontFamilies"] as? [String]) ?? []
+            if let arr = dict["selectedIconCodePoints"] as? [NSNumber] { selectedIconCodePoints = arr.map { $0.intValue } }
+            selectedIconFontFamilies = (dict["selectedIconFontFamilies"] as? [String]) ?? []
             if let v = dict["selectedIndex"] as? NSNumber { selectedIndex = v.intValue }
             if let v = dict["isDark"] as? NSNumber { isDark = v.boolValue }
             if let v = dict["isRtl"] as? NSNumber { isRtl = v.boolValue }
@@ -185,7 +197,30 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
                     item.tag = i
 
                     if !self.configureRuntimeImages(for: item, index: i) {
-                        if i < assetIcons.count && !assetIcons[i].isEmpty {
+                        if i < iconCodePoints.count && iconCodePoints[i] != 0 {
+                            let codePoint = iconCodePoints[i]
+                            let family = i < iconFontFamilies.count ? iconFontFamilies[i] : ""
+                            let rawImage = FlutterIconRenderer.imageFromIconData(codePoint: codePoint, fontFamily: family, size: 26)
+                            
+                            var selRawImage = rawImage
+                            if i < selectedIconCodePoints.count && selectedIconCodePoints[i] != 0 {
+                                let selCodePoint = selectedIconCodePoints[i]
+                                let selFamily = i < selectedIconFontFamilies.count ? selectedIconFontFamilies[i] : ""
+                                selRawImage = FlutterIconRenderer.imageFromIconData(codePoint: selCodePoint, fontFamily: selFamily, size: 26)
+                            }
+                            
+                            if #available(iOS 26.0, *) {
+                                if let unselTint = unselectedTint {
+                                    image = rawImage?.withTintColor(unselTint, renderingMode: .alwaysOriginal)
+                                } else {
+                                    image = rawImage?.withRenderingMode(.alwaysTemplate)
+                                }
+                                selectedImage = selRawImage?.withRenderingMode(.alwaysTemplate)
+                            } else {
+                                image = rawImage
+                                selectedImage = selRawImage
+                            }
+                        } else if i < assetIcons.count && !assetIcons[i].isEmpty {
                             let assetName = assetIcons[i]
                             let key = FlutterDartProject.lookupKey(forAsset: assetName)
                             let rawImageOriginal = UIImage(named: key)
@@ -253,7 +288,7 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
 
         let count = max(
             max(labels.count, symbols.count),
-            max(max(assetIcons.count, fileIcons.count), networkIcons.count)
+            max(max(assetIcons.count, fileIcons.count), max(networkIcons.count, iconCodePoints.count))
         )
         bar.items = buildItems(0..<count)
 
@@ -283,6 +318,10 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
         self.currentSelectedFileIcons = selectedFileIcons
         self.currentNetworkIcons = networkIcons
         self.currentSelectedNetworkIcons = selectedNetworkIcons
+        self.currentIconCodePoints = iconCodePoints
+        self.currentIconFontFamilies = iconFontFamilies
+        self.currentSelectedIconCodePoints = selectedIconCodePoints
+        self.currentSelectedIconFontFamilies = selectedIconFontFamilies
         self.currentSearchFlags = searchFlags
         self.currentBadgeCounts = badgeCounts
         // Apply minimize behavior if available
@@ -331,6 +370,10 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
             let selectedFileIcons = (args["selectedFileIcons"] as? [String]) ?? []
             let networkIcons = (args["networkIcons"] as? [String]) ?? []
             let selectedNetworkIcons = (args["selectedNetworkIcons"] as? [String]) ?? []
+            let iconCodePoints = (args["iconCodePoints"] as? [NSNumber])?.map { $0.intValue } ?? []
+            let iconFontFamilies = (args["iconFontFamilies"] as? [String]) ?? []
+            let selectedIconCodePoints = (args["selectedIconCodePoints"] as? [NSNumber])?.map { $0.intValue } ?? []
+            let selectedIconFontFamilies = (args["selectedIconFontFamilies"] as? [String]) ?? []
             let searchFlags = (args["searchFlags"] as? [Bool]) ?? []
             let selectedIndex = (args["selectedIndex"] as? NSNumber)?.intValue ?? 0
             var badgeCounts: [Int?] = []
@@ -346,12 +389,16 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
             self.currentSelectedFileIcons = selectedFileIcons
             self.currentNetworkIcons = networkIcons
             self.currentSelectedNetworkIcons = selectedNetworkIcons
+            self.currentIconCodePoints = iconCodePoints
+            self.currentIconFontFamilies = iconFontFamilies
+            self.currentSelectedIconCodePoints = selectedIconCodePoints
+            self.currentSelectedIconFontFamilies = selectedIconFontFamilies
             self.currentSearchFlags = searchFlags
             self.currentBadgeCounts = badgeCounts
 
             let count = max(
                 max(labels.count, symbols.count),
-                max(max(assetIcons.count, fileIcons.count), networkIcons.count)
+                max(max(assetIcons.count, fileIcons.count), max(networkIcons.count, iconCodePoints.count))
             )
 
             let buildItems: (Range<Int>) -> [UITabBarItem] = { range in
@@ -384,7 +431,31 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
                         item.tag = i
 
                         if !self.configureRuntimeImages(for: item, index: i) {
-                            if i < assetIcons.count && !assetIcons[i].isEmpty {
+                            if i < iconCodePoints.count && iconCodePoints[i] != 0 {
+                                let codePoint = iconCodePoints[i]
+                                let family = i < iconFontFamilies.count ? iconFontFamilies[i] : ""
+                                let rawImage = FlutterIconRenderer.imageFromIconData(codePoint: codePoint, fontFamily: family, size: 26)
+                                
+                                var selRawImage = rawImage
+                                if i < selectedIconCodePoints.count && selectedIconCodePoints[i] != 0 {
+                                    let selCodePoint = selectedIconCodePoints[i]
+                                    let selFamily = i < selectedIconFontFamilies.count ? selectedIconFontFamilies[i] : ""
+                                    selRawImage = FlutterIconRenderer.imageFromIconData(codePoint: selCodePoint, fontFamily: selFamily, size: 26)
+                                }
+                                
+                                if #available(iOS 26.0, *) {
+                                    let unselTint = self.tabBar?.unselectedItemTintColor
+                                    if let unselTint = unselTint {
+                                        image = rawImage?.withTintColor(unselTint, renderingMode: .alwaysOriginal)
+                                    } else {
+                                        image = rawImage?.withRenderingMode(.alwaysTemplate)
+                                    }
+                                    selectedImage = selRawImage?.withRenderingMode(.alwaysTemplate)
+                                } else {
+                                    image = rawImage?.withRenderingMode(.alwaysTemplate)
+                                    selectedImage = selRawImage?.withRenderingMode(.alwaysTemplate)
+                                }
+                            } else if i < assetIcons.count && !assetIcons[i].isEmpty {
                                 let assetName = assetIcons[i]
                                 let key = FlutterDartProject.lookupKey(forAsset: assetName)
                                 let rawImageOriginal = UIImage(named: key)
@@ -592,7 +663,7 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
         var items: [UITabBarItem] = []
         let itemCount = max(
             max(currentLabels.count, currentSymbols.count),
-            max(max(currentAssetIcons.count, currentFileIcons.count), currentNetworkIcons.count)
+            max(max(currentAssetIcons.count, currentFileIcons.count), max(currentNetworkIcons.count, currentIconCodePoints.count))
         )
         for i in 0..<itemCount {
             let title = i < currentLabels.count ? currentLabels[i] : nil
@@ -616,7 +687,31 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
                 item.tag = i
 
                 if !configureRuntimeImages(for: item, index: i) {
-                    if i < currentAssetIcons.count && !currentAssetIcons[i].isEmpty {
+                    if i < currentIconCodePoints.count && currentIconCodePoints[i] != 0 {
+                        let codePoint = currentIconCodePoints[i]
+                        let family = i < currentIconFontFamilies.count ? currentIconFontFamilies[i] : ""
+                        let rawImage = FlutterIconRenderer.imageFromIconData(codePoint: codePoint, fontFamily: family, size: 26)
+                        
+                        var selRawImage = rawImage
+                        if i < currentSelectedIconCodePoints.count && currentSelectedIconCodePoints[i] != 0 {
+                            let selCodePoint = currentSelectedIconCodePoints[i]
+                            let selFamily = i < currentSelectedIconFontFamilies.count ? currentSelectedIconFontFamilies[i] : ""
+                            selRawImage = FlutterIconRenderer.imageFromIconData(codePoint: selCodePoint, fontFamily: selFamily, size: 26)
+                        }
+                        
+                        if #available(iOS 26.0, *) {
+                            let unselTint = bar.unselectedItemTintColor
+                            if let unselTint = unselTint {
+                                image = rawImage?.withTintColor(unselTint, renderingMode: .alwaysOriginal)
+                            } else {
+                                image = rawImage?.withRenderingMode(.alwaysTemplate)
+                            }
+                            selectedImage = selRawImage?.withRenderingMode(.alwaysTemplate)
+                        } else {
+                            image = rawImage?.withRenderingMode(.alwaysTemplate)
+                            selectedImage = selRawImage?.withRenderingMode(.alwaysTemplate)
+                        }
+                    } else if i < currentAssetIcons.count && !currentAssetIcons[i].isEmpty {
                         if #available(iOS 26.0, *) {
                             let key = FlutterDartProject.lookupKey(forAsset: currentAssetIcons[i])
                             let rawImageOriginal = UIImage(named: key)

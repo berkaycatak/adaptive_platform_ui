@@ -46,6 +46,8 @@ class iOS26ButtonView: NSObject, FlutterPlatformView {
     private var iconName: String?
     private var iconSize: CGFloat?
     private var iconColor: UIColor?
+    private var iconCodePoint: Int?
+    private var iconFontFamily: String = ""
     private var useSmoothRectangleBorder: Bool = true
 
     init(
@@ -73,8 +75,13 @@ class iOS26ButtonView: NSObject, FlutterPlatformView {
                 textColor = UIColor(hexString: textColorHex)
             }
 
-            // SF Symbol icon configuration
+            // SF Symbol or Flutter Icon configuration
             iconName = config["iconName"] as? String
+            
+            // Flutter IconData
+            iconCodePoint = config["iconCodePoint"] as? Int
+            iconFontFamily = config["iconFontFamily"] as? String ?? ""
+            
             if let size = config["iconSize"] as? Double {
                 iconSize = CGFloat(size)
             }
@@ -207,6 +214,23 @@ class iOS26ButtonView: NSObject, FlutterPlatformView {
                         finalImage = finalImage.withTintColor(color, renderingMode: .alwaysOriginal)
                     }
 
+                    config.image = finalImage
+                    config.title = nil
+                    config.attributedTitle = nil
+                }
+            } else if let iconCodePoint = iconCodePoint {
+                // Flutter IconData mode
+                let size = iconSize ?? 24.0
+                if let image = FlutterIconRenderer.imageFromIconData(codePoint: iconCodePoint, fontFamily: iconFontFamily, size: size) {
+                    var finalImage = image
+                    
+                    // Apply icon color
+                    if let color = iconColor {
+                        finalImage = finalImage.withTintColor(color, renderingMode: .alwaysOriginal)
+                    } else if let tint = button.tintColor {
+                        finalImage = finalImage.withTintColor(tint, renderingMode: .alwaysTemplate)
+                    }
+                    
                     config.image = finalImage
                     config.title = nil
                     config.attributedTitle = nil
@@ -367,6 +391,9 @@ class iOS26ButtonView: NSObject, FlutterPlatformView {
         case "setIcon":
             if let args = call.arguments as? [String: Any] {
                 iconName = args["iconName"] as? String
+                iconCodePoint = args["iconCodePoint"] as? Int
+                iconFontFamily = args["iconFontFamily"] as? String ?? ""
+                
                 if let size = args["iconSize"] as? Double {
                     iconSize = CGFloat(size)
                 }

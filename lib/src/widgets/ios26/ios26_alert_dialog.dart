@@ -82,8 +82,8 @@ class IOS26AlertDialog extends StatefulWidget {
   /// List of actions for the alert
   final List<AlertAction> actions;
 
-  /// Optional SF Symbol icon name to display in the alert
-  final String? icon;
+  /// Optional SF Symbol icon name (String) or Flutter IconData to display
+  final dynamic icon;
 
   /// Optional icon size
   final double? iconSize;
@@ -146,10 +146,15 @@ class _IOS26AlertDialogState extends State<IOS26AlertDialog> {
         'actionTitles': widget.actions.map((a) => a.title).toList(),
         'actionStyles': widget.actions.map((a) => a.style.name).toList(),
         'actionEnabled': widget.actions.map((a) => a.enabled).toList(),
-        if (widget.icon != null) 'iconName': widget.icon,
+        if (widget.icon != null && widget.icon is String) 'iconName': widget.icon,
         if (widget.iconSize != null) 'iconSize': widget.iconSize,
         if (widget.iconColor != null)
           'iconColor': _colorToARGB(widget.iconColor!),
+        if (widget.icon is IconData) ...{
+          'iconCodePoint': (widget.icon as IconData).codePoint,
+          'iconFontFamily': _extractIconFontFamily(widget.icon as IconData),
+        },
+        if (widget.oneTimeCode != null) 'iconCodePoint': null, // Clear if OTP is using its own icon logic (though currently alert icon is separate)
         if (widget.oneTimeCode != null) 'oneTimeCode': widget.oneTimeCode,
         if (widget.input != null) ...{
           'textFieldPlaceholder': widget.input!.placeholder,
@@ -271,5 +276,12 @@ class _IOS26AlertDialogState extends State<IOS26AlertDialog> {
         // Ignore if method not implemented
       }
     }
+  }
+
+  String _extractIconFontFamily(IconData iconData) {
+    if (iconData.fontPackage != null) {
+      return 'packages/${iconData.fontPackage}/${iconData.fontFamily}';
+    }
+    return iconData.fontFamily ?? '';
   }
 }

@@ -196,11 +196,13 @@ class AdaptiveButton extends StatelessWidget {
         );
       }
 
-      // Icon mode - use child mode with Icon widget
+      // Icon mode - use native icon rendering
       if (icon != null) {
         return _wrapIOSButton(
-          IOS26Button.child(
+          IOS26Button.icon(
             onPressed: onPressed,
+            icon: icon!,
+            iconColor: iconColor,
             style: _mapToIOS26Style(style),
             size: _mapToIOS26Size(size),
             color: color,
@@ -209,7 +211,6 @@ class AdaptiveButton extends StatelessWidget {
             borderRadius: borderRadius,
             minSize: minSize,
             useSmoothRectangleBorder: useSmoothRectangleBorder,
-            child: Icon(icon, color: iconColor, size: 24),
           ),
         );
       }

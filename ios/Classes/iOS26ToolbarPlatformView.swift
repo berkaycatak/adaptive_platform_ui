@@ -219,6 +219,15 @@ class iOS26ToolbarPlatformView: NSObject, FlutterPlatformView {
                         target: self,
                         action: #selector(actionTapped(_:))
                     )
+                } else if let iconCodePoint = action["iconCodePoint"] as? Int {
+                    let fontFamily = action["iconFontFamily"] as? String ?? ""
+                    let image = FlutterIconRenderer.imageFromIconData(codePoint: iconCodePoint, fontFamily: fontFamily, size: 24)
+                    button = UIBarButtonItem(
+                        image: image?.withRenderingMode(.alwaysTemplate),
+                        style: .plain,
+                        target: self,
+                        action: #selector(actionTapped(_:))
+                    )
                 } else if let title = action["title"] as? String {
                     button = UIBarButtonItem(
                         title: title,

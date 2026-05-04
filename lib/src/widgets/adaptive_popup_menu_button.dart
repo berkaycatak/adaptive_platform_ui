@@ -118,10 +118,10 @@ class AdaptivePopupMenuButton<T> {
     double size = 44.0,
     PopupButtonStyle buttonStyle = PopupButtonStyle.glass,
   }) {
-    // iOS 26+ - Use native iOS 26 popup menu button (expects String - SF Symbol)
+    // iOS 26+ - Use native iOS 26 popup menu button
     if (PlatformInfo.isIOS26OrHigher()) {
       return IOS26PopupMenuButton<T>.icon(
-        buttonIcon: icon is String ? icon : 'ellipsis.circle',
+        buttonIcon: icon,
         items: items,
         onSelected: onSelected,
         tint: tint,

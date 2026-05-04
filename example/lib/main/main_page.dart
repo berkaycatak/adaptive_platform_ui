@@ -33,11 +33,7 @@ class _MainPageState extends State<MainPage> {
                   onTap: (index) => onDestinationSelected(index, context),
                   items: [
                     AdaptiveNavigationDestination(
-                      icon: PlatformInfo.isIOS26OrHigher()
-                          ? "house.fill"
-                          : PlatformInfo.isIOS
-                          ? CupertinoIcons.home
-                          : Icons.home_outlined,
+                      icon: Icons.shop,
 
                       selectedIcon: PlatformInfo.isIOS
                           ? CupertinoIcons.home

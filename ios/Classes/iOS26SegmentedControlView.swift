@@ -79,24 +79,37 @@ class iOS26SegmentedControlView: NSObject, FlutterPlatformView {
         _view.isUserInteractionEnabled = true
 
         if let config = args as? [String: Any] {
-            // Check for SF symbols first
-            if let sfSymbols = config["sfSymbols"] as? [String], !sfSymbols.isEmpty {
-                // Use SF symbols for segments
-                for (index, symbolName) in sfSymbols.enumerated() {
-                    if let image = UIImage(systemName: symbolName) {
+            // Check for SF symbols or IconData
+            if let sfSymbols = config["sfSymbols"] as? [Any], !sfSymbols.isEmpty {
+                // Use symbols or IconData for segments
+                for (index, icon) in sfSymbols.enumerated() {
+                    var finalImage: UIImage?
+                    
+                    if let symbolName = icon as? String {
+                        finalImage = UIImage(systemName: symbolName)
+                    } else if let iconData = icon as? [String: Any],
+                              let codePoint = iconData["codePoint"] as? Int,
+                              let fontFamily = iconData["fontFamily"] as? String {
+                        let size = (config["iconSize"] as? NSNumber)?.doubleValue ?? 24.0
+                        finalImage = FlutterIconRenderer.imageFromIconData(codePoint: codePoint, fontFamily: fontFamily, size: CGFloat(size))
+                    }
+                    
+                    if let image = finalImage {
                         segmentedControl.insertSegment(with: image, at: index, animated: false)
                     } else {
-                        // Fallback if symbol not found
-                        print("⚠️ SF Symbol not found: \(symbolName)")
+                        // Fallback with empty label if icon not found
+                        segmentedControl.insertSegment(withTitle: "", at: index, animated: false)
+                        print("⚠️ Icon not found at index \(index)")
                     }
                 }
 
-                // Apply icon size if provided
+                // Apply icon size if provided for SF Symbols
                 if let iconSizeNumber = config["iconSize"] as? NSNumber {
                     let iconSize = CGFloat(iconSizeNumber.doubleValue)
                     let configuration = UIImage.SymbolConfiguration(pointSize: iconSize)
                     for i in 0..<segmentedControl.numberOfSegments {
-                        if let image = segmentedControl.imageForSegment(at: i) {
+                        if let image = segmentedControl.imageForSegment(at: i),
+                           let icon = sfSymbols[i] as? String { // Only for SF Symbols
                             segmentedControl.setImage(image.withConfiguration(configuration), forSegmentAt: i)
                         }
                     }
@@ -105,7 +118,8 @@ class iOS26SegmentedControlView: NSObject, FlutterPlatformView {
                 // Apply icon color if provided
                 if let iconColorValue = config["iconColor"] as? Int {
                     let iconColor = colorFromARGB(iconColorValue)
-                    segmentedControl.setTitleTextAttributes([.foregroundColor: iconColor], for: .normal)
+                    // This sets the global tint for the segmented control which affects icons
+                    segmentedControl.tintColor = iconColor
                 }
             }
             // Otherwise use labels
