@@ -1,9 +1,27 @@
 import Flutter
 import UIKit
 
+private final class LayoutAwareTabBarContainerView: UIView {
+    var onWidthChanged: ((CGFloat) -> Void)?
+    private var lastReportedWidth: CGFloat = 0
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+
+        guard window != nil else { return }
+
+        let width = bounds.width
+        guard width > 0 else { return }
+        guard abs(width - lastReportedWidth) > 0.5 else { return }
+
+        lastReportedWidth = width
+        onWidthChanged?(width)
+    }
+}
+
 class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
     private let channel: FlutterMethodChannel
-    private let container: UIView
+    private let container: LayoutAwareTabBarContainerView
     private var tabBar: UITabBar?
     private var minimizeBehavior: Int = 3 // automatic
     private var currentLabels: [String] = []
@@ -23,7 +41,7 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
             name: "adaptive_platform_ui/ios26_tab_bar_\(viewId)",
             binaryMessenger: messenger
         )
-        self.container = UIView(frame: frame)
+        self.container = LayoutAwareTabBarContainerView(frame: frame)
 
         var labels: [String] = []
         var symbols: [String] = []
@@ -288,6 +306,10 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
         // Apply minimize behavior if available
         self.applyMinimizeBehavior()
 
+        container.onWidthChanged = { [weak self] _ in
+            self?.handleContainerWidthChange()
+        }
+
         // Setup method call handler
         channel.setMethodCallHandler { [weak self] call, result in
             guard let self = self else { result(nil); return }
@@ -305,6 +327,21 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
         //
         // This method stores the behavior preference for future use
         // The actual minimization animation should be handled by Flutter
+    }
+
+    private func handleContainerWidthChange() {
+        guard let bar = self.tabBar else { return }
+
+        // A standalone UITabBar hosted in a platform view can lay out once
+        // before it has its final width. Rebuild against the real container
+        // width so item labels and spacing are computed from the final bounds.
+        if #available(iOS 26.0, *) {
+            rebuildItemsWithCurrentState()
+        }
+
+        bar.setNeedsLayout()
+        bar.layoutIfNeeded()
+        container.setNeedsLayout()
     }
 
     private func handleMethodCall(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
@@ -493,9 +530,10 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
                     self.tabBar?.unselectedItemTintColor = c
                     NSLog("✅ setStyle: unselectedItemTintColor set to \(c)")
 
-                    // iOS 26+: Rebuild items with new unselected color
+                    // iOS 26+: Rebuild items with current state so untinted
+                    // and tinted icon variants are regenerated consistently.
                     if #available(iOS 26.0, *) {
-                        self.rebuildItemsWithCurrentColors()
+                        self.rebuildItemsWithCurrentState()
                     }
                 }
                 unselectedColor = c
@@ -582,8 +620,8 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
         }
     }
 
-    // iOS 26+: Rebuild tab items with current colors
-    private func rebuildItemsWithCurrentColors() {
+    // iOS 26+: Rebuild tab items from the current native state.
+    private func rebuildItemsWithCurrentState() {
         guard let bar = self.tabBar else { return }
 
         let currentSelectedIndex = bar.items?.firstIndex { $0 == bar.selectedItem } ?? 0
