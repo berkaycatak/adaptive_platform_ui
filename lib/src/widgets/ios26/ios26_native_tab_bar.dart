@@ -60,6 +60,10 @@ class _IOS26NativeTabBarState extends State<IOS26NativeTabBar> {
   List<String>? _lastSelectedFileIcons;
   List<String>? _lastNetworkIcons;
   List<String>? _lastSelectedNetworkIcons;
+  List<int?>? _lastIconCodePoints;
+  List<String?>? _lastIconFontFamilies;
+  List<int?>? _lastSelectedIconCodePoints;
+  List<String?>? _lastSelectedIconFontFamilies;
   List<int?>? _lastBadgeCounts;
   TabBarMinimizeBehavior? _lastMinimizeBehavior;
   bool? _lastHidden;
@@ -142,6 +146,25 @@ class _IOS26NativeTabBarState extends State<IOS26NativeTabBar> {
     return '';
   }
 
+  int _extractIconCodePoint(Object? icon) {
+    if (icon is IconData) return icon.codePoint;
+    if (icon is Icon && icon.icon != null) return icon.icon!.codePoint;
+    return 0;
+  }
+
+  String _extractIconFontFamily(Object? icon) {
+    IconData? iconData;
+    if (icon is IconData) iconData = icon;
+    if (icon is Icon) iconData = icon.icon;
+    if (iconData != null) {
+      if (iconData.fontPackage != null) {
+        return 'packages/${iconData.fontPackage}/${iconData.fontFamily}';
+      }
+      return iconData.fontFamily ?? '';
+    }
+    return '';
+  }
+
   List<String> _mapSymbols() =>
       widget.destinations.map((e) => _extractSymbol(e.icon)).toList();
 
@@ -166,6 +189,20 @@ class _IOS26NativeTabBarState extends State<IOS26NativeTabBar> {
       .map((e) => _extractNetworkUrl(e.selectedIcon ?? e.icon))
       .toList();
 
+  List<int> _mapIconCodePoints() =>
+      widget.destinations.map((e) => _extractIconCodePoint(e.icon)).toList();
+
+  List<String> _mapIconFontFamilies() =>
+      widget.destinations.map((e) => _extractIconFontFamily(e.icon)).toList();
+
+  List<int> _mapSelectedIconCodePoints() => widget.destinations
+      .map((e) => _extractIconCodePoint(e.selectedIcon ?? e.icon))
+      .toList();
+
+  List<String> _mapSelectedIconFontFamilies() => widget.destinations
+      .map((e) => _extractIconFontFamily(e.selectedIcon ?? e.icon))
+      .toList();
+
   @override
   Widget build(BuildContext context) {
     if (!kIsWeb && Platform.isIOS) {
@@ -177,6 +214,10 @@ class _IOS26NativeTabBarState extends State<IOS26NativeTabBar> {
       final selectedFileIcons = _mapSelectedFileIcons();
       final networkIcons = _mapNetworkIcons();
       final selectedNetworkIcons = _mapSelectedNetworkIcons();
+      final iconCodePoints = _mapIconCodePoints();
+      final iconFontFamilies = _mapIconFontFamilies();
+      final selectedIconCodePoints = _mapSelectedIconCodePoints();
+      final selectedIconFontFamilies = _mapSelectedIconFontFamilies();
 
       final searchFlags = widget.destinations.map((e) => e.isSearch).toList();
       final badgeCounts = widget.destinations.map((e) => e.badgeCount).toList();
@@ -193,6 +234,10 @@ class _IOS26NativeTabBarState extends State<IOS26NativeTabBar> {
         'selectedFileIcons': selectedFileIcons,
         'networkIcons': networkIcons,
         'selectedNetworkIcons': selectedNetworkIcons,
+        'iconCodePoints': iconCodePoints,
+        'iconFontFamilies': iconFontFamilies,
+        'selectedIconCodePoints': selectedIconCodePoints,
+        'selectedIconFontFamilies': selectedIconFontFamilies,
         'searchFlags': searchFlags,
         'badgeCounts': badgeCounts,
         'spacerFlags': spacerFlags,
@@ -343,6 +388,10 @@ class _IOS26NativeTabBarState extends State<IOS26NativeTabBar> {
     final selectedFileIcons = _mapSelectedFileIcons();
     final networkIcons = _mapNetworkIcons();
     final selectedNetworkIcons = _mapSelectedNetworkIcons();
+    final iconCodePoints = _mapIconCodePoints();
+    final iconFontFamilies = _mapIconFontFamilies();
+    final selectedIconCodePoints = _mapSelectedIconCodePoints();
+    final selectedIconFontFamilies = _mapSelectedIconFontFamilies();
     final searchFlags = widget.destinations.map((e) => e.isSearch).toList();
     final badgeCounts = widget.destinations.map((e) => e.badgeCount).toList();
 
@@ -354,7 +403,11 @@ class _IOS26NativeTabBarState extends State<IOS26NativeTabBar> {
         _lastSelectedFileIcons?.join('|') != selectedFileIcons.join('|') ||
         _lastNetworkIcons?.join('|') != networkIcons.join('|') ||
         _lastSelectedNetworkIcons?.join('|') !=
-            selectedNetworkIcons.join('|')) {
+            selectedNetworkIcons.join('|') ||
+        _lastIconCodePoints?.join('|') != iconCodePoints.join('|') ||
+        _lastIconFontFamilies?.join('|') != iconFontFamilies.join('|') ||
+        _lastSelectedIconCodePoints?.join('|') != selectedIconCodePoints.join('|') ||
+        _lastSelectedIconFontFamilies?.join('|') != selectedIconFontFamilies.join('|')) {
       await ch.invokeMethod('setItems', {
         'labels': labels,
         'sfSymbols': symbols,
@@ -364,6 +417,10 @@ class _IOS26NativeTabBarState extends State<IOS26NativeTabBar> {
         'selectedFileIcons': selectedFileIcons,
         'networkIcons': networkIcons,
         'selectedNetworkIcons': selectedNetworkIcons,
+        'iconCodePoints': iconCodePoints,
+        'iconFontFamilies': iconFontFamilies,
+        'selectedIconCodePoints': selectedIconCodePoints,
+        'selectedIconFontFamilies': selectedIconFontFamilies,
         'searchFlags': searchFlags,
         'badgeCounts': badgeCounts,
         'selectedIndex': widget.selectedIndex,
@@ -376,6 +433,10 @@ class _IOS26NativeTabBarState extends State<IOS26NativeTabBar> {
       _lastSelectedFileIcons = selectedFileIcons;
       _lastNetworkIcons = networkIcons;
       _lastSelectedNetworkIcons = selectedNetworkIcons;
+      _lastIconCodePoints = iconCodePoints;
+      _lastIconFontFamilies = iconFontFamilies;
+      _lastSelectedIconCodePoints = selectedIconCodePoints;
+      _lastSelectedIconFontFamilies = selectedIconFontFamilies;
       _requestIntrinsicSize();
     }
 
@@ -431,6 +492,10 @@ class _IOS26NativeTabBarState extends State<IOS26NativeTabBar> {
     _lastSelectedFileIcons = _mapSelectedFileIcons();
     _lastNetworkIcons = _mapNetworkIcons();
     _lastSelectedNetworkIcons = _mapSelectedNetworkIcons();
+    _lastIconCodePoints = _mapIconCodePoints();
+    _lastIconFontFamilies = _mapIconFontFamilies();
+    _lastSelectedIconCodePoints = _mapSelectedIconCodePoints();
+    _lastSelectedIconFontFamilies = _mapSelectedIconFontFamilies();
     _lastBadgeCounts = widget.destinations.map((e) => e.badgeCount).toList();
   }
 
@@ -466,6 +531,10 @@ class _IOS26NativeTabBarState extends State<IOS26NativeTabBar> {
     final selectedFileIcons = _mapSelectedFileIcons();
     final networkIcons = _mapNetworkIcons();
     final selectedNetworkIcons = _mapSelectedNetworkIcons();
+    final iconCodePoints = _mapIconCodePoints();
+    final iconFontFamilies = _mapIconFontFamilies();
+    final selectedIconCodePoints = _mapSelectedIconCodePoints();
+    final selectedIconFontFamilies = _mapSelectedIconFontFamilies();
     final searchFlags = widget.destinations.map((e) => e.isSearch).toList();
     final badgeCounts = widget.destinations.map((e) => e.badgeCount).toList();
 
@@ -479,6 +548,10 @@ class _IOS26NativeTabBarState extends State<IOS26NativeTabBar> {
         'selectedFileIcons': selectedFileIcons,
         'networkIcons': networkIcons,
         'selectedNetworkIcons': selectedNetworkIcons,
+        'iconCodePoints': iconCodePoints,
+        'iconFontFamilies': iconFontFamilies,
+        'selectedIconCodePoints': selectedIconCodePoints,
+        'selectedIconFontFamilies': selectedIconFontFamilies,
         'searchFlags': searchFlags,
         'badgeCounts': badgeCounts,
         'selectedIndex': widget.selectedIndex,

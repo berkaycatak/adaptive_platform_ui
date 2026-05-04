@@ -71,6 +71,8 @@ class IOS26Button extends StatefulWidget {
     this.useSmoothRectangleBorder = true,
   }) : child = null,
        isChildMode = false,
+       icon = null,
+       iconColor = null,
        sfSymbol = null;
 
   /// Creates an iOS 26 style button with a custom child widget
@@ -90,6 +92,8 @@ class IOS26Button extends StatefulWidget {
   }) : label = '',
        textColor = null,
        isChildMode = true,
+       icon = null,
+       iconColor = null,
        sfSymbol = null;
 
   /// Creates an iOS 26 style button with a native SF Symbol icon
@@ -108,7 +112,29 @@ class IOS26Button extends StatefulWidget {
   }) : label = '',
        textColor = null,
        child = null,
-       isChildMode = false;
+       isChildMode = false,
+       icon = null,
+       iconColor = null;
+
+  /// Creates an iOS 26 style button with a Flutter IconData
+  const IOS26Button.icon({
+    super.key,
+    required this.onPressed,
+    required this.icon,
+    this.iconColor,
+    this.style = IOS26ButtonStyle.filled,
+    this.size = IOS26ButtonSize.medium,
+    this.color,
+    this.enabled = true,
+    this.padding,
+    this.borderRadius,
+    this.minSize,
+    this.useSmoothRectangleBorder = true,
+  }) : label = '',
+       textColor = null,
+       child = null,
+       isChildMode = false,
+       sfSymbol = null;
 
   /// The callback that is called when the button is tapped
   final VoidCallback? onPressed;
@@ -118,6 +144,12 @@ class IOS26Button extends StatefulWidget {
 
   /// The custom child widget (used in .child() constructor)
   final Widget? child;
+
+  /// The icon to display (used in .icon() constructor)
+  final IconData? icon;
+
+  /// The color of the icon (used in .icon() constructor)
+  final Color? iconColor;
 
   /// The SF Symbol to display (used in .sfSymbol() constructor)
   final SFSymbol? sfSymbol;
@@ -252,6 +284,19 @@ class _IOS26ButtonState extends State<IOS26Button> {
         });
       }
     }
+
+    // Update IconData if changed
+    if (oldWidget.icon?.codePoint != widget.icon?.codePoint ||
+        oldWidget.iconColor != widget.iconColor) {
+      if (widget.icon != null) {
+        _channel.invokeMethod('setIcon', {
+          'iconCodePoint': widget.icon!.codePoint,
+          'iconFontFamily': _extractIconFontFamily(widget.icon!),
+          if (widget.iconColor != null)
+            'iconColor': _colorToARGB(widget.iconColor!),
+        });
+      }
+    }
   }
 
   Map<String, dynamic> _buildCreationParams() {
@@ -271,7 +316,17 @@ class _IOS26ButtonState extends State<IOS26Button> {
       if (widget.sfSymbol != null) 'iconSize': widget.sfSymbol!.size,
       if (widget.sfSymbol?.color != null)
         'iconColor': _colorToARGB(widget.sfSymbol!.color!),
+      if (widget.icon != null) 'iconCodePoint': widget.icon!.codePoint,
+      if (widget.icon != null) 'iconFontFamily': _extractIconFontFamily(widget.icon!),
+      if (widget.iconColor != null) 'iconColor': _colorToARGB(widget.iconColor!),
     };
+  }
+
+  String _extractIconFontFamily(IconData iconData) {
+    if (iconData.fontPackage != null) {
+      return 'packages/${iconData.fontPackage}/${iconData.fontFamily}';
+    }
+    return iconData.fontFamily ?? '';
   }
 
   String _styleToString(IOS26ButtonStyle style) {

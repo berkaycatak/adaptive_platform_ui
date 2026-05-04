@@ -97,9 +97,18 @@ class AdaptiveAppBarAction {
     return {
       if (iosSymbol != null) 'icon': iosSymbol!,
       if (title != null) 'title': title!,
+      if (icon != null) 'iconCodePoint': icon!.codePoint,
+      if (icon != null) 'iconFontFamily': _extractIconFontFamily(icon!),
       'spacerAfter': spacerAfter.index, // 0=none, 1=fixed, 2=flexible
       if (prominent) 'prominent': true,
       if (tintColor != null) 'tint': tintColor!.toARGB32(),
     };
+  }
+
+  String _extractIconFontFamily(IconData iconData) {
+    if (iconData.fontPackage != null) {
+      return 'packages/${iconData.fontPackage}/${iconData.fontFamily}';
+    }
+    return iconData.fontFamily ?? '';
   }
 }

@@ -19,10 +19,8 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
         title: "Buttons",
         actions: [
           AdaptiveAppBarAction(
-            icon: PlatformInfo.isIOS
-                ? CupertinoIcons.info_circle
-                : Icons.info_outline,
-            iosSymbol: "info.circle",
+            icon: Icons.info_outline,
+            // iosSymbol: "info.circle",
             onPressed: () => _showMessage(context, 'Info button pressed'),
           ),
         ],
