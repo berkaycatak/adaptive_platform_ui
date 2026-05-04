@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.1.107]
+* **NEW**: Added `resizeToAvoidBottomInset` prop to `AdaptiveScaffold` for explicit control over keyboard-driven scaffold resizing across all platform paths (iOS 26+, iOS <26, Android) (@philasmar)
+* **FIX**: Fixed iOS 26+ native tab bar rendering with truncated/ellipsized labels on cold launch — replaced timing-based retry with a layout-aware container that rebuilds items when the platform view receives its real width (@philasmar)
+
 ## [0.1.106]
 * **NEW**: Added `ImageProvider` support (`AssetImage`, `FileImage`, `NetworkImage`) for `AdaptiveBottomNavigationBar` icons — including async network image loading with caching and circular avatar rendering for iOS 26+ native tab bar (@philasmar)
 * **NEW**: Added `textColor` and `selectedTextColor` props to `AdaptiveSegmentedControl` for explicit label color customization across iOS 26+, iOS <26, and Android (@philasmar)
