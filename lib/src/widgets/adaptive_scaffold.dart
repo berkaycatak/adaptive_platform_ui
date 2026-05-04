@@ -246,24 +246,24 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
         }).toList();
       }
 
-        return _wrapWithDrawerIfNeeded(
-          IOS26Scaffold(
-            key: ValueKey(
-              'ios26_scaffold_${widget.bottomNavigationBar?.selectedIndex ?? 0}_${widget.body?.runtimeType.toString() ?? "empty"}',
-            ),
+      return _wrapWithDrawerIfNeeded(
+        IOS26Scaffold(
+          key: ValueKey(
+            'ios26_scaffold_${widget.bottomNavigationBar?.selectedIndex ?? 0}_${widget.body?.runtimeType.toString() ?? "empty"}',
+          ),
           bottomNavigationBar: widget.bottomNavigationBar,
           title: widget.appBar?.title,
           actions: widget.appBar?.actions,
           leading: widget.appBar?.leading,
           tintColor: widget.appBar?.tintColor,
-            minimizeBehavior: widget.minimizeBehavior,
-            enableBlur: widget.enableBlur,
-            useHeroBackButton: widget.useHeroBackButton,
-            tabBarHidden: widget.tabBarHidden,
-            resizeToAvoidBottomInset: widget.resizeToAvoidBottomInset,
-            children: childrenList,
-          ),
-        );
+          minimizeBehavior: widget.minimizeBehavior,
+          enableBlur: widget.enableBlur,
+          useHeroBackButton: widget.useHeroBackButton,
+          tabBarHidden: widget.tabBarHidden,
+          resizeToAvoidBottomInset: widget.resizeToAvoidBottomInset,
+          children: childrenList,
+        ),
+      );
     }
 
     // iOS <26 (iOS 18 and below) OR iOS 26+ with useNativeToolbar: false
