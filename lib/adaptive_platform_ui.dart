@@ -30,6 +30,9 @@ library;
 // Platform utilities
 export 'src/platform/platform_info.dart';
 
+// Animation utilities
+export 'src/utils/animation.dart';
+
 // Styles
 export 'src/style/sf_symbol.dart';
 
