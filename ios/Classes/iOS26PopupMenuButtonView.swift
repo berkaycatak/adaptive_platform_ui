@@ -52,6 +52,9 @@ class iOS26PopupMenuButtonView: NSObject, FlutterPlatformView {
         button.translatesAutoresizingMaskIntoConstraints = false
         if let t = tint { button.tintColor = t }
         else if #available(iOS 13.0, *) { button.tintColor = .label }
+        if #available(iOS 16.0, *) {
+            button.preferredMenuElementOrder = .fixed
+        }
 
         // Add button and pin to container
         container.addSubview(button)
