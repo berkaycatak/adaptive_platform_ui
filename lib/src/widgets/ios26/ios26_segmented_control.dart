@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 /// Native iOS 26 segmented control implementation using platform views
@@ -18,6 +19,8 @@ class IOS26SegmentedControl extends StatefulWidget {
     this.icons,
     this.iconSize,
     this.iconColor,
+    this.textColor,
+    this.selectedTextColor,
   });
 
   /// Segment labels to display, in order
@@ -50,6 +53,12 @@ class IOS26SegmentedControl extends StatefulWidget {
   /// Icon color (when using icons)
   final Color? iconColor;
 
+  /// Optional text color for unselected segments.
+  final Color? textColor;
+
+  /// Optional text color for the selected segment.
+  final Color? selectedTextColor;
+
   @override
   State<IOS26SegmentedControl> createState() => _IOS26SegmentedControlState();
 }
@@ -59,6 +68,9 @@ class _IOS26SegmentedControlState extends State<IOS26SegmentedControl> {
   late final int _id;
   late final MethodChannel _channel;
   bool? _lastIsDark;
+  int? _lastTintColor;
+  int? _lastTextColor;
+  int? _lastSelectedTextColor;
 
   @override
   void initState() {
@@ -73,7 +85,7 @@ class _IOS26SegmentedControlState extends State<IOS26SegmentedControl> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _syncBrightnessIfNeeded();
+    _syncThemeIfNeeded();
   }
 
   @override
@@ -82,12 +94,32 @@ class _IOS26SegmentedControlState extends State<IOS26SegmentedControl> {
     super.dispose();
   }
 
-  Future<void> _syncBrightnessIfNeeded() async {
-    final isDark = MediaQuery.platformBrightnessOf(context) == Brightness.dark;
-    if (_lastIsDark != isDark) {
+  Brightness _effectiveBrightness() {
+    return CupertinoTheme.of(context).brightness ??
+        Theme.of(context).brightness;
+  }
+
+  Future<void> _syncThemeIfNeeded() async {
+    final isDark = _effectiveBrightness() == Brightness.dark;
+    final themeParams = _buildThemeParams();
+    final tintColor = widget.color != null ? _colorToARGB(widget.color!) : null;
+    final textColor = themeParams['textColor'] as int;
+    final selectedTextColor = themeParams['selectedTextColor'] as int;
+
+    if (_lastIsDark != isDark ||
+        _lastTintColor != tintColor ||
+        _lastTextColor != textColor ||
+        _lastSelectedTextColor != selectedTextColor) {
       try {
-        await _channel.invokeMethod('setBrightness', {'isDark': isDark});
+        await _channel.invokeMethod('setBrightness', {
+          'isDark': isDark,
+          if (tintColor != null) 'tintColor': tintColor,
+          ...themeParams,
+        });
         _lastIsDark = isDark;
+        _lastTintColor = tintColor;
+        _lastTextColor = textColor;
+        _lastSelectedTextColor = selectedTextColor;
       } catch (e) {
         // Ignore errors if platform view is not yet ready
       }
@@ -116,6 +148,8 @@ class _IOS26SegmentedControlState extends State<IOS26SegmentedControl> {
         'index': widget.selectedIndex,
       });
     }
+
+    _syncThemeIfNeeded();
   }
 
   int _colorToARGB(Color color) {
@@ -125,9 +159,35 @@ class _IOS26SegmentedControlState extends State<IOS26SegmentedControl> {
         ((color.b * 255.0).round() & 0xff);
   }
 
+  Map<String, dynamic> _buildThemeParams() {
+    final cupertinoTheme = CupertinoTheme.of(context);
+    final brightness = _effectiveBrightness();
+
+    final baseTextStyle = DefaultTextStyle.of(context).style;
+    final themeTextStyle = cupertinoTheme.textTheme.textStyle;
+
+    final effectiveTextColor =
+        widget.textColor ??
+        baseTextStyle.color ??
+        themeTextStyle.color ??
+        (brightness == Brightness.dark
+            ? CupertinoColors.white
+            : CupertinoColors.black);
+
+    final effectiveSelectedTextColor =
+        widget.selectedTextColor ??
+        (widget.color != null
+            ? CupertinoColors.white
+            : effectiveTextColor);
+
+    return <String, dynamic>{
+      'textColor': _colorToARGB(effectiveTextColor),
+      'selectedTextColor': _colorToARGB(effectiveSelectedTextColor),
+    };
+  }
+
   Map<String, dynamic> _buildCreationParams() {
-    final bool isDark =
-        MediaQuery.platformBrightnessOf(context) == Brightness.dark;
+    final bool isDark = _effectiveBrightness() == Brightness.dark;
 
     final params = <String, dynamic>{
       'id': _id,
@@ -135,6 +195,7 @@ class _IOS26SegmentedControlState extends State<IOS26SegmentedControl> {
       'selectedIndex': widget.selectedIndex,
       'enabled': widget.enabled,
       'isDark': isDark,
+      ..._buildThemeParams(),
     };
 
     // Add SF symbols if provided

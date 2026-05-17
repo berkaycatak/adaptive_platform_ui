@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.1.107]
+* **NEW**: Added `resizeToAvoidBottomInset` prop to `AdaptiveScaffold` for explicit control over keyboard-driven scaffold resizing across all platform paths (iOS 26+, iOS <26, Android) (@philasmar)
+* **FIX**: Fixed iOS 26+ native tab bar rendering with truncated/ellipsized labels on cold launch — replaced timing-based retry with a layout-aware container that rebuilds items when the platform view receives its real width (@philasmar)
+
+## [0.1.106]
+* **NEW**: Added `ImageProvider` support (`AssetImage`, `FileImage`, `NetworkImage`) for `AdaptiveBottomNavigationBar` icons — including async network image loading with caching and circular avatar rendering for iOS 26+ native tab bar (@philasmar)
+* **NEW**: Added `textColor` and `selectedTextColor` props to `AdaptiveSegmentedControl` for explicit label color customization across iOS 26+, iOS <26, and Android (@philasmar)
+* **FIX**: Fixed dimmed background removal delay when closing iOS 26+ alert dialogs — removed redundant Flutter-side overlays so only the native `UIAlertController` dim is used (@ctrl-Felix)
+
+## [0.1.105]
+* **NEW**: Added `ImageIcon` / `AssetImage` support for iOS 26+ native tab bar — custom asset icons (with optional per-state selected icon) can now be used alongside SF Symbols (@Mohamed-7018)
+* **NEW**: Added automatic RTL (right-to-left) layout support for iOS 26+ native tab bar — mirrors automatically based on `Directionality.of(context)` (@Mohamed-7018)
+* **NEW**: Added `hideBottomDivider` prop to `AdaptiveListTile` for removing the bottom separator, useful for the last tile in a grouped list (@ctrl-Felix)
+* **NEW**: Added `separatorColor` prop to `AdaptiveListTile` for customizing the iOS bottom separator color (@philasmar)
+* **FIX**: Fixed iOS 26+ alert dialog incorrectly tinting the cancel button red when no primary action was present (@philasmar)
+* **FIX**: Removed unnecessary empty vertical space in message-only alert dialogs on Android and iOS <26 (@philasmar)
+* **FIX**: Fixed iOS segmented control inactive label colors not following the app theme on iOS 26+, and removed vertical overflow on older iOS versions (@philasmar)
+
 ## [0.1.104]
 * **NEW**: Added `tabBarHidden` prop to `AdaptiveScaffold` to hide the native iOS 26+ tab bar — prevents native `UITabBar` from bleeding through `showModalBottomSheet` (@DmitriiSer)
 * **NEW**: Added `tintColor` support for iOS 26+ native toolbar and `prominent` button style for `AdaptiveAppBarAction` (@luflow)

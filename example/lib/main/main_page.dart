@@ -56,6 +56,11 @@ class _MainPageState extends State<MainPage> {
                           : Icons.info,
                       label: 'Info',
                     ),
+
+                    const AdaptiveNavigationDestination(
+                      icon: NetworkImage('https://i.pravatar.cc/100'),
+                      label: 'Profile',
+                    ),
                     AdaptiveNavigationDestination(
                       icon: PlatformInfo.isIOS26OrHigher()
                           ? "magnifyingglass"

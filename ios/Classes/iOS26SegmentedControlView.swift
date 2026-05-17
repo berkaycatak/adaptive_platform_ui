@@ -35,6 +35,9 @@ class iOS26SegmentedControlView: NSObject, FlutterPlatformView {
     private var channel: FlutterMethodChannel
     private var controlId: Int
     private var isDark: Bool = false
+    private var tintColor: UIColor?
+    private var textColor: UIColor?
+    private var selectedTextColor: UIColor?
 
     init(
         frame: CGRect,
@@ -119,8 +122,14 @@ class iOS26SegmentedControlView: NSObject, FlutterPlatformView {
 
             // Set tint color if provided
             if let tintColorValue = config["tintColor"] as? Int {
-                let tintColor = colorFromARGB(tintColorValue)
-                segmentedControl.selectedSegmentTintColor = tintColor
+                tintColor = colorFromARGB(tintColorValue)
+            }
+
+            if let textColorValue = config["textColor"] as? Int {
+                textColor = colorFromARGB(textColorValue)
+            }
+            if let selectedTextColorValue = config["selectedTextColor"] as? Int {
+                selectedTextColor = colorFromARGB(selectedTextColorValue)
             }
 
             // Set selected index
@@ -135,6 +144,8 @@ class iOS26SegmentedControlView: NSObject, FlutterPlatformView {
                 }
             }
         }
+
+        applyTheme()
 
         _view.addSubview(segmentedControl)
         NSLayoutConstraint.activate([
@@ -155,7 +166,37 @@ class iOS26SegmentedControlView: NSObject, FlutterPlatformView {
         return UIColor(red: r, green: g, blue: b, alpha: a)
     }
 
+    private func applyTheme() {
+        let normalTextColor = textColor ?? .label
+        let selectedColor = selectedTextColor ?? normalTextColor
+        let font = UIFont.systemFont(ofSize: 13, weight: .medium)
+        let normalAttributes: [NSAttributedString.Key: Any] = [
+            .foregroundColor: normalTextColor,
+            .font: font,
+        ]
+        let selectedAttributes: [NSAttributedString.Key: Any] = [
+            .foregroundColor: selectedColor,
+            .font: font,
+        ]
+        let disabledAttributes: [NSAttributedString.Key: Any] = [
+            .foregroundColor: normalTextColor.withAlphaComponent(0.5),
+            .font: font,
+        ]
+
+        if let tintColor = tintColor {
+            segmentedControl.selectedSegmentTintColor = tintColor
+        }
+        segmentedControl.setTitleTextAttributes(normalAttributes, for: .normal)
+        segmentedControl.setTitleTextAttributes(selectedAttributes, for: .selected)
+        segmentedControl.setTitleTextAttributes(selectedAttributes, for: [.selected, .highlighted])
+        segmentedControl.setTitleTextAttributes(selectedAttributes, for: [.selected, .focused])
+        segmentedControl.setTitleTextAttributes(disabledAttributes, for: .disabled)
+        segmentedControl.setNeedsLayout()
+        segmentedControl.layoutIfNeeded()
+    }
+
     @objc private func segmentChanged() {
+        applyTheme()
         channel.invokeMethod("valueChanged", arguments: ["index": segmentedControl.selectedSegmentIndex])
 
         let impact = UIImpactFeedbackGenerator(style: .light)
@@ -176,12 +217,25 @@ class iOS26SegmentedControlView: NSObject, FlutterPlatformView {
             result(nil)
 
         case "setBrightness":
-            if let args = call.arguments as? [String: Any],
-               let dark = args["isDark"] as? Bool {
-                isDark = dark
-                if #available(iOS 13.0, *) {
-                    _view.overrideUserInterfaceStyle = dark ? .dark : .light
+            if let args = call.arguments as? [String: Any] {
+                if let dark = args["isDark"] as? Bool {
+                    isDark = dark
+                    if #available(iOS 13.0, *) {
+                        _view.overrideUserInterfaceStyle = dark ? .dark : .light
+                    }
                 }
+                if let tintColorValue = args["tintColor"] as? Int {
+                    tintColor = colorFromARGB(tintColorValue)
+                }
+
+                if let textColorValue = args["textColor"] as? Int {
+                    textColor = colorFromARGB(textColorValue)
+                }
+                if let selectedTextColorValue = args["selectedTextColor"] as? Int {
+                    selectedTextColor = colorFromARGB(selectedTextColorValue)
+                }
+
+                applyTheme()
             }
             result(nil)
 
