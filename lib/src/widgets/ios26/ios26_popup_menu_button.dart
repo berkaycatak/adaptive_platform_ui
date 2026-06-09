@@ -354,18 +354,21 @@ class _IOS26PopupMenuButtonState<T> extends State<IOS26PopupMenuButton<T>> {
 
       // Custom widget mode: Stack with custom widget determining size
       if (isCustomWidget) {
-        return GestureDetector(
-          onTap: widget.onTap,
-          child: Stack(
-            fit: StackFit.passthrough,
-            children: [
-              widget.child!, // Determines size and is visible
+        return Stack(
+          fit: StackFit.passthrough,
+          children: [
+            widget.child!, // Determines size and is visible
+            Positioned.fill(
+              child: platformView, // Native button overlay catches long-press
+            ),
+            if (widget.onTap != null)
               Positioned.fill(
-                child:
-                    platformView, // Native button overlay (transparent but catches touches)
+                child: GestureDetector(
+                  behavior: HitTestBehavior.translucent,
+                  onTap: widget.onTap,
+                ),
               ),
-            ],
-          ),
+          ],
         );
       }
 
