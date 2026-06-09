@@ -29,6 +29,7 @@ class iOS26PopupMenuButtonView: NSObject, FlutterPlatformView {
         var dividers: [NSNumber] = []
         var enabled: [NSNumber] = []
         var isCustomWidget: Bool = false
+        var triggerOnLongPress: Bool = false
 
         if let dict = args as? [String: Any] {
             if let t = dict["buttonTitle"] as? String { title = t }
@@ -38,6 +39,7 @@ class iOS26PopupMenuButtonView: NSObject, FlutterPlatformView {
             if let tintArgb = dict["tint"] as? NSNumber { tint = UIColor(argb: tintArgb.intValue) }
             if let bs = dict["buttonStyle"] as? String { buttonStyle = bs }
             if let cw = dict["customWidget"] as? NSNumber { isCustomWidget = cw.boolValue }
+            if let lp = dict["triggerOnLongPress"] as? NSNumber { triggerOnLongPress = lp.boolValue }
             labels = (dict["labels"] as? [String]) ?? []
             symbols = (dict["sfSymbols"] as? [String]) ?? []
             dividers = (dict["isDivider"] as? [NSNumber]) ?? []
@@ -94,7 +96,7 @@ class iOS26PopupMenuButtonView: NSObject, FlutterPlatformView {
         rebuildMenu()
 
         if #available(iOS 14.0, *) {
-            button.showsMenuAsPrimaryAction = true
+            button.showsMenuAsPrimaryAction = !triggerOnLongPress
         } else {
             button.addTarget(self, action: #selector(onButtonPressedLegacy(_:)), for: .touchUpInside)
         }
