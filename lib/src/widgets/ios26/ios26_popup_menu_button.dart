@@ -71,7 +71,8 @@ class IOS26PopupMenuButton<T> extends StatefulWidget {
        child = null,
        width = null,
        round = false,
-       triggerOnLongPress = false;
+       triggerOnLongPress = false,
+       onTap = null;
 
   /// Creates a round, icon-only popup menu button
   const IOS26PopupMenuButton.icon({
@@ -88,7 +89,8 @@ class IOS26PopupMenuButton<T> extends StatefulWidget {
        width = size,
        height = size,
        shrinkWrap = false,
-       triggerOnLongPress = false;
+       triggerOnLongPress = false,
+       onTap = null;
 
   /// Creates a popup menu button with a custom child widget
   const IOS26PopupMenuButton.widget({
