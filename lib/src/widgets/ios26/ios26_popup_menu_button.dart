@@ -98,6 +98,7 @@ class IOS26PopupMenuButton<T> extends StatefulWidget {
     this.tint,
     this.buttonStyle = PopupButtonStyle.plain,
     this.triggerOnLongPress = false,
+    this.onTap,
     required this.child,
   }) : buttonLabel = null,
        buttonIcon = null,
@@ -117,6 +118,9 @@ class IOS26PopupMenuButton<T> extends StatefulWidget {
 
   /// When true, menu shows on long press instead of tap (iOS 14+).
   final bool triggerOnLongPress;
+
+  /// Optional tap callback for widget mode — fires on regular tap when triggerOnLongPress is true.
+  final VoidCallback? onTap;
 
   /// Fixed width in icon mode
   final double? width;
@@ -348,15 +352,18 @@ class _IOS26PopupMenuButtonState<T> extends State<IOS26PopupMenuButton<T>> {
 
       // Custom widget mode: Stack with custom widget determining size
       if (isCustomWidget) {
-        return Stack(
-          fit: StackFit.passthrough,
-          children: [
-            widget.child!, // Determines size and is visible
-            Positioned.fill(
-              child:
-                  platformView, // Native button overlay (transparent but catches touches)
-            ),
-          ],
+        return GestureDetector(
+          onTap: widget.onTap,
+          child: Stack(
+            fit: StackFit.passthrough,
+            children: [
+              widget.child!, // Determines size and is visible
+              Positioned.fill(
+                child:
+                    platformView, // Native button overlay (transparent but catches touches)
+              ),
+            ],
+          ),
         );
       }
 
