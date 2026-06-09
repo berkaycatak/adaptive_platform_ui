@@ -508,7 +508,7 @@ class iOS26AlertDialogView: NSObject, FlutterPlatformView {
         // alert tint to red when no primary action is present.
         if let action = primaryAction {
             alert.preferredAction = action
-            alert.view.tintColor = UIColor.systemBlue
+            alert.view.tintColor = tint ?? UIColor.systemBlue
         }
 
         // Present the alert
