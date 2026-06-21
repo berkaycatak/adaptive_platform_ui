@@ -2,7 +2,7 @@
 
 ## [0.1.109]
 * **NEW**: `triggerOnLongPress` and `onTap` on popup menu buttons — tap fires `onTap`, long-press opens the menu (@yuriylybimov)
-* **NEW**: `isDestructive` on `AdaptivePopupMenuItem` — renders destructive styling on Material and iOS <26 (@yuriylybimov)
+* **NEW**: `isDestructive` on `AdaptivePopupMenuItem` — renders destructive (red) styling on Material, iOS <26, and iOS 26+ native menus (@yuriylybimov)
 * **FIX**: destructive menu items now use the theme `colorScheme.error` instead of a hardcoded red (@yuriylybimov)
 
 ## [0.1.108]

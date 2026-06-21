@@ -12,6 +12,7 @@ class iOS26PopupMenuButtonView: NSObject, FlutterPlatformView {
     private var symbols: [String] = []
     private var dividers: [Bool] = []
     private var enabled: [Bool] = []
+    private var isDestructive: [Bool] = []
 
     init(frame: CGRect, viewId: Int64, args: Any?, messenger: FlutterBinaryMessenger) {
         self.channel = FlutterMethodChannel(name: "adaptive_platform_ui/ios26_popup_menu_button_\(viewId)", binaryMessenger: messenger)
@@ -28,6 +29,7 @@ class iOS26PopupMenuButtonView: NSObject, FlutterPlatformView {
         var symbols: [String] = []
         var dividers: [NSNumber] = []
         var enabled: [NSNumber] = []
+        var isDestructive: [NSNumber] = []
         var isCustomWidget: Bool = false
         var triggerOnLongPress: Bool = false
 
@@ -44,6 +46,7 @@ class iOS26PopupMenuButtonView: NSObject, FlutterPlatformView {
             symbols = (dict["sfSymbols"] as? [String]) ?? []
             dividers = (dict["isDivider"] as? [NSNumber]) ?? []
             enabled = (dict["enabled"] as? [NSNumber]) ?? []
+            isDestructive = (dict["isDestructive"] as? [NSNumber]) ?? []
         }
 
         super.init()
@@ -72,6 +75,7 @@ class iOS26PopupMenuButtonView: NSObject, FlutterPlatformView {
         self.symbols = symbols
         self.dividers = dividers.map { $0.boolValue }
         self.enabled = enabled.map { $0.boolValue }
+        self.isDestructive = isDestructive.map { $0.boolValue }
 
         self.isRoundButton = makeRound
         currentButtonStyle = buttonStyle
@@ -130,6 +134,7 @@ class iOS26PopupMenuButtonView: NSObject, FlutterPlatformView {
                     self.symbols = (args["sfSymbols"] as? [String]) ?? []
                     self.dividers = ((args["isDivider"] as? [NSNumber]) ?? []).map { $0.boolValue }
                     self.enabled = ((args["enabled"] as? [NSNumber]) ?? []).map { $0.boolValue }
+                    self.isDestructive = ((args["isDestructive"] as? [NSNumber]) ?? []).map { $0.boolValue }
                     self.rebuildMenu()
                     result(nil)
                 } else { result(FlutterError(code: "bad_args", message: "Missing menu items", details: nil)) }
@@ -173,10 +178,13 @@ class iOS26PopupMenuButtonView: NSObject, FlutterPlatformView {
                 }
 
                 let isEnabled = i < enabled.count ? enabled[i] : true
+                let isDestructiveItem = i < isDestructive.count ? isDestructive[i] : false
                 let currentSelectableIndex = selectableIndex
                 selectableIndex += 1
 
-                let action = UIAction(title: title, image: image, attributes: isEnabled ? [] : [.disabled]) { [weak self] _ in
+                var attrs: UIMenuElement.Attributes = isEnabled ? [] : [.disabled]
+                if isDestructiveItem { attrs.insert(.destructive) }
+                let action = UIAction(title: title, image: image, attributes: attrs) { [weak self] _ in
                     self?.channel.invokeMethod("itemSelected", arguments: ["index": currentSelectableIndex])
                 }
                 current.append(action)
@@ -205,10 +213,11 @@ class iOS26PopupMenuButtonView: NSObject, FlutterPlatformView {
             }
 
             let title = i < labels.count ? labels[i] : ""
+            let isDestructiveItem = i < isDestructive.count ? isDestructive[i] : false
             let currentSelectableIndex = selectableIndex
             selectableIndex += 1
 
-            let action = UIAlertAction(title: title, style: .default) { [weak self] _ in
+            let action = UIAlertAction(title: title, style: isDestructiveItem ? .destructive : .default) { [weak self] _ in
                 self?.channel.invokeMethod("itemSelected", arguments: ["index": currentSelectableIndex])
             }
 
