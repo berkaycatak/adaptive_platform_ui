@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.1.109]
+* **FIX**: `IOSSpringCurve` no longer clamps its output to [0,1], restoring the natural spring overshoot in the mid-range (endpoints remain exact) (@yuriylybimov)
+* **NEW**: Exported `IOSSpringCurve` from the package's public API (@yuriylybimov)
+
 ## [0.1.108]
 * **IMPROVEMENT**: Migrated the iOS plugin from CocoaPods to Swift Package Manager — apps with SPM enabled (`flutter config --enable-swift-package-manager`) now consume the plugin as a Swift package, while CocoaPods-based projects keep working unchanged (@philipgiuliani)
 * **IMPROVEMENT**: Raised the iOS minimum deployment target from 12.0 to 13.0, matching Flutter's supported minimum (@philipgiuliani)
