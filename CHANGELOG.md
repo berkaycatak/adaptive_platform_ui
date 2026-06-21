@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.1.108]
+* **IMPROVEMENT**: Migrated the iOS plugin from CocoaPods to Swift Package Manager — apps with SPM enabled (`flutter config --enable-swift-package-manager`) now consume the plugin as a Swift package, while CocoaPods-based projects keep working unchanged (@philipgiuliani)
+* **IMPROVEMENT**: Raised the iOS minimum deployment target from 12.0 to 13.0, matching Flutter's supported minimum (@philipgiuliani)
+
 ## [0.1.107]
 * **NEW**: Added `resizeToAvoidBottomInset` prop to `AdaptiveScaffold` for explicit control over keyboard-driven scaffold resizing across all platform paths (iOS 26+, iOS <26, Android) (@philasmar)
 * **FIX**: Fixed iOS 26+ native tab bar rendering with truncated/ellipsized labels on cold launch — replaced timing-based retry with a layout-aware container that rebuilds items when the platform view receives its real width (@philasmar)
