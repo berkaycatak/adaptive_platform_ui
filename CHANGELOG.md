@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.1.109]
+* **NEW**: `triggerOnLongPress` and `onTap` on popup menu buttons — tap fires `onTap`, long-press opens the menu (@yuriylybimov)
+* **NEW**: `isDestructive` on `AdaptivePopupMenuItem` — renders destructive styling on Material and iOS <26 (@yuriylybimov)
+* **FIX**: destructive menu items now use the theme `colorScheme.error` instead of a hardcoded red (@yuriylybimov)
+
 ## [0.1.108]
 * **IMPROVEMENT**: Migrated the iOS plugin from CocoaPods to Swift Package Manager — apps with SPM enabled (`flutter config --enable-swift-package-manager`) now consume the plugin as a Swift package, while CocoaPods-based projects keep working unchanged (@philipgiuliani)
 * **IMPROVEMENT**: Raised the iOS minimum deployment target from 12.0 to 13.0, matching Flutter's supported minimum (@philipgiuliani)

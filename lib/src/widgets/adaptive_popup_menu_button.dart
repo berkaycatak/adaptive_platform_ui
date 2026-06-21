@@ -1,5 +1,4 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../platform/platform_info.dart';
 import 'ios26/ios26_popup_menu_button.dart';
@@ -76,6 +75,11 @@ class AdaptivePopupMenuButton<T> {
     VoidCallback? onTap,
     required Widget child,
   }) {
+    assert(
+      onTap == null || triggerOnLongPress,
+      'onTap is only used with triggerOnLongPress: true (tap fires onTap, '
+      'long-press opens the menu).',
+    );
     // iOS 26+ - Use gesture detector with native menu
     if (PlatformInfo.isIOS26OrHigher()) {
       return IOS26PopupMenuButton<T>.widget(
@@ -266,7 +270,7 @@ class _MaterialPopupMenuButtonState<T>
       } else if (widget.items[i] is AdaptivePopupMenuItem<T>) {
         final item = widget.items[i] as AdaptivePopupMenuItem<T>;
         final labelStyle = item.isDestructive
-            ? const TextStyle(color: Color(0xFFD22121))
+            ? TextStyle(color: Theme.of(context).colorScheme.error)
             : null;
         menuItems.add(
           PopupMenuItem<int>(
@@ -280,7 +284,9 @@ class _MaterialPopupMenuButtonState<T>
                         ? item.icon as IconData
                         : Icons.circle,
                     size: 20,
-                    color: item.isDestructive ? const Color(0xFFD22121) : null,
+                    color: item.isDestructive
+                        ? Theme.of(context).colorScheme.error
+                        : null,
                   ),
                   const SizedBox(width: 12),
                 ],

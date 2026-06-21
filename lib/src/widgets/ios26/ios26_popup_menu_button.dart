@@ -107,7 +107,12 @@ class IOS26PopupMenuButton<T> extends StatefulWidget {
        round = false,
        width = null,
        height = 32.0,
-       shrinkWrap = true;
+       shrinkWrap = true,
+       assert(
+         onTap == null || triggerOnLongPress,
+         'onTap is only used with triggerOnLongPress: true (tap fires onTap, '
+         'long-press opens the menu).',
+       );
 
   /// Text for the button (null when using icon)
   final String? buttonLabel;
@@ -121,7 +126,10 @@ class IOS26PopupMenuButton<T> extends StatefulWidget {
   /// When true, menu shows on long press instead of tap (iOS 14+).
   final bool triggerOnLongPress;
 
-  /// Optional tap callback for widget mode — fires on regular tap when triggerOnLongPress is true.
+  /// Optional tap callback for widget mode. Pairs with [triggerOnLongPress]:
+  /// when `triggerOnLongPress` is true, a regular tap fires this callback while
+  /// a long-press opens the menu. Has no effect unless `triggerOnLongPress` is
+  /// true (asserted in the constructor).
   final VoidCallback? onTap;
 
   /// Fixed width in icon mode
@@ -361,7 +369,7 @@ class _IOS26PopupMenuButtonState<T> extends State<IOS26PopupMenuButton<T>> {
             Positioned.fill(
               child: platformView, // Native button overlay catches long-press
             ),
-            if (widget.onTap != null)
+            if (widget.triggerOnLongPress && widget.onTap != null)
               Positioned.fill(
                 child: GestureDetector(
                   behavior: HitTestBehavior.translucent,
