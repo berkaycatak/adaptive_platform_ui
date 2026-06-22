@@ -34,7 +34,41 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
     private var currentSelectedNetworkIcons: [String] = []
     private var currentSearchFlags: [Bool] = []
     private var currentBadgeCounts: [Int?] = []
+    private var currentBadgeTexts: [String?] = []
+    private var currentBadgeColors: [Int?] = []
+    private var currentBadgeTextColors: [Int?] = []
     private let imageCache = NSCache<NSString, UIImage>()
+
+    /// Applies a badge to a tab bar item from the Flutter-provided styling.
+    /// Precedence: a non-empty [text] wins over [count]; otherwise a positive
+    /// [count] is shown; otherwise no badge. [colorARGB] sets the badge
+    /// background (nil = system default red), [textColorARGB] the glyph color
+    /// (nil = platform default). A transparent background + a colored glyph
+    /// renders a clean dot (e.g. badgeText "●").
+    private static func applyBadge(to item: UITabBarItem, count: Int?, text: String?, colorARGB: Int?, textColorARGB: Int?) {
+        let value: String?
+        if let text = text, !text.isEmpty {
+            value = text
+        } else if let count = count, count > 0 {
+            value = count > 99 ? "99+" : String(count)
+        } else {
+            value = nil
+        }
+        item.badgeValue = value
+        item.badgeColor = colorARGB != nil ? colorFromARGB(colorARGB!) : nil
+        if let argb = textColorARGB {
+            let attrs: [NSAttributedString.Key: Any] = [.foregroundColor: colorFromARGB(argb)]
+            item.setBadgeTextAttributes(attrs, for: .normal)
+            item.setBadgeTextAttributes(attrs, for: .selected)
+        } else {
+            item.setBadgeTextAttributes(nil, for: .normal)
+            item.setBadgeTextAttributes(nil, for: .selected)
+        }
+    }
+
+    private static func badgeAt<T>(_ arr: [T?], _ i: Int) -> T? {
+        return i < arr.count ? arr[i] : nil
+    }
 
     init(frame: CGRect, viewId: Int64, args: Any?, messenger: FlutterBinaryMessenger) {
         self.channel = FlutterMethodChannel(
@@ -53,6 +87,9 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
         var selectedNetworkIcons: [String] = []
         var searchFlags: [Bool] = []
         var badgeCounts: [Int?] = []
+        var badgeTexts: [String?] = []
+        var badgeColors: [Int?] = []
+        var badgeTextColors: [Int?] = []
         var spacerFlags: [Bool] = []
         var selectedIndex: Int = 0
         var isDark: Bool = false
@@ -77,6 +114,15 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
             spacerFlags = (dict["spacerFlags"] as? [Bool]) ?? []
             if let badgeData = dict["badgeCounts"] as? [NSNumber?] {
                 badgeCounts = badgeData.map { $0?.intValue }
+            }
+            if let arr = dict["badgeTexts"] as? [Any?] {
+                badgeTexts = arr.map { $0 as? String }
+            }
+            if let arr = dict["badgeColors"] as? [NSNumber?] {
+                badgeColors = arr.map { $0?.intValue }
+            }
+            if let arr = dict["badgeTextColors"] as? [NSNumber?] {
+                badgeTextColors = arr.map { $0?.intValue }
             }
             if let v = dict["selectedIndex"] as? NSNumber { selectedIndex = v.intValue }
             if let v = dict["isDark"] as? NSNumber { isDark = v.boolValue }
@@ -257,12 +303,14 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
                     }
                 }
 
-                // Set badge value if provided
-                if let count = badgeCount, count > 0 {
-                    item.badgeValue = count > 99 ? "99+" : String(count)
-                } else {
-                    item.badgeValue = nil
-                }
+                // Set badge (count / text / colors)
+                Self.applyBadge(
+                    to: item,
+                    count: badgeCount,
+                    text: Self.badgeAt(badgeTexts, i),
+                    colorARGB: Self.badgeAt(badgeColors, i),
+                    textColorARGB: Self.badgeAt(badgeTextColors, i)
+                )
 
                 items.append(item)
             }
@@ -303,6 +351,9 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
         self.currentSelectedNetworkIcons = selectedNetworkIcons
         self.currentSearchFlags = searchFlags
         self.currentBadgeCounts = badgeCounts
+        self.currentBadgeTexts = badgeTexts
+        self.currentBadgeColors = badgeColors
+        self.currentBadgeTextColors = badgeTextColors
         // Apply minimize behavior if available
         self.applyMinimizeBehavior()
 
@@ -374,7 +425,10 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
             if let badgeData = args["badgeCounts"] as? [NSNumber?] {
                 badgeCounts = badgeData.map { $0?.intValue }
             }
-            
+            let badgeTexts: [String?] = (args["badgeTexts"] as? [Any?])?.map { $0 as? String } ?? []
+            let badgeColors: [Int?] = (args["badgeColors"] as? [NSNumber?])?.map { $0?.intValue } ?? []
+            let badgeTextColors: [Int?] = (args["badgeTextColors"] as? [NSNumber?])?.map { $0?.intValue } ?? []
+
             self.currentLabels = labels
             self.currentSymbols = symbols
             self.currentAssetIcons = assetIcons
@@ -385,6 +439,9 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
             self.currentSelectedNetworkIcons = selectedNetworkIcons
             self.currentSearchFlags = searchFlags
             self.currentBadgeCounts = badgeCounts
+            self.currentBadgeTexts = badgeTexts
+            self.currentBadgeColors = badgeColors
+            self.currentBadgeTextColors = badgeTextColors
 
             let count = max(
                 max(labels.count, symbols.count),
@@ -478,12 +535,14 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
                         }
                     }
 
-                    // Set badge value if provided
-                    if let count = badgeCount, count > 0 {
-                        item.badgeValue = count > 99 ? "99+" : String(count)
-                    } else {
-                        item.badgeValue = nil
-                    }
+                    // Set badge (count / text / colors)
+                    Self.applyBadge(
+                        to: item,
+                        count: badgeCount,
+                        text: Self.badgeAt(badgeTexts, i),
+                        colorARGB: Self.badgeAt(badgeColors, i),
+                        textColorARGB: Self.badgeAt(badgeTextColors, i)
+                    )
 
                     items.append(item)
                 }
@@ -599,18 +658,20 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
 
             let badgeCounts = badgeData.map { $0?.intValue }
             self.currentBadgeCounts = badgeCounts
+            self.currentBadgeTexts = (args["badgeTexts"] as? [Any?])?.map { $0 as? String } ?? []
+            self.currentBadgeColors = (args["badgeColors"] as? [NSNumber?])?.map { $0?.intValue } ?? []
+            self.currentBadgeTextColors = (args["badgeTextColors"] as? [NSNumber?])?.map { $0?.intValue } ?? []
 
             // Update existing tab bar items with new badge values
             if let bar = self.tabBar, let items = bar.items {
                 for (index, item) in items.enumerated() {
-                    if index < badgeCounts.count {
-                        let count = badgeCounts[index]
-                        if let count = count, count > 0 {
-                            item.badgeValue = count > 99 ? "99+" : String(count)
-                        } else {
-                            item.badgeValue = nil
-                        }
-                    }
+                    Self.applyBadge(
+                        to: item,
+                        count: Self.badgeAt(badgeCounts, index),
+                        text: Self.badgeAt(self.currentBadgeTexts, index),
+                        colorARGB: Self.badgeAt(self.currentBadgeColors, index),
+                        textColorARGB: Self.badgeAt(self.currentBadgeTextColors, index)
+                    )
                 }
             }
             result(nil)
@@ -715,9 +776,13 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
                 }
             }
 
-            if let count = badgeCount, count > 0 {
-                item.badgeValue = count > 99 ? "99+" : String(count)
-            }
+            Self.applyBadge(
+                to: item,
+                count: badgeCount,
+                text: Self.badgeAt(currentBadgeTexts, i),
+                colorARGB: Self.badgeAt(currentBadgeColors, i),
+                textColorARGB: Self.badgeAt(currentBadgeTextColors, i)
+            )
 
             items.append(item)
         }

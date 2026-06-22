@@ -17,6 +17,9 @@ class AdaptiveNavigationDestination {
     this.selectedIcon,
     this.isSearch = false,
     this.badgeCount,
+    this.badgeText,
+    this.badgeColor,
+    this.badgeTextColor,
     this.addSpacerAfter = false,
   });
 
@@ -43,6 +46,25 @@ class AdaptiveNavigationDestination {
   /// On iOS 26+: Uses native UITabBarItem.badgeValue
   /// On iOS <26 and Android: Uses AdaptiveBadge widget
   final int? badgeCount;
+
+  /// Arbitrary badge text — maps 1:1 to `UITabBarItem.badgeValue` on iOS 26+.
+  /// Use it for "NEW", "!", a glyph, etc. Takes precedence over [badgeCount]
+  /// when non-null.
+  ///
+  /// Tip: combine `badgeText: "●"` + [badgeColor] `Colors.transparent` +
+  /// [badgeTextColor] to render a clean dot indicator (no pill background),
+  /// Threads/Instagram style.
+  final String? badgeText;
+
+  /// Badge background color — maps to `UITabBarItem.badgeColor` on iOS 26+.
+  /// Defaults to the platform's default badge color (system red) when null.
+  /// Set to a transparent color to remove the pill background (e.g. for a dot).
+  final Color? badgeColor;
+
+  /// Badge text/glyph color — maps to the badge text attributes' foreground
+  /// color on iOS 26+. Defaults to the platform default (white) when null.
+  /// Pair with a transparent [badgeColor] to color a dot glyph.
+  final Color? badgeTextColor;
 
   /// Add flexible space after this tab item (iOS 26+ only)
   /// Useful for creating grouped tabs (e.g., left group and right group)
