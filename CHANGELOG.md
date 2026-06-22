@@ -1,5 +1,8 @@
 # Changelog
 
+## [Unreleased]
+* **NEW**: `AdaptiveNavigationDestination` gains `badgeText`, `badgeColor`, and `badgeTextColor` for full control over the iOS 26+ native tab bar badge. `badgeText` maps 1:1 to `UITabBarItem.badgeValue` (takes precedence over `badgeCount`), `badgeColor` to the badge background, and `badgeTextColor` to the glyph color. Combine `badgeText: "●"` + a transparent `badgeColor` + a `badgeTextColor` to render a clean dot indicator (Threads/Instagram style) instead of a numeric pill.
+
 ## [0.1.108]
 * **IMPROVEMENT**: Migrated the iOS plugin from CocoaPods to Swift Package Manager — apps with SPM enabled (`flutter config --enable-swift-package-manager`) now consume the plugin as a Swift package, while CocoaPods-based projects keep working unchanged (@philipgiuliani)
 * **IMPROVEMENT**: Raised the iOS minimum deployment target from 12.0 to 13.0, matching Flutter's supported minimum (@philipgiuliani)
