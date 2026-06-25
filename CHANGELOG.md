@@ -4,6 +4,8 @@
 * **NEW**: `triggerOnLongPress` and `onTap` on popup menu buttons — tap fires `onTap`, long-press opens the menu (@yuriylybimov)
 * **NEW**: `isDestructive` on `AdaptivePopupMenuItem` — renders destructive (red) styling on Material, iOS <26, and iOS 26+ native menus (@yuriylybimov)
 * **FIX**: destructive menu items now use the theme `colorScheme.error` instead of a hardcoded red (@yuriylybimov)
+* **FIX**: `IOSSpringCurve` no longer clamps its output to [0,1], restoring the natural spring overshoot in the mid-range (endpoints remain exact) (@yuriylybimov)
+* **NEW**: Exported `IOSSpringCurve` from the package's public API (@yuriylybimov)
 
 ## [0.1.108]
 * **IMPROVEMENT**: Migrated the iOS plugin from CocoaPods to Swift Package Manager — apps with SPM enabled (`flutter config --enable-swift-package-manager`) now consume the plugin as a Swift package, while CocoaPods-based projects keep working unchanged (@philipgiuliani)

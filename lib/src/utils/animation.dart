@@ -20,6 +20,6 @@ class IOSSpringCurve extends Curve {
     // Simulate over a fixed duration window (e.g. 1.5s)
     // t is [0,1], so we map it into the spring's time domain
     final sim = SpringSimulation(spring, 0, 1, 0);
-    return sim.x(t * 1.5).clamp(0.0, 1.0);
+    return sim.x(t * 1.5);
   }
 }
