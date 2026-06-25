@@ -71,8 +71,15 @@ class AdaptivePopupMenuButton<T> {
     onSelected,
     Color? tint,
     PopupButtonStyle buttonStyle = PopupButtonStyle.plain,
+    bool triggerOnLongPress = false,
+    VoidCallback? onTap,
     required Widget child,
   }) {
+    assert(
+      onTap == null || triggerOnLongPress,
+      'onTap is only used with triggerOnLongPress: true (tap fires onTap, '
+      'long-press opens the menu).',
+    );
     // iOS 26+ - Use gesture detector with native menu
     if (PlatformInfo.isIOS26OrHigher()) {
       return IOS26PopupMenuButton<T>.widget(
@@ -80,6 +87,8 @@ class AdaptivePopupMenuButton<T> {
         onSelected: onSelected,
         tint: tint,
         buttonStyle: buttonStyle,
+        triggerOnLongPress: triggerOnLongPress,
+        onTap: onTap,
         child: child,
       );
     }
@@ -97,7 +106,8 @@ class AdaptivePopupMenuButton<T> {
     // iOS <26 (iOS 18 and below) - Use GestureDetector with action sheet
     return Builder(
       builder: (context) => GestureDetector(
-        onTap: () => _showMenu<T>(context, null, items, onSelected),
+        onTap: triggerOnLongPress ? onTap : () => _showMenu<T>(context, null, items, onSelected),
+        onLongPress: triggerOnLongPress ? () => _showMenu<T>(context, null, items, onSelected) : null,
         child: child,
       ),
     );
@@ -171,6 +181,7 @@ class AdaptivePopupMenuButton<T> {
               if (items[i] is AdaptivePopupMenuItem<T>)
                 CupertinoActionSheetAction(
                   onPressed: () => Navigator.of(ctx).pop(i),
+                  isDestructiveAction: (items[i] as AdaptivePopupMenuItem<T>).isDestructive,
                   child: Text((items[i] as AdaptivePopupMenuItem<T>).label),
                 )
               else
@@ -258,6 +269,9 @@ class _MaterialPopupMenuButtonState<T>
         menuItems.add(const PopupMenuDivider());
       } else if (widget.items[i] is AdaptivePopupMenuItem<T>) {
         final item = widget.items[i] as AdaptivePopupMenuItem<T>;
+        final labelStyle = item.isDestructive
+            ? TextStyle(color: Theme.of(context).colorScheme.error)
+            : null;
         menuItems.add(
           PopupMenuItem<int>(
             value: i,
@@ -270,10 +284,13 @@ class _MaterialPopupMenuButtonState<T>
                         ? item.icon as IconData
                         : Icons.circle,
                     size: 20,
+                    color: item.isDestructive
+                        ? Theme.of(context).colorScheme.error
+                        : null,
                   ),
                   const SizedBox(width: 12),
                 ],
-                Expanded(child: Text(item.label)),
+                Expanded(child: Text(item.label, style: labelStyle)),
               ],
             ),
           ),
