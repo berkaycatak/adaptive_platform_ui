@@ -235,19 +235,19 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
                                 // Unselected: Only apply custom color if unselectedTint is provided
                                 if let unselTint = unselectedTint {
                                     // Create colored image for unselected state
-                                    if let originalImage = UIImage(systemName: symbols[i]) {
+                                    if let originalImage = UIImage(systemName: symbols[i]) ?? UIImage(named: symbols[i]) {
                                         image = originalImage.withTintColor(unselTint, renderingMode: .alwaysOriginal)
                                     }
                                 } else {
                                     // No custom color - use template mode to respect theme
-                                    image = UIImage(systemName: symbols[i])?.withRenderingMode(.alwaysTemplate)
+                                    image = (UIImage(systemName: symbols[i]) ?? UIImage(named: symbols[i]))?.withRenderingMode(.alwaysTemplate)
                                 }
 
                                 // Selected: Use template rendering so tintColor applies
-                                selectedImage = UIImage(systemName: symbols[i])?.withRenderingMode(.alwaysTemplate)
+                                selectedImage = (UIImage(systemName: symbols[i]) ?? UIImage(named: symbols[i]))?.withRenderingMode(.alwaysTemplate)
                             } else {
                                 // iOS <26: Use default behavior
-                                image = UIImage(systemName: symbols[i])
+                                image = UIImage(systemName: symbols[i]) ?? UIImage(named: symbols[i])
                                 selectedImage = image
                             }
                         }
@@ -456,19 +456,19 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
 
                                     // Unselected: Only apply custom color if unselectedTint is set
                                     if let unselTint = unselTint {
-                                        if let originalImage = UIImage(systemName: symbols[i]) {
+                                        if let originalImage = UIImage(systemName: symbols[i]) ?? UIImage(named: symbols[i]) {
                                             image = originalImage.withTintColor(unselTint, renderingMode: .alwaysOriginal)
                                         }
                                     } else {
                                         // No custom color - use template mode to respect theme
-                                        image = UIImage(systemName: symbols[i])?.withRenderingMode(.alwaysTemplate)
+                                        image = (UIImage(systemName: symbols[i]) ?? UIImage(named: symbols[i]))?.withRenderingMode(.alwaysTemplate)
                                     }
 
                                     // Selected: Use template rendering so tintColor applies
-                                    selectedImage = UIImage(systemName: symbols[i])?.withRenderingMode(.alwaysTemplate)
+                                    selectedImage = (UIImage(systemName: symbols[i]) ?? UIImage(named: symbols[i]))?.withRenderingMode(.alwaysTemplate)
                                 } else {
                                     // iOS <26: Use default behavior
-                                    image = UIImage(systemName: symbols[i])
+                                    image = UIImage(systemName: symbols[i]) ?? UIImage(named: symbols[i])
                                     selectedImage = image
                                 }
                             }
@@ -697,15 +697,15 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
                             let unselTint = bar.unselectedItemTintColor
 
                             if let unselTint = unselTint {
-                                if let originalImage = UIImage(systemName: currentSymbols[i]) {
+                                if let originalImage = UIImage(systemName: currentSymbols[i]) ?? UIImage(named: currentSymbols[i]) {
                                     image = originalImage.withTintColor(unselTint, renderingMode: .alwaysOriginal)
                                 }
                             } else {
-                                image = UIImage(systemName: currentSymbols[i])?.withRenderingMode(.alwaysTemplate)
+                                image = (UIImage(systemName: currentSymbols[i]) ?? UIImage(named: currentSymbols[i]))?.withRenderingMode(.alwaysTemplate)
                             }
-                            selectedImage = UIImage(systemName: currentSymbols[i])?.withRenderingMode(.alwaysTemplate)
+                            selectedImage = (UIImage(systemName: currentSymbols[i]) ?? UIImage(named: currentSymbols[i]))?.withRenderingMode(.alwaysTemplate)
                         } else {
-                            image = UIImage(systemName: currentSymbols[i])
+                            image = UIImage(systemName: currentSymbols[i]) ?? UIImage(named: currentSymbols[i])
                             selectedImage = image
                         }
                     }

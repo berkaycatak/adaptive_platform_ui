@@ -193,7 +193,7 @@ class iOS26ButtonView: NSObject, FlutterPlatformView {
             // Set title or icon based on configuration
             if let iconName = iconName {
                 // SF Symbol icon mode
-                if let image = UIImage(systemName: iconName) {
+                if let image = UIImage(systemName: iconName) ?? UIImage(named: iconName) {
                     var finalImage = image
 
                     // Apply icon size
