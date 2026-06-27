@@ -214,7 +214,7 @@ class iOS26ToolbarPlatformView: NSObject, FlutterPlatformView {
 
                 if let icon = action["icon"] as? String {
                     button = UIBarButtonItem(
-                        image: UIImage(systemName: icon),
+                        image: UIImage(systemName: icon) ?? UIImage(named: icon),
                         style: .plain,
                         target: self,
                         action: #selector(actionTapped(_:))

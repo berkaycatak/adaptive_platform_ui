@@ -64,8 +64,8 @@ class iOS26ScaffoldManager: NSObject {
 
             let item = UITabBarItem(
                 title: label,
-                image: UIImage(systemName: iconName),
-                selectedImage: UIImage(systemName: selectedIconName)
+                image: UIImage(systemName: iconName) ?? UIImage(named: iconName),
+                selectedImage: UIImage(systemName: selectedIconName) ?? UIImage(named: selectedIconName)
             )
 
             items.append(item)
