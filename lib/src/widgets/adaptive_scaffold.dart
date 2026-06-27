@@ -362,6 +362,8 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
                       Widget actionChild;
                       if (action.title != null) {
                         actionChild = Text(action.title!);
+                      } else if (action.iconWidget != null) {
+                        actionChild = action.iconWidget!;
                       } else if (action.icon != null) {
                         actionChild = Icon(action.icon!);
                       } else {
@@ -560,6 +562,8 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
                     Widget actionChild;
                     if (action.title != null) {
                       actionChild = Text(action.title!);
+                    } else if (action.iconWidget != null) {
+                      actionChild = action.iconWidget!;
                     } else if (action.icon != null) {
                       actionChild = Icon(action.icon!);
                     } else {
@@ -650,9 +654,9 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
               );
             }
             return IconButton(
-              icon: action.icon != null
+              icon: action.iconWidget ?? (action.icon != null
                   ? Icon(action.icon!)
-                  : const Icon(Icons.circle),
+                  : const Icon(Icons.circle)),
               onPressed: action.onPressed,
             );
           }).toList(),
@@ -750,9 +754,9 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
             );
           }
           return IconButton(
-            icon: action.icon != null
+            icon: action.iconWidget ?? (action.icon != null
                 ? Icon(action.icon!)
-                : const Icon(Icons.circle),
+                : const Icon(Icons.circle)),
             onPressed: action.onPressed,
           );
         }).toList(),
