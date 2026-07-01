@@ -32,7 +32,11 @@ class AdaptiveNavigationDestination {
   /// Label text for the destination
   final String label;
 
-  /// Optional selected state icon
+  /// Optional selected state icon.
+  ///
+  /// Accepts the same value types as [icon], including an SF Symbol name
+  /// `String` (e.g. `magazine.fill`) which the iOS 26+ native tab bar applies
+  /// when the destination is selected. Falls back to [icon] when null.
   final dynamic selectedIcon;
 
   /// Whether this is a search tab (iOS 26+)
