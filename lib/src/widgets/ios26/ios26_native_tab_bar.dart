@@ -54,6 +54,7 @@ class _IOS26NativeTabBarState extends State<IOS26NativeTabBar> {
   double? _intrinsicHeight;
   List<String>? _lastLabels;
   List<String>? _lastSymbols;
+  List<String>? _lastSelectedSymbols;
   List<String>? _lastAssetIcons;
   List<String>? _lastSelectedAssetIcons;
   List<String>? _lastFileIcons;
@@ -145,6 +146,10 @@ class _IOS26NativeTabBarState extends State<IOS26NativeTabBar> {
   List<String> _mapSymbols() =>
       widget.destinations.map((e) => _extractSymbol(e.icon)).toList();
 
+  List<String> _mapSelectedSymbols() => widget.destinations
+      .map((e) => _extractSymbol(e.selectedIcon ?? e.icon))
+      .toList();
+
   List<String> _mapAssetIcons() =>
       widget.destinations.map((e) => _extractAssetPath(e.icon)).toList();
 
@@ -171,6 +176,7 @@ class _IOS26NativeTabBarState extends State<IOS26NativeTabBar> {
     if (!kIsWeb && Platform.isIOS) {
       final labels = widget.destinations.map((e) => e.label).toList();
       final symbols = _mapSymbols();
+      final selectedSymbols = _mapSelectedSymbols();
       final assetIcons = _mapAssetIcons();
       final selectedAssetIcons = _mapSelectedAssetIcons();
       final fileIcons = _mapFileIcons();
@@ -187,6 +193,7 @@ class _IOS26NativeTabBarState extends State<IOS26NativeTabBar> {
       final creationParams = <String, dynamic>{
         'labels': labels,
         'sfSymbols': symbols,
+        'selectedSfSymbols': selectedSymbols,
         'assetIcons': assetIcons,
         'selectedAssetIcons': selectedAssetIcons,
         'fileIcons': fileIcons,
@@ -337,6 +344,7 @@ class _IOS26NativeTabBarState extends State<IOS26NativeTabBar> {
     // Items update (for hot reload or dynamic changes)
     final labels = widget.destinations.map((e) => e.label).toList();
     final symbols = _mapSymbols();
+    final selectedSymbols = _mapSelectedSymbols();
     final assetIcons = _mapAssetIcons();
     final selectedAssetIcons = _mapSelectedAssetIcons();
     final fileIcons = _mapFileIcons();
@@ -348,6 +356,7 @@ class _IOS26NativeTabBarState extends State<IOS26NativeTabBar> {
 
     if (_lastLabels?.join('|') != labels.join('|') ||
         _lastSymbols?.join('|') != symbols.join('|') ||
+        _lastSelectedSymbols?.join('|') != selectedSymbols.join('|') ||
         _lastAssetIcons?.join('|') != assetIcons.join('|') ||
         _lastSelectedAssetIcons?.join('|') != selectedAssetIcons.join('|') ||
         _lastFileIcons?.join('|') != fileIcons.join('|') ||
@@ -358,6 +367,7 @@ class _IOS26NativeTabBarState extends State<IOS26NativeTabBar> {
       await ch.invokeMethod('setItems', {
         'labels': labels,
         'sfSymbols': symbols,
+        'selectedSfSymbols': selectedSymbols,
         'assetIcons': assetIcons,
         'selectedAssetIcons': selectedAssetIcons,
         'fileIcons': fileIcons,
@@ -370,6 +380,7 @@ class _IOS26NativeTabBarState extends State<IOS26NativeTabBar> {
       });
       _lastLabels = labels;
       _lastSymbols = symbols;
+      _lastSelectedSymbols = selectedSymbols;
       _lastAssetIcons = assetIcons;
       _lastSelectedAssetIcons = selectedAssetIcons;
       _lastFileIcons = fileIcons;
@@ -425,6 +436,7 @@ class _IOS26NativeTabBarState extends State<IOS26NativeTabBar> {
   void _cacheItems() {
     _lastLabels = widget.destinations.map((e) => e.label).toList();
     _lastSymbols = _mapSymbols();
+    _lastSelectedSymbols = _mapSelectedSymbols();
     _lastAssetIcons = _mapAssetIcons();
     _lastSelectedAssetIcons = _mapSelectedAssetIcons();
     _lastFileIcons = _mapFileIcons();
@@ -460,6 +472,7 @@ class _IOS26NativeTabBarState extends State<IOS26NativeTabBar> {
   Future<void> _pushInitialStateToNative(MethodChannel ch) async {
     final labels = widget.destinations.map((e) => e.label).toList();
     final symbols = _mapSymbols();
+    final selectedSymbols = _mapSelectedSymbols();
     final assetIcons = _mapAssetIcons();
     final selectedAssetIcons = _mapSelectedAssetIcons();
     final fileIcons = _mapFileIcons();
@@ -473,6 +486,7 @@ class _IOS26NativeTabBarState extends State<IOS26NativeTabBar> {
       await ch.invokeMethod('setItems', {
         'labels': labels,
         'sfSymbols': symbols,
+        'selectedSfSymbols': selectedSymbols,
         'assetIcons': assetIcons,
         'selectedAssetIcons': selectedAssetIcons,
         'fileIcons': fileIcons,

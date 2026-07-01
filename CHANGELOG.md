@@ -1,5 +1,8 @@
 # Changelog
 
+## [0.1.110]
+* **NEW**: Per-state SF Symbols on the iOS 26+ native tab bar — `AdaptiveNavigationDestination.selectedIcon` now accepts a distinct SF Symbol name (e.g. `magazine.fill`) that is applied for the selected state, matching the existing per-state behavior for asset/file/network icons (@philipgiuliani)
+
 ## [0.1.109]
 * **NEW**: `triggerOnLongPress` and `onTap` on popup menu buttons — tap fires `onTap`, long-press opens the menu (@yuriylybimov)
 * **NEW**: `isDestructive` on `AdaptivePopupMenuItem` — renders destructive (red) styling on Material, iOS <26, and iOS 26+ native menus (@yuriylybimov)

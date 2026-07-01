@@ -26,6 +26,7 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
     private var minimizeBehavior: Int = 3 // automatic
     private var currentLabels: [String] = []
     private var currentSymbols: [String] = []
+    private var currentSelectedSymbols: [String] = []
     private var currentAssetIcons: [String] = []
     private var currentSelectedAssetIcons: [String] = []
     private var currentFileIcons: [String] = []
@@ -45,6 +46,7 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
 
         var labels: [String] = []
         var symbols: [String] = []
+        var selectedSymbols: [String] = []
         var assetIcons: [String] = []
         var selectedAssetIcons: [String] = []
         var fileIcons: [String] = []
@@ -67,6 +69,7 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
             NSLog("📦 TabBar init dict keys: \(dict.keys)")
             labels = (dict["labels"] as? [String]) ?? []
             symbols = (dict["sfSymbols"] as? [String]) ?? []
+            selectedSymbols = (dict["selectedSfSymbols"] as? [String]) ?? []
             assetIcons = (dict["assetIcons"] as? [String]) ?? []
             selectedAssetIcons = (dict["selectedAssetIcons"] as? [String]) ?? []
             fileIcons = (dict["fileIcons"] as? [String]) ?? []
@@ -230,6 +233,10 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
                                 selectedImage = selRawImage
                             }
                         } else if i < symbols.count && !symbols[i].isEmpty {
+                            // Selected state may use a distinct SF Symbol (e.g. filled variant).
+                            let selSymbol = (i < selectedSymbols.count && !selectedSymbols[i].isEmpty)
+                                ? selectedSymbols[i]
+                                : symbols[i]
                             // iOS 26+: Use different rendering modes for selected/unselected
                             if #available(iOS 26.0, *) {
                                 // Unselected: Only apply custom color if unselectedTint is provided
@@ -244,11 +251,11 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
                                 }
 
                                 // Selected: Use template rendering so tintColor applies
-                                selectedImage = UIImage(systemName: symbols[i])?.withRenderingMode(.alwaysTemplate)
+                                selectedImage = UIImage(systemName: selSymbol)?.withRenderingMode(.alwaysTemplate)
                             } else {
                                 // iOS <26: Use default behavior
                                 image = UIImage(systemName: symbols[i])
-                                selectedImage = image
+                                selectedImage = UIImage(systemName: selSymbol)
                             }
                         }
 
@@ -362,6 +369,7 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
                 return
             }
 
+            let selectedSymbols = (args["selectedSfSymbols"] as? [String]) ?? []
             let assetIcons = (args["assetIcons"] as? [String]) ?? []
             let selectedAssetIcons = (args["selectedAssetIcons"] as? [String]) ?? []
             let fileIcons = (args["fileIcons"] as? [String]) ?? []
@@ -377,6 +385,7 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
             
             self.currentLabels = labels
             self.currentSymbols = symbols
+            self.currentSelectedSymbols = selectedSymbols
             self.currentAssetIcons = assetIcons
             self.currentSelectedAssetIcons = selectedAssetIcons
             self.currentFileIcons = fileIcons
@@ -449,6 +458,10 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
                                     selectedImage = selRawImage
                                 }
                             } else if i < symbols.count && !symbols[i].isEmpty {
+                                // Selected state may use a distinct SF Symbol (e.g. filled variant).
+                                let selSymbol = (i < selectedSymbols.count && !selectedSymbols[i].isEmpty)
+                                    ? selectedSymbols[i]
+                                    : symbols[i]
                                 // iOS 26+: Use different rendering modes for selected/unselected
                                 if #available(iOS 26.0, *) {
                                     // Get current unselected color from tab bar
@@ -465,11 +478,11 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
                                     }
 
                                     // Selected: Use template rendering so tintColor applies
-                                    selectedImage = UIImage(systemName: symbols[i])?.withRenderingMode(.alwaysTemplate)
+                                    selectedImage = UIImage(systemName: selSymbol)?.withRenderingMode(.alwaysTemplate)
                                 } else {
                                     // iOS <26: Use default behavior
                                     image = UIImage(systemName: symbols[i])
-                                    selectedImage = image
+                                    selectedImage = UIImage(systemName: selSymbol)
                                 }
                             }
 
@@ -693,6 +706,10 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
                             }
                         }
                     } else if i < currentSymbols.count && !currentSymbols[i].isEmpty {
+                        // Selected state may use a distinct SF Symbol (e.g. filled variant).
+                        let selSymbol = (i < currentSelectedSymbols.count && !currentSelectedSymbols[i].isEmpty)
+                            ? currentSelectedSymbols[i]
+                            : currentSymbols[i]
                         if #available(iOS 26.0, *) {
                             let unselTint = bar.unselectedItemTintColor
 
@@ -703,10 +720,10 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
                             } else {
                                 image = UIImage(systemName: currentSymbols[i])?.withRenderingMode(.alwaysTemplate)
                             }
-                            selectedImage = UIImage(systemName: currentSymbols[i])?.withRenderingMode(.alwaysTemplate)
+                            selectedImage = UIImage(systemName: selSymbol)?.withRenderingMode(.alwaysTemplate)
                         } else {
                             image = UIImage(systemName: currentSymbols[i])
-                            selectedImage = image
+                            selectedImage = UIImage(systemName: selSymbol)
                         }
                     }
 
