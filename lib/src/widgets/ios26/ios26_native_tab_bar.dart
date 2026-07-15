@@ -207,7 +207,7 @@ class _IOS26NativeTabBarState extends State<IOS26NativeTabBar> {
           'backgroundColor': _colorToARGB(widget.backgroundColor!),
       };
 
-      final platformView = widget.showNativeView
+      final platformView = widget.showNativeView && !widget.hidden
           ? UiKitView(
               viewType: 'adaptive_platform_ui/ios26_tab_bar',
               creationParams: creationParams,
@@ -500,6 +500,8 @@ class _IOS26NativeTabBarState extends State<IOS26NativeTabBar> {
 
       await ch.invokeMethod('setSelectedIndex', {'index': widget.selectedIndex});
       _lastIndex = widget.selectedIndex;
+      await ch.invokeMethod('setHidden', {'hidden': widget.hidden});
+      _lastHidden = widget.hidden;
       await _requestIntrinsicSize();
     } catch (_) {}
   }

@@ -181,8 +181,8 @@ class _IOS26ScaffoldState extends State<IOS26Scaffold>
         heroLeading != null ||
         (widget.actions != null && widget.actions!.isNotEmpty));
 
-    // Show native view only if it's the current route OR it's popping
-    final showNativeView = isCurrentRoute || isPopping;
+    // Show native view only if it's the current route OR it's popping, AND the tab bar is not explicitly hidden
+    final showNativeView = (isCurrentRoute || isPopping) && !widget.tabBarHidden;
 
     // Get brightness and determine text color
     final brightness = MediaQuery.platformBrightnessOf(context);
