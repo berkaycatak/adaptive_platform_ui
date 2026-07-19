@@ -4,6 +4,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 
+/// Placeholder width used for a text/standard popup button when it is laid out
+/// in an unbounded-width context before its native intrinsic width has been
+/// measured. It resizes to the real width once UIKit reports it.
+const double _kUnboundedFallbackWidth = 120.0;
+
 /// Base type for entries in a popup menu
 abstract class AdaptivePopupMenuEntry {
   /// Const constructor for subclasses
@@ -418,6 +423,16 @@ class _IOS26PopupMenuButtonState<T> extends State<IOS26PopupMenuButton<T>> {
             width = widget.width ?? widget.height;
           } else if (preferIntrinsic) {
             width = _intrinsicWidth;
+          }
+
+          // In an unbounded-width context (e.g. placed directly inside a Row)
+          // the native platform view would try to expand to infinity before
+          // its intrinsic width has been reported back from UIKit, throwing an
+          // unbounded-constraints error on the first frame. Fall back to a
+          // finite placeholder width until the real width arrives; it resizes
+          // via setState once measured.
+          if (!hasBoundedWidth && widget.width == null && width == null) {
+            width = _kUnboundedFallbackWidth;
           }
 
           return SizedBox(
