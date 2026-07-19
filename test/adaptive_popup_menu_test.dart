@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 // Public barrel only — these are the symbols consumers actually import.
@@ -16,6 +18,25 @@ void main() {
         isDestructive: true,
       );
       expect(item.isDestructive, isTrue);
+    });
+  });
+
+  group('AdaptivePopupMenuItem subtitle/imageBytes', () {
+    test('default to null', () {
+      const item = AdaptivePopupMenuItem<String>(label: 'Edit');
+      expect(item.subtitle, isNull);
+      expect(item.imageBytes, isNull);
+    });
+
+    test('store subtitle and imageBytes when set', () {
+      final bytes = Uint8List.fromList([1, 2, 3]);
+      final item = AdaptivePopupMenuItem<String>(
+        label: 'Jamie Doe',
+        subtitle: 'Online',
+        imageBytes: bytes,
+      );
+      expect(item.subtitle, 'Online');
+      expect(item.imageBytes, same(bytes));
     });
   });
 

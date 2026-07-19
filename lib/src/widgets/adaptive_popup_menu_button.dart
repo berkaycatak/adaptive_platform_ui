@@ -165,6 +165,46 @@ class AdaptivePopupMenuButton<T> {
     );
   }
 
+  static Widget _buildActionSheetContent<T>(AdaptivePopupMenuItem<T> item) {
+    final hasImage = item.imageBytes != null;
+    final hasSubtitle = item.subtitle != null && item.subtitle!.isNotEmpty;
+
+    if (!hasImage && !hasSubtitle) return Text(item.label);
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        if (hasImage) ...[
+          ClipOval(
+            child: Image.memory(
+              item.imageBytes!,
+              width: 32,
+              height: 32,
+              fit: BoxFit.cover,
+            ),
+          ),
+          const SizedBox(width: 10),
+        ],
+        Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment:
+              hasImage ? CrossAxisAlignment.start : CrossAxisAlignment.center,
+          children: [
+            Text(item.label),
+            if (hasSubtitle)
+              Text(
+                item.subtitle!,
+                style: const TextStyle(
+                  fontSize: 13,
+                  color: CupertinoColors.secondaryLabel,
+                ),
+              ),
+          ],
+        ),
+      ],
+    );
+  }
+
   static Future<void> _showMenu<T>(
     BuildContext context,
     String? title,
@@ -182,7 +222,9 @@ class AdaptivePopupMenuButton<T> {
                 CupertinoActionSheetAction(
                   onPressed: () => Navigator.of(ctx).pop(i),
                   isDestructiveAction: (items[i] as AdaptivePopupMenuItem<T>).isDestructive,
-                  child: Text((items[i] as AdaptivePopupMenuItem<T>).label),
+                  child: _buildActionSheetContent<T>(
+                    items[i] as AdaptivePopupMenuItem<T>,
+                  ),
                 )
               else
                 const SizedBox(height: 8),
@@ -272,13 +314,24 @@ class _MaterialPopupMenuButtonState<T>
         final labelStyle = item.isDestructive
             ? TextStyle(color: Theme.of(context).colorScheme.error)
             : null;
+        final hasSubtitle = item.subtitle != null && item.subtitle!.isNotEmpty;
         menuItems.add(
           PopupMenuItem<int>(
             value: i,
             enabled: item.enabled,
             child: Row(
               children: [
-                if (item.icon != null) ...[
+                if (item.imageBytes != null) ...[
+                  ClipOval(
+                    child: Image.memory(
+                      item.imageBytes!,
+                      width: 32,
+                      height: 32,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                ] else if (item.icon != null) ...[
                   Icon(
                     item.icon is IconData
                         ? item.icon as IconData
@@ -290,7 +343,30 @@ class _MaterialPopupMenuButtonState<T>
                   ),
                   const SizedBox(width: 12),
                 ],
-                Expanded(child: Text(item.label, style: labelStyle)),
+                Expanded(
+                  child: hasSubtitle
+                      ? Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(item.label, style: labelStyle),
+                            Text(
+                              item.subtitle!,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.copyWith(
+                                    color: Theme.of(context)
+                                        .textTheme
+                                        .bodySmall
+                                        ?.color
+                                        ?.withValues(alpha: 0.7),
+                                  ),
+                            ),
+                          ],
+                        )
+                      : Text(item.label, style: labelStyle),
+                ),
               ],
             ),
           ),
