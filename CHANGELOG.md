@@ -1,5 +1,8 @@
 # Changelog
 
+## [Unreleased]
+* **FIX**: iOS 26+ native toolbar now insets the body's top padding by the toolbar height, so `SafeArea`/`SliverSafeArea` inside a page clear the Liquid Glass toolbar automatically — matching how `CupertinoPageScaffold` handles a translucent navigation bar. Removes the need for per-screen top-offset hacks. (@luflow)
+
 ## [0.1.109]
 * **NEW**: `triggerOnLongPress` and `onTap` on popup menu buttons — tap fires `onTap`, long-press opens the menu (@yuriylybimov)
 * **NEW**: `isDestructive` on `AdaptivePopupMenuItem` — renders destructive (red) styling on Material, iOS <26, and iOS 26+ native menus (@yuriylybimov)

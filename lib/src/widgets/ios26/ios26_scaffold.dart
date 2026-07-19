@@ -7,6 +7,11 @@ import '../adaptive_scaffold.dart';
 import 'ios26_native_tab_bar.dart';
 import 'ios26_native_toolbar.dart';
 
+/// Height of the iOS 26 Liquid Glass toolbar's content area (excluding the
+/// status bar), matching [IOS26NativeToolbar]'s default height. The toolbar is
+/// an overlay, so this amount is added to the body's top padding.
+const double kToolbarContentHeight = 44.0;
+
 /// Native iOS 26 scaffold with UITabBar
 class IOS26Scaffold extends StatefulWidget {
   const IOS26Scaffold({
@@ -190,24 +195,46 @@ class _IOS26ScaffoldState extends State<IOS26Scaffold>
         ? CupertinoColors.white
         : CupertinoColors.black;
 
+    // Content - full screen - use KeepAlive to prevent rebuild
+    // Wrap content with DefaultTextStyle to ensure proper text color
+    Widget bodyContent = DefaultTextStyle(
+      style: TextStyle(
+        color: textColor,
+        fontSize: 17, // iOS default
+      ),
+      child: widget.children.length == 1
+          ? widget.children.first
+          : IndexedStack(
+              index: widget.bottomNavigationBar?.selectedIndex ?? 0,
+              sizing: StackFit.expand,
+              children: widget.children,
+            ),
+    );
+
+    // The Liquid Glass toolbar is drawn as a Positioned overlay on top of the
+    // body (see below), so — unlike CupertinoPageScaffold with a translucent
+    // nav bar — it does NOT inset the body automatically. Mirror that framework
+    // behaviour here by adding the toolbar's height to the body's top padding,
+    // so any SafeArea/SliverSafeArea inside a page clears the toolbar without
+    // per-screen offset hacks. Content still scrolls behind it (scroll-edge
+    // effect) because SafeArea insets rather than clips.
+    if (hasToolbarContent) {
+      final mq = MediaQuery.of(context);
+      bodyContent = MediaQuery(
+        data: mq.copyWith(
+          padding:
+              mq.padding.copyWith(top: mq.padding.top + kToolbarContentHeight),
+          viewPadding: mq.viewPadding
+              .copyWith(top: mq.viewPadding.top + kToolbarContentHeight),
+        ),
+        child: bodyContent,
+      );
+    }
+
     // Build the stack content
     final stackContent = Stack(
       children: [
-        // Content - full screen - use KeepAlive to prevent rebuild
-        // Wrap content with DefaultTextStyle to ensure proper text color
-        DefaultTextStyle(
-          style: TextStyle(
-            color: textColor,
-            fontSize: 17, // iOS default
-          ),
-          child: widget.children.length == 1
-              ? widget.children.first
-              : IndexedStack(
-                  index: widget.bottomNavigationBar?.selectedIndex ?? 0,
-                  sizing: StackFit.expand,
-                  children: widget.children,
-                ),
-        ),
+        bodyContent,
         // Top toolbar - iOS 26 Liquid Glass style - only show if there's content
         if (hasToolbarContent)
           Positioned(
