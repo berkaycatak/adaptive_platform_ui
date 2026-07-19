@@ -1,7 +1,14 @@
 # Changelog
 
-## [Unreleased]
-* **FIX**: iOS 26+ native toolbar now insets the body's top padding by the toolbar height, so `SafeArea`/`SliverSafeArea` inside a page clear the Liquid Glass toolbar automatically — matching how `CupertinoPageScaffold` handles a translucent navigation bar. Removes the need for per-screen top-offset hacks. (@luflow)
+## [0.1.110]
+* **NEW**: `subtitle` and `titleWidget` on `AdaptiveAppBar`. Show a smaller subtitle below the title, or replace the title area with any widget. Works on iOS 26+ native toolbar (centered overlay), iOS <26 `CupertinoNavigationBar`, and Material `AppBar` (@luflow)
+* **NEW**: `subtitle` and `imageBytes` on `AdaptivePopupMenuItem`. Subtitles render natively via `UIAction.subtitle` on iOS 15+, and image bytes (e.g. avatars) are shown clipped to a circle on iOS 26+ native menus, Material popup menus, and the iOS <26 action-sheet fallback (@luflow)
+* **IMPROVEMENT**: iOS 26+ native toolbar now insets the body's top padding by the toolbar height, so `SafeArea`/`SliverSafeArea` inside a page clear the Liquid Glass toolbar automatically, matching how `CupertinoPageScaffold` handles a translucent navigation bar. Removes the need for per-screen top-offset hacks (@luflow)
+* **FIX**: Material alert dialogs now place the cancel (dismissive) button on the left, matching the Material 3 dialog guidelines (@luflow)
+* **FIX**: iOS status bar style now follows the effective theme brightness on the Cupertino path, so it stays legible when a forced `ThemeMode` differs from the system brightness (@luflow)
+* **FIX**: Fixed iOS 16+ popup menu items being reordered by the system by setting `preferredMenuElementOrder = .fixed`, so items keep their declared order (@Sahil-Kundaliya)
+* **FIX**: Fixed an unbounded-width crash when an iOS 26 text popup button is placed directly in a `Row`, before its native intrinsic width has been measured
+* **FIX**: Silenced an iOS 26 native button Auto Layout constraint conflict that logged on every layout pass
 
 ## [0.1.109]
 * **NEW**: `triggerOnLongPress` and `onTap` on popup menu buttons — tap fires `onTap`, long-press opens the menu (@yuriylybimov)
