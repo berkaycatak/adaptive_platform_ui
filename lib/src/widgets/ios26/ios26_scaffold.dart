@@ -21,6 +21,7 @@ class IOS26Scaffold extends StatefulWidget {
     this.actions,
     this.leading,
     this.tintColor,
+    this.titleWidget,
     this.minimizeBehavior = TabBarMinimizeBehavior.automatic,
     this.enableBlur = true,
     this.useHeroBackButton = true,
@@ -34,6 +35,10 @@ class IOS26Scaffold extends StatefulWidget {
   final List<AdaptiveAppBarAction>? actions;
   final Widget? leading;
   final Color? tintColor;
+
+  /// Custom widget overlaid at the toolbar's title position.
+  /// When set, the native title is hidden and this widget is centered instead.
+  final Widget? titleWidget;
   final TabBarMinimizeBehavior minimizeBehavior;
   final bool enableBlur;
   final bool useHeroBackButton;
@@ -182,6 +187,7 @@ class _IOS26ScaffoldState extends State<IOS26Scaffold>
     // Only the underlying UiKitView should be hidden.
     final hasToolbarContent =
         (widget.title != null ||
+        widget.titleWidget != null ||
         widget.leading != null ||
         heroLeading != null ||
         (widget.actions != null && widget.actions!.isNotEmpty));
@@ -247,6 +253,7 @@ class _IOS26ScaffoldState extends State<IOS26Scaffold>
               showNativeView: showNativeView,
               actions: widget.actions,
               tintColor: widget.tintColor,
+              titleWidget: widget.titleWidget,
               onActionTap: (index) {
                 // Call the appropriate action callback
                 if (widget.actions != null &&

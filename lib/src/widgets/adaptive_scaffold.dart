@@ -176,6 +176,59 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
   final GlobalKey<_MinimizableTabBarState> _tabBarKey =
       GlobalKey<_MinimizableTabBarState>();
 
+  /// Builds the app bar title area, optionally with a subtitle below it.
+  ///
+  /// Returns [AdaptiveAppBar.titleWidget] verbatim when provided; otherwise a
+  /// title (plus subtitle when set). When [nativeTitleFallback] is true the
+  /// plain-title case returns null so the iOS 26 native toolbar can render the
+  /// title itself; the other paths return a plain `Text` instead.
+  Widget? _buildAppBarTitle({
+    CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.center,
+    TextStyle? titleStyle,
+    double subtitleFontSize = 12,
+    Color? subtitleColor,
+    bool nativeTitleFallback = false,
+  }) {
+    if (widget.appBar?.titleWidget != null) return widget.appBar!.titleWidget;
+    final title = widget.appBar?.title;
+    if (title == null) return null;
+    final subtitle = widget.appBar?.subtitle;
+    if (subtitle == null || subtitle.isEmpty) {
+      return nativeTitleFallback ? null : Text(title, style: titleStyle);
+    }
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: crossAxisAlignment,
+      children: [
+        Text(title, style: titleStyle),
+        Text(
+          subtitle,
+          style: TextStyle(
+            fontSize: subtitleFontSize,
+            fontWeight: FontWeight.normal,
+            color: subtitleColor,
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// iOS 26+ native toolbar title overlay. The native title is a plain string,
+  /// so a subtitle (or custom widget) is drawn as a Flutter overlay instead.
+  /// Colors resolve from the ambient brightness so the overlay matches the
+  /// native title in light and dark mode.
+  Widget? _buildIOS26TitleOverlay() {
+    return _buildAppBarTitle(
+      nativeTitleFallback: true,
+      titleStyle: TextStyle(
+        fontSize: 17,
+        fontWeight: FontWeight.w600,
+        color: CupertinoColors.label.resolveFrom(context),
+      ),
+      subtitleColor: CupertinoColors.secondaryLabel.resolveFrom(context),
+    );
+  }
+
   Widget _wrapWithDrawerIfNeeded(Widget child) {
     if (widget.drawer == null && widget.endDrawer == null) {
       return child;
@@ -256,6 +309,7 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
           actions: widget.appBar?.actions,
           leading: widget.appBar?.leading,
           tintColor: widget.appBar?.tintColor,
+          titleWidget: _buildIOS26TitleOverlay(),
           minimizeBehavior: widget.minimizeBehavior,
           enableBlur: widget.enableBlur,
           useHeroBackButton: widget.useHeroBackButton,
@@ -298,9 +352,7 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
                 PlatformInfo.isIOS26OrHigher() && useNativeToolbar
                 ? false
                 : true, // Let CupertinoNavigationBar handle back button naturally
-            middle: widget.appBar!.title != null
-                ? Text(widget.appBar!.title!)
-                : null,
+            middle: _buildAppBarTitle(),
             trailing:
                 widget.appBar!.actions != null &&
                     widget.appBar!.actions!.isNotEmpty
@@ -488,6 +540,7 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
       // Priority 2: Build from title, actions, leading (if appBar has content)
       else if (widget.appBar != null &&
           (widget.appBar!.title != null ||
+              widget.appBar!.titleWidget != null ||
               (widget.appBar!.actions != null &&
                   widget.appBar!.actions!.isNotEmpty) ||
               effectiveLeading != null ||
@@ -497,9 +550,7 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
               PlatformInfo.isIOS26OrHigher() && useNativeToolbar
               ? false
               : true, // Let CupertinoNavigationBar handle back button naturally
-          middle: widget.appBar!.title != null
-              ? Text(widget.appBar!.title!)
-              : null,
+          middle: _buildAppBarTitle(),
           trailing:
               widget.appBar!.actions != null &&
                   widget.appBar!.actions!.isNotEmpty
@@ -578,13 +629,19 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
       // Priority 2: Build from title, actions, leading (if appBar has content)
       else if (widget.appBar != null &&
           (widget.appBar!.title != null ||
+              widget.appBar!.titleWidget != null ||
               (widget.appBar!.actions != null &&
                   widget.appBar!.actions!.isNotEmpty) ||
               widget.appBar!.leading != null)) {
         appBar = AppBar(
-          title: widget.appBar!.title != null
-              ? Text(widget.appBar!.title!)
-              : null,
+          title: _buildAppBarTitle(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            subtitleFontSize: 13,
+            subtitleColor: Theme.of(
+              context,
+            ).textTheme.bodySmall?.color?.withValues(alpha: 0.7),
+          ),
+          centerTitle: widget.appBar!.titleWidget != null,
           actions: widget.appBar!.actions?.map((action) {
             if (action.title != null) {
               return TextButton(
@@ -677,9 +734,14 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
     // Priority 2: Build AppBar if widget.appBar is provided (even if empty - for automatic back button)
     else if (widget.appBar != null) {
       appBar = AppBar(
-        title: widget.appBar!.title != null
-            ? Text(widget.appBar!.title!)
-            : null,
+        title: _buildAppBarTitle(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          subtitleFontSize: 13,
+          subtitleColor: Theme.of(
+            context,
+          ).textTheme.bodySmall?.color?.withValues(alpha: 0.7),
+        ),
+        centerTitle: widget.appBar!.titleWidget != null,
         actions: widget.appBar!.actions?.map((action) {
           if (action.title != null) {
             return TextButton(

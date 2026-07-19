@@ -353,6 +353,16 @@ class _HomePageState extends State<HomePage> {
               ),
               _DemoItem(
                 icon: PlatformInfo.isIOS
+                    ? CupertinoIcons.textformat
+                    : Icons.title,
+                title: 'App Bar Title',
+                description:
+                    'Subtitle and custom titleWidget in the app bar',
+                routeName: RouterService.routes.appBarTitle,
+                isNew: true,
+              ),
+              _DemoItem(
+                icon: PlatformInfo.isIOS
                     ? CupertinoIcons.search_circle_fill
                     : Icons.search,
                 title: 'Native Search Tab',
