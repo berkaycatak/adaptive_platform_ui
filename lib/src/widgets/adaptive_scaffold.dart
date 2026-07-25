@@ -32,7 +32,11 @@ class AdaptiveNavigationDestination {
   /// Label text for the destination
   final String label;
 
-  /// Optional selected state icon
+  /// Optional selected state icon.
+  ///
+  /// Accepts the same value types as [icon], including an SF Symbol name
+  /// `String` (e.g. `magazine.fill`) which the iOS 26+ native tab bar applies
+  /// when the destination is selected. Falls back to [icon] when null.
   final dynamic selectedIcon;
 
   /// Whether this is a search tab (iOS 26+)
@@ -362,6 +366,8 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
                       Widget actionChild;
                       if (action.title != null) {
                         actionChild = Text(action.title!);
+                      } else if (action.iconWidget != null) {
+                        actionChild = action.iconWidget!;
                       } else if (action.icon != null) {
                         actionChild = Icon(action.icon!);
                       } else {
@@ -560,6 +566,8 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
                     Widget actionChild;
                     if (action.title != null) {
                       actionChild = Text(action.title!);
+                    } else if (action.iconWidget != null) {
+                      actionChild = action.iconWidget!;
                     } else if (action.icon != null) {
                       actionChild = Icon(action.icon!);
                     } else {
@@ -650,9 +658,9 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
               );
             }
             return IconButton(
-              icon: action.icon != null
+              icon: action.iconWidget ?? (action.icon != null
                   ? Icon(action.icon!)
-                  : const Icon(Icons.circle),
+                  : const Icon(Icons.circle)),
               onPressed: action.onPressed,
             );
           }).toList(),
@@ -750,9 +758,9 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
             );
           }
           return IconButton(
-            icon: action.icon != null
+            icon: action.iconWidget ?? (action.icon != null
                 ? Icon(action.icon!)
-                : const Icon(Icons.circle),
+                : const Icon(Icons.circle)),
             onPressed: action.onPressed,
           );
         }).toList(),

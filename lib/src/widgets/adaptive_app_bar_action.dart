@@ -22,14 +22,15 @@ class AdaptiveAppBarAction {
   const AdaptiveAppBarAction({
     this.iosSymbol,
     this.icon,
+    this.iconWidget,
     this.title,
     required this.onPressed,
     this.spacerAfter = ToolbarSpacerType.none,
     this.prominent = false,
     this.tintColor,
   }) : assert(
-         iosSymbol != null || icon != null || title != null,
-         'At least one of iosSymbol, icon, or title must be provided',
+         iosSymbol != null || icon != null || iconWidget != null || title != null,
+         'At least one of iosSymbol, icon, iconWidget, or title must be provided',
        );
 
   /// SF Symbol name for iOS 26+ ONLY (e.g., 'info.circle', 'plus.circle')
@@ -43,6 +44,10 @@ class AdaptiveAppBarAction {
   /// - iOS <26: Used for CupertinoButton
   /// - Android: Used for IconButton
   final IconData? icon;
+
+  /// Custom icon widget for iOS <26 and Android (e.g., SvgPicture.asset)
+  /// If provided, this widget is used instead of the icon parameter.
+  final Widget? iconWidget;
 
   /// Text title for the action (optional)
   /// If provided along with icons, title takes precedence
@@ -84,13 +89,14 @@ class AdaptiveAppBarAction {
     return other is AdaptiveAppBarAction &&
         other.iosSymbol == iosSymbol &&
         other.icon == icon &&
+        other.iconWidget == iconWidget &&
         other.title == title &&
         other.prominent == prominent &&
         other.tintColor == tintColor;
   }
 
   @override
-  int get hashCode => Object.hash(iosSymbol, icon, title, prominent, tintColor);
+  int get hashCode => Object.hash(iosSymbol, icon, iconWidget, title, prominent, tintColor);
 
   /// Convert action to map for native platform channel (iOS 26+ only)
   Map<String, dynamic> toNativeMap() {
