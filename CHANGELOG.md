@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.111]
+* **NEW**: Custom SF Symbols on iOS. `AdaptiveAppBarAction`, native buttons, and the tab bar now fall back to a bundle asset (`UIImage(named:)`) when a name is not a system SF Symbol, so custom symbols or images from the app's asset catalog work (@hieutbui)
+* **NEW**: `iconWidget` on `AdaptiveAppBarAction` for a custom fallback widget (e.g. an SVG) on iOS <26 and Android (@hieutbui)
+* **NEW**: Per-state SF Symbols on the iOS 26+ native tab bar. `AdaptiveNavigationDestination.selectedIcon` now accepts a distinct SF Symbol name for the selected state (outline when unselected, filled when selected) (@hieutbui, @philipgiuliani)
+* **NEW**: `minuteInterval` on `AdaptiveTimePicker` and `AdaptiveDatePicker` restricts selectable minutes to a fixed grid (e.g. 15-minute steps). iOS uses the native `minuteInterval`; Android snaps the picked value onto the grid (@luflow)
+* **NEW**: `AdaptiveDatePicker` now honors `dateAndTime` and `monthYear` modes on Android too, with `use24HourFormat` support (@luflow)
+
 ## [0.1.110]
 * **NEW**: `subtitle` and `titleWidget` on `AdaptiveAppBar`. Show a smaller subtitle below the title, or replace the title area with any widget. Works on iOS 26+ native toolbar (centered overlay), iOS <26 `CupertinoNavigationBar`, and Material `AppBar` (@luflow)
 * **NEW**: `subtitle` and `imageBytes` on `AdaptivePopupMenuItem`. Subtitles render natively via `UIAction.subtitle` on iOS 15+, and image bytes (e.g. avatars) are shown clipped to a circle on iOS 26+ native menus, Material popup menus, and the iOS <26 action-sheet fallback (@luflow)
