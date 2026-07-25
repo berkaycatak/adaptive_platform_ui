@@ -1,10 +1,5 @@
 # Changelog
 
-## [0.1.111]
-* **NEW**: Custom SF Symbols support — native tab bar, `AdaptiveAppBarAction`, and iOS 26+ buttons now support custom SF Symbols bundled in the app asset catalog (`UIImage(named:)`) (@hieutbui)
-* **NEW**: `iconWidget` on `AdaptiveAppBarAction` — render custom Flutter widgets for app bar action buttons across all platform implementations (@hieutbui)
-* **NEW**: Per-state SF Symbols on the iOS 26+ native tab bar — `AdaptiveNavigationDestination.selectedIcon` now accepts a distinct SF Symbol name (e.g. `magazine.fill`) that is applied for the selected state, matching the existing per-state behavior for asset/file/network icons (@philipgiuliani)
-
 ## [0.1.110]
 * **NEW**: `subtitle` and `titleWidget` on `AdaptiveAppBar`. Show a smaller subtitle below the title, or replace the title area with any widget. Works on iOS 26+ native toolbar (centered overlay), iOS <26 `CupertinoNavigationBar`, and Material `AppBar` (@luflow)
 * **NEW**: `subtitle` and `imageBytes` on `AdaptivePopupMenuItem`. Subtitles render natively via `UIAction.subtitle` on iOS 15+, and image bytes (e.g. avatars) are shown clipped to a circle on iOS 26+ native menus, Material popup menus, and the iOS <26 action-sheet fallback (@luflow)
