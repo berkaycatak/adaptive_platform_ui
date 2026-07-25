@@ -1,9 +1,5 @@
 # Changelog
 
-## [Unreleased]
-* **NEW**: `minuteInterval` on `AdaptiveTimePicker` and `AdaptiveDatePicker` — restricts results to a fixed minute grid (e.g. 15-minute steps). Uses `CupertinoDatePicker`'s native `minuteInterval` on iOS; on Android the Material picker's confirmed value is snapped to the nearest interval. Initial values are auto-aligned to the grid; no extra dependencies (@luflow)
-* **NEW**: `AdaptiveDatePicker` now honors `CupertinoDatePickerMode.dateAndTime` and `monthYear` on Android too — Material shows a date picker followed by a time picker (with `use24HourFormat` support), and month-year picks normalize to the 1st of the month (@luflow)
-
 ## [0.1.109]
 * **NEW**: `triggerOnLongPress` and `onTap` on popup menu buttons — tap fires `onTap`, long-press opens the menu (@yuriylybimov)
 * **NEW**: `isDestructive` on `AdaptivePopupMenuItem` — renders destructive (red) styling on Material, iOS <26, and iOS 26+ native menus (@yuriylybimov)
