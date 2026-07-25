@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import '../platform/platform_info.dart';
+import 'adaptive_time_picker.dart';
+import 'minute_interval.dart';
 
 /// An adaptive date picker that renders platform-specific styles
 ///
@@ -20,6 +22,7 @@ class AdaptiveDatePicker {
     CupertinoDatePickerMode mode = CupertinoDatePickerMode.date,
     DatePickerMode initialDatePickerMode = DatePickerMode.day,
     bool use24HourFormat = false,
+    int minuteInterval = 1,
   }) async {
     final effectiveFirstDate = firstDate ?? DateTime(1900);
     final effectiveLastDate = lastDate ?? DateTime(2100);
@@ -32,16 +35,19 @@ class AdaptiveDatePicker {
         lastDate: effectiveLastDate,
         mode: mode,
         use24HourFormat: use24HourFormat,
+        minuteInterval: minuteInterval,
       );
     }
 
-    // Android - Use Material DatePicker
     return _showMaterialDatePicker(
       context: context,
       initialDate: initialDate,
       firstDate: effectiveFirstDate,
       lastDate: effectiveLastDate,
+      mode: mode,
+      use24HourFormat: use24HourFormat,
       initialDatePickerMode: initialDatePickerMode,
+      minuteInterval: minuteInterval,
     );
   }
 
@@ -52,18 +58,22 @@ class AdaptiveDatePicker {
     required DateTime lastDate,
     required CupertinoDatePickerMode mode,
     required bool use24HourFormat,
+    required int minuteInterval,
   }) async {
-    DateTime selectedDate = initialDate;
+    // CupertinoDatePicker asserts the initial value already sits on the grid.
+    final alignedInitial = alignDateTimeToInterval(initialDate, minuteInterval);
+    DateTime selectedDate = alignedInitial;
 
     return showCupertinoModalPopup<DateTime>(
       context: context,
       builder: (BuildContext context) {
         return _CupertinoDatePickerContent(
-          initialDate: initialDate,
+          initialDate: alignedInitial,
           firstDate: firstDate,
           lastDate: lastDate,
           mode: mode,
           use24HourFormat: use24HourFormat,
+          minuteInterval: minuteInterval,
           onDateSelected: (date) => selectedDate = date,
         );
       },
@@ -75,15 +85,40 @@ class AdaptiveDatePicker {
     required DateTime initialDate,
     required DateTime firstDate,
     required DateTime lastDate,
+    required CupertinoDatePickerMode mode,
+    required bool use24HourFormat,
     required DatePickerMode initialDatePickerMode,
+    required int minuteInterval,
   }) async {
-    return showDatePicker(
+    DateTime date = initialDate;
+    if (mode != CupertinoDatePickerMode.time) {
+      // Material has no native month-year picker; force year-only entry and
+      // normalize to the 1st so callers still get a usable DateTime.
+      final isMonthYear = mode == CupertinoDatePickerMode.monthYear;
+      final picked = await showDatePicker(
+        context: context,
+        initialDate: initialDate,
+        firstDate: firstDate,
+        lastDate: lastDate,
+        initialDatePickerMode:
+            isMonthYear ? DatePickerMode.year : initialDatePickerMode,
+      );
+      if (picked == null) return null;
+      date = isMonthYear ? DateTime(picked.year, picked.month, 1) : picked;
+    }
+    if (mode == CupertinoDatePickerMode.date ||
+        mode == CupertinoDatePickerMode.monthYear) {
+      return DateTime(date.year, date.month, date.day);
+    }
+    if (!context.mounted) return null;
+    final time = await AdaptiveTimePicker.show(
       context: context,
-      initialDate: initialDate,
-      firstDate: firstDate,
-      lastDate: lastDate,
-      initialDatePickerMode: initialDatePickerMode,
+      initialTime: TimeOfDay.fromDateTime(initialDate),
+      use24HourFormat: use24HourFormat,
+      minuteInterval: minuteInterval,
     );
+    if (time == null) return null;
+    return DateTime(date.year, date.month, date.day, time.hour, time.minute);
   }
 }
 
@@ -95,6 +130,7 @@ class _CupertinoDatePickerContent extends StatefulWidget {
     required this.lastDate,
     required this.mode,
     required this.use24HourFormat,
+    required this.minuteInterval,
     required this.onDateSelected,
   });
 
@@ -103,6 +139,7 @@ class _CupertinoDatePickerContent extends StatefulWidget {
   final DateTime lastDate;
   final CupertinoDatePickerMode mode;
   final bool use24HourFormat;
+  final int minuteInterval;
   final ValueChanged<DateTime> onDateSelected;
 
   @override
@@ -170,6 +207,7 @@ class _CupertinoDatePickerContentState
             child: CupertinoDatePicker(
               mode: widget.mode,
               use24hFormat: widget.use24HourFormat,
+              minuteInterval: widget.minuteInterval,
               initialDateTime: widget.initialDate,
               minimumDate: widget.firstDate,
               maximumDate: widget.lastDate,
