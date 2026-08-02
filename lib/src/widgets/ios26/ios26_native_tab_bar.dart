@@ -220,8 +220,17 @@ class _IOS26NativeTabBarState extends State<IOS26NativeTabBar> {
               creationParams: creationParams,
               creationParamsCodec: const StandardMessageCodec(),
               onPlatformViewCreated: _onCreated,
+              // A TapGestureRecognizer only claims the arena on pointer-up,
+              // by which time Flutter has already cancelled the touch
+              // sequence on the embedded UITabBar — the hit test lands on the
+              // right _UITabButton but `didSelect` never fires. Claiming
+              // eagerly hands the whole sequence to UIKit, which restores the
+              // press highlight and the drag-between-tabs gesture along with
+              // plain taps.
               gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
-                Factory<TapGestureRecognizer>(() => TapGestureRecognizer()),
+                Factory<OneSequenceGestureRecognizer>(
+                  () => EagerGestureRecognizer(),
+                ),
               },
             )
           : const SizedBox.shrink();
