@@ -106,8 +106,16 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
         tabBar = bar
         bar.delegate = self
         bar.translatesAutoresizingMaskIntoConstraints = false
-        bar.semanticContentAttribute = isRtl ? .forceRightToLeft : .forceLeftToRight
-        container.semanticContentAttribute = isRtl ? .forceRightToLeft : .forceLeftToRight
+        let semanticAttribute: UISemanticContentAttribute = isRtl
+            ? .forceRightToLeft
+            : .forceLeftToRight
+        bar.semanticContentAttribute = semanticAttribute
+        // The iOS 26 selected Liquid Glass content is portal-backed and reads the trait direction.
+        // Override both APIs so the app locale wins when it differs from the device locale.
+        if #available(iOS 17.0, *) {
+            bar.traitOverrides.layoutDirection = isRtl ? .rightToLeft : .leftToRight
+        }
+        container.semanticContentAttribute = semanticAttribute
 
         // iOS 26+ special handling - Skip appearance, use direct properties only
         if #available(iOS 26.0, *) {
@@ -578,8 +586,15 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
                 return
             }
 
-            let attribute: UISemanticContentAttribute = isRtl ? .forceRightToLeft : .forceLeftToRight
+            let attribute: UISemanticContentAttribute = isRtl
+                ? .forceRightToLeft
+                : .forceLeftToRight
             self.tabBar?.semanticContentAttribute = attribute
+            if #available(iOS 17.0, *) {
+                self.tabBar?.traitOverrides.layoutDirection = isRtl
+                    ? .rightToLeft
+                    : .leftToRight
+            }
             self.container.semanticContentAttribute = attribute
             result(nil)
 
