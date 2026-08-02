@@ -24,12 +24,16 @@ class AdaptiveAppBarAction {
     this.icon,
     this.iconWidget,
     this.title,
+    this.accessibilityLabel,
     required this.onPressed,
     this.spacerAfter = ToolbarSpacerType.none,
     this.prominent = false,
     this.tintColor,
   }) : assert(
-         iosSymbol != null || icon != null || iconWidget != null || title != null,
+         iosSymbol != null ||
+             icon != null ||
+             iconWidget != null ||
+             title != null,
          'At least one of iosSymbol, icon, iconWidget, or title must be provided',
        );
 
@@ -52,6 +56,11 @@ class AdaptiveAppBarAction {
   /// Text title for the action (optional)
   /// If provided along with icons, title takes precedence
   final String? title;
+
+  /// Localized description announced by assistive technologies.
+  ///
+  /// On iOS 26+, this is forwarded to the native [UIBarButtonItem].
+  final String? accessibilityLabel;
 
   /// Callback when the action is tapped
   final VoidCallback onPressed;
@@ -91,18 +100,28 @@ class AdaptiveAppBarAction {
         other.icon == icon &&
         other.iconWidget == iconWidget &&
         other.title == title &&
+        other.accessibilityLabel == accessibilityLabel &&
         other.prominent == prominent &&
         other.tintColor == tintColor;
   }
 
   @override
-  int get hashCode => Object.hash(iosSymbol, icon, iconWidget, title, prominent, tintColor);
+  int get hashCode => Object.hash(
+    iosSymbol,
+    icon,
+    iconWidget,
+    title,
+    accessibilityLabel,
+    prominent,
+    tintColor,
+  );
 
   /// Convert action to map for native platform channel (iOS 26+ only)
   Map<String, dynamic> toNativeMap() {
     return {
       if (iosSymbol != null) 'icon': iosSymbol!,
       if (title != null) 'title': title!,
+      if (accessibilityLabel != null) 'accessibilityLabel': accessibilityLabel!,
       'spacerAfter': spacerAfter.index, // 0=none, 1=fixed, 2=flexible
       if (prominent) 'prominent': true,
       if (tintColor != null) 'tint': tintColor!.toARGB32(),

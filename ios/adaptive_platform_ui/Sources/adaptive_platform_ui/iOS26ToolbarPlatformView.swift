@@ -230,6 +230,7 @@ class iOS26ToolbarPlatformView: NSObject, FlutterPlatformView {
 
                 if let btn = button {
                     btn.tag = index
+                    btn.accessibilityLabel = action["accessibilityLabel"] as? String
 
                     // Apply prominent style (iOS 26+)
                     if action["prominent"] as? Bool == true {

@@ -36,12 +36,14 @@ void main() {
         iosSymbol: 'info.circle',
         icon: Icons.info,
         title: 'Info',
+        accessibilityLabel: 'Show information',
         onPressed: () {},
       );
 
       expect(action.iosSymbol, 'info.circle');
       expect(action.icon, Icons.info);
       expect(action.title, 'Info');
+      expect(action.accessibilityLabel, 'Show information');
     });
 
     test('throws assertion error when all parameters are null', () {
@@ -162,6 +164,27 @@ void main() {
 
       expect(map['icon'], 'info.circle');
       expect(map['title'], 'Info');
+    });
+
+    test('toNativeMap includes accessibility label when present', () {
+      final action = AdaptiveAppBarAction(
+        iosSymbol: 'info.circle',
+        accessibilityLabel: 'Show information',
+        onPressed: () {},
+      );
+
+      final map = action.toNativeMap();
+
+      expect(map['accessibilityLabel'], 'Show information');
+    });
+
+    test('toNativeMap omits accessibility label when absent', () {
+      final action = AdaptiveAppBarAction(
+        iosSymbol: 'info.circle',
+        onPressed: () {},
+      );
+
+      expect(action.toNativeMap().containsKey('accessibilityLabel'), isFalse);
     });
 
     test('toNativeMap excludes icon parameter', () {
