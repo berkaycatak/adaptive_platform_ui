@@ -12,7 +12,12 @@ import 'package:material_ui/material_ui.dart';
 /// no-op, preserving the default per-minute behaviour.
 DateTime alignDateTimeToInterval(DateTime dateTime, int interval) {
   if (interval <= 1) return dateTime;
-  final base = DateTime(dateTime.year, dateTime.month, dateTime.day, dateTime.hour);
+  final base = DateTime(
+    dateTime.year,
+    dateTime.month,
+    dateTime.day,
+    dateTime.hour,
+  );
   final roundedMinutes = (dateTime.minute / interval).round() * interval;
   return base.add(Duration(minutes: roundedMinutes));
 }

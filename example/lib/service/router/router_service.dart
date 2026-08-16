@@ -255,14 +255,12 @@ class RouterService {
                   GoRoute(
                     name: routes.toolbarTint,
                     path: routes.toolbarTint,
-                    builder: (context, state) =>
-                        const ToolbarTintDemoPage(),
+                    builder: (context, state) => const ToolbarTintDemoPage(),
                   ),
                   GoRoute(
                     name: routes.appBarTitle,
                     path: routes.appBarTitle,
-                    builder: (context, state) =>
-                        const AppBarTitleDemoPage(),
+                    builder: (context, state) => const AppBarTitleDemoPage(),
                   ),
                   GoRoute(
                     name: routes.navigationPage1,

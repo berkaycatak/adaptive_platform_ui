@@ -560,10 +560,7 @@ class _PopupMenuDemoPageState extends State<PopupMenuDemoPage> {
                 value: 'work',
               ),
               AdaptivePopupMenuDivider(),
-              AdaptivePopupMenuItem(
-                label: 'Add account',
-                value: 'add',
-              ),
+              AdaptivePopupMenuItem(label: 'Add account', value: 'add'),
             ],
             onSelected: (index, item) {
               setState(() {
@@ -592,10 +589,7 @@ class _PopupMenuDemoPageState extends State<PopupMenuDemoPage> {
                 value: 'alex',
               ),
               const AdaptivePopupMenuDivider(),
-              const AdaptivePopupMenuItem(
-                label: 'Unassigned',
-                value: 'none',
-              ),
+              const AdaptivePopupMenuItem(label: 'Unassigned', value: 'none'),
             ],
             onSelected: (index, item) {
               setState(() {

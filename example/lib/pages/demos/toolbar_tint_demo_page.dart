@@ -121,8 +121,7 @@ class _ToolbarTintDemoPageState extends State<ToolbarTintDemoPage> {
             context,
             icon: Icons.favorite,
             title: 'Heart — Prominent + per-action tint',
-            description:
-                'Combines prominent: true with per-action tintColor.',
+            description: 'Combines prominent: true with per-action tintColor.',
             isDark: isDark,
             selectedIndex: _heartTintIndex,
             onChanged: (i) => setState(() => _heartTintIndex = i),
@@ -136,11 +135,7 @@ class _ToolbarTintDemoPageState extends State<ToolbarTintDemoPage> {
     );
   }
 
-  Widget _buildSectionHeader(
-    BuildContext context,
-    String title,
-    bool isDark,
-  ) {
+  Widget _buildSectionHeader(BuildContext context, String title, bool isDark) {
     return Padding(
       padding: const EdgeInsets.only(left: 4),
       child: Text(
@@ -156,11 +151,7 @@ class _ToolbarTintDemoPageState extends State<ToolbarTintDemoPage> {
     );
   }
 
-  Widget _buildDescription(
-    BuildContext context,
-    String text,
-    bool isDark,
-  ) {
+  Widget _buildDescription(BuildContext context, String text, bool isDark) {
     return Padding(
       padding: const EdgeInsets.only(left: 4),
       child: Text(
@@ -184,7 +175,8 @@ class _ToolbarTintDemoPageState extends State<ToolbarTintDemoPage> {
       children: List.generate(_tintOptions.length, (index) {
         final option = _tintOptions[index];
         final isSelected = _selectedColorIndex == index;
-        final displayColor = option.color ??
+        final displayColor =
+            option.color ??
             (PlatformInfo.isIOS
                 ? CupertinoColors.systemBlue
                 : Theme.of(context).colorScheme.primary);
@@ -235,7 +227,9 @@ class _ToolbarTintDemoPageState extends State<ToolbarTintDemoPage> {
                   option.name,
                   style: TextStyle(
                     fontSize: 14,
-                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                    fontWeight: isSelected
+                        ? FontWeight.w600
+                        : FontWeight.normal,
                     color: isSelected
                         ? displayColor
                         : (isDark ? Colors.white : Colors.black87),
@@ -406,7 +400,9 @@ class _ToolbarTintDemoPageState extends State<ToolbarTintDemoPage> {
               height: 28,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: color ?? (isDark ? Colors.grey.shade700 : Colors.grey.shade300),
+                color:
+                    color ??
+                    (isDark ? Colors.grey.shade700 : Colors.grey.shade300),
                 border: Border.all(
                   color: isSelected
                       ? (isDark ? Colors.white : Colors.black87)

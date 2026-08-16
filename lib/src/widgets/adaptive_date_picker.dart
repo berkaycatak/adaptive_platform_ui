@@ -100,8 +100,9 @@ class AdaptiveDatePicker {
         initialDate: initialDate,
         firstDate: firstDate,
         lastDate: lastDate,
-        initialDatePickerMode:
-            isMonthYear ? DatePickerMode.year : initialDatePickerMode,
+        initialDatePickerMode: isMonthYear
+            ? DatePickerMode.year
+            : initialDatePickerMode,
       );
       if (picked == null) return null;
       date = isMonthYear ? DateTime(picked.year, picked.month, 1) : picked;

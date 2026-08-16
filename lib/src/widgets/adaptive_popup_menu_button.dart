@@ -106,8 +106,12 @@ class AdaptivePopupMenuButton<T> {
     // iOS <26 (iOS 18 and below) - Use GestureDetector with action sheet
     return Builder(
       builder: (context) => GestureDetector(
-        onTap: triggerOnLongPress ? onTap : () => _showMenu<T>(context, null, items, onSelected),
-        onLongPress: triggerOnLongPress ? () => _showMenu<T>(context, null, items, onSelected) : null,
+        onTap: triggerOnLongPress
+            ? onTap
+            : () => _showMenu<T>(context, null, items, onSelected),
+        onLongPress: triggerOnLongPress
+            ? () => _showMenu<T>(context, null, items, onSelected)
+            : null,
         child: child,
       ),
     );
@@ -187,8 +191,9 @@ class AdaptivePopupMenuButton<T> {
         ],
         Column(
           mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment:
-              hasImage ? CrossAxisAlignment.start : CrossAxisAlignment.center,
+          crossAxisAlignment: hasImage
+              ? CrossAxisAlignment.start
+              : CrossAxisAlignment.center,
           children: [
             Text(item.label),
             if (hasSubtitle)
@@ -221,7 +226,8 @@ class AdaptivePopupMenuButton<T> {
               if (items[i] is AdaptivePopupMenuItem<T>)
                 CupertinoActionSheetAction(
                   onPressed: () => Navigator.of(ctx).pop(i),
-                  isDestructiveAction: (items[i] as AdaptivePopupMenuItem<T>).isDestructive,
+                  isDestructiveAction:
+                      (items[i] as AdaptivePopupMenuItem<T>).isDestructive,
                   child: _buildActionSheetContent<T>(
                     items[i] as AdaptivePopupMenuItem<T>,
                   ),
@@ -352,9 +358,7 @@ class _MaterialPopupMenuButtonState<T>
                             Text(item.label, style: labelStyle),
                             Text(
                               item.subtitle!,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodySmall
+                              style: Theme.of(context).textTheme.bodySmall
                                   ?.copyWith(
                                     color: Theme.of(context)
                                         .textTheme

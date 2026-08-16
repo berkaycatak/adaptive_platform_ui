@@ -387,7 +387,9 @@ class _IOS26PopupMenuButtonState<T> extends State<IOS26PopupMenuButton<T>> {
         onPlatformViewCreated: _onCreated,
         gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
           widget.triggerOnLongPress
-              ? Factory<LongPressGestureRecognizer>(() => LongPressGestureRecognizer())
+              ? Factory<LongPressGestureRecognizer>(
+                  () => LongPressGestureRecognizer(),
+                )
               : Factory<TapGestureRecognizer>(() => TapGestureRecognizer()),
         },
       );
@@ -603,7 +605,9 @@ class _IOS26PopupMenuButtonState<T> extends State<IOS26PopupMenuButton<T>> {
               if (widget.items[i] is AdaptivePopupMenuItem<T>)
                 CupertinoActionSheetAction(
                   onPressed: () => Navigator.of(ctx).pop(i),
-                  isDestructiveAction: (widget.items[i] as AdaptivePopupMenuItem<T>).isDestructive,
+                  isDestructiveAction:
+                      (widget.items[i] as AdaptivePopupMenuItem<T>)
+                          .isDestructive,
                   child: _buildActionSheetItemContent(
                     widget.items[i] as AdaptivePopupMenuItem<T>,
                   ),

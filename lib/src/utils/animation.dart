@@ -2,10 +2,7 @@ import 'package:flutter/animation.dart';
 import 'package:flutter/physics.dart';
 
 class IOSSpringCurve extends Curve {
-  const IOSSpringCurve({
-    this.stiffness = 100,
-    this.damping = 18,
-  });
+  const IOSSpringCurve({this.stiffness = 100, this.damping = 18});
 
   final double stiffness;
   final double damping;

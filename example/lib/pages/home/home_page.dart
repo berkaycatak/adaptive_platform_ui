@@ -356,8 +356,7 @@ class _HomePageState extends State<HomePage> {
                     ? CupertinoIcons.textformat
                     : Icons.title,
                 title: 'App Bar Title',
-                description:
-                    'Subtitle and custom titleWidget in the app bar',
+                description: 'Subtitle and custom titleWidget in the app bar',
                 routeName: RouterService.routes.appBarTitle,
                 isNew: true,
               ),
