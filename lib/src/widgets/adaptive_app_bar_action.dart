@@ -1,5 +1,5 @@
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
+import 'package:cupertino_ui/cupertino_ui.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Spacer type for toolbar items (iOS 26+ only)
 enum ToolbarSpacerType {
@@ -29,7 +29,10 @@ class AdaptiveAppBarAction {
     this.prominent = false,
     this.tintColor,
   }) : assert(
-         iosSymbol != null || icon != null || iconWidget != null || title != null,
+         iosSymbol != null ||
+             icon != null ||
+             iconWidget != null ||
+             title != null,
          'At least one of iosSymbol, icon, iconWidget, or title must be provided',
        );
 
@@ -96,13 +99,14 @@ class AdaptiveAppBarAction {
   }
 
   @override
-  int get hashCode => Object.hash(iosSymbol, icon, iconWidget, title, prominent, tintColor);
+  int get hashCode =>
+      Object.hash(iosSymbol, icon, iconWidget, title, prominent, tintColor);
 
   /// Convert action to map for native platform channel (iOS 26+ only)
   Map<String, dynamic> toNativeMap() {
     return {
-      if (iosSymbol != null) 'icon': iosSymbol!,
-      if (title != null) 'title': title!,
+      'icon': ?iosSymbol,
+      'title': ?title,
       'spacerAfter': spacerAfter.index, // 0=none, 1=fixed, 2=flexible
       if (prominent) 'prominent': true,
       if (tintColor != null) 'tint': tintColor!.toARGB32(),

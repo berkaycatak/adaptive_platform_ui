@@ -1,4 +1,4 @@
-import 'package:flutter/cupertino.dart';
+import 'package:cupertino_ui/cupertino_ui.dart';
 import '../../style/sf_symbol.dart';
 import '../adaptive_app_bar_action.dart';
 import '../adaptive_bottom_navigation_bar.dart';
@@ -164,7 +164,7 @@ class _IOS26ScaffoldState extends State<IOS26Scaffold>
         heroLeading = widget.useHeroBackButton
             ? Hero(
                 tag: 'adaptive_back_button',
-                flightShuttleBuilder: (_, __, ___, ____, toHeroContext) =>
+                flightShuttleBuilder: (_, _, _, _, toHeroContext) =>
                     toHeroContext.widget,
                 child: backButton,
               )
@@ -228,10 +228,12 @@ class _IOS26ScaffoldState extends State<IOS26Scaffold>
       final mq = MediaQuery.of(context);
       bodyContent = MediaQuery(
         data: mq.copyWith(
-          padding:
-              mq.padding.copyWith(top: mq.padding.top + kToolbarContentHeight),
-          viewPadding: mq.viewPadding
-              .copyWith(top: mq.viewPadding.top + kToolbarContentHeight),
+          padding: mq.padding.copyWith(
+            top: mq.padding.top + kToolbarContentHeight,
+          ),
+          viewPadding: mq.viewPadding.copyWith(
+            top: mq.viewPadding.top + kToolbarContentHeight,
+          ),
         ),
         child: bodyContent,
       );

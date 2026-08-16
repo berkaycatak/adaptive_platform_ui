@@ -1,5 +1,5 @@
 import 'package:adaptive_platform_ui_example/service/router/router_service.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 
 class NavigationPage2 extends StatelessWidget {

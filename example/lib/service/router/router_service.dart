@@ -35,7 +35,7 @@ import 'package:adaptive_platform_ui_example/pages/demos/navigation_page2.dart';
 import 'package:adaptive_platform_ui_example/pages/demos/navigation_page3.dart';
 import 'package:adaptive_platform_ui_example/utils/constants/route_constants.dart';
 import 'package:adaptive_platform_ui_example/utils/global_variables.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:go_router/go_router.dart';
 
 class RouterService {

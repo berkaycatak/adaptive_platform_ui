@@ -1,5 +1,5 @@
 import 'dart:ui';
-import 'package:flutter/cupertino.dart';
+import 'package:cupertino_ui/cupertino_ui.dart';
 import '../adaptive_scaffold.dart';
 
 /// iOS 26 styled tab bar with Liquid Glass effect

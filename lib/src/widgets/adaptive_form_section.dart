@@ -1,5 +1,5 @@
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
+import 'package:cupertino_ui/cupertino_ui.dart';
+import 'package:material_ui/material_ui.dart';
 import '../../adaptive_platform_ui.dart';
 
 /// An adaptive form section widget that displays a group of form rows with
@@ -223,11 +223,7 @@ class AdaptiveFormSection extends StatelessWidget {
       section = Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
-        children: [
-          if (headerWidget != null) headerWidget,
-          section,
-          if (footerWidget != null) footerWidget,
-        ],
+        children: [?headerWidget, section, ?footerWidget],
       );
     }
 

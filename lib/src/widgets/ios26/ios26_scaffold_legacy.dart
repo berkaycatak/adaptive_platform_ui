@@ -1,4 +1,4 @@
-import 'package:flutter/cupertino.dart';
+import 'package:cupertino_ui/cupertino_ui.dart';
 import '../adaptive_app_bar_action.dart';
 import '../adaptive_scaffold.dart';
 import 'ios26_native_tab_bar.dart';
