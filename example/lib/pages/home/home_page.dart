@@ -1,8 +1,8 @@
 import 'package:adaptive_platform_ui_example/service/router/router_service.dart';
 import 'package:adaptive_platform_ui_example/utils/global_variables.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 
 class HomePage extends StatefulWidget {
@@ -356,8 +356,7 @@ class _HomePageState extends State<HomePage> {
                     ? CupertinoIcons.textformat
                     : Icons.title,
                 title: 'App Bar Title',
-                description:
-                    'Subtitle and custom titleWidget in the app bar',
+                description: 'Subtitle and custom titleWidget in the app bar',
                 routeName: RouterService.routes.appBarTitle,
                 isNew: true,
               ),

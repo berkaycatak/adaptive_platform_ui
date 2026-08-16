@@ -1,5 +1,5 @@
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
+import 'package:cupertino_ui/cupertino_ui.dart';
+import 'package:material_ui/material_ui.dart';
 import '../platform/platform_info.dart';
 import 'minute_interval.dart';
 
@@ -52,7 +52,13 @@ class AdaptiveTimePicker {
     // grid first, as the picker asserts the initial value is a valid interval.
     final now = DateTime.now();
     DateTime selectedDateTime = alignDateTimeToInterval(
-      DateTime(now.year, now.month, now.day, initialTime.hour, initialTime.minute),
+      DateTime(
+        now.year,
+        now.month,
+        now.day,
+        initialTime.hour,
+        initialTime.minute,
+      ),
       minuteInterval,
     );
 
@@ -85,9 +91,9 @@ class AdaptiveTimePicker {
   }) async {
     final builder = use24HourFormat
         ? (BuildContext ctx, Widget? child) => MediaQuery(
-              data: MediaQuery.of(ctx).copyWith(alwaysUse24HourFormat: true),
-              child: child!,
-            )
+            data: MediaQuery.of(ctx).copyWith(alwaysUse24HourFormat: true),
+            child: child!,
+          )
         : null;
 
     // Material has no native minute stepping; snap the picked value onto the

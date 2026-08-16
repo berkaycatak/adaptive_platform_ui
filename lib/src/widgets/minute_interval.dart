@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Helpers to snap picked times onto a fixed minute grid (e.g. 15-minute
 /// steps), keeping the iOS Cupertino and Android Material pickers consistent.
@@ -12,7 +12,12 @@ import 'package:flutter/material.dart';
 /// no-op, preserving the default per-minute behaviour.
 DateTime alignDateTimeToInterval(DateTime dateTime, int interval) {
   if (interval <= 1) return dateTime;
-  final base = DateTime(dateTime.year, dateTime.month, dateTime.day, dateTime.hour);
+  final base = DateTime(
+    dateTime.year,
+    dateTime.month,
+    dateTime.day,
+    dateTime.hour,
+  );
   final roundedMinutes = (dateTime.minute / interval).round() * interval;
   return base.add(Duration(minutes: roundedMinutes));
 }

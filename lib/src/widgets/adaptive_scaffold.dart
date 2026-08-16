@@ -1,6 +1,6 @@
 import 'package:adaptive_platform_ui/src/widgets/ios26/ios26_native_tab_bar.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
+import 'package:cupertino_ui/cupertino_ui.dart';
+import 'package:material_ui/material_ui.dart';
 import '../platform/platform_info.dart';
 import '../style/sf_symbol.dart';
 import 'adaptive_app_bar.dart';
@@ -658,9 +658,11 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
               );
             }
             return IconButton(
-              icon: action.iconWidget ?? (action.icon != null
-                  ? Icon(action.icon!)
-                  : const Icon(Icons.circle)),
+              icon:
+                  action.iconWidget ??
+                  (action.icon != null
+                      ? Icon(action.icon!)
+                      : const Icon(Icons.circle)),
               onPressed: action.onPressed,
             );
           }).toList(),
@@ -758,9 +760,11 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
             );
           }
           return IconButton(
-            icon: action.iconWidget ?? (action.icon != null
-                ? Icon(action.icon!)
-                : const Icon(Icons.circle)),
+            icon:
+                action.iconWidget ??
+                (action.icon != null
+                    ? Icon(action.icon!)
+                    : const Icon(Icons.circle)),
             onPressed: action.onPressed,
           );
         }).toList(),
@@ -856,7 +860,7 @@ class _NavigationImageIcon extends StatelessWidget {
         child: Image(
           image: image,
           fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) =>
+          errorBuilder: (_, _, _) =>
               const Icon(CupertinoIcons.person_crop_circle),
         ),
       ),

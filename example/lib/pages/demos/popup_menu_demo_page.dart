@@ -1,6 +1,6 @@
 import 'package:adaptive_platform_ui_example/utils/extensions/extensions.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
+import 'package:cupertino_ui/cupertino_ui.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 
@@ -560,10 +560,7 @@ class _PopupMenuDemoPageState extends State<PopupMenuDemoPage> {
                 value: 'work',
               ),
               AdaptivePopupMenuDivider(),
-              AdaptivePopupMenuItem(
-                label: 'Add account',
-                value: 'add',
-              ),
+              AdaptivePopupMenuItem(label: 'Add account', value: 'add'),
             ],
             onSelected: (index, item) {
               setState(() {
@@ -592,10 +589,7 @@ class _PopupMenuDemoPageState extends State<PopupMenuDemoPage> {
                 value: 'alex',
               ),
               const AdaptivePopupMenuDivider(),
-              const AdaptivePopupMenuItem(
-                label: 'Unassigned',
-                value: 'none',
-              ),
+              const AdaptivePopupMenuItem(label: 'Unassigned', value: 'none'),
             ],
             onSelected: (index, item) {
               setState(() {

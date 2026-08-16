@@ -1,5 +1,5 @@
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
+import 'package:cupertino_ui/cupertino_ui.dart';
+import 'package:material_ui/material_ui.dart';
 import '../platform/platform_info.dart';
 import 'adaptive_time_picker.dart';
 import 'minute_interval.dart';
@@ -100,8 +100,9 @@ class AdaptiveDatePicker {
         initialDate: initialDate,
         firstDate: firstDate,
         lastDate: lastDate,
-        initialDatePickerMode:
-            isMonthYear ? DatePickerMode.year : initialDatePickerMode,
+        initialDatePickerMode: isMonthYear
+            ? DatePickerMode.year
+            : initialDatePickerMode,
       );
       if (picked == null) return null;
       date = isMonthYear ? DateTime(picked.year, picked.month, 1) : picked;

@@ -1,8 +1,8 @@
 import 'dart:io';
-import 'package:flutter/cupertino.dart';
+import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 
 /// Native iOS 26 segmented control implementation using platform views
@@ -113,7 +113,7 @@ class _IOS26SegmentedControlState extends State<IOS26SegmentedControl> {
       try {
         await _channel.invokeMethod('setBrightness', {
           'isDark': isDark,
-          if (tintColor != null) 'tintColor': tintColor,
+          'tintColor': ?tintColor,
           ...themeParams,
         });
         _lastIsDark = isDark;
@@ -176,9 +176,7 @@ class _IOS26SegmentedControlState extends State<IOS26SegmentedControl> {
 
     final effectiveSelectedTextColor =
         widget.selectedTextColor ??
-        (widget.color != null
-            ? CupertinoColors.white
-            : effectiveTextColor);
+        (widget.color != null ? CupertinoColors.white : effectiveTextColor);
 
     return <String, dynamic>{
       'textColor': _colorToARGB(effectiveTextColor),
