@@ -39,7 +39,10 @@ cd example && flutter pub get && flutter run
 flutter pub publish --dry-run
 ```
 
-CI uses Flutter 3.35.6 stable. CI pipeline: analyze -> test -> build example APK.
+CI uses Flutter 3.47.0 stable. CI pipeline: analyze -> test -> build example APK.
+
+Requires Flutter >=3.44.0: Material and Cupertino now come from the standalone
+`material_ui` / `cupertino_ui` packages, not from `package:flutter/`.
 
 ## Architecture
 

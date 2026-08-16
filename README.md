@@ -1257,8 +1257,14 @@ This package follows Apple's Human Interface Guidelines for iOS and Material Des
 
 ## Requirements
 
-- Flutter SDK: >=1.17.0
-- Dart SDK: ^3.9.2
+- Flutter SDK: >=3.44.0
+- Dart SDK: ^3.12.2
+
+Flutter 3.44 moved the Material and Cupertino design libraries out of the
+`flutter` SDK package into the standalone `material_ui` and `cupertino_ui`
+packages, which this plugin now depends on. If you reference Material or
+Cupertino types directly in your own code, import them from those packages
+instead of `package:flutter/material.dart` and `package:flutter/cupertino.dart`.
 
 ## Contributing
 

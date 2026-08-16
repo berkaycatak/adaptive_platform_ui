@@ -7,15 +7,17 @@ screenshots:
     path: img/liquid-glass-demo.png
 
 environment:
-  sdk: ^3.9.2
-  flutter: ">=1.17.0"
+  sdk: ^3.12.2
+  flutter: ">=3.44.0"
 
 dependencies:
   flutter:
     sdk: flutter
 
-  cupertino_ui: any
-  material_ui: any
+  # Material and Cupertino were split out of the Flutter SDK in 3.44.
+  cupertino_ui: ^1.0.0
+  material_ui: ^1.0.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
