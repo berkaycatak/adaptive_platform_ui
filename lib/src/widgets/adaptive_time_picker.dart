@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import '../platform/platform_info.dart';
+import 'minute_interval.dart';
 
 /// An adaptive time picker that renders platform-specific styles
 ///
@@ -11,37 +12,48 @@ class AdaptiveTimePicker {
 
   /// Shows a platform-adaptive time picker
   ///
-  /// Returns the selected [TimeOfDay] or null if cancelled
+  /// Returns the selected [TimeOfDay] or null if cancelled.
+  ///
+  /// [minuteInterval] restricts results to a fixed minute grid (e.g. 15-minute
+  /// steps). On iOS the Cupertino wheel only offers interval minutes; on
+  /// Android the Material picker stays unrestricted and the confirmed value is
+  /// snapped to the nearest interval.
   static Future<TimeOfDay?> show({
     required BuildContext context,
     required TimeOfDay initialTime,
     bool use24HourFormat = false,
+    int minuteInterval = 1,
   }) async {
     if (PlatformInfo.isIOS) {
       return _showCupertinoTimePicker(
         context: context,
         initialTime: initialTime,
         use24HourFormat: use24HourFormat,
+        minuteInterval: minuteInterval,
       );
     }
 
     // Android - Use Material TimePicker
-    return _showMaterialTimePicker(context: context, initialTime: initialTime);
+    return _showMaterialTimePicker(
+      context: context,
+      initialTime: initialTime,
+      use24HourFormat: use24HourFormat,
+      minuteInterval: minuteInterval,
+    );
   }
 
   static Future<TimeOfDay?> _showCupertinoTimePicker({
     required BuildContext context,
     required TimeOfDay initialTime,
     required bool use24HourFormat,
+    required int minuteInterval,
   }) async {
-    // Convert TimeOfDay to DateTime for CupertinoDatePicker
+    // Convert TimeOfDay to DateTime for CupertinoDatePicker; align onto the
+    // grid first, as the picker asserts the initial value is a valid interval.
     final now = DateTime.now();
-    DateTime selectedDateTime = DateTime(
-      now.year,
-      now.month,
-      now.day,
-      initialTime.hour,
-      initialTime.minute,
+    DateTime selectedDateTime = alignDateTimeToInterval(
+      DateTime(now.year, now.month, now.day, initialTime.hour, initialTime.minute),
+      minuteInterval,
     );
 
     final result = await showCupertinoModalPopup<DateTime>(
@@ -50,6 +62,7 @@ class AdaptiveTimePicker {
         return _CupertinoTimePickerContent(
           initialDateTime: selectedDateTime,
           use24HourFormat: use24HourFormat,
+          minuteInterval: minuteInterval,
           onTimeSelected: (dateTime) => selectedDateTime = dateTime,
         );
       },
@@ -67,8 +80,25 @@ class AdaptiveTimePicker {
   static Future<TimeOfDay?> _showMaterialTimePicker({
     required BuildContext context,
     required TimeOfDay initialTime,
+    required bool use24HourFormat,
+    required int minuteInterval,
   }) async {
-    return showTimePicker(context: context, initialTime: initialTime);
+    final builder = use24HourFormat
+        ? (BuildContext ctx, Widget? child) => MediaQuery(
+              data: MediaQuery.of(ctx).copyWith(alwaysUse24HourFormat: true),
+              child: child!,
+            )
+        : null;
+
+    // Material has no native minute stepping; snap the picked value onto the
+    // grid afterwards instead (no-op for minuteInterval <= 1).
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: alignTimeOfDayToInterval(initialTime, minuteInterval),
+      builder: builder,
+    );
+    if (picked == null) return null;
+    return alignTimeOfDayToInterval(picked, minuteInterval);
   }
 }
 
@@ -77,11 +107,13 @@ class _CupertinoTimePickerContent extends StatefulWidget {
   const _CupertinoTimePickerContent({
     required this.initialDateTime,
     required this.use24HourFormat,
+    required this.minuteInterval,
     required this.onTimeSelected,
   });
 
   final DateTime initialDateTime;
   final bool use24HourFormat;
+  final int minuteInterval;
   final ValueChanged<DateTime> onTimeSelected;
 
   @override
@@ -149,6 +181,7 @@ class _CupertinoTimePickerContentState
             child: CupertinoDatePicker(
               mode: CupertinoDatePickerMode.time,
               use24hFormat: widget.use24HourFormat,
+              minuteInterval: widget.minuteInterval,
               initialDateTime: widget.initialDateTime,
               onDateTimeChanged: (DateTime newDateTime) {
                 setState(() {

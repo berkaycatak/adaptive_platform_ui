@@ -12,6 +12,7 @@ class TimePickerDemoPage extends StatefulWidget {
 class _TimePickerDemoPageState extends State<TimePickerDemoPage> {
   TimeOfDay? _selectedTime12;
   TimeOfDay? _selectedTime24;
+  TimeOfDay? _selectedTimeInterval;
 
   @override
   Widget build(BuildContext context) {
@@ -68,6 +69,33 @@ class _TimePickerDemoPageState extends State<TimePickerDemoPage> {
                 );
                 if (result != null) {
                   setState(() => _selectedTime24 = result);
+                }
+              },
+            ),
+          ),
+          const SizedBox(height: 24),
+          _buildSection(
+            context,
+            isDark,
+            title: '15-Minute Interval',
+            description:
+                'Results snap to quarter-hour values (minuteInterval: 15) — '
+                'native interval wheel on iOS, nearest-value rounding on '
+                'Android',
+            child: _buildTimePickerButton(
+              context,
+              isDark,
+              label: 'Select Time (15 min steps)',
+              selectedTime: _selectedTimeInterval,
+              onPressed: () async {
+                final result = await AdaptiveTimePicker.show(
+                  context: context,
+                  initialTime: _selectedTimeInterval ?? TimeOfDay.now(),
+                  use24HourFormat: true,
+                  minuteInterval: 15,
+                );
+                if (result != null) {
+                  setState(() => _selectedTimeInterval = result);
                 }
               },
             ),

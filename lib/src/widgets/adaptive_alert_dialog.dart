@@ -419,7 +419,22 @@ class AdaptiveAlertDialog {
         return AlertDialog(
           title: Text(title),
           content: contentWidget,
+          // Material convention: dismissive action on the left, confirming
+          // action on the right — so the cancel button comes first.
           actions: [
+            if (actions.any((a) => a.style == AlertActionStyle.cancel))
+              TextButton(
+                onPressed: () {
+                  // Cancel button always returns null for input dialogs
+                  if (input != null) {
+                    Navigator.of(context).pop<String?>(null);
+                  } else {
+                    Navigator.of(context).pop();
+                  }
+                  cancelAction.onPressed();
+                },
+                child: Text(cancelAction.title),
+              ),
             ...normalActions.map((action) {
               Color? buttonColor;
               switch (action.style) {
@@ -464,19 +479,6 @@ class AdaptiveAlertDialog {
                 child: Text(action.title),
               );
             }),
-            if (actions.any((a) => a.style == AlertActionStyle.cancel))
-              TextButton(
-                onPressed: () {
-                  // Cancel button always returns null for input dialogs
-                  if (input != null) {
-                    Navigator.of(context).pop<String?>(null);
-                  } else {
-                    Navigator.of(context).pop();
-                  }
-                  cancelAction.onPressed();
-                },
-                child: Text(cancelAction.title),
-              ),
           ],
         );
       },

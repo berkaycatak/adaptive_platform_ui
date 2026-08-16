@@ -129,12 +129,20 @@ class iOS26ButtonView: NSObject, FlutterPlatformView {
         _view.addSubview(button)
 
         // Button should fill container width
+        // The top+bottom pins already tie the button's height to the
+        // container. Keep the explicit height as a *preference* (lower than
+        // required) so it acts as an intrinsic size when nothing else drives
+        // the height, but yields to the container when they differ — otherwise
+        // a container that is a couple of points taller/shorter produces an
+        // "unable to simultaneously satisfy constraints" log every layout pass.
+        let heightConstraint = button.heightAnchor.constraint(equalToConstant: getHeightForSize())
+        heightConstraint.priority = .defaultHigh
         NSLayoutConstraint.activate([
             button.leadingAnchor.constraint(equalTo: _view.leadingAnchor),
             button.trailingAnchor.constraint(equalTo: _view.trailingAnchor),
             button.topAnchor.constraint(equalTo: _view.topAnchor),
             button.bottomAnchor.constraint(equalTo: _view.bottomAnchor),
-            button.heightAnchor.constraint(equalToConstant: getHeightForSize())
+            heightConstraint
         ])
 
         // Low content hugging - button can expand if container wants
@@ -193,7 +201,7 @@ class iOS26ButtonView: NSObject, FlutterPlatformView {
             // Set title or icon based on configuration
             if let iconName = iconName {
                 // SF Symbol icon mode
-                if let image = UIImage(systemName: iconName) {
+                if let image = UIImage(systemName: iconName) ?? UIImage(named: iconName) {
                     var finalImage = image
 
                     // Apply icon size

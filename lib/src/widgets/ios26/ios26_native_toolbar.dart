@@ -16,6 +16,7 @@ class IOS26NativeToolbar extends StatefulWidget {
     this.actions,
     this.onLeadingTap,
     this.onActionTap,
+    this.titleWidget,
     this.tintColor,
     this.height = 44.0,
     this.showNativeView = true,
@@ -27,6 +28,10 @@ class IOS26NativeToolbar extends StatefulWidget {
   final List<AdaptiveAppBarAction>? actions;
   final VoidCallback? onLeadingTap;
   final ValueChanged<int>? onActionTap;
+
+  /// Custom widget overlaid at the title position.
+  /// When set, the native title is hidden and this widget is centered instead.
+  final Widget? titleWidget;
 
   /// Tint color for bar button items (action buttons and back button)
   ///
@@ -79,7 +84,8 @@ class _IOS26NativeToolbarState extends State<IOS26NativeToolbar> {
 
     if (widget.title != oldWidget.title) {
       final ch = _channel;
-      if (ch != null && widget.title != null) {
+      // Skip when a titleWidget overlay is shown — the native title stays hidden
+      if (ch != null && widget.title != null && widget.titleWidget == null) {
         ch.invokeMethod('updateTitle', {'title': widget.title!});
       }
     }
@@ -148,7 +154,9 @@ class _IOS26NativeToolbarState extends State<IOS26NativeToolbar> {
     final safePadding = MediaQuery.of(context).padding.top;
 
     final creationParams = <String, dynamic>{
-      if (widget.title != null) 'title': widget.title!,
+      // Hide native title when a titleWidget overlay is provided
+      if (widget.title != null && widget.titleWidget == null)
+        'title': widget.title!,
       if (widget.leading == null && widget.leadingText != null)
         'leading': widget.leadingText!,
       if (widget.actions != null && widget.actions!.isNotEmpty)
@@ -179,6 +187,14 @@ class _IOS26NativeToolbarState extends State<IOS26NativeToolbar> {
                 alignment: Alignment.centerLeft,
                 child: widget.leading!,
               ),
+            ),
+          if (widget.titleWidget != null)
+            Positioned(
+              left: 0,
+              right: 0,
+              top: safePadding,
+              bottom: 0,
+              child: Center(child: widget.titleWidget!),
             ),
         ],
       ),
@@ -211,7 +227,8 @@ class _IOS26NativeToolbarState extends State<IOS26NativeToolbar> {
 
   Widget _buildFallbackToolbar() {
     return CupertinoNavigationBar(
-      middle: widget.title != null ? Text(widget.title!) : null,
+      middle: widget.titleWidget ??
+          (widget.title != null ? Text(widget.title!) : null),
       leading: widget.leading,
       trailing: widget.actions != null && widget.actions!.isNotEmpty
           ? Row(

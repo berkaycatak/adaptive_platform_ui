@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../platform/platform_info.dart';
 
 /// Platform-specific configuration for MaterialApp
@@ -298,7 +299,15 @@ class AdaptiveApp extends StatelessWidget {
         data: MediaQuery.of(
           context,
         ).copyWith(platformBrightness: effectiveBrightness),
-        child: CupertinoTheme(data: theme, child: child!),
+        // Keep the status bar legible: light icons on dark backgrounds and
+        // vice versa. Without this, forcing a ThemeMode that differs from the
+        // system brightness leaves the status bar in the wrong style.
+        child: AnnotatedRegion<SystemUiOverlayStyle>(
+          value: isDark
+              ? SystemUiOverlayStyle.light
+              : SystemUiOverlayStyle.dark,
+          child: CupertinoTheme(data: theme, child: child!),
+        ),
       );
     }
 

@@ -79,7 +79,9 @@ class _DatePickerDemoPageState extends State<DatePickerDemoPage> {
             context,
             isDark,
             title: 'Date & Time Picker',
-            description: 'Select both date and time (iOS only)',
+            description:
+                'Select both date and time — Material shows a date picker '
+                'followed by a time picker (minuteInterval: 15)',
             child: _buildDatePickerButton(
               context,
               isDark,
@@ -91,6 +93,8 @@ class _DatePickerDemoPageState extends State<DatePickerDemoPage> {
                   context: context,
                   initialDate: _selectedDateTime ?? DateTime.now(),
                   mode: CupertinoDatePickerMode.dateAndTime,
+                  use24HourFormat: true,
+                  minuteInterval: 15,
                 );
                 if (result != null) {
                   setState(() => _selectedDateTime = result);

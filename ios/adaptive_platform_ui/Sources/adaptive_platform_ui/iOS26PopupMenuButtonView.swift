@@ -9,9 +9,12 @@ class iOS26PopupMenuButtonView: NSObject, FlutterPlatformView {
     private var currentButtonStyle: String = "plain"
     private var isRoundButton: Bool = false
     private var labels: [String] = []
+    private var subtitles: [String] = []
     private var symbols: [String] = []
+    private var imageDataList: [Data?] = []
     private var dividers: [Bool] = []
     private var enabled: [Bool] = []
+    private var isDestructive: [Bool] = []
 
     init(frame: CGRect, viewId: Int64, args: Any?, messenger: FlutterBinaryMessenger) {
         self.channel = FlutterMethodChannel(name: "adaptive_platform_ui/ios26_popup_menu_button_\(viewId)", binaryMessenger: messenger)
@@ -25,10 +28,14 @@ class iOS26PopupMenuButtonView: NSObject, FlutterPlatformView {
         var tint: UIColor? = nil
         var buttonStyle: String = "plain"
         var labels: [String] = []
+        var subtitles: [String] = []
         var symbols: [String] = []
+        var imageDataArray: [Any] = []
         var dividers: [NSNumber] = []
         var enabled: [NSNumber] = []
+        var isDestructive: [NSNumber] = []
         var isCustomWidget: Bool = false
+        var triggerOnLongPress: Bool = false
 
         if let dict = args as? [String: Any] {
             if let t = dict["buttonTitle"] as? String { title = t }
@@ -38,10 +45,14 @@ class iOS26PopupMenuButtonView: NSObject, FlutterPlatformView {
             if let tintArgb = dict["tint"] as? NSNumber { tint = UIColor(argb: tintArgb.intValue) }
             if let bs = dict["buttonStyle"] as? String { buttonStyle = bs }
             if let cw = dict["customWidget"] as? NSNumber { isCustomWidget = cw.boolValue }
+            if let lp = dict["triggerOnLongPress"] as? NSNumber { triggerOnLongPress = lp.boolValue }
             labels = (dict["labels"] as? [String]) ?? []
+            subtitles = (dict["subtitles"] as? [String]) ?? []
             symbols = (dict["sfSymbols"] as? [String]) ?? []
+            imageDataArray = (dict["imageData"] as? [Any]) ?? []
             dividers = (dict["isDivider"] as? [NSNumber]) ?? []
             enabled = (dict["enabled"] as? [NSNumber]) ?? []
+            isDestructive = (dict["isDestructive"] as? [NSNumber]) ?? []
         }
 
         super.init()
@@ -52,6 +63,9 @@ class iOS26PopupMenuButtonView: NSObject, FlutterPlatformView {
         button.translatesAutoresizingMaskIntoConstraints = false
         if let t = tint { button.tintColor = t }
         else if #available(iOS 13.0, *) { button.tintColor = .label }
+        if #available(iOS 16.0, *) {
+            button.preferredMenuElementOrder = .fixed
+        }
 
         // Add button and pin to container
         container.addSubview(button)
@@ -64,9 +78,12 @@ class iOS26PopupMenuButtonView: NSObject, FlutterPlatformView {
 
         // Store menu items
         self.labels = labels
+        self.subtitles = subtitles
         self.symbols = symbols
+        self.imageDataList = iOS26PopupMenuButtonView.parseImageData(imageDataArray)
         self.dividers = dividers.map { $0.boolValue }
         self.enabled = enabled.map { $0.boolValue }
+        self.isDestructive = isDestructive.map { $0.boolValue }
 
         self.isRoundButton = makeRound
         currentButtonStyle = buttonStyle
@@ -91,7 +108,7 @@ class iOS26PopupMenuButtonView: NSObject, FlutterPlatformView {
         rebuildMenu()
 
         if #available(iOS 14.0, *) {
-            button.showsMenuAsPrimaryAction = true
+            button.showsMenuAsPrimaryAction = !triggerOnLongPress
         } else {
             button.addTarget(self, action: #selector(onButtonPressedLegacy(_:)), for: .touchUpInside)
         }
@@ -122,9 +139,12 @@ class iOS26PopupMenuButtonView: NSObject, FlutterPlatformView {
             case "updateMenuItems":
                 if let args = call.arguments as? [String: Any] {
                     self.labels = (args["labels"] as? [String]) ?? []
+                    self.subtitles = (args["subtitles"] as? [String]) ?? []
                     self.symbols = (args["sfSymbols"] as? [String]) ?? []
+                    self.imageDataList = iOS26PopupMenuButtonView.parseImageData((args["imageData"] as? [Any]) ?? [])
                     self.dividers = ((args["isDivider"] as? [NSNumber]) ?? []).map { $0.boolValue }
                     self.enabled = ((args["enabled"] as? [NSNumber]) ?? []).map { $0.boolValue }
+                    self.isDestructive = ((args["isDestructive"] as? [NSNumber]) ?? []).map { $0.boolValue }
                     self.rebuildMenu()
                     result(nil)
                 } else { result(FlutterError(code: "bad_args", message: "Missing menu items", details: nil)) }
@@ -142,6 +162,25 @@ class iOS26PopupMenuButtonView: NSObject, FlutterPlatformView {
     }
 
     func view() -> UIView { container }
+
+    private static func circularImage(_ image: UIImage, size: CGFloat) -> UIImage {
+        let rect = CGRect(x: 0, y: 0, width: size, height: size)
+        UIGraphicsBeginImageContextWithOptions(rect.size, false, image.scale)
+        UIBezierPath(ovalIn: rect).addClip()
+        image.draw(in: rect)
+        let result = UIGraphicsGetImageFromCurrentImageContext() ?? image
+        UIGraphicsEndImageContext()
+        return result.withRenderingMode(.alwaysOriginal)
+    }
+
+    private static func parseImageData(_ array: [Any]) -> [Data?] {
+        return array.map { element in
+            if let typedData = element as? FlutterStandardTypedData {
+                return typedData.data
+            }
+            return nil
+        }
+    }
 
     private func rebuildMenu() {
         // iOS 14+ native menu
@@ -162,17 +201,32 @@ class iOS26PopupMenuButtonView: NSObject, FlutterPlatformView {
                 if isDiv { flushGroup(); continue }
 
                 let title = i < labels.count ? labels[i] : ""
+                let subtitle = i < subtitles.count ? subtitles[i] : ""
+
+                // Resolve image: prefer imageData bytes (clipped to circle), fall back to SF Symbol
                 var image: UIImage? = nil
-                if i < symbols.count, !symbols[i].isEmpty {
+                if i < imageDataList.count, let data = imageDataList[i], let raw = UIImage(data: data) {
+                    image = iOS26PopupMenuButtonView.circularImage(raw, size: 40)
+                } else if i < symbols.count, !symbols[i].isEmpty {
                     image = UIImage(systemName: symbols[i])
                 }
 
                 let isEnabled = i < enabled.count ? enabled[i] : true
+                let isDestructiveItem = i < isDestructive.count ? isDestructive[i] : false
                 let currentSelectableIndex = selectableIndex
                 selectableIndex += 1
 
-                let action = UIAction(title: title, image: image, attributes: isEnabled ? [] : [.disabled]) { [weak self] _ in
-                    self?.channel.invokeMethod("itemSelected", arguments: ["index": currentSelectableIndex])
+                var attrs: UIMenuElement.Attributes = isEnabled ? [] : [.disabled]
+                if isDestructiveItem { attrs.insert(.destructive) }
+                let action: UIAction
+                if #available(iOS 15.0, *), !subtitle.isEmpty {
+                    action = UIAction(title: title, subtitle: subtitle, image: image, attributes: attrs) { [weak self] _ in
+                        self?.channel.invokeMethod("itemSelected", arguments: ["index": currentSelectableIndex])
+                    }
+                } else {
+                    action = UIAction(title: title, image: image, attributes: attrs) { [weak self] _ in
+                        self?.channel.invokeMethod("itemSelected", arguments: ["index": currentSelectableIndex])
+                    }
                 }
                 current.append(action)
             }
@@ -200,10 +254,11 @@ class iOS26PopupMenuButtonView: NSObject, FlutterPlatformView {
             }
 
             let title = i < labels.count ? labels[i] : ""
+            let isDestructiveItem = i < isDestructive.count ? isDestructive[i] : false
             let currentSelectableIndex = selectableIndex
             selectableIndex += 1
 
-            let action = UIAlertAction(title: title, style: .default) { [weak self] _ in
+            let action = UIAlertAction(title: title, style: isDestructiveItem ? .destructive : .default) { [weak self] _ in
                 self?.channel.invokeMethod("itemSelected", arguments: ["index": currentSelectableIndex])
             }
 

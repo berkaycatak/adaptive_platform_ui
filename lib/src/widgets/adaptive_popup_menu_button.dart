@@ -71,8 +71,15 @@ class AdaptivePopupMenuButton<T> {
     onSelected,
     Color? tint,
     PopupButtonStyle buttonStyle = PopupButtonStyle.plain,
+    bool triggerOnLongPress = false,
+    VoidCallback? onTap,
     required Widget child,
   }) {
+    assert(
+      onTap == null || triggerOnLongPress,
+      'onTap is only used with triggerOnLongPress: true (tap fires onTap, '
+      'long-press opens the menu).',
+    );
     // iOS 26+ - Use gesture detector with native menu
     if (PlatformInfo.isIOS26OrHigher()) {
       return IOS26PopupMenuButton<T>.widget(
@@ -80,6 +87,8 @@ class AdaptivePopupMenuButton<T> {
         onSelected: onSelected,
         tint: tint,
         buttonStyle: buttonStyle,
+        triggerOnLongPress: triggerOnLongPress,
+        onTap: onTap,
         child: child,
       );
     }
@@ -97,7 +106,8 @@ class AdaptivePopupMenuButton<T> {
     // iOS <26 (iOS 18 and below) - Use GestureDetector with action sheet
     return Builder(
       builder: (context) => GestureDetector(
-        onTap: () => _showMenu<T>(context, null, items, onSelected),
+        onTap: triggerOnLongPress ? onTap : () => _showMenu<T>(context, null, items, onSelected),
+        onLongPress: triggerOnLongPress ? () => _showMenu<T>(context, null, items, onSelected) : null,
         child: child,
       ),
     );
@@ -155,6 +165,46 @@ class AdaptivePopupMenuButton<T> {
     );
   }
 
+  static Widget _buildActionSheetContent<T>(AdaptivePopupMenuItem<T> item) {
+    final hasImage = item.imageBytes != null;
+    final hasSubtitle = item.subtitle != null && item.subtitle!.isNotEmpty;
+
+    if (!hasImage && !hasSubtitle) return Text(item.label);
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        if (hasImage) ...[
+          ClipOval(
+            child: Image.memory(
+              item.imageBytes!,
+              width: 32,
+              height: 32,
+              fit: BoxFit.cover,
+            ),
+          ),
+          const SizedBox(width: 10),
+        ],
+        Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment:
+              hasImage ? CrossAxisAlignment.start : CrossAxisAlignment.center,
+          children: [
+            Text(item.label),
+            if (hasSubtitle)
+              Text(
+                item.subtitle!,
+                style: const TextStyle(
+                  fontSize: 13,
+                  color: CupertinoColors.secondaryLabel,
+                ),
+              ),
+          ],
+        ),
+      ],
+    );
+  }
+
   static Future<void> _showMenu<T>(
     BuildContext context,
     String? title,
@@ -171,7 +221,10 @@ class AdaptivePopupMenuButton<T> {
               if (items[i] is AdaptivePopupMenuItem<T>)
                 CupertinoActionSheetAction(
                   onPressed: () => Navigator.of(ctx).pop(i),
-                  child: Text((items[i] as AdaptivePopupMenuItem<T>).label),
+                  isDestructiveAction: (items[i] as AdaptivePopupMenuItem<T>).isDestructive,
+                  child: _buildActionSheetContent<T>(
+                    items[i] as AdaptivePopupMenuItem<T>,
+                  ),
                 )
               else
                 const SizedBox(height: 8),
@@ -258,22 +311,62 @@ class _MaterialPopupMenuButtonState<T>
         menuItems.add(const PopupMenuDivider());
       } else if (widget.items[i] is AdaptivePopupMenuItem<T>) {
         final item = widget.items[i] as AdaptivePopupMenuItem<T>;
+        final labelStyle = item.isDestructive
+            ? TextStyle(color: Theme.of(context).colorScheme.error)
+            : null;
+        final hasSubtitle = item.subtitle != null && item.subtitle!.isNotEmpty;
         menuItems.add(
           PopupMenuItem<int>(
             value: i,
             enabled: item.enabled,
             child: Row(
               children: [
-                if (item.icon != null) ...[
+                if (item.imageBytes != null) ...[
+                  ClipOval(
+                    child: Image.memory(
+                      item.imageBytes!,
+                      width: 32,
+                      height: 32,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                ] else if (item.icon != null) ...[
                   Icon(
                     item.icon is IconData
                         ? item.icon as IconData
                         : Icons.circle,
                     size: 20,
+                    color: item.isDestructive
+                        ? Theme.of(context).colorScheme.error
+                        : null,
                   ),
                   const SizedBox(width: 12),
                 ],
-                Expanded(child: Text(item.label)),
+                Expanded(
+                  child: hasSubtitle
+                      ? Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(item.label, style: labelStyle),
+                            Text(
+                              item.subtitle!,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.copyWith(
+                                    color: Theme.of(context)
+                                        .textTheme
+                                        .bodySmall
+                                        ?.color
+                                        ?.withValues(alpha: 0.7),
+                                  ),
+                            ),
+                          ],
+                        )
+                      : Text(item.label, style: labelStyle),
+                ),
               ],
             ),
           ),

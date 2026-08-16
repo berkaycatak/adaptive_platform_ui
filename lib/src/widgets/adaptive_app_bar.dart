@@ -18,16 +18,21 @@ class AdaptiveAppBar {
   /// Creates an adaptive app bar configuration
   const AdaptiveAppBar({
     this.title,
+    this.subtitle,
     this.actions,
     this.leading,
     this.useNativeToolbar = true,
     this.tintColor,
+    this.titleWidget,
     this.cupertinoNavigationBar,
     this.appBar,
   });
 
   /// Title for the app bar
   final String? title;
+
+  /// Optional subtitle displayed below the title
+  final String? subtitle;
 
   /// Action buttons in the app bar
   /// - iOS 26+ with native toolbar: Rendered as native UIBarButtonItem in UIToolbar
@@ -48,6 +53,14 @@ class AdaptiveAppBar {
   ///
   /// If true, [cupertinoNavigationBar] will be ignored and native toolbar will be shown.
   final bool useNativeToolbar;
+
+  /// Custom widget to display in the title area
+  ///
+  /// When set, this widget replaces the default title text rendering.
+  /// On iOS 26+ with native toolbar, it is overlaid centered over the toolbar.
+  /// On iOS < 26, it is used as the CupertinoNavigationBar middle.
+  /// On Android, it is used as the AppBar title.
+  final Widget? titleWidget;
 
   /// Tint color for toolbar action buttons (iOS 26+ native toolbar only)
   ///
@@ -75,19 +88,23 @@ class AdaptiveAppBar {
   /// Creates a copy of this app bar with the given fields replaced
   AdaptiveAppBar copyWith({
     String? title,
+    String? subtitle,
     List<AdaptiveAppBarAction>? actions,
     Widget? leading,
     bool? useNativeToolbar,
     Color? tintColor,
+    Widget? titleWidget,
     PreferredSizeWidget? cupertinoNavigationBar,
     PreferredSizeWidget? appBar,
   }) {
     return AdaptiveAppBar(
       title: title ?? this.title,
+      subtitle: subtitle ?? this.subtitle,
       actions: actions ?? this.actions,
       leading: leading ?? this.leading,
       useNativeToolbar: useNativeToolbar ?? this.useNativeToolbar,
       tintColor: tintColor ?? this.tintColor,
+      titleWidget: titleWidget ?? this.titleWidget,
       cupertinoNavigationBar:
           cupertinoNavigationBar ?? this.cupertinoNavigationBar,
       appBar: appBar ?? this.appBar,

@@ -125,7 +125,7 @@ class iOS26NativeTabBarManager: NSObject {
                 // Setup tab bar item
                 var image: UIImage?
                 if let symbol = config.sfSymbol {
-                    image = UIImage(systemName: symbol)
+                    image = UIImage(systemName: symbol) ?? UIImage(named: symbol)
                 }
                 tabVC.tabBarItem = UITabBarItem(
                     title: config.title,

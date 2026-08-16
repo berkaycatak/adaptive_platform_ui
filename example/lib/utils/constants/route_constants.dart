@@ -34,6 +34,7 @@ class RouteConstants {
   String blurView = 'blur-view';
   String drawer = 'drawer';
   String toolbarTint = 'toolbar-tint';
+  String appBarTitle = 'app-bar-title';
   String navigationPage1 = 'navigation-page1';
   String navigationPage2 = 'navigation-page2';
   String navigationPage3 = 'navigation-page3';

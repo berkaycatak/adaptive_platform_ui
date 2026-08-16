@@ -1,5 +1,33 @@
 # Changelog
 
+## [0.1.111]
+* **NEW**: Custom SF Symbols on iOS. `AdaptiveAppBarAction`, native buttons, and the tab bar now fall back to a bundle asset (`UIImage(named:)`) when a name is not a system SF Symbol, so custom symbols or images from the app's asset catalog work (@hieutbui)
+* **NEW**: `iconWidget` on `AdaptiveAppBarAction` for a custom fallback widget (e.g. an SVG) on iOS <26 and Android (@hieutbui)
+* **NEW**: Per-state SF Symbols on the iOS 26+ native tab bar. `AdaptiveNavigationDestination.selectedIcon` now accepts a distinct SF Symbol name for the selected state (outline when unselected, filled when selected) (@hieutbui, @philipgiuliani)
+* **NEW**: `minuteInterval` on `AdaptiveTimePicker` and `AdaptiveDatePicker` restricts selectable minutes to a fixed grid (e.g. 15-minute steps). iOS uses the native `minuteInterval`; Android snaps the picked value onto the grid (@luflow)
+* **NEW**: `AdaptiveDatePicker` now honors `dateAndTime` and `monthYear` modes on Android too, with `use24HourFormat` support (@luflow)
+
+## [0.1.110]
+* **NEW**: `subtitle` and `titleWidget` on `AdaptiveAppBar`. Show a smaller subtitle below the title, or replace the title area with any widget. Works on iOS 26+ native toolbar (centered overlay), iOS <26 `CupertinoNavigationBar`, and Material `AppBar` (@luflow)
+* **NEW**: `subtitle` and `imageBytes` on `AdaptivePopupMenuItem`. Subtitles render natively via `UIAction.subtitle` on iOS 15+, and image bytes (e.g. avatars) are shown clipped to a circle on iOS 26+ native menus, Material popup menus, and the iOS <26 action-sheet fallback (@luflow)
+* **IMPROVEMENT**: iOS 26+ native toolbar now insets the body's top padding by the toolbar height, so `SafeArea`/`SliverSafeArea` inside a page clear the Liquid Glass toolbar automatically, matching how `CupertinoPageScaffold` handles a translucent navigation bar. Removes the need for per-screen top-offset hacks (@luflow)
+* **FIX**: Material alert dialogs now place the cancel (dismissive) button on the left, matching the Material 3 dialog guidelines (@luflow)
+* **FIX**: iOS status bar style now follows the effective theme brightness on the Cupertino path, so it stays legible when a forced `ThemeMode` differs from the system brightness (@luflow)
+* **FIX**: Fixed iOS 16+ popup menu items being reordered by the system by setting `preferredMenuElementOrder = .fixed`, so items keep their declared order (@Sahil-Kundaliya)
+* **FIX**: Fixed an unbounded-width crash when an iOS 26 text popup button is placed directly in a `Row`, before its native intrinsic width has been measured
+* **FIX**: Silenced an iOS 26 native button Auto Layout constraint conflict that logged on every layout pass
+
+## [0.1.109]
+* **NEW**: `triggerOnLongPress` and `onTap` on popup menu buttons — tap fires `onTap`, long-press opens the menu (@yuriylybimov)
+* **NEW**: `isDestructive` on `AdaptivePopupMenuItem` — renders destructive (red) styling on Material, iOS <26, and iOS 26+ native menus (@yuriylybimov)
+* **FIX**: destructive menu items now use the theme `colorScheme.error` instead of a hardcoded red (@yuriylybimov)
+* **FIX**: `IOSSpringCurve` no longer clamps its output to [0,1], restoring the natural spring overshoot in the mid-range (endpoints remain exact) (@yuriylybimov)
+* **NEW**: Exported `IOSSpringCurve` from the package's public API (@yuriylybimov)
+
+## [0.1.108]
+* **IMPROVEMENT**: Migrated the iOS plugin from CocoaPods to Swift Package Manager — apps with SPM enabled (`flutter config --enable-swift-package-manager`) now consume the plugin as a Swift package, while CocoaPods-based projects keep working unchanged (@philipgiuliani)
+* **IMPROVEMENT**: Raised the iOS minimum deployment target from 12.0 to 13.0, matching Flutter's supported minimum (@philipgiuliani)
+
 ## [0.1.107]
 * **NEW**: Added `resizeToAvoidBottomInset` prop to `AdaptiveScaffold` for explicit control over keyboard-driven scaffold resizing across all platform paths (iOS 26+, iOS <26, Android) (@philasmar)
 * **FIX**: Fixed iOS 26+ native tab bar rendering with truncated/ellipsized labels on cold launch — replaced timing-based retry with a layout-aware container that rebuilds items when the platform view receives its real width (@philasmar)

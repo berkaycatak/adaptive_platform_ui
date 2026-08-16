@@ -12,6 +12,7 @@ import 'package:adaptive_platform_ui_example/pages/demos/context_menu_demo_page.
 import 'package:adaptive_platform_ui_example/pages/demos/demo_tabbar_page.dart';
 import 'package:adaptive_platform_ui_example/pages/demos/native_search_tab_demo_page.dart';
 import 'package:adaptive_platform_ui_example/pages/demos/popup_menu_demo_page.dart';
+import 'package:adaptive_platform_ui_example/pages/demos/appbar_title_demo_page.dart';
 import 'package:adaptive_platform_ui_example/pages/demos/radio_demo_page.dart';
 import 'package:adaptive_platform_ui_example/pages/demos/segmented_control_demo_page.dart';
 import 'package:adaptive_platform_ui_example/pages/demos/slider_demo_page.dart';
@@ -256,6 +257,12 @@ class RouterService {
                     path: routes.toolbarTint,
                     builder: (context, state) =>
                         const ToolbarTintDemoPage(),
+                  ),
+                  GoRoute(
+                    name: routes.appBarTitle,
+                    path: routes.appBarTitle,
+                    builder: (context, state) =>
+                        const AppBarTitleDemoPage(),
                   ),
                   GoRoute(
                     name: routes.navigationPage1,
