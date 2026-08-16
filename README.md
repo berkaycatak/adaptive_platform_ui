@@ -3,7 +3,7 @@
 [![CI](https://github.com/berkaycatak/adaptive_platform_ui/workflows/CI/badge.svg)](https://github.com/berkaycatak/adaptive_platform_ui/actions)
 [![Release](https://github.com/berkaycatak/adaptive_platform_ui/workflows/Release/badge.svg)](https://github.com/berkaycatak/adaptive_platform_ui/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-[![Flutter](https://img.shields.io/badge/Flutter-%3E%3D3.0.0-blue.svg)](https://flutter.dev)
+[![Flutter](https://img.shields.io/badge/Flutter-%3E%3D3.47.0-blue.svg)](https://flutter.dev)
 
 A Flutter package that provides adaptive platform-specific widgets with native iOS 26+ designs, traditional Cupertino widgets for older iOS versions, and Material Design for Android.
 
@@ -58,14 +58,13 @@ Native iOS 26 UIToolbar and UITabBar with Liquid Glass blur effects, minimize be
 ⚠️ **For proper localization support (automatic translations for date/time pickers, buttons, etc.), you must add localization delegates to your `AdaptiveApp`:**
 
 ```dart
-import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:cupertino_ui/cupertino_ui.dart';
+import 'package:material_ui/material_ui.dart';
 
 AdaptiveApp(
-  localizationsDelegates: [
-    GlobalMaterialLocalizations.delegate,
-    GlobalCupertinoLocalizations.delegate, // Important!
-    GlobalWidgetsLocalizations.delegate,
-  ],
+  // GlobalMaterialLocalizations.delegates bundles the material, cupertino,
+  // and widgets delegates — no other localization package import needed.
+  localizationsDelegates: GlobalMaterialLocalizations.delegates,
   supportedLocales: [
     Locale('en', ''), // English
     Locale('de', ''), // German
@@ -999,6 +998,20 @@ String description = PlatformInfo.platformDescription; // e.g., "iOS 26"
 ```
 
 ## Installation
+
+### Requirements
+
+This package is built on the standalone `material_ui` and `cupertino_ui` packages
+(Flutter 3.47 decoupled the Material and Cupertino design systems from the SDK).
+This requires:
+
+- Flutter `>=3.47.0`
+- Dart SDK `^3.12.0`
+
+Your app must import Material and Cupertino widgets from `package:material_ui/material_ui.dart`
+and `package:cupertino_ui/cupertino_ui.dart` rather than `package:flutter/material.dart` and
+`package:flutter/cupertino.dart`. Those are distinct Dart types despite the identical names, so
+mixing them produces type errors at the boundary.
 
 Add this to your package's `pubspec.yaml` file:
 
