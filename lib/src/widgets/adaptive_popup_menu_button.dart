@@ -169,11 +169,26 @@ class AdaptivePopupMenuButton<T> {
     final hasImage = item.imageBytes != null;
     final hasSubtitle = item.subtitle != null && item.subtitle!.isNotEmpty;
 
-    if (!hasImage && !hasSubtitle) return Text(item.label);
+    if (!hasImage && !hasSubtitle) {
+      if (!item.selected) return Text(item.label);
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(CupertinoIcons.checkmark, size: 18),
+          const SizedBox(width: 8),
+          Text(item.label),
+        ],
+      );
+    }
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
+        if (item.selected) ...[
+          const Icon(CupertinoIcons.checkmark, size: 18),
+          const SizedBox(width: 8),
+        ],
         if (hasImage) ...[
           ClipOval(
             child: Image.memory(
@@ -367,6 +382,14 @@ class _MaterialPopupMenuButtonState<T>
                         )
                       : Text(item.label, style: labelStyle),
                 ),
+                if (item.selected) ...[
+                  const SizedBox(width: 12),
+                  Icon(
+                    Icons.check,
+                    size: 20,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                ],
               ],
             ),
           ),
