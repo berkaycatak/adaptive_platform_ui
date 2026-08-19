@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import '../adaptive_scaffold.dart';
+import 'ios_native_color.dart';
 
 /// Native iOS 26 tab bar using UITabBar platform view
 class IOS26NativeTabBar extends StatefulWidget {
@@ -24,6 +25,11 @@ class IOS26NativeTabBar extends StatefulWidget {
   final List<AdaptiveNavigationDestination> destinations;
   final int selectedIndex;
   final ValueChanged<int> onTap;
+
+  /// Selected-item tint.
+  ///
+  /// A [CupertinoDynamicColor] stays dynamic in the native iOS view, allowing
+  /// Liquid Glass and accessibility traits to select the appropriate variant.
   final Color? tint;
   final Color? unselectedItemTint;
   final Color? backgroundColor;
@@ -46,9 +52,9 @@ class IOS26NativeTabBar extends StatefulWidget {
 class _IOS26NativeTabBarState extends State<IOS26NativeTabBar> {
   MethodChannel? _channel;
   int? _lastIndex;
-  int? _lastTint;
-  int? _lastUnselectedTint;
-  int? _lastBg;
+  Object? _lastTint;
+  Object? _lastUnselectedTint;
+  Object? _lastBg;
   bool? _lastIsDark;
   bool? _lastIsRtl;
   double? _intrinsicHeight;
@@ -89,23 +95,6 @@ class _IOS26NativeTabBarState extends State<IOS26NativeTabBar> {
   void dispose() {
     _channel?.setMethodCallHandler(null);
     super.dispose();
-  }
-
-  int _colorToARGB(Color color) {
-    // Resolve CupertinoDynamicColor if needed
-    Color resolvedColor = color;
-    if (color is CupertinoDynamicColor) {
-      // Resolve based on current brightness
-      final brightness = MediaQuery.platformBrightnessOf(context);
-      resolvedColor = brightness == Brightness.dark
-          ? color.darkColor
-          : color.color;
-    }
-
-    return ((resolvedColor.a * 255.0).round() & 0xff) << 24 |
-        ((resolvedColor.r * 255.0).round() & 0xff) << 16 |
-        ((resolvedColor.g * 255.0).round() & 0xff) << 8 |
-        ((resolvedColor.b * 255.0).round() & 0xff);
   }
 
   /// Extract SF Symbol name from an icon value.
@@ -207,11 +196,14 @@ class _IOS26NativeTabBarState extends State<IOS26NativeTabBar> {
         'isDark': _isDark,
         'isRtl': _isRtl,
         'minimizeBehavior': widget.minimizeBehavior.index,
-        if (_effectiveTint != null) 'tint': _colorToARGB(_effectiveTint!),
+        if (_effectiveTint != null)
+          'tint': encodeColorForNative(_effectiveTint!),
         if (widget.unselectedItemTint != null)
-          'unselectedItemTint': _colorToARGB(widget.unselectedItemTint!),
+          'unselectedItemTint': encodeColorForNative(
+            widget.unselectedItemTint!,
+          ),
         if (widget.backgroundColor != null)
-          'backgroundColor': _colorToARGB(widget.backgroundColor!),
+          'backgroundColor': encodeColorForNative(widget.backgroundColor!),
       };
 
       final platformView = widget.showNativeView
@@ -276,12 +268,14 @@ class _IOS26NativeTabBarState extends State<IOS26NativeTabBar> {
     _channel = ch;
     ch.setMethodCallHandler(_onMethodCall);
     _lastIndex = null;
-    _lastTint = _effectiveTint != null ? _colorToARGB(_effectiveTint!) : null;
+    _lastTint = _effectiveTint != null
+        ? encodeColorForNative(_effectiveTint!)
+        : null;
     _lastUnselectedTint = widget.unselectedItemTint != null
-        ? _colorToARGB(widget.unselectedItemTint!)
+        ? encodeColorForNative(widget.unselectedItemTint!)
         : null;
     _lastBg = widget.backgroundColor != null
-        ? _colorToARGB(widget.backgroundColor!)
+        ? encodeColorForNative(widget.backgroundColor!)
         : null;
     _lastIsDark = _isDark;
     _lastIsRtl = _isRtl;
@@ -311,12 +305,14 @@ class _IOS26NativeTabBarState extends State<IOS26NativeTabBar> {
     if (ch == null) return;
 
     final idx = widget.selectedIndex;
-    final tint = _effectiveTint != null ? _colorToARGB(_effectiveTint!) : null;
+    final tint = _effectiveTint != null
+        ? encodeColorForNative(_effectiveTint!)
+        : null;
     final unselectedTint = widget.unselectedItemTint != null
-        ? _colorToARGB(widget.unselectedItemTint!)
+        ? encodeColorForNative(widget.unselectedItemTint!)
         : null;
     final bg = widget.backgroundColor != null
-        ? _colorToARGB(widget.backgroundColor!)
+        ? encodeColorForNative(widget.backgroundColor!)
         : null;
 
     if (_lastIndex != idx) {
@@ -325,15 +321,16 @@ class _IOS26NativeTabBarState extends State<IOS26NativeTabBar> {
     }
 
     final style = <String, dynamic>{};
-    if (_lastTint != tint && tint != null) {
+    if (!nativeColorsEqual(_lastTint, tint) && tint != null) {
       style['tint'] = tint;
       _lastTint = tint;
     }
-    if (_lastUnselectedTint != unselectedTint && unselectedTint != null) {
+    if (!nativeColorsEqual(_lastUnselectedTint, unselectedTint) &&
+        unselectedTint != null) {
       style['unselectedItemTint'] = unselectedTint;
       _lastUnselectedTint = unselectedTint;
     }
-    if (_lastBg != bg && bg != null) {
+    if (!nativeColorsEqual(_lastBg, bg) && bg != null) {
       style['backgroundColor'] = bg;
       _lastBg = bg;
     }
@@ -500,19 +497,25 @@ class _IOS26NativeTabBarState extends State<IOS26NativeTabBar> {
 
       final style = <String, dynamic>{};
       if (_effectiveTint != null) {
-        style['tint'] = _colorToARGB(_effectiveTint!);
+        style['tint'] = encodeColorForNative(_effectiveTint!);
       }
       if (widget.unselectedItemTint != null) {
-        style['unselectedItemTint'] = _colorToARGB(widget.unselectedItemTint!);
+        style['unselectedItemTint'] = encodeColorForNative(
+          widget.unselectedItemTint!,
+        );
       }
       if (widget.backgroundColor != null) {
-        style['backgroundColor'] = _colorToARGB(widget.backgroundColor!);
+        style['backgroundColor'] = encodeColorForNative(
+          widget.backgroundColor!,
+        );
       }
       if (style.isNotEmpty) {
         await ch.invokeMethod('setStyle', style);
       }
 
-      await ch.invokeMethod('setSelectedIndex', {'index': widget.selectedIndex});
+      await ch.invokeMethod('setSelectedIndex', {
+        'index': widget.selectedIndex,
+      });
       _lastIndex = widget.selectedIndex;
       await _requestIntrinsicSize();
     } catch (_) {}

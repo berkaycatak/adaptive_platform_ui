@@ -76,6 +76,9 @@ class AdaptiveBottomNavigationBar {
   /// - iOS (native/CupertinoTabBar): Sets activeColor
   /// - Android (NavigationBar): Sets indicatorColor
   ///
+  /// On the native iOS 26+ bar, pass a [CupertinoDynamicColor] with light and
+  /// dark variants to preserve Liquid Glass's content-aware tint adaptation.
+  ///
   /// If null, uses platform defaults.
   final Color? selectedItemColor;
 

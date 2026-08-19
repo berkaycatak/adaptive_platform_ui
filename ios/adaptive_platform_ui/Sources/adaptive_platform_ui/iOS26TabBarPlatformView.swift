@@ -84,12 +84,12 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
             if let v = dict["selectedIndex"] as? NSNumber { selectedIndex = v.intValue }
             if let v = dict["isDark"] as? NSNumber { isDark = v.boolValue }
             if let v = dict["isRtl"] as? NSNumber { isRtl = v.boolValue }
-            if let n = dict["tint"] as? NSNumber { tint = Self.colorFromARGB(n.intValue) }
-            if let n = dict["unselectedItemTint"] as? NSNumber {
-                unselectedTint = Self.colorFromARGB(n.intValue)
-                NSLog("🎨 Parsed unselectedItemTint from dict: \(unselectedTint!)")
+            if let value = dict["tint"] { tint = Self.color(from: value) }
+            if let value = dict["unselectedItemTint"], let color = Self.color(from: value) {
+                unselectedTint = color
+                NSLog("🎨 Parsed unselectedItemTint from dict: \(color)")
             }
-            if let n = dict["backgroundColor"] as? NSNumber { bg = Self.colorFromARGB(n.intValue) }
+            if let value = dict["backgroundColor"] { bg = Self.color(from: value) }
             if let m = dict["minimizeBehavior"] as? NSNumber { minimize = m.intValue }
         }
 
@@ -533,13 +533,11 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
             var tintColor: UIColor? = nil
             var unselectedColor: UIColor? = nil
 
-            if let n = args["tint"] as? NSNumber {
-                let c = Self.colorFromARGB(n.intValue)
+            if let value = args["tint"], let c = Self.color(from: value) {
                 self.tabBar?.tintColor = c
                 tintColor = c
             }
-            if let n = args["unselectedItemTint"] as? NSNumber {
-                let c = Self.colorFromARGB(n.intValue)
+            if let value = args["unselectedItemTint"], let c = Self.color(from: value) {
                 if #available(iOS 10.0, *) {
                     self.tabBar?.unselectedItemTintColor = c
                     NSLog("✅ setStyle: unselectedItemTintColor set to \(c)")
@@ -552,8 +550,7 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
                 }
                 unselectedColor = c
             }
-            if let n = args["backgroundColor"] as? NSNumber {
-                let c = Self.colorFromARGB(n.intValue)
+            if let value = args["backgroundColor"], let c = Self.color(from: value) {
                 self.tabBar?.barTintColor = c
             }
 
@@ -760,6 +757,40 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
         let g = CGFloat((argb >> 8) & 0xFF) / 255.0
         let b = CGFloat(argb & 0xFF) / 255.0
         return UIColor(red: r, green: g, blue: b, alpha: a)
+    }
+
+    private static func color(from value: Any) -> UIColor? {
+        if let argb = value as? NSNumber {
+            return colorFromARGB(argb.intValue)
+        }
+
+        guard let variants = value as? [String: Any],
+              let light = variants["light"] as? NSNumber,
+              let dark = variants["dark"] as? NSNumber else {
+            return nil
+        }
+
+        return UIColor { traits in
+            let isDark = traits.userInterfaceStyle == .dark
+            let isHighContrast = traits.accessibilityContrast == .high
+            let isElevated = traits.userInterfaceLevel == .elevated
+
+            let key: String
+            switch (isDark, isHighContrast, isElevated) {
+            case (false, false, false): key = "light"
+            case (true, false, false): key = "dark"
+            case (false, true, false): key = "lightHighContrast"
+            case (true, true, false): key = "darkHighContrast"
+            case (false, false, true): key = "lightElevated"
+            case (true, false, true): key = "darkElevated"
+            case (false, true, true): key = "lightHighContrastElevated"
+            case (true, true, true): key = "darkHighContrastElevated"
+            }
+
+            let fallback = isDark ? dark : light
+            let variant = variants[key] as? NSNumber ?? fallback
+            return Self.colorFromARGB(variant.intValue)
+        }
     }
 
     private func runtimeFilePath(for index: Int, selected: Bool) -> String {

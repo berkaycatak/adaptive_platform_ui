@@ -25,6 +25,13 @@ class TestTabColors extends StatefulWidget {
 }
 
 class _TestTabColorsState extends State<TestTabColors> {
+  static const _selectedTint = CupertinoDynamicColor.withBrightnessAndContrast(
+    color: Color(0xFF075293),
+    darkColor: Color(0xFF0A95F0),
+    highContrastColor: Color(0xFF003F73),
+    darkHighContrastColor: Color(0xFF55B9FF),
+  );
+
   int _selectedIndex = 0;
 
   @override
@@ -40,7 +47,7 @@ class _TestTabColorsState extends State<TestTabColors> {
               style: const TextStyle(fontSize: 24),
             ),
             const SizedBox(height: 20),
-            const Text('Testing selectedItemColor: Red'),
+            const Text('Testing selectedItemColor: Dynamic blue'),
             const Text('Testing unselectedItemColor: Green'),
           ],
         ),
@@ -62,7 +69,7 @@ class _TestTabColorsState extends State<TestTabColors> {
             _selectedIndex = index;
           });
         },
-        selectedItemColor: CupertinoColors.systemRed,
+        selectedItemColor: _selectedTint,
         unselectedItemColor: CupertinoColors.systemGreen,
         useNativeBottomBar: true, // Test with native iOS 26 bar
       ),
