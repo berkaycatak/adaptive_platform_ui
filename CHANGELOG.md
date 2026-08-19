@@ -1,5 +1,8 @@
 # Changelog
 
+## [0.1.112]
+* **NEW**: `selected` on `AdaptivePopupMenuItem` marks the current choice in a single-select menu. iOS 14+ native menus set `UIAction.state = .on` for the system trailing checkmark; Material popup menus and the iOS <26 action-sheet fallback show a leading checkmark (@gem85247)
+
 ## [0.1.111]
 * **NEW**: Custom SF Symbols on iOS. `AdaptiveAppBarAction`, native buttons, and the tab bar now fall back to a bundle asset (`UIImage(named:)`) when a name is not a system SF Symbol, so custom symbols or images from the app's asset catalog work (@hieutbui)
 * **NEW**: `iconWidget` on `AdaptiveAppBarAction` for a custom fallback widget (e.g. an SVG) on iOS <26 and Android (@hieutbui)

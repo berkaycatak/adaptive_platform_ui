@@ -351,6 +351,22 @@ AdaptivePopupMenuButton.widget<String>(
     ),
   ),
 )
+
+// Single-select menu — mark the current value with `selected: true`.
+// iOS 14+ native menus show the system trailing checkmark; Material menus and
+// the iOS <26 action-sheet fallback show a leading checkmark.
+AdaptivePopupMenuButton.text<String>(
+  label: currentValue,
+  items: [
+    for (final option in options)
+      AdaptivePopupMenuItem(
+        label: option,
+        value: option,
+        selected: option == currentValue,
+      ),
+  ],
+  onSelected: (index, item) => setState(() => currentValue = item.value!),
+)
 ```
 
 ### AdaptiveSegmentedControl

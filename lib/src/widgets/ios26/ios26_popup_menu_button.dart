@@ -25,6 +25,7 @@ class AdaptivePopupMenuItem<T> extends AdaptivePopupMenuEntry {
     this.imageBytes,
     this.enabled = true,
     this.isDestructive = false,
+    this.selected = false,
     this.value,
   });
 
@@ -46,6 +47,13 @@ class AdaptivePopupMenuItem<T> extends AdaptivePopupMenuEntry {
 
   /// If true, renders the item in red (destructive action styling)
   final bool isDestructive;
+
+  /// If true, marks the item as the currently selected one.
+  ///
+  /// On iOS 14+ native menus this sets `UIAction.state = .on`, showing the
+  /// system's trailing checkmark. On Material popup menus and the iOS <26
+  /// action-sheet fallback a leading checkmark is shown instead.
+  final bool selected;
 
   /// Optional value of type T associated with this item
   final T? value;
@@ -245,6 +253,7 @@ class _IOS26PopupMenuButtonState<T> extends State<IOS26PopupMenuButton<T>> {
             oldItem.imageBytes != newItem.imageBytes ||
             oldItem.enabled != newItem.enabled ||
             oldItem.isDestructive != newItem.isDestructive ||
+            oldItem.selected != newItem.selected ||
             oldItem.value != newItem.value) {
           return true;
         }
@@ -265,6 +274,7 @@ class _IOS26PopupMenuButtonState<T> extends State<IOS26PopupMenuButton<T>> {
     final isDivider = <bool>[];
     final enabled = <bool>[];
     final isDestructive = <bool>[];
+    final isSelected = <bool>[];
 
     for (final e in widget.items) {
       if (e is AdaptivePopupMenuDivider) {
@@ -275,6 +285,7 @@ class _IOS26PopupMenuButtonState<T> extends State<IOS26PopupMenuButton<T>> {
         isDivider.add(true);
         enabled.add(false);
         isDestructive.add(false);
+        isSelected.add(false);
       } else if (e is AdaptivePopupMenuItem<T>) {
         labels.add(e.label);
         subtitles.add(e.subtitle ?? '');
@@ -283,6 +294,7 @@ class _IOS26PopupMenuButtonState<T> extends State<IOS26PopupMenuButton<T>> {
         isDivider.add(false);
         enabled.add(e.enabled);
         isDestructive.add(e.isDestructive);
+        isSelected.add(e.selected);
       }
     }
 
@@ -295,6 +307,7 @@ class _IOS26PopupMenuButtonState<T> extends State<IOS26PopupMenuButton<T>> {
         'isDivider': isDivider,
         'enabled': enabled,
         'isDestructive': isDestructive,
+        'isSelected': isSelected,
       });
     } catch (_) {}
   }
@@ -326,6 +339,7 @@ class _IOS26PopupMenuButtonState<T> extends State<IOS26PopupMenuButton<T>> {
       final isDivider = <bool>[];
       final enabled = <bool>[];
       final isDestructiveList = <bool>[];
+      final isSelectedList = <bool>[];
 
       for (final e in widget.items) {
         if (e is AdaptivePopupMenuDivider) {
@@ -336,6 +350,7 @@ class _IOS26PopupMenuButtonState<T> extends State<IOS26PopupMenuButton<T>> {
           isDivider.add(true);
           enabled.add(false);
           isDestructiveList.add(false);
+          isSelectedList.add(false);
         } else if (e is AdaptivePopupMenuItem<T>) {
           labels.add(e.label);
           subtitles.add(e.subtitle ?? '');
@@ -344,6 +359,7 @@ class _IOS26PopupMenuButtonState<T> extends State<IOS26PopupMenuButton<T>> {
           isDivider.add(false);
           enabled.add(e.enabled);
           isDestructiveList.add(e.isDestructive);
+          isSelectedList.add(e.selected);
         }
       }
 
@@ -361,6 +377,7 @@ class _IOS26PopupMenuButtonState<T> extends State<IOS26PopupMenuButton<T>> {
         'isDivider': isDivider,
         'enabled': enabled,
         'isDestructive': isDestructiveList,
+        'isSelected': isSelectedList,
         'isDark': _isDark,
         if (_effectiveTint != null) 'tint': _colorToARGB(_effectiveTint!),
       };
@@ -369,7 +386,7 @@ class _IOS26PopupMenuButtonState<T> extends State<IOS26PopupMenuButton<T>> {
       final itemsKey = widget.items
           .map((item) {
             if (item is AdaptivePopupMenuItem<T>) {
-              return '${item.label}_${item.subtitle}_${item.icon}_${item.enabled}_${item.value}_${item.imageBytes?.length}';
+              return '${item.label}_${item.subtitle}_${item.icon}_${item.enabled}_${item.selected}_${item.value}_${item.imageBytes?.length}';
             }
             return 'divider';
           })
@@ -553,11 +570,26 @@ class _IOS26PopupMenuButtonState<T> extends State<IOS26PopupMenuButton<T>> {
     final hasImage = item.imageBytes != null;
     final hasSubtitle = item.subtitle != null && item.subtitle!.isNotEmpty;
 
-    if (!hasImage && !hasSubtitle) return Text(item.label);
+    if (!hasImage && !hasSubtitle) {
+      if (!item.selected) return Text(item.label);
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(CupertinoIcons.checkmark, size: 18),
+          const SizedBox(width: 8),
+          Text(item.label),
+        ],
+      );
+    }
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
+        if (item.selected) ...[
+          const Icon(CupertinoIcons.checkmark, size: 18),
+          const SizedBox(width: 8),
+        ],
         if (hasImage) ...[
           ClipOval(
             child: Image.memory(

@@ -336,33 +336,49 @@ class _IOS26ButtonState extends State<IOS26Button> {
         creationParamsCodec: const StandardMessageCodec(),
       );
 
-      // Wrap in SizedBox for height constraint
+      // Wrap in SizedBox for height constraint. In child mode the Flutter-drawn
+      // child gives the button its intrinsic width; [padding] surrounds it so
+      // the native pill extends past the label like the native title mode does.
       Widget buttonWidget = SizedBox(
         height: _height,
         child: widget.isChildMode
             ? Stack(
                 children: [
                   Positioned.fill(child: platformView),
-                  Center(child: IgnorePointer(child: widget.child!)),
+                  Center(
+                    child: IgnorePointer(
+                      child: Padding(
+                        padding: widget.padding ?? const EdgeInsets.symmetric(horizontal: 16.0),
+                        child: widget.child!,
+                      ),
+                    ),
+                  ),
                 ],
               )
             : platformView,
       );
 
-      // Apply width constraint if minSize is provided
+      // Apply width constraint if minSize is provided.
       if (widget.minSize != null) {
-        buttonWidget = SizedBox(
-          width: widget.minSize!.width,
-          height: _height,
-          child: widget.isChildMode
-              ? Stack(
-                  children: [
-                    Positioned.fill(child: platformView),
-                    Center(child: IgnorePointer(child: widget.child!)),
-                  ],
-                )
-              : platformView,
-        );
+        buttonWidget = widget.isChildMode
+            // Child mode sizes itself to its content, so treat minSize as a
+            // minimum — matching ConstrainedBox semantics used by the other
+            // platform implementations. A fixed SizedBox here would collapse
+            // the button to width 0 for callers passing Size(0, h).
+            ? ConstrainedBox(
+                constraints: BoxConstraints(
+                  minWidth: widget.minSize!.width,
+                  minHeight: widget.minSize!.height,
+                ),
+                child: buttonWidget,
+              )
+            // Title mode draws the label natively, so Flutter has no intrinsic
+            // width for it — keep the explicit size.
+            : SizedBox(
+                width: widget.minSize!.width,
+                height: _height,
+                child: platformView,
+              );
       }
 
       return buttonWidget;
