@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+import 'ios26/ios26_popup_menu_button.dart';
+
 /// Spacer type for toolbar items (iOS 26+ only)
 enum ToolbarSpacerType {
   /// No spacer
@@ -25,6 +27,8 @@ class AdaptiveAppBarAction {
     this.iconWidget,
     this.title,
     required this.onPressed,
+    this.menuItems,
+    this.onMenuSelected,
     this.spacerAfter = ToolbarSpacerType.none,
     this.prominent = false,
     this.tintColor,
@@ -99,13 +103,47 @@ class AdaptiveAppBarAction {
   int get hashCode => Object.hash(iosSymbol, icon, iconWidget, title, prominent, tintColor);
 
   /// Convert action to map for native platform channel (iOS 26+ only)
+  /// Menu entries this action opens instead of firing [onPressed]
+  ///
+  /// - On iOS 26+: attached to the native UIBarButtonItem as a UIMenu, so the
+  ///   toolbar button opens a native menu rather than calling back into Dart
+  /// - On iOS < 26 and Android: rendered through [AdaptivePopupMenuButton]
+  ///
+  /// [AdaptivePopupMenuDivider.title] groups the entries into titled sections.
+  final List<AdaptivePopupMenuEntry>? menuItems;
+
+  /// Called with the entry the user picked from [menuItems]
+  final void Function(int index, AdaptivePopupMenuItem entry)? onMenuSelected;
+
+  /// Whether this action opens a menu rather than firing [onPressed]
+  bool get hasMenu => menuItems != null && menuItems!.isNotEmpty;
+
   Map<String, dynamic> toNativeMap() {
     return {
       if (iosSymbol != null) 'icon': iosSymbol!,
       if (title != null) 'title': title!,
+      if (hasMenu) 'menu': _menuToNativeList(),
       'spacerAfter': spacerAfter.index, // 0=none, 1=fixed, 2=flexible
       if (prominent) 'prominent': true,
       if (tintColor != null) 'tint': tintColor!.toARGB32(),
     };
+  }
+
+  List<Map<String, dynamic>> _menuToNativeList() {
+    return [
+      for (final entry in menuItems!)
+        if (entry is AdaptivePopupMenuDivider)
+          // The title rides along with the divider, naming the group after it.
+          {'label': entry.title ?? '', 'isDivider': true, 'enabled': false}
+        else if (entry is AdaptivePopupMenuItem)
+          {
+            'label': entry.label,
+            'subtitle': entry.subtitle ?? '',
+            'icon': entry.icon is String ? entry.icon as String : '',
+            'isDivider': false,
+            'enabled': entry.enabled,
+            'isDestructive': entry.isDestructive,
+          },
+    ];
   }
 }

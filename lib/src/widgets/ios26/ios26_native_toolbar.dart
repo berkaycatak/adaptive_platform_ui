@@ -2,6 +2,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+
+import 'ios26_popup_menu_button.dart';
 import '../../utils/animation.dart';
 import '../adaptive_app_bar_action.dart';
 
@@ -211,6 +213,28 @@ class _IOS26NativeToolbarState extends State<IOS26NativeToolbar> {
         widget.actions != null ? List.of(widget.actions!) : null;
   }
 
+  /// The native menu reports the position among the selectable entries, so
+  /// dividers have to be skipped to land on the entry Dart handed over.
+  void _notifyMenuSelection(int actionIndex, int itemIndex) {
+    final actions = widget.actions;
+    if (actions == null || actionIndex >= actions.length) return;
+
+    final action = actions[actionIndex];
+    final items = action.menuItems;
+    if (items == null) return;
+
+    var selectable = 0;
+    for (var i = 0; i < items.length; i++) {
+      final entry = items[i];
+      if (entry is! AdaptivePopupMenuItem) continue;
+      if (selectable == itemIndex) {
+        action.onMenuSelected?.call(i, entry);
+        return;
+      }
+      selectable++;
+    }
+  }
+
   Future<dynamic> _handleMethodCall(MethodCall call) async {
     switch (call.method) {
       case 'onLeadingTapped':
@@ -220,6 +244,16 @@ class _IOS26NativeToolbarState extends State<IOS26NativeToolbar> {
         if (call.arguments is Map) {
           final index = (call.arguments as Map)['index'] as int?;
           if (index != null) widget.onActionTap?.call(index);
+        }
+        break;
+      case 'onMenuItemSelected':
+        if (call.arguments is Map) {
+          final args = call.arguments as Map;
+          final index = args['index'] as int?;
+          final itemIndex = args['itemIndex'] as int?;
+          if (index != null && itemIndex != null) {
+            _notifyMenuSelection(index, itemIndex);
+          }
         }
         break;
     }

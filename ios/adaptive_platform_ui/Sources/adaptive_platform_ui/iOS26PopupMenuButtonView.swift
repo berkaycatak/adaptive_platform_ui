@@ -186,11 +186,20 @@ class iOS26PopupMenuButtonView: NSObject, FlutterPlatformView {
         // iOS 14+ native menu
         if #available(iOS 14.0, *) {
             var groups: [[UIMenuElement]] = []
+            var groupTitles: [String] = []
+            // A divider carries the title of the group that follows it, so the
+            // one waiting here belongs to whatever is collected next.
+            var pendingTitle = ""
             var current: [UIMenuElement] = []
             let count = max(labels.count, max(symbols.count, dividers.count))
 
             let flushGroup: () -> Void = {
-                if !current.isEmpty { groups.append(current); current = [] }
+                if !current.isEmpty {
+                    groups.append(current)
+                    groupTitles.append(pendingTitle)
+                    current = []
+                    pendingTitle = ""
+                }
             }
 
             // Count only selectable items for indexing
@@ -198,7 +207,11 @@ class iOS26PopupMenuButtonView: NSObject, FlutterPlatformView {
 
             for i in 0..<count {
                 let isDiv = i < dividers.count ? dividers[i] : false
-                if isDiv { flushGroup(); continue }
+                if isDiv {
+                    flushGroup()
+                    pendingTitle = i < labels.count ? labels[i] : ""
+                    continue
+                }
 
                 let title = i < labels.count ? labels[i] : ""
                 let subtitle = i < subtitles.count ? subtitles[i] : ""
@@ -232,8 +245,8 @@ class iOS26PopupMenuButtonView: NSObject, FlutterPlatformView {
             }
             flushGroup()
 
-            let children: [UIMenuElement] = groups.map { group in
-                UIMenu(title: "", options: .displayInline, children: group)
+            let children: [UIMenuElement] = groups.enumerated().map { index, group in
+                UIMenu(title: groupTitles[index], options: .displayInline, children: group)
             }
             button.menu = UIMenu(title: "", children: children)
         }

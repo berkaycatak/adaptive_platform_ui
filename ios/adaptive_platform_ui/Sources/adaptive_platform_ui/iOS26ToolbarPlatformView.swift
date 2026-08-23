@@ -231,6 +231,15 @@ class iOS26ToolbarPlatformView: NSObject, FlutterPlatformView {
                 if let btn = button {
                     btn.tag = index
 
+                    // An action carrying menu entries opens them natively
+                    // instead of calling back into Dart on every tap.
+                    if #available(iOS 14.0, *),
+                       let entries = action["menu"] as? [[String: Any]] {
+                        btn.menu = buildMenu(entries, actionIndex: index)
+                        btn.target = nil
+                        btn.action = nil
+                    }
+
                     // Apply prominent style (iOS 26+)
                     if action["prominent"] as? Bool == true {
                         if #available(iOS 26.0, *) {
@@ -287,6 +296,79 @@ class iOS26ToolbarPlatformView: NSObject, FlutterPlatformView {
 
     @objc private func actionTapped(_ sender: UIBarButtonItem) {
         channel.invokeMethod("onActionTapped", arguments: ["index": sender.tag])
+    }
+
+    /// Builds the menu of one toolbar action. Entries marked as dividers end
+    /// the current section and name the one that follows, which is how an
+    /// inline UIMenu carries a section title.
+    @available(iOS 14.0, *)
+    private func buildMenu(_ entries: [[String: Any]], actionIndex: Int) -> UIMenu {
+        var groups: [[UIMenuElement]] = []
+        var groupTitles: [String] = []
+        var current: [UIMenuElement] = []
+        var pendingTitle = ""
+        var selectableIndex = 0
+
+        let flushGroup: () -> Void = {
+            if !current.isEmpty {
+                groups.append(current)
+                groupTitles.append(pendingTitle)
+                current = []
+                pendingTitle = ""
+            }
+        }
+
+        for entry in entries {
+            if entry["isDivider"] as? Bool == true {
+                flushGroup()
+                pendingTitle = entry["label"] as? String ?? ""
+                continue
+            }
+
+            let label = entry["label"] as? String ?? ""
+            let subtitle = entry["subtitle"] as? String ?? ""
+            let symbol = entry["icon"] as? String ?? ""
+            let isEnabled = entry["enabled"] as? Bool ?? true
+            let isDestructive = entry["isDestructive"] as? Bool ?? false
+            var attributes: UIMenuElement.Attributes = isEnabled ? [] : [.disabled]
+            if isDestructive { attributes.insert(.destructive) }
+            let image = symbol.isEmpty ? nil : UIImage(systemName: symbol)
+            let itemIndex = selectableIndex
+            selectableIndex += 1
+
+            let handler: (UIAction) -> Void = { [weak self] _ in
+                self?.channel.invokeMethod(
+                    "onMenuItemSelected",
+                    arguments: ["index": actionIndex, "itemIndex": itemIndex]
+                )
+            }
+
+            let uiAction: UIAction
+            if #available(iOS 15.0, *), !subtitle.isEmpty {
+                uiAction = UIAction(
+                    title: label,
+                    subtitle: subtitle,
+                    image: image,
+                    attributes: attributes,
+                    handler: handler
+                )
+            } else {
+                uiAction = UIAction(
+                    title: label,
+                    image: image,
+                    attributes: attributes,
+                    handler: handler
+                )
+            }
+            current.append(uiAction)
+        }
+        flushGroup()
+
+        let children: [UIMenuElement] = groups.enumerated().map { index, group in
+            UIMenu(title: groupTitles[index], options: .displayInline, children: group)
+        }
+
+        return UIMenu(title: "", children: children)
     }
 
     private func handleMethodCall(_ call: FlutterMethodCall, result: @escaping FlutterResult) {

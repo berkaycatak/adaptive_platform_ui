@@ -13,6 +13,7 @@ class _ToolbarTintDemoPageState extends State<ToolbarTintDemoPage> {
   int _selectedColorIndex = 0;
   int _checkmarkTintIndex = 2; // Green by default
   int _heartTintIndex = 1; // Red by default
+  String? _lastMenuSelection;
 
   static const _tintOptions = <_TintOption>[
     _TintOption(name: 'Blue', color: Colors.blue),
@@ -63,6 +64,36 @@ class _ToolbarTintDemoPageState extends State<ToolbarTintDemoPage> {
             tintColor: _heartTint,
             onPressed: () {},
           ),
+          // Action that opens a menu instead of firing onPressed — a native
+          // UIMenu with titled inline sections on iOS 26+.
+          AdaptiveAppBarAction(
+            iosSymbol: 'ellipsis.circle',
+            icon: Icons.more_vert,
+            onPressed: () {},
+            menuItems: const [
+              AdaptivePopupMenuDivider(title: 'Edit'),
+              AdaptivePopupMenuItem(
+                label: 'Rename',
+                icon: 'pencil',
+                value: 'rename',
+              ),
+              AdaptivePopupMenuItem(
+                label: 'Duplicate',
+                icon: 'doc.on.doc',
+                value: 'duplicate',
+              ),
+              AdaptivePopupMenuDivider(title: 'Danger'),
+              AdaptivePopupMenuItem(
+                label: 'Delete',
+                icon: 'trash',
+                isDestructive: true,
+                value: 'delete',
+              ),
+            ],
+            onMenuSelected: (index, entry) {
+              setState(() => _lastMenuSelection = entry.label);
+            },
+          ),
         ],
       ),
       body: _buildBody(context),
@@ -80,6 +111,24 @@ class _ToolbarTintDemoPageState extends State<ToolbarTintDemoPage> {
       child: ListView(
         padding: const EdgeInsets.fromLTRB(16, 120, 16, 32),
         children: [
+          _buildSectionHeader(context, 'Action Menu', isDark),
+          const SizedBox(height: 8),
+          _buildDescription(
+            context,
+            'The last toolbar action opens a menu instead of firing '
+            'onPressed. On iOS 26+ it is a native UIMenu whose sections carry '
+            'the titles given to AdaptivePopupMenuDivider.',
+            isDark,
+          ),
+          const SizedBox(height: 8),
+          _buildDescription(
+            context,
+            _lastMenuSelection == null
+                ? 'Nothing picked yet.'
+                : 'Picked: $_lastMenuSelection',
+            isDark,
+          ),
+          const SizedBox(height: 24),
           _buildSectionHeader(context, 'Global Tint Color', isDark),
           const SizedBox(height: 8),
           _buildDescription(

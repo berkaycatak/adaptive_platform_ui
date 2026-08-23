@@ -411,7 +411,7 @@ class _PopupMenuDemoPageState extends State<PopupMenuDemoPage> {
                 icon: PlatformInfo.isIOS26OrHigher() ? 'folder' : Icons.folder,
                 value: 'open',
               ),
-              AdaptivePopupMenuDivider(),
+              AdaptivePopupMenuDivider(title: 'Saving'),
               AdaptivePopupMenuItem(
                 label: 'Save',
                 icon: PlatformInfo.isIOS26OrHigher()
@@ -426,7 +426,7 @@ class _PopupMenuDemoPageState extends State<PopupMenuDemoPage> {
                     : Icons.save_as_sharp,
                 value: 'save_as',
               ),
-              AdaptivePopupMenuDivider(),
+              AdaptivePopupMenuDivider(title: 'Window'),
               AdaptivePopupMenuItem(
                 label: 'Close',
                 icon: PlatformInfo.isIOS26OrHigher() ? 'xmark' : Icons.close,

@@ -4,9 +4,11 @@ import 'package:flutter/material.dart';
 import '../platform/platform_info.dart';
 import '../style/sf_symbol.dart';
 import 'adaptive_app_bar.dart';
+import 'adaptive_app_bar_action.dart';
 import 'adaptive_badge.dart';
 import 'adaptive_bottom_navigation_bar.dart';
 import 'adaptive_button.dart';
+import 'adaptive_popup_menu_button.dart';
 import 'ios26/ios26_scaffold.dart';
 
 /// Navigation destination for bottom navigation
@@ -373,6 +375,9 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
                       } else {
                         actionChild = const Icon(CupertinoIcons.circle);
                       }
+                      if (action.hasMenu) {
+                        return _menuButton(action, actionChild);
+                      }
                       return CupertinoButton(
                         padding: EdgeInsets.zero,
                         onPressed: action.onPressed,
@@ -573,6 +578,9 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
                     } else {
                       actionChild = const Icon(CupertinoIcons.circle);
                     }
+                    if (action.hasMenu) {
+                      return _menuButton(action, actionChild);
+                    }
                     return CupertinoButton(
                       padding: EdgeInsets.zero,
                       onPressed: action.onPressed,
@@ -651,6 +659,14 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
           ),
           centerTitle: widget.appBar!.titleWidget != null,
           actions: widget.appBar!.actions?.map((action) {
+            if (action.hasMenu) {
+              return _menuButton(
+                action,
+                action.title != null
+                    ? Text(action.title!)
+                    : (action.iconWidget ?? Icon(action.icon ?? Icons.circle)),
+              );
+            }
             if (action.title != null) {
               return TextButton(
                 onPressed: action.onPressed,
@@ -751,6 +767,14 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
         ),
         centerTitle: widget.appBar!.titleWidget != null,
         actions: widget.appBar!.actions?.map((action) {
+          if (action.hasMenu) {
+            return _menuButton(
+              action,
+              action.title != null
+                  ? Text(action.title!)
+                  : (action.iconWidget ?? Icon(action.icon ?? Icons.circle)),
+            );
+          }
           if (action.title != null) {
             return TextButton(
               onPressed: action.onPressed,
@@ -812,6 +836,17 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
       'checkmark.circle': CupertinoIcons.checkmark_circle,
     };
     return iconMap[sfSymbol] ?? CupertinoIcons.circle;
+  }
+
+  /// An app bar action carrying menu entries opens them instead of firing
+  /// onPressed. iOS 26 hands its own menu to the native toolbar button, so
+  /// this path only serves iOS < 26 and Android.
+  Widget _menuButton(AdaptiveAppBarAction action, Widget child) {
+    return AdaptivePopupMenuButton.widget<dynamic>(
+      items: action.menuItems!,
+      onSelected: (index, entry) => action.onMenuSelected?.call(index, entry),
+      child: child,
+    );
   }
 
   Widget _buildNavigationIconWidget({

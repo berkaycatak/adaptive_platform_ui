@@ -205,6 +205,32 @@ class AdaptivePopupMenuButton<T> {
     );
   }
 
+  /// The gap between two groups in the action sheet, carrying the group's
+  /// title when the divider has one — the sheet has no section of its own.
+  static Widget _buildSheetDivider(
+    BuildContext context,
+    AdaptivePopupMenuEntry entry,
+  ) {
+    final title = entry is AdaptivePopupMenuDivider ? entry.title : null;
+    if (title == null || title.isEmpty) return const SizedBox(height: 8);
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 6),
+      child: SizedBox(
+        width: double.infinity,
+        child: Text(
+          title,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            color: CupertinoColors.secondaryLabel.resolveFrom(context),
+          ),
+        ),
+      ),
+    );
+  }
+
   static Future<void> _showMenu<T>(
     BuildContext context,
     String? title,
@@ -227,7 +253,7 @@ class AdaptivePopupMenuButton<T> {
                   ),
                 )
               else
-                const SizedBox(height: 8),
+                _buildSheetDivider(ctx, items[i]),
           ],
           cancelButton: CupertinoActionSheetAction(
             onPressed: () => Navigator.of(ctx).pop(),
@@ -308,7 +334,21 @@ class _MaterialPopupMenuButtonState<T>
 
     for (var i = 0; i < widget.items.length; i++) {
       if (widget.items[i] is AdaptivePopupMenuDivider) {
-        menuItems.add(const PopupMenuDivider());
+        final divider = widget.items[i] as AdaptivePopupMenuDivider;
+        final title = divider.title;
+        if (i > 0) menuItems.add(const PopupMenuDivider());
+        if (title != null && title.isNotEmpty) {
+          menuItems.add(
+            PopupMenuItem<int>(
+              enabled: false,
+              height: 32,
+              child: Text(
+                title,
+                style: Theme.of(context).textTheme.labelMedium,
+              ),
+            ),
+          );
+        }
       } else if (widget.items[i] is AdaptivePopupMenuItem<T>) {
         final item = widget.items[i] as AdaptivePopupMenuItem<T>;
         final labelStyle = item.isDestructive
