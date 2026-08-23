@@ -149,20 +149,30 @@ class _IOSRadio<T> extends StatelessWidget {
         height: 22,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: _selected
-              ? activeColor
-              : (isDark
-                    ? CupertinoColors.systemGrey5.darkColor
-                    : CupertinoColors.systemBackground.color),
+          color: isDark
+              ? CupertinoColors.systemGrey5.darkColor
+              : CupertinoColors.systemBackground.color,
           border: Border.all(
             color: _selected
                 ? activeColor
                 : (isDark
                       ? CupertinoColors.systemGrey3.darkColor
                       : CupertinoColors.systemGrey4.color),
-            width: _selected ? 6 : 1.5,
+            width: _selected ? 2 : 1.5,
           ),
         ),
+        child: _selected
+            ? Center(
+                child: Container(
+                  width: 12,
+                  height: 12,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: activeColor,
+                  ),
+                ),
+              )
+            : null,
       ),
     );
   }
