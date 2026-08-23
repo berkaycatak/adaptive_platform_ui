@@ -62,7 +62,15 @@ class AdaptivePopupMenuItem<T> extends AdaptivePopupMenuEntry {
 /// A visual divider between popup menu items
 class AdaptivePopupMenuDivider extends AdaptivePopupMenuEntry {
   /// Creates a visual divider between items
-  const AdaptivePopupMenuDivider();
+  ///
+  /// [title] names the group that follows it. On iOS 26+ it becomes the title
+  /// of the inline UIMenu section, which is where the platform puts such a
+  /// label. A divider placed before the first item titles that first group
+  /// without drawing a separator.
+  const AdaptivePopupMenuDivider({this.title});
+
+  /// Optional title for the group that follows this divider
+  final String? title;
 }
 
 /// Button style for popup menu button
@@ -278,7 +286,7 @@ class _IOS26PopupMenuButtonState<T> extends State<IOS26PopupMenuButton<T>> {
 
     for (final e in widget.items) {
       if (e is AdaptivePopupMenuDivider) {
-        labels.add('');
+        labels.add(e.title ?? '');
         subtitles.add('');
         symbols.add('');
         imageData.add(null);
@@ -343,7 +351,7 @@ class _IOS26PopupMenuButtonState<T> extends State<IOS26PopupMenuButton<T>> {
 
       for (final e in widget.items) {
         if (e is AdaptivePopupMenuDivider) {
-          labels.add('');
+          labels.add(e.title ?? '');
           subtitles.add('');
           symbols.add('');
           imageData.add(null);

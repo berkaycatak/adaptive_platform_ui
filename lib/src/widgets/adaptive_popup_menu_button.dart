@@ -267,7 +267,7 @@ class AdaptivePopupMenuButton<T> {
 
     for (var i = 0; i < items.length; i++) {
       if (items[i] is AdaptivePopupMenuDivider) {
-        menuItems.add(const PopupMenuDivider());
+        menuItems.addAll(_materialDivider(context, items[i], i));
       } else if (items[i] is AdaptivePopupMenuItem<T>) {
         final item = items[i] as AdaptivePopupMenuItem<T>;
         final labelStyle = item.isDestructive
@@ -364,7 +364,7 @@ class AdaptivePopupMenuButton<T> {
                   ),
                 )
               else
-                const SizedBox(height: 8),
+                _buildSheetDivider(ctx, items[i]),
           ],
           cancelButton: CupertinoActionSheetAction(
             onPressed: () => Navigator.of(ctx).pop(),
@@ -385,6 +385,50 @@ class AdaptivePopupMenuButton<T> {
         onSelected(selected, selectedEntry);
       }
     }
+  }
+
+  /// The gap between two groups in the action sheet, carrying the group's
+  /// title when the divider has one; the sheet has no section of its own.
+  static Widget _buildSheetDivider(
+    BuildContext context,
+    AdaptivePopupMenuEntry entry,
+  ) {
+    final title = entry is AdaptivePopupMenuDivider ? entry.title : null;
+    if (title == null || title.isEmpty) return const SizedBox(height: 8);
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 6),
+      child: SizedBox(
+        width: double.infinity,
+        child: Text(
+          title,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            color: CupertinoColors.secondaryLabel.resolveFrom(context),
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// A Material divider, preceded by nothing for the first group and followed
+  /// by a disabled heading row when the divider carries a title.
+  static List<PopupMenuEntry<int>> _materialDivider(
+    BuildContext context,
+    AdaptivePopupMenuEntry entry,
+    int index,
+  ) {
+    final title = entry is AdaptivePopupMenuDivider ? entry.title : null;
+    return [
+      if (index > 0) const PopupMenuDivider(),
+      if (title != null && title.isNotEmpty)
+        PopupMenuItem<int>(
+          enabled: false,
+          height: 32,
+          child: Text(title, style: Theme.of(context).textTheme.labelMedium),
+        ),
+    ];
   }
 }
 
