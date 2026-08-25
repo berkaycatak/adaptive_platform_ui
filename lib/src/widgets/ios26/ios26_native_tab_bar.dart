@@ -62,6 +62,7 @@ class _IOS26NativeTabBarState extends State<IOS26NativeTabBar> {
   List<String>? _lastNetworkIcons;
   List<String>? _lastSelectedNetworkIcons;
   List<int?>? _lastBadgeCounts;
+  List<bool>? _lastSearchFlags;
   TabBarMinimizeBehavior? _lastMinimizeBehavior;
   bool? _lastHidden;
 
@@ -363,7 +364,8 @@ class _IOS26NativeTabBarState extends State<IOS26NativeTabBar> {
         _lastSelectedFileIcons?.join('|') != selectedFileIcons.join('|') ||
         _lastNetworkIcons?.join('|') != networkIcons.join('|') ||
         _lastSelectedNetworkIcons?.join('|') !=
-            selectedNetworkIcons.join('|')) {
+            selectedNetworkIcons.join('|') ||
+        _lastSearchFlags?.join('|') != searchFlags.join('|')) {
       await ch.invokeMethod('setItems', {
         'labels': labels,
         'sfSymbols': symbols,
@@ -387,6 +389,7 @@ class _IOS26NativeTabBarState extends State<IOS26NativeTabBar> {
       _lastSelectedFileIcons = selectedFileIcons;
       _lastNetworkIcons = networkIcons;
       _lastSelectedNetworkIcons = selectedNetworkIcons;
+      _lastSearchFlags = searchFlags;
       _requestIntrinsicSize();
     }
 
@@ -444,6 +447,7 @@ class _IOS26NativeTabBarState extends State<IOS26NativeTabBar> {
     _lastNetworkIcons = _mapNetworkIcons();
     _lastSelectedNetworkIcons = _mapSelectedNetworkIcons();
     _lastBadgeCounts = widget.destinations.map((e) => e.badgeCount).toList();
+    _lastSearchFlags = widget.destinations.map((e) => e.isSearch).toList();
   }
 
   Future<void> _syncHiddenIfNeeded() async {
