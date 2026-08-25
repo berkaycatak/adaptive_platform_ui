@@ -48,9 +48,24 @@ class AdaptiveNavigationDestination {
   /// On iOS <26 and Android: Uses AdaptiveBadge widget
   final int? badgeCount;
 
-  /// Add flexible space after this tab item (iOS 26+ only)
-  /// Useful for creating grouped tabs (e.g., left group and right group)
-  /// Only applies to iOS 26+ native tab bar
+  /// Ends the main tab group after this item (iOS 26+ only)
+  ///
+  /// Destinations after the flagged one are lifted out of the tab pill and
+  /// drawn beside it as a separate circular button - the same treatment iOS 26
+  /// gives its own search tab, so it reads as an action rather than a tab.
+  /// Tapping one still reports its index through `onTap`; if the app leaves
+  /// `selectedIndex` unchanged the highlight stays on the real tab, which is
+  /// what makes it usable as a toggle.
+  ///
+  /// Limitations, all imposed by UIKit - it exposes exactly one detached slot:
+  /// - Only the last `addSpacerAfter` in a bar counts; several spacers do not
+  ///   produce several groups.
+  /// - Only the first destination after the spacer detaches; any further ones
+  ///   stay inline.
+  /// - A destination with [isSearch] claims the detached slot first, so the two
+  ///   cannot be combined in the same tab bar.
+  ///
+  /// Ignored on iOS <26 and on Android.
   final bool addSpacerAfter;
 }
 
