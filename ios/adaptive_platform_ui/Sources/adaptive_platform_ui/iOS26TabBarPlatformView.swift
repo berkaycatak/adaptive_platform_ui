@@ -175,6 +175,20 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
 
         if let bg = bg { bar.barTintColor = bg }
 
+        // Assigned before the first build, not after: configureRuntimeImages
+        // reads these to resolve file and network icons, and saw them empty.
+        self.currentLabels = labels
+        self.currentSymbols = symbols
+        self.currentSelectedSymbols = selectedSymbols
+        self.currentAssetIcons = assetIcons
+        self.currentSelectedAssetIcons = selectedAssetIcons
+        self.currentFileIcons = fileIcons
+        self.currentSelectedFileIcons = selectedFileIcons
+        self.currentNetworkIcons = networkIcons
+        self.currentSelectedNetworkIcons = selectedNetworkIcons
+        self.currentSearchFlags = searchFlags
+        self.currentBadgeCounts = badgeCounts
+
         // Build tab bar items
         func buildItems(_ range: Range<Int>) -> [UITabBarItem] {
             var items: [UITabBarItem] = []
@@ -300,17 +314,6 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
         ])
 
         self.minimizeBehavior = minimize
-        self.currentLabels = labels
-        self.currentSymbols = symbols
-        self.currentSelectedSymbols = selectedSymbols
-        self.currentAssetIcons = assetIcons
-        self.currentSelectedAssetIcons = selectedAssetIcons
-        self.currentFileIcons = fileIcons
-        self.currentSelectedFileIcons = selectedFileIcons
-        self.currentNetworkIcons = networkIcons
-        self.currentSelectedNetworkIcons = selectedNetworkIcons
-        self.currentSearchFlags = searchFlags
-        self.currentBadgeCounts = badgeCounts
         // Apply minimize behavior if available
         self.applyMinimizeBehavior()
 
@@ -664,7 +667,7 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
                 var image: UIImage? = nil
                 var selectedImage: UIImage? = nil
 
-                item = UITabBarItem(title: title, image: nil, selectedImage: nil)
+                item = UITabBarItem(title: title ?? "Tab \(i+1)", image: nil, selectedImage: nil)
                 item.tag = i
 
                 if !configureRuntimeImages(for: item, index: i) {
@@ -735,6 +738,8 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
 
             if let count = badgeCount, count > 0 {
                 item.badgeValue = count > 99 ? "99+" : String(count)
+            } else {
+                item.badgeValue = nil
             }
 
             items.append(item)
