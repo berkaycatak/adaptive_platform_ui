@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+* **FIX**: Host the iOS 26+ tab bar in a `UITabBarController` so UIKit applies backdrop-dependent Liquid Glass tint shading. Flutter retains page rendering and selection callbacks; the native controller attaches and detaches with the platform view.
 * **FIX**: Preserve the system Liquid Glass tab bar background and shadow on iOS 26+ instead of replacing them with empty images.
 * **NEW**: `IOS26NativeTabBar.useNativeSystemTint` uses UIKit's semantic system blue and supports switching back to custom or theme tints at runtime.
 

@@ -3,7 +3,47 @@ import UIKit
 
 private final class LayoutAwareTabBarContainerView: UIView {
     var onWidthChanged: ((CGFloat) -> Void)?
+    var tabBarController: UITabBarController?
     private var lastReportedWidth: CGFloat = 0
+
+    override func didMoveToWindow() {
+        super.didMoveToWindow()
+        updateControllerParent()
+    }
+
+    override func didMoveToSuperview() {
+        super.didMoveToSuperview()
+        updateControllerParent()
+    }
+
+    private func updateControllerParent() {
+        guard let controller = tabBarController else { return }
+        guard window != nil else {
+            detachController()
+            return
+        }
+
+        var responder = next
+        while let candidate = responder, !(candidate is UIViewController) {
+            responder = candidate.next
+        }
+        guard let parent = responder as? UIViewController else { return }
+        guard controller.parent !== parent else { return }
+
+        detachController()
+        parent.addChild(controller)
+        controller.view.frame = bounds
+        controller.view.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        addSubview(controller.view)
+        controller.didMove(toParent: parent)
+    }
+
+    func detachController() {
+        guard let controller = tabBarController, controller.parent != nil else { return }
+        controller.willMove(toParent: nil)
+        controller.view.removeFromSuperview()
+        controller.removeFromParent()
+    }
 
     override func layoutSubviews() {
         super.layoutSubviews()
@@ -19,7 +59,7 @@ private final class LayoutAwareTabBarContainerView: UIView {
     }
 }
 
-class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
+class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate, UITabBarControllerDelegate {
     private let channel: FlutterMethodChannel
     private let container: LayoutAwareTabBarContainerView
     private var tabBar: UITabBar?
@@ -101,11 +141,26 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
         }
 
 
-        // Create single tab bar
-        let bar = UITabBar(frame: .zero)
+        // Controller ownership enables UIKit's backdrop-dependent Liquid Glass
+        // tint treatment. Its transparent children leave page rendering to Flutter.
+        let bar: UITabBar
+        if #available(iOS 26.0, *) {
+            let controller = UITabBarController()
+            container.tabBarController = controller
+            controller.delegate = self
+            controller.mode = .tabBar
+            controller.overrideUserInterfaceStyle = isDark ? .dark : .light
+            controller.view.backgroundColor = .clear
+            controller.view.isOpaque = false
+            controller.view.semanticContentAttribute = isRtl ? .forceRightToLeft : .forceLeftToRight
+            bar = controller.tabBar
+            // UITabBarController manages its tab bar's delegate and layout.
+        } else {
+            bar = UITabBar(frame: .zero)
+            bar.delegate = self
+            bar.translatesAutoresizingMaskIntoConstraints = false
+        }
         tabBar = bar
-        bar.delegate = self
-        bar.translatesAutoresizingMaskIntoConstraints = false
         bar.semanticContentAttribute = isRtl ? .forceRightToLeft : .forceLeftToRight
         container.semanticContentAttribute = isRtl ? .forceRightToLeft : .forceLeftToRight
 
@@ -277,24 +332,22 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
             max(labels.count, symbols.count),
             max(max(assetIcons.count, fileIcons.count), networkIcons.count)
         )
-        bar.items = buildItems(0..<count)
+        setTabItems(buildItems(0..<count), selectedIndex: selectedIndex)
 
         // Note: spacerFlags are received but not yet implemented for UITabBar
         // UITabBar doesn't natively support flexible spacing between items like UIToolbar does
         // This would require custom UITabBar subclass or different approach
         // TODO: Implement grouped tab bar layout if needed
 
-        if selectedIndex >= 0, let items = bar.items, selectedIndex < items.count {
-            bar.selectedItem = items[selectedIndex]
+        if container.tabBarController == nil {
+            container.addSubview(bar)
+            NSLayoutConstraint.activate([
+                bar.leadingAnchor.constraint(equalTo: container.leadingAnchor),
+                bar.trailingAnchor.constraint(equalTo: container.trailingAnchor),
+                bar.topAnchor.constraint(equalTo: container.topAnchor),
+                bar.bottomAnchor.constraint(equalTo: container.bottomAnchor),
+            ])
         }
-
-        container.addSubview(bar)
-        NSLayoutConstraint.activate([
-            bar.leadingAnchor.constraint(equalTo: container.leadingAnchor),
-            bar.trailingAnchor.constraint(equalTo: container.trailingAnchor),
-            bar.topAnchor.constraint(equalTo: container.topAnchor),
-            bar.bottomAnchor.constraint(equalTo: container.bottomAnchor),
-        ])
 
         self.minimizeBehavior = minimize
         self.currentLabels = labels
@@ -322,28 +375,56 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
         }
     }
 
+    deinit {
+        channel.setMethodCallHandler(nil)
+        container.detachController()
+    }
+
+    private func setTabItems(_ items: [UITabBarItem], selectedIndex: Int) {
+        if let controller = container.tabBarController {
+            let previousControllers = controller.viewControllers ?? []
+            let children = items.enumerated().map { index, item in
+                let child = index < previousControllers.count ? previousControllers[index] : UIViewController()
+                child.view.backgroundColor = .clear
+                child.view.isOpaque = false
+                child.tabBarItem = item
+                return child
+            }
+            controller.setViewControllers(children, animated: false)
+            controller.customizableViewControllers = []
+        } else {
+            tabBar?.items = items
+        }
+        setSelectedIndex(selectedIndex)
+    }
+
+    private func setSelectedIndex(_ index: Int) {
+        if let controller = container.tabBarController {
+            guard let children = controller.viewControllers, children.indices.contains(index) else { return }
+            controller.selectedIndex = index
+        } else if let items = tabBar?.items, items.indices.contains(index) {
+            tabBar?.selectedItem = items[index]
+        }
+    }
+
     private func applyMinimizeBehavior() {
-        // Note: UITabBarController.tabBarMinimizeBehavior is the official iOS 26+ API
-        // However, since we're using a standalone UITabBar in a platform view,
-        // we need to implement custom minimize behavior
-        //
-        // The minimize behavior should be controlled at the Flutter level
-        // by adjusting the tab bar's height/visibility based on scroll events
-        //
-        // This method stores the behavior preference for future use
-        // The actual minimization animation should be handled by Flutter
+        if #available(iOS 26.0, *), let controller = container.tabBarController {
+            switch minimizeBehavior {
+            case 0: controller.tabBarMinimizeBehavior = .never
+            case 1: controller.tabBarMinimizeBehavior = .onScrollDown
+            case 2: controller.tabBarMinimizeBehavior = .onScrollUp
+            default: controller.tabBarMinimizeBehavior = .automatic
+            }
+        }
+        // Flutter scroll notifications are still handled by AdaptiveScaffold;
+        // UIKit cannot observe Flutter scrolling through the empty child views.
     }
 
     private func handleContainerWidthChange() {
         guard let bar = self.tabBar else { return }
 
-        // A standalone UITabBar hosted in a platform view can lay out once
-        // before it has its final width. Rebuild against the real container
-        // width so item labels and spacing are computed from the final bounds.
-        if #available(iOS 26.0, *) {
-            rebuildItemsWithCurrentState()
-        }
-
+        container.tabBarController?.view.setNeedsLayout()
+        container.tabBarController?.view.layoutIfNeeded()
         bar.setNeedsLayout()
         bar.layoutIfNeeded()
         container.setNeedsLayout()
@@ -501,12 +582,7 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
                 return items
             }
 
-            if let bar = self.tabBar {
-                bar.items = buildItems(0..<count)
-                if let items = bar.items, selectedIndex >= 0, selectedIndex < items.count {
-                    bar.selectedItem = items[selectedIndex]
-                }
-            }
+            setTabItems(buildItems(0..<count), selectedIndex: selectedIndex)
             result(nil)
 
         case "setSelectedIndex":
@@ -516,9 +592,7 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
                 return
             }
 
-            if let bar = self.tabBar, let items = bar.items, idx >= 0, idx < items.count {
-                bar.selectedItem = items[idx]
-            }
+            setSelectedIndex(idx)
             result(nil)
 
         case "setStyle":
@@ -562,6 +636,7 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
 
             if #available(iOS 13.0, *) {
                 self.container.overrideUserInterfaceStyle = isDark ? .dark : .light
+                self.container.tabBarController?.overrideUserInterfaceStyle = isDark ? .dark : .light
             }
             result(nil)
 
@@ -575,6 +650,7 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
             let attribute: UISemanticContentAttribute = isRtl ? .forceRightToLeft : .forceLeftToRight
             self.tabBar?.semanticContentAttribute = attribute
             self.container.semanticContentAttribute = attribute
+            self.container.tabBarController?.view.semanticContentAttribute = attribute
             result(nil)
 
         case "setMinimizeBehavior":
@@ -734,13 +810,16 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
             items.append(item)
         }
 
-        bar.items = items
-        if currentSelectedIndex < items.count {
-            bar.selectedItem = items[currentSelectedIndex]
-        }
+        setTabItems(items, selectedIndex: currentSelectedIndex)
     }
 
     func view() -> UIView { container }
+
+    func tabBarController(_ tabBarController: UITabBarController, didSelect viewController: UIViewController) {
+        guard tabBarController === container.tabBarController,
+              let index = tabBarController.viewControllers?.firstIndex(of: viewController) else { return }
+        channel.invokeMethod("valueChanged", arguments: ["index": index])
+    }
 
     func tabBar(_ tabBar: UITabBar, didSelect item: UITabBarItem) {
         if let bar = self.tabBar, bar === tabBar, let items = bar.items, let idx = items.firstIndex(of: item) {

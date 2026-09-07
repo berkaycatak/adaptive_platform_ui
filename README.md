@@ -161,7 +161,13 @@ Adaptive Bottom Navigation Bar (Destinations):
 
 ### Native iOS tab bar tint
 
-`IOS26NativeTabBar` preserves the system Liquid Glass background on iOS 26+.
+`IOS26NativeTabBar` embeds a `UITabBarController` on iOS 26+, preserving the
+system Liquid Glass background and backdrop-dependent tint shading. Its native
+child views are transparent; your Flutter pages and `onTap` routing stay in place.
+Pass an opaque brand color, for example `tint: Color(0xFF0A95F0)`, to let UIKit
+apply its native treatment to that color. A custom gradient or reduced alpha is
+not required. Template icons participate in this tinting; full-color avatars do not.
+
 To use UIKit's native system blue for selected icons and labels:
 
 ```dart
@@ -185,6 +191,11 @@ Custom `CupertinoDynamicColor` tints retain their native trait variants, but tho
 variants alone do not guarantee contrast against every backdrop. Test scrolling
 content in both appearances and with Increase Contrast and Reduce Transparency.
 Changes to the Swift implementation require a full iOS rebuild.
+
+Use up to five destinations in this compact platform view. UIKit's More list for
+additional destinations needs a full content area, which this bridge does not host.
+Flutter scroll notifications still drive
+`AdaptiveScaffold` minimization because the native children contain no scroll views.
 
 ### AdaptiveButton
 

@@ -5,7 +5,9 @@ import 'package:flutter/services.dart';
 import '../adaptive_scaffold.dart';
 import 'ios_native_color.dart';
 
-/// Native iOS 26 tab bar using UITabBar platform view
+/// Native iOS tab bar hosted by a UITabBarController on iOS 26+.
+///
+/// Flutter owns the page content and handles selection through [onTap].
 class IOS26NativeTabBar extends StatefulWidget {
   const IOS26NativeTabBar({
     super.key,
