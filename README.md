@@ -159,6 +159,33 @@ Adaptive Bottom Navigation Bar (Destinations):
 </p>
 
 
+### Native iOS tab bar tint
+
+`IOS26NativeTabBar` preserves the system Liquid Glass background on iOS 26+.
+To use UIKit's native system blue for selected icons and labels:
+
+```dart
+IOS26NativeTabBar(
+  useNativeSystemTint: true,
+  destinations: const [
+    AdaptiveNavigationDestination(icon: 'house', label: 'Home'),
+    AdaptiveNavigationDestination(icon: 'gearshape', label: 'Settings'),
+  ],
+  selectedIndex: selectedIndex,
+  onTap: (index) => setState(() => selectedIndex = index),
+)
+```
+
+`useNativeSystemTint` defaults to `false`. When enabled, it takes precedence over
+`tint` and the Cupertino theme's primary color. You can toggle it at runtime;
+turning it off restores the current explicit tint or theme color. Leave
+`unselectedItemTint` and `backgroundColor` unset to retain their system defaults.
+
+Custom `CupertinoDynamicColor` tints retain their native trait variants, but those
+variants alone do not guarantee contrast against every backdrop. Test scrolling
+content in both appearances and with Increase Contrast and Reduce Transparency.
+Changes to the Swift implementation require a full iOS rebuild.
+
 ### AdaptiveButton
 
 <img src="https://raw.githubusercontent.com/berkaycatak/adaptive_platform_ui/refs/heads/main/img/buttons_p.png" alt="iOS 26 Native Toolbar">

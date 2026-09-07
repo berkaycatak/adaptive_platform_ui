@@ -109,14 +109,11 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
         bar.semanticContentAttribute = isRtl ? .forceRightToLeft : .forceLeftToRight
         container.semanticContentAttribute = isRtl ? .forceRightToLeft : .forceLeftToRight
 
-        // iOS 26+ special handling - Skip appearance, use direct properties only
+        // Preserve the system Liquid Glass material on iOS 26+.
         if #available(iOS 26.0, *) {
-            // For iOS 26, we skip UITabBarAppearance as it interferes with custom colors
+            // Even an empty background image is a custom background and can
+            // suppress the system blur. Leave background and shadow defaults intact.
             bar.isTranslucent = true
-            bar.backgroundImage = UIImage()
-            bar.shadowImage = UIImage()
-            bar.backgroundColor = .clear
-            NSLog("📱 iOS 26+ detected - using direct properties only")
         }
         // iOS 13-25 - Use appearance
         else if #available(iOS 13.0, *) {
@@ -760,6 +757,11 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
     }
 
     private static func color(from value: Any) -> UIColor? {
+        // Keep the semantic UIKit color through creation and setStyle updates.
+        if let name = value as? String, name == "systemBlue" {
+            return .systemBlue
+        }
+
         if let argb = value as? NSNumber {
             return colorFromARGB(argb.intValue)
         }

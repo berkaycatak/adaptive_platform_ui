@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -14,6 +13,7 @@ class IOS26NativeTabBar extends StatefulWidget {
     required this.selectedIndex,
     required this.onTap,
     this.tint,
+    this.useNativeSystemTint = false,
     this.unselectedItemTint,
     this.backgroundColor,
     this.height,
@@ -28,9 +28,17 @@ class IOS26NativeTabBar extends StatefulWidget {
 
   /// Selected-item tint.
   ///
-  /// A [CupertinoDynamicColor] stays dynamic in the native iOS view, allowing
-  /// Liquid Glass and accessibility traits to select the appropriate variant.
+  /// A [CupertinoDynamicColor] stays dynamic in the native iOS view so UIKit
+  /// can select its appearance, accessibility, and elevation variants.
+  /// Ignored when [useNativeSystemTint] is true.
   final Color? tint;
+
+  /// Uses UIKit's semantic `UIColor.systemBlue` for selected items on iOS.
+  ///
+  /// Bypasses [tint] and the Cupertino theme's primary color, preserving the
+  /// native system color instead of reconstructing it from Flutter RGB values.
+  /// Defaults to false to preserve the existing theme/custom tint behavior.
+  final bool useNativeSystemTint;
   final Color? unselectedItemTint;
   final Color? backgroundColor;
   final double? height;
@@ -74,8 +82,11 @@ class _IOS26NativeTabBarState extends State<IOS26NativeTabBar> {
   bool get _isDark =>
       MediaQuery.platformBrightnessOf(context) == Brightness.dark;
   bool get _isRtl => Directionality.of(context) == TextDirection.rtl;
-  Color? get _effectiveTint =>
-      widget.tint ?? CupertinoTheme.of(context).primaryColor;
+  Object get _encodedTint => widget.useNativeSystemTint
+      ? 'systemBlue'
+      : encodeColorForNative(
+          widget.tint ?? CupertinoTheme.of(context).primaryColor,
+        );
 
   @override
   void didUpdateWidget(covariant IOS26NativeTabBar oldWidget) {
@@ -162,7 +173,7 @@ class _IOS26NativeTabBarState extends State<IOS26NativeTabBar> {
 
   @override
   Widget build(BuildContext context) {
-    if (!kIsWeb && Platform.isIOS) {
+    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS) {
       final labels = widget.destinations.map((e) => e.label).toList();
       final symbols = _mapSymbols();
       final selectedSymbols = _mapSelectedSymbols();
@@ -196,8 +207,7 @@ class _IOS26NativeTabBarState extends State<IOS26NativeTabBar> {
         'isDark': _isDark,
         'isRtl': _isRtl,
         'minimizeBehavior': widget.minimizeBehavior.index,
-        if (_effectiveTint != null)
-          'tint': encodeColorForNative(_effectiveTint!),
+        'tint': _encodedTint,
         if (widget.unselectedItemTint != null)
           'unselectedItemTint': encodeColorForNative(
             widget.unselectedItemTint!,
@@ -268,9 +278,7 @@ class _IOS26NativeTabBarState extends State<IOS26NativeTabBar> {
     _channel = ch;
     ch.setMethodCallHandler(_onMethodCall);
     _lastIndex = null;
-    _lastTint = _effectiveTint != null
-        ? encodeColorForNative(_effectiveTint!)
-        : null;
+    _lastTint = _encodedTint;
     _lastUnselectedTint = widget.unselectedItemTint != null
         ? encodeColorForNative(widget.unselectedItemTint!)
         : null;
@@ -305,9 +313,7 @@ class _IOS26NativeTabBarState extends State<IOS26NativeTabBar> {
     if (ch == null) return;
 
     final idx = widget.selectedIndex;
-    final tint = _effectiveTint != null
-        ? encodeColorForNative(_effectiveTint!)
-        : null;
+    final tint = _encodedTint;
     final unselectedTint = widget.unselectedItemTint != null
         ? encodeColorForNative(widget.unselectedItemTint!)
         : null;
@@ -321,7 +327,7 @@ class _IOS26NativeTabBarState extends State<IOS26NativeTabBar> {
     }
 
     final style = <String, dynamic>{};
-    if (!nativeColorsEqual(_lastTint, tint) && tint != null) {
+    if (!nativeColorsEqual(_lastTint, tint)) {
       style['tint'] = tint;
       _lastTint = tint;
     }
@@ -495,10 +501,7 @@ class _IOS26NativeTabBarState extends State<IOS26NativeTabBar> {
         'selectedIndex': widget.selectedIndex,
       });
 
-      final style = <String, dynamic>{};
-      if (_effectiveTint != null) {
-        style['tint'] = encodeColorForNative(_effectiveTint!);
-      }
+      final style = <String, dynamic>{'tint': _encodedTint};
       if (widget.unselectedItemTint != null) {
         style['unselectedItemTint'] = encodeColorForNative(
           widget.unselectedItemTint!,
