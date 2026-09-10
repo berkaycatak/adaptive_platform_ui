@@ -240,6 +240,7 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
     return Scaffold(
       key: widget.scaffoldKey,
       backgroundColor: Colors.transparent,
+      resizeToAvoidBottomInset: widget.resizeToAvoidBottomInset,
       body: child,
       drawer: widget.drawer,
       endDrawer: widget.endDrawer,
@@ -616,7 +617,11 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
 
       // Always use CupertinoPageScaffold to ensure proper background color
       return _wrapWithDrawerIfNeeded(
-        CupertinoPageScaffold(navigationBar: navigationBar, child: body),
+        CupertinoPageScaffold(
+          resizeToAvoidBottomInset: widget.resizeToAvoidBottomInset ?? true,
+          navigationBar: navigationBar,
+          child: body,
+        ),
       );
     }
 
