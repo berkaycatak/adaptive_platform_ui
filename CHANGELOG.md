@@ -1,5 +1,8 @@
 # Changelog
 
+## Unreleased
+* **FIX**: `resizeToAvoidBottomInset` is now honored on iOS. The plain `CupertinoPageScaffold` page branch and the drawer wrapper built their scaffolds without forwarding it, so the body was still resized for the keyboard and any chrome anchored to the bottom of the body was lifted above it (@Danilo-Mota)
+
 ## [0.1.111]
 * **NEW**: Custom SF Symbols on iOS. `AdaptiveAppBarAction`, native buttons, and the tab bar now fall back to a bundle asset (`UIImage(named:)`) when a name is not a system SF Symbol, so custom symbols or images from the app's asset catalog work (@hieutbui)
 * **NEW**: `iconWidget` on `AdaptiveAppBarAction` for a custom fallback widget (e.g. an SVG) on iOS <26 and Android (@hieutbui)
