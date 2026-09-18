@@ -172,8 +172,8 @@ slide underneath it, the bar stays where it is, and only its items change.
 - **Any router.** It relies on the widget tree only, not on a
   `NavigatorObserver`, so it works with `Navigator`, GoRouter (including
   `StatefulShellRoute`), auto_route, nested navigators and tabs.
-- **Items follow the page transition.** The swap from one page's items to
-  the next is driven by the route's own animation, so it lasts exactly as
+- **Items follow the page transition.** The outgoing page's items fade out
+  and the incoming page's fade in, driven by the route's own animation, so it lasts exactly as
   long as the page transition, follows a back swipe under the finger and
   reverses when the swipe is cancelled. Switching tabs crossfades. The back
   button appears when the page can go back and pops that page's own

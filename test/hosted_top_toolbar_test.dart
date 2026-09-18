@@ -2,7 +2,6 @@ import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import 'package:adaptive_platform_ui/src/toolbar/hosted_duo_bar.dart';
 import 'package:adaptive_platform_ui/src/toolbar/hosted_top_toolbar.dart';
 import 'package:adaptive_platform_ui/src/toolbar/toolbar_chrome_scope.dart';
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:foldable/foldable.dart';
@@ -51,115 +50,25 @@ void usePhone(WidgetTester tester) {
 Finder get bar => find.byType(HostedTopToolbar);
 Finder inBar(Finder finder) => find.descendant(of: bar, matching: finder);
 
+/// Opacity of the page layer (or shared back layer) [finder] is drawn in.
+double opacityOf(WidgetTester tester, Finder finder) => tester
+    .widget<FadeTransition>(
+      find
+          .ancestor(
+            of: inBar(finder),
+            // Layers are keyed; the buttons' own press feedback fades are not.
+            matching: find.byWidgetPredicate(
+              (w) => w is FadeTransition && w.key != null,
+            ),
+          )
+          .first,
+    )
+    .opacity
+    .value;
+
+Finder get backButton => inBar(find.byType(AdaptiveButton));
+
 void main() {
-  group('TopToolbarNativeSync', () {
-    Map<String, dynamic> items(String title) => {'title': title};
-    List<String> methods(List<TopToolbarNativeCall> calls) =>
-        calls.map((c) => c.method).toList();
-
-    TopToolbarNativeSync showing(String title) =>
-        TopToolbarNativeSync()..created(items(title));
-
-    test('nothing is sent while the bar already shows the content', () {
-      final sync = showing('Home');
-      expect(sync.update(owner: items('Home'), blendCount: null), isEmpty);
-    });
-
-    test('a page updating its own items is applied at once', () {
-      final sync = showing('Home');
-      final calls = sync.update(owner: items('Inbox (3)'), blendCount: null);
-      expect(methods(calls), ['setItems']);
-      expect(calls.single.arguments, items('Inbox (3)'));
-    });
-
-    test('a blend becomes one native transition into its target', () {
-      final sync = showing('Home');
-
-      final begin = sync.update(
-        owner: items('Detail'),
-        blendCount: 1,
-        target: items('Detail'),
-      );
-      expect(methods(begin), ['beginItemTransition']);
-      expect(begin.single.arguments, items('Detail'));
-      expect(sync.isTransitioning, isTrue);
-
-      // Further notifications of the same blend start nothing new.
-      expect(
-        sync.update(owner: items('Detail'), blendCount: 1, target: items('X')),
-        isEmpty,
-      );
-
-      final end = sync.update(owner: items('Detail'), blendCount: null);
-      expect(methods(end), ['endItemTransition']);
-      expect(end.single.arguments, {'completed': true});
-      expect(sync.isTransitioning, isFalse);
-    });
-
-    test('a cancelled back swipe settles back on the page it started on', () {
-      final sync = showing('Detail');
-      sync.update(owner: items('Detail'), blendCount: 1, target: items('Home'));
-
-      final end = sync.update(
-        owner: items('Detail'),
-        blendCount: null,
-        targetWon: false,
-      );
-      expect(methods(end), ['endItemTransition']);
-      expect(end.single.arguments, {'completed': false});
-
-      // The bar shows Detail again, so nothing more is needed.
-      expect(sync.update(owner: items('Detail'), blendCount: null), isEmpty);
-    });
-
-    test('a completed back swipe needs no second transition', () {
-      final sync = showing('Detail');
-      sync.update(owner: items('Detail'), blendCount: 1, target: items('Home'));
-      // The finger lifts, the route pops: same blend, new owner.
-      expect(
-        sync.update(owner: items('Home'), blendCount: 1, target: items('Home')),
-        isEmpty,
-      );
-      final end = sync.update(owner: items('Home'), blendCount: null);
-      expect(end.single.arguments, {'completed': true});
-      expect(sync.update(owner: items('Home'), blendCount: null), isEmpty);
-    });
-
-    test('a navigation that overtakes another settles the first one', () {
-      final sync = showing('A');
-      sync.update(owner: items('B'), blendCount: 1, target: items('B'));
-      final calls = sync.update(
-        owner: items('C'),
-        blendCount: 2,
-        target: items('C'),
-      );
-      expect(methods(calls), ['endItemTransition', 'beginItemTransition']);
-      expect(calls.last.arguments, items('C'));
-    });
-
-    test('pages with identical items do not transition', () {
-      final sync = showing('Same');
-      expect(
-        sync.update(owner: items('Same'), blendCount: 1, target: items('Same')),
-        isEmpty,
-      );
-      expect(sync.isTransitioning, isFalse);
-      expect(sync.update(owner: items('Same'), blendCount: null), isEmpty);
-    });
-
-    test('items changed during a transition catch up when it ends', () {
-      final sync = showing('Home');
-      sync.update(
-        owner: items('Detail'),
-        blendCount: 1,
-        target: items('Detail'),
-      );
-      final end = sync.update(owner: items('Detail (2)'), blendCount: null);
-      expect(methods(end), ['endItemTransition', 'setItems']);
-      expect(end.last.arguments, items('Detail (2)'));
-    });
-  });
-
   group('HostedTopToolbar', () {
     testWidgets('one fixed bar at the top shows the page in front', (
       tester,
@@ -178,7 +87,7 @@ void main() {
       expect(bar, findsOneWidget);
       expect(find.byType(HostedDuoBar), findsNothing);
       expect(inBar(find.text('Home')), findsOneWidget);
-      expect(inBar(find.byIcon(CupertinoIcons.chevron_left)), findsNothing);
+      expect(backButton, findsNothing);
       final rect = tester.getRect(
         find.descendant(of: bar, matching: find.byType(SizedBox)).first,
       );
@@ -196,22 +105,79 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 100));
 
-      // Mid-transition: the bar has not moved and already belongs to the
-      // incoming page (UIKit animates the item change itself).
+      // Mid-transition: the bar has not moved; it is handing over from the
+      // outgoing page's items to the incoming page's.
       expect(
         tester.getRect(
           find.descendant(of: bar, matching: find.byType(SizedBox)).first,
         ),
         rect,
       );
-      expect(inBar(find.text('Detail')), findsOneWidget);
+      expect(opacityOf(tester, find.text('Home')), lessThan(1));
+      expect(opacityOf(tester, find.text('Detail')), lessThan(1));
       await tester.pumpAndSettle();
+      expect(inBar(find.text('Home')), findsNothing);
+      expect(opacityOf(tester, find.text('Detail')), 1);
 
       // Back is performed on the owner's navigator.
-      await tester.tap(inBar(find.byIcon(CupertinoIcons.chevron_left)));
+      await tester.tap(backButton);
       await tester.pumpAndSettle();
       expect(find.text('body:Detail'), findsNothing);
       expect(inBar(find.text('Home')), findsOneWidget);
+    });
+
+    testWidgets('outgoing items leave before incoming ones arrive', (
+      tester,
+    ) async {
+      usePhone(tester);
+      final nav = GlobalKey<NavigatorState>();
+      await tester.pumpWidget(hostedApp(navigatorKey: nav, home: page('Home')));
+      await tester.pump();
+
+      final route = PageRouteBuilder<void>(
+        transitionDuration: const Duration(seconds: 4),
+        reverseTransitionDuration: const Duration(seconds: 4),
+        pageBuilder: (_, _, _) => page('Detail'),
+      );
+      nav.currentState!.push(route);
+      await tester.pump();
+      await tester.pump();
+
+      // A quarter in: the old title is fading, the new one has not started.
+      await tester.pump(const Duration(seconds: 1));
+      expect(opacityOf(tester, find.text('Home')), inExclusiveRange(0, 1));
+      expect(opacityOf(tester, find.text('Detail')), 0);
+
+      // Three quarters in: the old one is gone, the new one is arriving.
+      await tester.pump(const Duration(seconds: 2));
+      expect(opacityOf(tester, find.text('Home')), 0);
+      expect(opacityOf(tester, find.text('Detail')), inExclusiveRange(0, 1));
+      await tester.pumpAndSettle();
+    });
+
+    testWidgets('a back button both pages show stays put', (tester) async {
+      usePhone(tester);
+      final nav = GlobalKey<NavigatorState>();
+      await tester.pumpWidget(hostedApp(navigatorKey: nav, home: page('A')));
+      await tester.pump();
+      nav.currentState!.push(
+        MaterialPageRoute<void>(builder: (_) => page('B')),
+      );
+      await tester.pumpAndSettle();
+      final backRect = tester.getRect(backButton);
+
+      nav.currentState!.push(
+        MaterialPageRoute<void>(builder: (_) => page('C')),
+      );
+      await tester.pump();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 150));
+
+      expect(backButton, findsOneWidget);
+      expect(opacityOf(tester, find.byType(AdaptiveButton)), 1);
+      expect(tester.getRect(backButton), backRect);
+      expect(opacityOf(tester, find.text('B')), lessThan(1));
+      await tester.pumpAndSettle();
     });
 
     testWidgets('pages are told the host draws their toolbar', (tester) async {
@@ -251,14 +217,11 @@ void main() {
       expect(inBar(find.text('3 unread')), findsOneWidget);
     });
 
-    testWidgets('a page without a toolbar hides the bar but keeps it alive', (
-      tester,
-    ) async {
+    testWidgets('a page without a toolbar empties the bar', (tester) async {
       usePhone(tester);
       final nav = GlobalKey<NavigatorState>();
       await tester.pumpWidget(hostedApp(navigatorKey: nav, home: page('Home')));
       await tester.pump();
-      final element = tester.element(bar);
 
       nav.currentState!.push(
         MaterialPageRoute<void>(
@@ -266,16 +229,12 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
+      expect(bar, findsOneWidget);
+      expect(inBar(find.text('Home')), findsNothing);
 
-      expect(tester.element(bar), same(element));
-      expect(
-        tester
-            .widget<AnimatedOpacity>(
-              find.descendant(of: bar, matching: find.byType(AnimatedOpacity)),
-            )
-            .opacity,
-        0,
-      );
+      nav.currentState!.pop();
+      await tester.pumpAndSettle();
+      expect(inBar(find.text('Home')), findsOneWidget);
     });
 
     testWidgets('on iPhone Duo the top bar keeps the title only', (

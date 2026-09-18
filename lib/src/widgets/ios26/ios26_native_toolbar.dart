@@ -20,6 +20,7 @@ class IOS26NativeToolbar extends StatefulWidget {
     this.tintColor,
     this.height = 44.0,
     this.showNativeView = true,
+    this.showsGradient = true,
   });
 
   final String? title;
@@ -42,6 +43,11 @@ class IOS26NativeToolbar extends StatefulWidget {
 
   final double height;
   final bool showNativeView;
+
+  /// Whether the native view draws the readability gradient behind the bar.
+  /// The fixed toolbar host turns it off and draws one gradient of its own
+  /// behind all page layers.
+  final bool showsGradient;
 
   @override
   State<IOS26NativeToolbar> createState() => _IOS26NativeToolbarState();
@@ -162,6 +168,7 @@ class _IOS26NativeToolbarState extends State<IOS26NativeToolbar> {
       if (widget.actions != null && widget.actions!.isNotEmpty)
         'actions': widget.actions!.map((a) => a.toNativeMap()).toList(),
       'isDark': _isDark,
+      if (!widget.showsGradient) 'showsGradient': false,
       if (widget.tintColor != null) 'tint': _colorToARGB(widget.tintColor!),
     };
 
