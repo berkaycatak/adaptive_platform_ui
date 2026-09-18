@@ -82,11 +82,15 @@ class iOS26ToolbarPlatformView: NSObject, FlutterPlatformView {
             containerView.overrideUserInterfaceStyle = isDark ? .dark : .light
         }
 
-        setupGradient()
+        // The fixed toolbar host stacks one bar per page and fades them, so it
+        // draws a single gradient of its own behind them instead.
+        let showsGradient = (args as? [String: Any])?["showsGradient"] as? Bool ?? true
+        if showsGradient {
+            setupGradient()
+        }
         setupNavigationBar()
 
         if let params = args as? [String: Any] {
-            currentParams = params
             configureItems(params)
             // Apply global tint color after configuring items
             if let n = params["tint"] as? NSNumber {
@@ -171,10 +175,6 @@ class iOS26ToolbarPlatformView: NSObject, FlutterPlatformView {
     }
 
     private func configureItems(_ params: [String: Any]) {
-        configureItems(params, on: navigationItem)
-    }
-
-    private func configureItems(_ params: [String: Any], on navigationItem: UINavigationItem) {
         // Title
         if let title = params["title"] as? String {
             navigationItem.title = title
@@ -286,130 +286,6 @@ class iOS26ToolbarPlatformView: NSObject, FlutterPlatformView {
         navigationItem.rightBarButtonItems = rightGroup.reversed()
     }
 
-    // MARK: - Fixed toolbar: swapping one page's items for another's
-
-    /// Builds a navigation item for one page's content.
-    private func makeItem(_ params: [String: Any]) -> UINavigationItem {
-        perActionTintTags.removeAll()
-        let item = UINavigationItem()
-        // The back button is an ordinary leading item that reports to Flutter,
-        // which owns the navigation stack; the system one must not appear.
-        item.hidesBackButton = true
-        configureItems(params, on: item)
-        if let n = params["tint"] as? NSNumber {
-            let color = Self.colorFromARGB(n.intValue)
-            for barItem in (item.leftBarButtonItems ?? []) + (item.rightBarButtonItems ?? []) {
-                if !perActionTintTags.contains(barItem.tag) {
-                    barItem.tintColor = color
-                }
-            }
-        }
-        return item
-    }
-
-    private func applyBarTint(_ params: [String: Any]) {
-        if let n = params["tint"] as? NSNumber {
-            let color = Self.colorFromARGB(n.intValue)
-            containerView.tintColor = color
-            navigationBar.tintColor = color
-        } else {
-            containerView.tintColor = nil
-            navigationBar.tintColor = nil
-        }
-    }
-
-    /// Replaces the content of the bar with another page's, at once. The bar
-    /// itself stays where it is.
-    private func setItems(_ params: [String: Any]) {
-        if itemTransition != nil { endItemTransition(completed: false) }
-        applyBarTint(params)
-        let target = makeItem(params)
-        navigationBar.setItems([target], animated: false)
-        navigationItem = target
-        currentParams = params
-    }
-
-    // MARK: - Fixed toolbar: a swap that follows the page transition
-
-    // A UINavigationBar outside a UINavigationController does not play the
-    // system item transition, and even if it did, its fixed length could not
-    // follow a back swipe or a custom route duration. So the swap is a
-    // crossfade frozen at its first frame, and Flutter moves it: by the route
-    // animation on push and pop, by the finger on a back swipe.
-
-    /// Length of the frozen crossfade. Arbitrary: progress is mapped onto it.
-    private static let itemTransitionDuration: CFTimeInterval = 1.0
-    private static let itemTransitionKey = "adaptive_toolbar_item_transition"
-
-    private struct ItemTransition {
-        let from: UINavigationItem
-        let fromParams: [String: Any]
-        let to: UINavigationItem
-        let pausedAt: CFTimeInterval
-    }
-
-    private var itemTransition: ItemTransition?
-    private var currentParams: [String: Any] = [:]
-
-    /// Starts the crossfade into [params] and freezes it at its first frame,
-    /// so `updateItemTransition` can move it.
-    private func beginItemTransition(_ params: [String: Any]) {
-        if itemTransition != nil { endItemTransition(completed: true) }
-        let from = navigationItem
-        let to = makeItem(params)
-
-        let layer = navigationBar.layer
-        let pausedAt = layer.convertTime(CACurrentMediaTime(), from: nil)
-        layer.speed = 0
-        layer.timeOffset = pausedAt
-
-        let fade = CATransition()
-        fade.type = .fade
-        fade.duration = Self.itemTransitionDuration
-        fade.timingFunction = CAMediaTimingFunction(name: .linear)
-        fade.beginTime = pausedAt
-        fade.fillMode = .both
-        fade.isRemovedOnCompletion = false
-        layer.add(fade, forKey: Self.itemTransitionKey)
-
-        applyBarTint(params)
-        navigationBar.setItems([to], animated: false)
-        navigationItem = to
-
-        itemTransition = ItemTransition(
-            from: from, fromParams: currentParams, to: to, pausedAt: pausedAt)
-        currentParams = params
-    }
-
-    private func updateItemTransition(_ progress: Double) {
-        guard let transition = itemTransition else { return }
-        // Stay just inside the ends: at exactly the full length the frozen
-        // animation would be treated as finished and dropped.
-        let clamped = max(0.0, min(0.999, progress))
-        navigationBar.layer.timeOffset =
-            transition.pausedAt + clamped * Self.itemTransitionDuration
-    }
-
-    /// Lets go of the frozen crossfade and settles on the page that won:
-    /// the new one when [completed], the previous one when a back swipe was
-    /// cancelled.
-    private func endItemTransition(completed: Bool) {
-        guard let transition = itemTransition else { return }
-        itemTransition = nil
-
-        let layer = navigationBar.layer
-        layer.removeAnimation(forKey: Self.itemTransitionKey)
-        if !completed {
-            applyBarTint(transition.fromParams)
-            navigationBar.setItems([transition.from], animated: false)
-            navigationItem = transition.from
-            currentParams = transition.fromParams
-        }
-        layer.speed = 1
-        layer.timeOffset = 0
-        layer.beginTime = 0
-    }
-
     @objc private func leadingTapped() {
         channel.invokeMethod("onLeadingTapped", arguments: nil)
     }
@@ -448,27 +324,6 @@ class iOS26ToolbarPlatformView: NSObject, FlutterPlatformView {
                         }
                     }
                 }
-            }
-            result(nil)
-        case "setItems":
-            if let args = call.arguments as? [String: Any] {
-                setItems(args)
-            }
-            result(nil)
-        case "beginItemTransition":
-            if let args = call.arguments as? [String: Any] {
-                beginItemTransition(args)
-            }
-            result(nil)
-        case "updateItemTransition":
-            if let args = call.arguments as? [String: Any],
-               let progress = args["progress"] as? Double {
-                updateItemTransition(progress)
-            }
-            result(nil)
-        case "endItemTransition":
-            if let args = call.arguments as? [String: Any] {
-                endItemTransition(completed: args["completed"] as? Bool ?? false)
             }
             result(nil)
         case "setStyle":
