@@ -194,7 +194,10 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
   @override
   void didUpdateWidget(AdaptiveScaffold oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.appBar != widget.appBar) _syncToolbarEntry();
+    if (oldWidget.appBar != widget.appBar ||
+        oldWidget.bottomNavigationBar != widget.bottomNavigationBar) {
+      _syncToolbarEntry();
+    }
   }
 
   @override
@@ -227,6 +230,7 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
         route: ModalRoute.of(context),
         navigator: Navigator.maybeOf(context),
         visible: TickerMode.valuesOf(context).enabled && Visibility.of(context),
+        hasTabBar: widget.bottomNavigationBar?.items?.isNotEmpty ?? false,
       ),
     );
   }

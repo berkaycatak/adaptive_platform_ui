@@ -16,6 +16,7 @@ class ToolbarEntry {
     required this.route,
     required this.navigator,
     required this.visible,
+    this.hasTabBar = false,
   });
 
   /// Identifies the registering scaffold instance.
@@ -37,12 +38,20 @@ class ToolbarEntry {
   /// non-selected tab of an IndexedStack.
   final bool visible;
 
+  /// Whether the registering scaffold shows a tab bar. Such a scaffold is the
+  /// root of a tab layout and never gets an automatic back button.
+  final bool hasTabBar;
+
   /// Whether the user is looking at this page right now: it is visible and
   /// on top of its own navigator. Read live, so it tracks pushes and pops.
   bool get isActive => visible && (route?.isCurrent ?? true);
 
   /// Whether the chrome should offer a back button for this page.
   bool get canPop => navigator?.canPop() ?? false;
+
+  /// Whether the chrome should supply a back button on its own: the page can
+  /// go back, brought no leading widget of its own, and is not a tab root.
+  bool get impliesBackButton => canPop && appBar?.leading == null && !hasTabBar;
 }
 
 /// Ordered set of the pages currently mounted under an [AdaptiveToolbarHost].
