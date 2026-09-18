@@ -6,16 +6,20 @@ import PackageDescription
 let package = Package(
     name: "adaptive_platform_ui",
     platforms: [
-        .iOS("13.0")
+        .iOS("15.0")
     ],
     products: [
         .library(name: "adaptive-platform-ui", targets: ["adaptive_platform_ui"])
     ],
-    dependencies: [],
+    dependencies: [
+        .package(name: "FlutterFramework", path: "../FlutterFramework")
+    ],
     targets: [
         .target(
             name: "adaptive_platform_ui",
-            dependencies: []
+            dependencies: [
+                .product(name: "FlutterFramework", package: "FlutterFramework")
+            ]
         )
     ]
 )
