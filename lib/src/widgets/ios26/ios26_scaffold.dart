@@ -242,15 +242,13 @@ class _IOS26ScaffoldState extends State<IOS26Scaffold>
             ),
     );
 
-    // iPhone Duo inner display: the system moves *controls* (back button,
+    // iPhone Duo (inner display, and the cover display while folded): the
+    // system reserves a trailing strip and moves *controls* (back button,
     // actions) into a vertical bar on the trailing edge and leaves the title
     // in place. Our toolbar is a hand-built UINavigationBar, which iOS never
     // lays out vertically, so mirror that behaviour here: keep a title-only
     // toolbar at the top (when there is a title) and render the controls in a
     // trailing vertical bar of our own.
-    // iOS keeps horizontal bars on the inner display in portrait and only moves
-    // controls to the side while the display is wider than tall, so the
-    // vertical bar depends on the pose, not just on the display.
     //
     // With an AdaptiveToolbarHost above the navigator the host decides the
     // pose and draws the one fixed vertical bar for every page, so this page
@@ -258,7 +256,7 @@ class _IOS26ScaffoldState extends State<IOS26Scaffold>
     final chrome = ToolbarChromeScope.maybeOf(context);
     final duoVerticalPose =
         chrome?.hostsDuoControls ??
-        DuoLayout.isVerticalBarPose(_fold, MediaQuery.sizeOf(context));
+        DuoLayout.isVerticalBarPose(MediaQuery.viewPaddingOf(context));
     final hasTitle = widget.title != null || widget.titleWidget != null;
     final hasControls =
         widget.leading != null ||
@@ -327,7 +325,7 @@ class _IOS26ScaffoldState extends State<IOS26Scaffold>
             top: 0,
             right: 0,
             bottom: 0,
-            width: DuoLayout.bandWidth(MediaQuery.paddingOf(context)),
+            width: DuoLayout.bandWidth(MediaQuery.viewPaddingOf(context)),
             child: DuoVerticalBar(
               leading: widget.leading ?? heroLeading,
               actions: widget.actions ?? const <AdaptiveAppBarAction>[],

@@ -18,47 +18,46 @@ const ReservedRegion duoFlatFold = ReservedRegion(
   isActive: false,
 );
 
-FoldableData fold(SizeClass horizontal, SizeClass vertical) => FoldableData(
-  capabilities: FoldableData.unsupported.capabilities,
-  status: FoldableData.unsupported.status,
-  angleDegrees: FoldableData.unsupported.angleDegrees,
-  regions: const [duoCamera, duoFlatFold],
-  displayFeatures: const [],
-  horizontalSizeClass: horizontal,
-  verticalSizeClass: vertical,
+/// The cover display while folded.
+const Size duoCover = Size(466, 678);
+const ReservedRegion duoCoverCluster = ReservedRegion(
+  kind: ReservedRegionKind.occlusion,
+  bounds: Rect.fromLTRB(382, 0, 466, 170),
+  isActive: true,
 );
 
 void main() {
   group('DuoLayout: detection', () {
-    test('no snapshot yet means not the inner display', () {
-      expect(DuoLayout.isInnerDisplay(null), isFalse);
-      expect(DuoLayout.isVerticalBarPose(null, duoLandscape), isFalse);
+    test('the inner display reserves a trailing strip', () {
+      expect(DuoLayout.isVerticalBarPose(duoPadding), isTrue);
     });
 
-    test('regular/regular is the inner display, before the hinge reports', () {
-      final data = fold(SizeClass.regular, SizeClass.regular);
-      expect(data.status, FoldableData.unsupported.status);
-      expect(DuoLayout.isInnerDisplay(data), isTrue);
+    test('so does the cover display while folded', () {
+      // Same insets as the inner display, measured folded at 466x678.
+      expect(DuoLayout.isVerticalBarPose(duoPadding), isTrue);
     });
 
-    test('a Plus/Max in landscape (regular/compact) is not', () {
+    test('an ordinary iPhone in portrait has a top inset', () {
       expect(
-        DuoLayout.isInnerDisplay(fold(SizeClass.regular, SizeClass.compact)),
+        DuoLayout.isVerticalBarPose(const EdgeInsets.only(top: 62, bottom: 34)),
         isFalse,
       );
     });
 
-    test('the cover display (compact/regular) is not', () {
+    test('an ordinary iPhone in landscape is inset on both sides', () {
       expect(
-        DuoLayout.isInnerDisplay(fold(SizeClass.compact, SizeClass.regular)),
+        DuoLayout.isVerticalBarPose(
+          const EdgeInsets.only(left: 62, right: 62, bottom: 21),
+        ),
         isFalse,
       );
     });
 
-    test('the inner display keeps horizontal bars in portrait', () {
-      final data = fold(SizeClass.regular, SizeClass.regular);
-      expect(DuoLayout.isVerticalBarPose(data, duoLandscape), isTrue);
-      expect(DuoLayout.isVerticalBarPose(data, duoLandscape.flipped), isFalse);
+    test('an iPad has no trailing inset', () {
+      expect(
+        DuoLayout.isVerticalBarPose(const EdgeInsets.only(top: 24, bottom: 20)),
+        isFalse,
+      );
     });
   });
 
@@ -83,6 +82,28 @@ void main() {
       );
     });
 
+    test('on the cover display too', () {
+      expect(
+        DuoLayout.topClearance(
+          size: duoCover,
+          padding: duoPadding,
+          regions: const [duoCoverCluster],
+        ),
+        170,
+      );
+    });
+
+    test('stays clear of the cluster until regions are reported', () {
+      expect(
+        DuoLayout.topClearance(
+          size: duoLandscape,
+          padding: duoPadding,
+          regions: const [],
+        ),
+        kDuoStatusClusterFallbackHeight,
+      );
+    });
+
     test('inactive or non-overlapping occlusions are ignored', () {
       const inactive = ReservedRegion(
         kind: ReservedRegionKind.occlusion,
@@ -97,10 +118,10 @@ void main() {
       expect(
         DuoLayout.topClearance(
           size: duoLandscape,
-          padding: const EdgeInsets.only(top: 20, right: 84),
+          padding: const EdgeInsets.only(right: 84),
           regions: const [inactive, leftSide, duoFlatFold],
         ),
-        20,
+        kDuoStatusClusterFallbackHeight,
       );
     });
   });
@@ -110,7 +131,11 @@ void main() {
       return tester.pumpWidget(
         MaterialApp(
           home: MediaQuery(
-            data: const MediaQueryData(size: duoLandscape, padding: duoPadding),
+            data: const MediaQueryData(
+              size: duoLandscape,
+              padding: duoPadding,
+              viewPadding: duoPadding,
+            ),
             child: Align(
               alignment: Alignment.topRight,
               child: SizedBox(

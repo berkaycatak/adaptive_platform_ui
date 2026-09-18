@@ -53,6 +53,7 @@ void useDuoLandscape(WidgetTester tester) {
   tester.view.physicalSize = duoLandscape;
   tester.view.devicePixelRatio = 1;
   tester.view.padding = const FakeViewPadding(right: 84, bottom: 34);
+  tester.view.viewPadding = const FakeViewPadding(right: 84, bottom: 34);
   addTearDown(tester.view.reset);
 }
 
@@ -387,6 +388,23 @@ void main() {
     });
   });
 
+  testWidgets('the folded cover display gets the vertical bar too', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(466, 678);
+    tester.view.devicePixelRatio = 1;
+    tester.view.padding = const FakeViewPadding(right: 84, bottom: 34);
+    tester.view.viewPadding = const FakeViewPadding(right: 84, bottom: 34);
+    addTearDown(tester.view.reset);
+
+    await tester.pumpWidget(hostedApp(home: page('Home', action: Icons.add)));
+    await tester.pump();
+
+    expect(bar, findsOneWidget);
+    expect(tester.getRect(bar).right, 466);
+    expect(inBar(find.byIcon(Icons.add)), findsOneWidget);
+  });
+
   testWidgets('pages learn from the host that it draws their controls', (
     tester,
   ) async {
@@ -404,8 +422,9 @@ void main() {
     );
     expect(hosted, isTrue);
 
-    // Portrait keeps horizontal bars, so the host hands the controls back.
-    tester.view.physicalSize = duoLandscape.flipped;
+    // A pose that puts the status bar back on top hands the controls back.
+    tester.view.padding = const FakeViewPadding(top: 50, bottom: 34);
+    tester.view.viewPadding = const FakeViewPadding(top: 50, bottom: 34);
     await tester.pump();
     expect(hosted, isFalse);
     expect(bar, findsNothing);

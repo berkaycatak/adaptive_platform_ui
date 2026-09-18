@@ -30,8 +30,8 @@ class AdaptiveToolbarHost extends StatefulWidget {
   /// The navigator (or whatever the app's `builder` receives).
   final Widget child;
 
-  /// Replaces the platform's fold readings and the iOS 26 check, so the
-  /// chrome can be exercised in widget tests on any host.
+  /// Replaces the platform's fold readings (the reserved regions) and the
+  /// iOS 26 check, so the chrome can be exercised in widget tests anywhere.
   @visibleForTesting
   final FoldableData? debugFold;
 
@@ -50,8 +50,7 @@ class _AdaptiveToolbarHostState extends State<AdaptiveToolbarHost> {
   @override
   void initState() {
     super.initState();
-    // The fixed chrome only exists where pages use the native iOS 26
-    // toolbar; elsewhere pages keep their own Cupertino / Material bars.
+    // Fold readings are only needed for the camera clearance of the bar.
     if (widget.debugFold == null && PlatformInfo.isIOS26OrHigher()) {
       Foldable.snapshot.then(_onFoldChanged).catchError((Object _) {});
       _foldSub = Foldable.changes.listen(
@@ -76,10 +75,11 @@ class _AdaptiveToolbarHostState extends State<AdaptiveToolbarHost> {
   @override
   Widget build(BuildContext context) {
     final fold = widget.debugFold ?? _fold;
-    final hostsDuoControls = DuoLayout.isVerticalBarPose(
-      fold,
-      MediaQuery.sizeOf(context),
-    );
+    // The fixed chrome only exists where pages use the native iOS 26
+    // toolbar; elsewhere pages keep their own Cupertino / Material bars.
+    final hostsDuoControls =
+        (widget.debugFold != null || PlatformInfo.isIOS26OrHigher()) &&
+        DuoLayout.isVerticalBarPose(MediaQuery.viewPaddingOf(context));
 
     return ToolbarRegistryScope(
       registry: _registry,
@@ -96,7 +96,7 @@ class _AdaptiveToolbarHostState extends State<AdaptiveToolbarHost> {
                 top: 0,
                 right: 0,
                 bottom: 0,
-                width: DuoLayout.bandWidth(MediaQuery.paddingOf(context)),
+                width: DuoLayout.bandWidth(MediaQuery.viewPaddingOf(context)),
                 child: HostedDuoBar(
                   registry: _registry,
                   regions: fold?.regions ?? const <ReservedRegion>[],
