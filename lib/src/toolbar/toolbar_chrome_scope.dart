@@ -14,7 +14,7 @@ class ToolbarChromeScope extends InheritedWidget {
   });
 
   /// True while the host shows the page's controls (back button, actions) in
-  /// the fixed trailing vertical bar of the iPhone Duo inner display. Pages
+  /// the fixed trailing vertical bar of iPhone Duo. Pages
   /// then keep only their title at the top.
   final bool hostsDuoControls;
 

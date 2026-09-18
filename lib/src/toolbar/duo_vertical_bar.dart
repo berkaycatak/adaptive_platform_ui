@@ -16,43 +16,35 @@ const double kDuoVerticalBarWidth = 60.0;
 /// display edge.
 const double kDuoVerticalBarBezelInset = 12.0;
 
-/// Layout decisions for the iPhone Duo inner display.
+/// Clearance used below the top edge until the system has reported where the
+/// camera and status cluster are. It covers the taller of the two displays, so
+/// controls never start out underneath the cluster.
+const double kDuoStatusClusterFallbackHeight = 170.0;
+
+/// Layout decisions for iPhone Duo.
 abstract final class DuoLayout {
-  /// True on the inner display of an iPhone Duo.
+  /// Whether toolbar controls belong in a trailing vertical bar right now.
   ///
-  /// Branches on the size classes iOS itself lays out from: a regular
-  /// horizontal *and* vertical size class is unique to the Duo inner display
-  /// among iPhones (the cover display is compact width; a Plus/Max in
-  /// landscape is regular width but compact height). This mirrors how the
-  /// system moves its own bars to the side there.
+  /// Decided from what the system actually reserves rather than from a device
+  /// or size class: on iPhone Duo the status cluster lives in a strip on the
+  /// trailing edge, so the window has a trailing inset while its leading and
+  /// top insets are zero. That holds on the inner display (regular/regular)
+  /// and on the cover display while folded (compact/regular), which size
+  /// classes cannot tell apart from an ordinary iPhone. It is false where the
+  /// system keeps horizontal bars:
   ///
-  /// `isFoldable` is deliberately not required: it is derived from the hinge
-  /// API, whose status arrives asynchronously after the first snapshot (the
-  /// initial value is `unknown`, then the stream reports e.g. `fullyOpen`).
-  /// Requiring it would lay controls out at the top on the first frames and
-  /// jump them to the side a moment later; the size classes are correct at
-  /// once.
+  /// * any other iPhone in portrait has a top inset, and in landscape has
+  ///   equal leading and trailing insets;
+  /// * an iPad has no trailing inset;
+  /// * a Duo pose that puts the status bar back on top has a top inset.
   ///
-  /// Known gap: an iPad is also regular/regular and cannot be told apart by
-  /// size class alone; exposing the interface idiom from `foldable` would
-  /// close this.
-  static bool isInnerDisplay(FoldableData? fold) {
-    if (fold == null) return false;
-    return fold.horizontalSizeClass == SizeClass.regular &&
-        fold.verticalSizeClass == SizeClass.regular;
-  }
+  /// Pass the *view* padding: it is known on the very first frame, and unlike
+  /// `padding` it is not consumed by a `SafeArea` further up the tree.
+  static bool isVerticalBarPose(EdgeInsets viewPadding) =>
+      viewPadding.right > 0 && viewPadding.left == 0 && viewPadding.top == 0;
 
-  /// Whether toolbar controls belong in the trailing vertical bar right now.
-  ///
-  /// iOS keeps horizontal bars on the inner display in portrait and only
-  /// moves controls to the side while the display is wider than tall, so the
-  /// decision depends on the pose, not just on the display.
-  static bool isVerticalBarPose(FoldableData? fold, Size size) =>
-      isInnerDisplay(fold) && size.width > size.height;
-
-  /// Width of the trailing strip the system reserves on the inner display
-  /// (its status cluster lives there, so `padding.right` is non-zero while
-  /// `padding.top` is 0). The vertical bar sits inside that strip, which is
+  /// Width of the trailing strip the system reserves (its status cluster
+  /// lives there, so the trailing inset is non-zero while the top one is 0). The vertical bar sits inside that strip, which is
   /// also where iOS places its own vertical bars. Falls back to
   /// [kDuoVerticalBarWidth] if the inset is ever reported as 0.
   static double stripWidth(EdgeInsets padding) =>
@@ -74,7 +66,13 @@ abstract final class DuoLayout {
   }) {
     final stripLeft = size.width - stripWidth(padding);
     var clearance = padding.top;
+    var found = false;
     for (final region in regions) {
+      if (region.kind == ReservedRegionKind.occlusion &&
+          region.isActive &&
+          region.bounds.right > stripLeft) {
+        found = true;
+      }
       if (region.kind == ReservedRegionKind.occlusion &&
           region.isActive &&
           region.bounds.right > stripLeft &&
@@ -82,11 +80,16 @@ abstract final class DuoLayout {
         clearance = region.bounds.bottom;
       }
     }
+    // Regions arrive a moment after launch; until then stay clear of where
+    // the cluster can be instead of starting underneath it.
+    if (!found && clearance < kDuoStatusClusterFallbackHeight) {
+      return kDuoStatusClusterFallbackHeight;
+    }
     return clearance;
   }
 }
 
-/// The trailing vertical bar used on the iPhone Duo inner display. It holds
+/// The trailing vertical bar used on iPhone Duo. It holds
 /// the controls a top toolbar would otherwise show, ordered top to bottom the
 /// way the system orders its own vertical bar: primary navigation (back)
 /// first, then the actions in their original grouping.
@@ -113,7 +116,7 @@ class DuoVerticalBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final padding = MediaQuery.paddingOf(context);
+    final padding = MediaQuery.viewPaddingOf(context);
 
     final children = <Widget>[];
     if (leading != null) {
