@@ -297,7 +297,7 @@ class _IOS26ScaffoldState extends State<IOS26Scaffold>
         bodyContent,
         // Top toolbar - iOS 26 Liquid Glass style. On iPhone Duo it carries
         // only the title; the controls live in the trailing vertical bar.
-        if (showTopToolbar)
+        if (showTopToolbar && !(chrome?.hostsToolbar ?? false))
           Positioned(
             left: 0,
             right: 0,

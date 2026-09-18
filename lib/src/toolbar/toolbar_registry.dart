@@ -18,6 +18,7 @@ class ToolbarEntry {
     required this.visible,
     this.hasTabBar = false,
     this.enclosingRoutes = const <ModalRoute<Object?>>[],
+    this.titleOverlay,
   });
 
   /// Identifies the registering scaffold instance.
@@ -27,6 +28,11 @@ class ToolbarEntry {
   /// A null entry still counts, so the chrome empties out instead of keeping
   /// the previous page's items on a page that has none.
   final AdaptiveAppBar? appBar;
+
+  /// The page's title when it has to be drawn by Flutter (a custom widget, or
+  /// a title with a subtitle), already styled for the page's theme. Null
+  /// when the native bar can show [AdaptiveAppBar.title] itself.
+  final Widget? titleOverlay;
 
   /// The route the page lives in; null when it is not inside a Navigator.
   final ModalRoute<Object?>? route;

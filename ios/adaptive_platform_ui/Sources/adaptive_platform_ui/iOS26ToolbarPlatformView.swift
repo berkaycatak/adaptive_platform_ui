@@ -170,6 +170,10 @@ class iOS26ToolbarPlatformView: NSObject, FlutterPlatformView {
     }
 
     private func configureItems(_ params: [String: Any]) {
+        configureItems(params, on: navigationItem)
+    }
+
+    private func configureItems(_ params: [String: Any], on navigationItem: UINavigationItem) {
         // Title
         if let title = params["title"] as? String {
             navigationItem.title = title
@@ -281,6 +285,73 @@ class iOS26ToolbarPlatformView: NSObject, FlutterPlatformView {
         navigationItem.rightBarButtonItems = rightGroup.reversed()
     }
 
+    // MARK: - Fixed toolbar: swapping one page's items for another's
+
+    /// When the bar animates into its current items; a swap requested before
+    /// then is applied without animation, because UIKit corrupts a bar that is
+    /// asked to start a second item transition while one is running.
+    private var itemTransitionEnds: Date = .distantPast
+
+    /// Replaces the whole content of the bar with another page's. The bar
+    /// itself stays where it is; UIKit animates the items the way it does in
+    /// a UINavigationController: "push" and "pop" run the system item
+    /// transition in the matching direction, "fade" crossfades (tab switch),
+    /// anything else applies at once.
+    private func setItems(_ params: [String: Any]) {
+        let transition = params["transition"] as? String ?? "none"
+
+        perActionTintTags.removeAll()
+        let newItem = UINavigationItem()
+        // The back button is an ordinary leading item that reports to Flutter,
+        // which owns the navigation stack; the system one must not appear.
+        newItem.hidesBackButton = true
+        configureItems(params, on: newItem)
+
+        if let n = params["tint"] as? NSNumber {
+            let color = Self.colorFromARGB(n.intValue)
+            containerView.tintColor = color
+            navigationBar.tintColor = color
+        } else {
+            containerView.tintColor = nil
+            navigationBar.tintColor = nil
+        }
+        if let globalTint = params["tint"] as? NSNumber {
+            let color = Self.colorFromARGB(globalTint.intValue)
+            for item in (newItem.leftBarButtonItems ?? []) + (newItem.rightBarButtonItems ?? []) {
+                if !perActionTintTags.contains(item.tag) {
+                    item.tintColor = color
+                }
+            }
+        }
+
+        let current = navigationItem
+        current.hidesBackButton = true
+        let busy = Date() < itemTransitionEnds
+        let animated = !busy && (transition == "push" || transition == "pop")
+
+        if animated && transition == "push" {
+            navigationBar.setItems([current], animated: false)
+            navigationBar.setItems([current, newItem], animated: true)
+        } else if animated && transition == "pop" {
+            navigationBar.setItems([newItem, current], animated: false)
+            navigationBar.setItems([newItem], animated: true)
+        } else {
+            if !busy && transition == "fade" {
+                let fade = CATransition()
+                fade.type = .fade
+                fade.duration = 0.22
+                fade.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+                navigationBar.layer.add(fade, forKey: "adaptive_toolbar_fade")
+            }
+            navigationBar.setItems([newItem], animated: false)
+        }
+
+        if animated {
+            itemTransitionEnds = Date().addingTimeInterval(0.5)
+        }
+        navigationItem = newItem
+    }
+
     @objc private func leadingTapped() {
         channel.invokeMethod("onLeadingTapped", arguments: nil)
     }
@@ -319,6 +390,11 @@ class iOS26ToolbarPlatformView: NSObject, FlutterPlatformView {
                         }
                     }
                 }
+            }
+            result(nil)
+        case "setItems":
+            if let args = call.arguments as? [String: Any] {
+                setItems(args)
             }
             result(nil)
         case "setStyle":

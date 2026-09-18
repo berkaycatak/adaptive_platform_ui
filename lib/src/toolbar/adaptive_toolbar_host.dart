@@ -6,6 +6,7 @@ import 'package:foldable/foldable.dart';
 import '../platform/platform_info.dart';
 import 'duo_vertical_bar.dart';
 import 'hosted_duo_bar.dart';
+import 'hosted_top_toolbar.dart';
 import 'toolbar_blend.dart';
 import 'toolbar_chrome_scope.dart';
 import 'toolbar_registry.dart';
@@ -82,13 +83,16 @@ class _AdaptiveToolbarHostState extends State<AdaptiveToolbarHost>
     final fold = widget.debugFold ?? _fold;
     // The fixed chrome only exists where pages use the native iOS 26
     // toolbar; elsewhere pages keep their own Cupertino / Material bars.
+    final hostsToolbar =
+        widget.debugFold != null || PlatformInfo.isIOS26OrHigher();
     final hostsDuoControls =
-        (widget.debugFold != null || PlatformInfo.isIOS26OrHigher()) &&
+        hostsToolbar &&
         DuoLayout.isVerticalBarPose(MediaQuery.viewPaddingOf(context));
 
     return ToolbarRegistryScope(
       registry: _registry,
       child: ToolbarChromeScope(
+        hostsToolbar: hostsToolbar,
         hostsDuoControls: hostsDuoControls,
         child: Stack(
           fit: StackFit.expand,
@@ -96,6 +100,8 @@ class _AdaptiveToolbarHostState extends State<AdaptiveToolbarHost>
             // Always the first child at a stable position, so toggling the
             // chrome never rebuilds the navigator from scratch.
             widget.child,
+            if (hostsToolbar)
+              HostedTopToolbar(blend: _blend, titleOnly: hostsDuoControls),
             if (hostsDuoControls)
               Positioned(
                 top: 0,
