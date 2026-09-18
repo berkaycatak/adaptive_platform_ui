@@ -8,6 +8,7 @@ import 'adaptive_badge.dart';
 import 'adaptive_bottom_navigation_bar.dart';
 import 'adaptive_button.dart';
 import 'ios26/ios26_scaffold.dart';
+import '../toolbar/toolbar_registry.dart';
 
 /// Navigation destination for bottom navigation
 class AdaptiveNavigationDestination {
@@ -179,6 +180,56 @@ class AdaptiveScaffold extends StatefulWidget {
 class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
   final GlobalKey<_MinimizableTabBarState> _tabBarKey =
       GlobalKey<_MinimizableTabBarState>();
+
+  /// The fixed toolbar chrome this page publishes its app bar to, if an
+  /// [AdaptiveToolbarHost] is installed above the navigator.
+  ToolbarRegistry? _toolbarRegistry;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _syncToolbarEntry();
+  }
+
+  @override
+  void didUpdateWidget(AdaptiveScaffold oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.appBar != widget.appBar) _syncToolbarEntry();
+  }
+
+  @override
+  void dispose() {
+    _toolbarRegistry?.remove(this);
+    super.dispose();
+  }
+
+  /// Publishes this page's app bar to the fixed toolbar chrome.
+  ///
+  /// Reading [ModalRoute.of], [TickerMode.valuesOf] and [Visibility.of] here
+  /// registers dependencies on the route's live status and on the page's
+  /// visibility, so this re-runs exactly when the page stops (or starts) being
+  /// the current route, or is hidden/shown by a tab switch: the moments the
+  /// chrome has to pick another page's items. No-op when no host is installed.
+  ///
+  /// Both visibility signals are needed because tab containers hide pages
+  /// differently: GoRouter's `StatefulShellRoute.indexedStack` and
+  /// `CupertinoTabScaffold` use `Offstage` + a disabled [TickerMode], while a
+  /// plain [IndexedStack] uses [Visibility.maintain], which keeps tickers
+  /// enabled and is only observable through [Visibility.of].
+  void _syncToolbarEntry() {
+    final registry = ToolbarRegistry.maybeOf(context);
+    if (registry == null) return;
+    _toolbarRegistry = registry;
+    registry.upsert(
+      ToolbarEntry(
+        id: this,
+        appBar: widget.appBar,
+        route: ModalRoute.of(context),
+        navigator: Navigator.maybeOf(context),
+        visible: TickerMode.valuesOf(context).enabled && Visibility.of(context),
+      ),
+    );
+  }
 
   /// Builds the app bar title area, optionally with a subtitle below it.
   ///
@@ -658,9 +709,11 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
               );
             }
             return IconButton(
-              icon: action.iconWidget ?? (action.icon != null
-                  ? Icon(action.icon!)
-                  : const Icon(Icons.circle)),
+              icon:
+                  action.iconWidget ??
+                  (action.icon != null
+                      ? Icon(action.icon!)
+                      : const Icon(Icons.circle)),
               onPressed: action.onPressed,
             );
           }).toList(),
@@ -758,9 +811,11 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
             );
           }
           return IconButton(
-            icon: action.iconWidget ?? (action.icon != null
-                ? Icon(action.icon!)
-                : const Icon(Icons.circle)),
+            icon:
+                action.iconWidget ??
+                (action.icon != null
+                    ? Icon(action.icon!)
+                    : const Icon(Icons.circle)),
             onPressed: action.onPressed,
           );
         }).toList(),
