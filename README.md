@@ -159,6 +159,41 @@ Adaptive Bottom Navigation Bar (Destinations):
 </p>
 
 
+### Fixed Liquid Glass toolbar and iPhone Duo
+
+On iOS 26+ the native toolbar is not part of a page. `AdaptiveApp` keeps one
+toolbar above the navigator, the way a `UINavigationController` does: pages
+slide underneath it, the bar stays where it is, and only its items change.
+
+- **Nothing to set up.** Use `AdaptiveApp` (or `AdaptiveApp.router`) and give
+  your pages an `AdaptiveAppBar(useNativeToolbar: true)`. Each
+  `AdaptiveScaffold` publishes its app bar when it appears and withdraws it
+  when it leaves.
+- **Any router.** It relies on the widget tree only, not on a
+  `NavigatorObserver`, so it works with `Navigator`, GoRouter (including
+  `StatefulShellRoute`), auto_route, nested navigators and tabs.
+- **Native item transitions.** Push and pop play the system item transition;
+  switching tabs crossfades. The back button appears when the page can go
+  back and pops that page's own navigator.
+- **Dialogs and sheets** leave the bar in place, dimmed and not tappable.
+- **iPhone Duo.** On the inner display, and on the cover display while
+  folded, iOS reserves a strip on the trailing edge. The controls move into a
+  fixed vertical bar in that strip, clear of the camera, and the title stays
+  on top. Item changes there follow the route transition, including a back
+  swipe under the finger.
+
+Not using `AdaptiveApp`? Install the host yourself, around the navigator:
+
+```dart
+MaterialApp(
+  builder: (context, child) => AdaptiveToolbarHost(child: child!),
+  // ...
+);
+```
+
+Without a host every page draws its own toolbar, as before.
+
+
 ### AdaptiveButton
 
 <img src="https://raw.githubusercontent.com/berkaycatak/adaptive_platform_ui/refs/heads/main/img/buttons_p.png" alt="iOS 26 Native Toolbar">
