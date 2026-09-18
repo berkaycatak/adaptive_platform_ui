@@ -11,18 +11,6 @@ const Duration kToolbarItemSwapDuration = Duration(milliseconds: 220);
 /// How far the chrome is dimmed while a dialog or sheet covers its owner.
 const double kToolbarCoveredOpacity = 0.45;
 
-/// Why the owner of the chrome changed.
-enum ToolbarSwapKind {
-  /// A page was pushed on top of the previous owner.
-  push,
-
-  /// The previous owner was popped (or swiped away) and uncovered this one.
-  pop,
-
-  /// No route transition links the two: a tab switch, a replaced stack.
-  swap,
-}
-
 /// Works out, for every part of the fixed chrome, whose controls to show and
 /// how to move from one page's controls to the next.
 ///
@@ -97,6 +85,16 @@ class ToolbarBlend extends ChangeNotifier {
   /// Whether [upper] (rather than [lower]) is the [owner].
   bool get upperOwns => !isBlending || _upperId == _ownerId;
 
+  /// Whether the running blend was started by a back swipe. It stays true
+  /// after the finger lifts, while the route settles one way or the other.
+  bool get isGestureBlend => _gestureBlend;
+  bool _gestureBlend = false;
+
+  /// Incremented each time a new blend starts. A back swipe that ends in a
+  /// pop keeps its number, because it carries on with the same blend.
+  int get blendCount => _blendCount;
+  int _blendCount = 0;
+
   /// The animation blending [lower] (0) into [upper] (1); null when idle.
   Animation<double>? get driver => _driver;
 
@@ -117,15 +115,6 @@ class ToolbarBlend extends ChangeNotifier {
 
   Animation<double> get lowerOpacity =>
       _driver?.drive(_fadeOut) ?? kAlwaysDismissedAnimation;
-
-  /// Incremented every time [owner] changes to another page, with
-  /// [lastSwapKind] saying how. Parts of the chrome that animate natively use
-  /// it to start the matching animation once per change.
-  int get swapCount => _swapCount;
-  int _swapCount = 0;
-
-  ToolbarSwapKind get lastSwapKind => _lastSwapKind;
-  ToolbarSwapKind _lastSwapKind = ToolbarSwapKind.swap;
 
   ToolbarEntry? _entry(Object? id) {
     if (id == null) return null;
@@ -161,20 +150,30 @@ class ToolbarBlend extends ChangeNotifier {
       _hasShownOwner = next != null;
     } else if (next?.id != previous?.id) {
       _ownerId = next?.id;
-      _swapCount++;
       final pushing = next?.route?.animation;
       final popping = previous?.route?.animation;
-      if (pushing != null && pushing.status == AnimationStatus.forward) {
+      // A freshly pushed route spends its first frame off stage (so heroes
+      // can be measured) and reports a completed animation for that frame.
+      // It is about to run forward from zero, so it is a push all the same.
+      final isPushing =
+          pushing != null &&
+          (pushing.status == AnimationStatus.forward ||
+              (next?.route?.offstage ?? false));
+      if (isPushing) {
         // A new page is coming in on top of the previous owner.
-        _lastSwapKind = ToolbarSwapKind.push;
         _startBlend(pushing, upper: next, lower: previous);
       } else if (popping != null && popping.status == AnimationStatus.reverse) {
         // The previous owner is leaving and uncovers the new one. When a
         // back swipe was already blending the two, this continues it.
-        _lastSwapKind = ToolbarSwapKind.pop;
-        _startBlend(popping, upper: previous, lower: next);
+        _startBlend(
+          popping,
+          upper: previous,
+          lower: next,
+          continuesGesture: _gestureBlend && identical(_driver, popping),
+        );
       } else {
-        _lastSwapKind = ToolbarSwapKind.swap;
+        // No route transition to follow: a tab switch, or a transition that
+        // a heavy first frame has already outlasted. Crossfade briefly.
         _swap.value = 0;
         _startBlend(_swap, upper: next, lower: previous);
         _swap.forward();
@@ -207,7 +206,12 @@ class ToolbarBlend extends ChangeNotifier {
       final owner = this.owner;
       final animation = owner?.route?.animation;
       if (owner == null || animation == null) return;
-      _startBlend(animation, upper: owner, lower: registry.below(owner));
+      _startBlend(
+        animation,
+        upper: owner,
+        lower: registry.below(owner),
+        gesture: true,
+      );
       notifyListeners();
     } else {
       // Released: the route now either settles back or pops.
@@ -219,8 +223,13 @@ class ToolbarBlend extends ChangeNotifier {
     Animation<double> driver, {
     required ToolbarEntry? upper,
     required ToolbarEntry? lower,
+    bool gesture = false,
+    bool continuesGesture = false,
   }) {
     _stopBlend();
+    _gestureBlend = gesture || continuesGesture;
+    // A swipe that ends in a pop is still the same blend, not a new one.
+    if (!continuesGesture) _blendCount++;
     _driver = driver;
     _upperId = upper?.id;
     _lowerId = lower?.id;
@@ -230,6 +239,7 @@ class ToolbarBlend extends ChangeNotifier {
   void _stopBlend() {
     _driver?.removeStatusListener(_onDriverStatus);
     _driver = null;
+    _gestureBlend = false;
     _upperId = null;
     _lowerId = null;
   }
