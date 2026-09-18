@@ -17,6 +17,7 @@ class ToolbarEntry {
     required this.navigator,
     required this.visible,
     this.hasTabBar = false,
+    this.enclosingRoutes = const <ModalRoute<Object?>>[],
   });
 
   /// Identifies the registering scaffold instance.
@@ -38,13 +39,33 @@ class ToolbarEntry {
   /// non-selected tab of an IndexedStack.
   final bool visible;
 
+  /// The routes of the navigators this page's navigator is nested in, nearest
+  /// first: for a page inside a tab or shell route, the route that hosts the
+  /// tabs. A dialog pushed on an outer navigator covers the page just as one
+  /// pushed on its own navigator does, and only these routes reveal it.
+  final List<ModalRoute<Object?>> enclosingRoutes;
+
   /// Whether the registering scaffold shows a tab bar. Such a scaffold is the
   /// root of a tab layout and never gets an automatic back button.
   final bool hasTabBar;
 
+  bool get _isOnTop =>
+      (route?.isCurrent ?? true) && enclosingRoutes.every((r) => r.isCurrent);
+
+  bool get _isInStack =>
+      (route?.isActive ?? true) && enclosingRoutes.every((r) => r.isActive);
+
   /// Whether the user is looking at this page right now: it is visible and
-  /// on top of its own navigator. Read live, so it tracks pushes and pops.
-  bool get isActive => visible && (route?.isCurrent ?? true);
+  /// nothing is on top of it, in its own navigator or in an outer one. Read
+  /// live, so it tracks pushes and pops.
+  bool get isActive => visible && _isOnTop;
+
+  /// Whether the page is still on screen underneath something that is not a
+  /// page: a dialog, a sheet, a popup. (A page covered by an opaque route is
+  /// taken off stage by the navigator and stops being [visible].) Its
+  /// controls stay in the chrome, dimmed and inert, like a navigation bar
+  /// behind a sheet.
+  bool get isCovered => visible && !_isOnTop && _isInStack;
 
   /// Whether the chrome should offer a back button for this page.
   ///
@@ -77,14 +98,25 @@ class ToolbarRegistry extends ChangeNotifier {
   /// All mounted entries in registration order (oldest first).
   List<ToolbarEntry> get entries => List<ToolbarEntry>.unmodifiable(_entries);
 
-  /// The entry whose items the chrome shows.
+  /// The page in front, whose items the chrome shows and acts on.
   ///
-  /// The most recently registered page that is on its navigator's top and
-  /// visible. Newest wins so a page inside a nested navigator beats the shell
-  /// page hosting it, and a freshly pushed page beats the one beneath it.
+  /// The most recently registered page that is visible with nothing on top.
+  /// Newest wins so a page inside a nested navigator beats the shell page
+  /// hosting it, and a freshly pushed page beats the one beneath it.
   ToolbarEntry? get active {
     for (var i = _entries.length - 1; i >= 0; i--) {
       if (_entries[i].isActive) return _entries[i];
+    }
+    return null;
+  }
+
+  /// The page whose items the chrome shows: the [active] one, or else the
+  /// page that a dialog or sheet currently covers.
+  ToolbarEntry? get owner {
+    final active = this.active;
+    if (active != null) return active;
+    for (var i = _entries.length - 1; i >= 0; i--) {
+      if (_entries[i].isCovered) return _entries[i];
     }
     return null;
   }

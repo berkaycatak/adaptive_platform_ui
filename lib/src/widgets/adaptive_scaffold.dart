@@ -223,12 +223,25 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
     final registry = ToolbarRegistry.maybeOf(context);
     if (registry == null) return;
     _toolbarRegistry = registry;
+    final navigator = Navigator.maybeOf(context);
+    // Routes of the navigators around this page's own one (tabs, shell
+    // routes). `Navigator.maybeOf` would hand a navigator's context straight
+    // back to itself, so step to its ancestor explicitly.
+    final enclosingRoutes = <ModalRoute<Object?>>[];
+    var outer = navigator?.context;
+    while (outer != null) {
+      final route = ModalRoute.of(outer);
+      if (route == null) break;
+      enclosingRoutes.add(route);
+      outer = outer.findAncestorStateOfType<NavigatorState>()?.context;
+    }
     registry.upsert(
       ToolbarEntry(
         id: this,
         appBar: widget.appBar,
         route: ModalRoute.of(context),
-        navigator: Navigator.maybeOf(context),
+        navigator: navigator,
+        enclosingRoutes: enclosingRoutes,
         visible: TickerMode.valuesOf(context).enabled && Visibility.of(context),
         hasTabBar: widget.bottomNavigationBar?.items?.isNotEmpty ?? false,
       ),

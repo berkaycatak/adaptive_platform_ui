@@ -6,6 +6,7 @@ import 'package:foldable/foldable.dart';
 import '../platform/platform_info.dart';
 import 'duo_vertical_bar.dart';
 import 'hosted_duo_bar.dart';
+import 'toolbar_blend.dart';
 import 'toolbar_chrome_scope.dart';
 import 'toolbar_registry.dart';
 
@@ -39,8 +40,10 @@ class AdaptiveToolbarHost extends StatefulWidget {
   State<AdaptiveToolbarHost> createState() => _AdaptiveToolbarHostState();
 }
 
-class _AdaptiveToolbarHostState extends State<AdaptiveToolbarHost> {
+class _AdaptiveToolbarHostState extends State<AdaptiveToolbarHost>
+    with TickerProviderStateMixin {
   final ToolbarRegistry _registry = ToolbarRegistry();
+  late final ToolbarBlend _blend;
 
   /// Latest fold / size-class reading; null until the first one arrives and
   /// on platforms where the chrome is never drawn.
@@ -50,6 +53,7 @@ class _AdaptiveToolbarHostState extends State<AdaptiveToolbarHost> {
   @override
   void initState() {
     super.initState();
+    _blend = ToolbarBlend(registry: _registry, vsync: this);
     // Fold readings are only needed for the camera clearance of the bar.
     if (widget.debugFold == null && PlatformInfo.isIOS26OrHigher()) {
       Foldable.snapshot.then(_onFoldChanged).catchError((Object _) {});
@@ -68,6 +72,7 @@ class _AdaptiveToolbarHostState extends State<AdaptiveToolbarHost> {
   @override
   void dispose() {
     _foldSub?.cancel();
+    _blend.dispose();
     _registry.dispose();
     super.dispose();
   }
@@ -98,7 +103,7 @@ class _AdaptiveToolbarHostState extends State<AdaptiveToolbarHost> {
                 bottom: 0,
                 width: DuoLayout.bandWidth(MediaQuery.viewPaddingOf(context)),
                 child: HostedDuoBar(
-                  registry: _registry,
+                  blend: _blend,
                   regions: fold?.regions ?? const <ReservedRegion>[],
                 ),
               ),
