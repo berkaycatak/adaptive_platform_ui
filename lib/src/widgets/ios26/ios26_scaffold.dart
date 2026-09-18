@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:foldable/foldable.dart';
 import '../../style/sf_symbol.dart';
+import '../../toolbar/duo_vertical_bar.dart';
 import '../adaptive_app_bar_action.dart';
 import '../adaptive_bottom_navigation_bar.dart';
 import '../adaptive_button.dart';
@@ -14,12 +15,6 @@ import 'ios26_native_toolbar.dart';
 /// status bar), matching [IOS26NativeToolbar]'s default height. The toolbar is
 /// an overlay, so this amount is added to the body's top padding.
 const double kToolbarContentHeight = 44.0;
-
-/// Fallback width of the trailing vertical control bar on the iPhone Duo inner
-/// display, used only if the system reports no trailing safe-area inset. The
-/// bar normally takes the width of that inset (`padding.right`), which is the
-/// strip iOS reserves for its own vertical bars and status cluster.
-const double kDuoVerticalBarWidth = 60.0;
 
 /// Native iOS 26 scaffold with UITabBar
 class IOS26Scaffold extends StatefulWidget {
@@ -69,30 +64,6 @@ class _IOS26ScaffoldState extends State<IOS26Scaffold>
   /// Null until the first snapshot arrives; stays null on non-iOS.
   FoldableData? _fold;
   StreamSubscription<FoldableData>? _foldSub;
-
-  /// True on the inner display of an iPhone Duo.
-  ///
-  /// Branches on the size classes iOS itself lays out from: a regular
-  /// horizontal *and* vertical size class is unique to the Duo inner display
-  /// among iPhones (the cover display is compact width; a Plus/Max in landscape
-  /// is regular width but compact height). This mirrors how the system moves
-  /// its own bars to the side there.
-  ///
-  /// `isFoldable` is deliberately not required: it is derived from the hinge
-  /// API, whose status arrives asynchronously after the first snapshot (the
-  /// initial value is `unknown`, then the stream reports e.g. `fullyOpen`).
-  /// Requiring it would lay the toolbar out at the top on the first frames and
-  /// jump it to the side a moment later; the size classes are correct at once.
-  ///
-  /// Known gap: an iPad is also regular/regular and cannot be told apart by
-  /// size class alone; exposing the interface idiom from `foldable` would
-  /// close this.
-  bool get _isDuoInnerDisplay {
-    final fold = _fold;
-    if (fold == null) return false;
-    return fold.horizontalSizeClass == SizeClass.regular &&
-        fold.verticalSizeClass == SizeClass.regular;
-  }
 
   @override
   void initState() {
@@ -189,106 +160,6 @@ class _IOS26ScaffoldState extends State<IOS26Scaffold>
         (displaySize.shortestSide != viewportSize.shortestSide);
   }
 
-  /// Width of the trailing strip the system reserves on the iPhone Duo inner
-  /// display (its status cluster lives there, so `padding.right` is non-zero
-  /// while `padding.top` is 0). The vertical bar sits inside that strip, which
-  /// is also where iOS places its own vertical bars. Falls back to
-  /// [kDuoVerticalBarWidth] if the inset is ever reported as 0.
-  static double _duoBarWidth(EdgeInsets padding) =>
-      padding.right > 0 ? padding.right : kDuoVerticalBarWidth;
-
-  /// Top clearance for the vertical bar: below any active occlusion region
-  /// (the under-display camera / status cluster) that overlaps the trailing
-  /// strip, so controls never sit under the camera the way they would under
-  /// the plain top safe-area inset (which is 0 on this display).
-  double _duoBarTopClearance(BuildContext context, EdgeInsets padding) {
-    final size = MediaQuery.sizeOf(context);
-    final stripLeft = size.width - _duoBarWidth(padding);
-    var clearance = padding.top;
-    for (final region in _fold?.regions ?? const <ReservedRegion>[]) {
-      if (region.kind == ReservedRegionKind.occlusion &&
-          region.isActive &&
-          region.bounds.right > stripLeft) {
-        if (region.bounds.bottom > clearance) clearance = region.bounds.bottom;
-      }
-    }
-    return clearance;
-  }
-
-  /// The trailing vertical bar used on the iPhone Duo inner display. It holds
-  /// the controls the top toolbar would otherwise show, ordered top to bottom
-  /// the way the system orders its own vertical bar: primary navigation (back)
-  /// first, then the actions in their original grouping.
-  ///
-  /// This is a Flutter overlay rather than a native bar: iOS only lays out
-  /// container-managed bars vertically, never a hand-built UINavigationBar.
-  Widget _buildDuoVerticalBar(BuildContext context, Widget? heroLeading) {
-    final padding = MediaQuery.paddingOf(context);
-    final leading = widget.leading ?? heroLeading;
-    final actions = widget.actions ?? const <AdaptiveAppBarAction>[];
-
-    final children = <Widget>[];
-    if (leading != null) {
-      children.add(leading);
-      children.add(const SizedBox(height: 12));
-    }
-    for (final action in actions) {
-      children.add(_buildDuoBarAction(action));
-      switch (action.spacerAfter) {
-        case ToolbarSpacerType.flexible:
-          children.add(const Spacer());
-        case ToolbarSpacerType.fixed:
-          children.add(const SizedBox(height: 12));
-        case ToolbarSpacerType.none:
-          children.add(const SizedBox(height: 8));
-      }
-    }
-
-    return Padding(
-      // Safe areas are asymmetric on iPhone Duo; read each edge on its own.
-      padding: EdgeInsets.only(
-        top: _duoBarTopClearance(context, padding) + 8,
-        bottom: padding.bottom + 8,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: children,
-      ),
-    );
-  }
-
-  /// One control in the Duo vertical bar. A narrow, tall bar favours the
-  /// icon-only representation, so prefer the SF Symbol (the iOS 26 form),
-  /// then a custom icon widget or IconData, and fall back to the title text.
-  Widget _buildDuoBarAction(AdaptiveAppBarAction action) {
-    final Widget child;
-    if (action.iosSymbol != null) {
-      child = AdaptiveButton.sfSymbol(
-        onPressed: action.onPressed,
-        sfSymbol: SFSymbol(action.iosSymbol!, size: 20),
-      );
-    } else if (action.iconWidget != null) {
-      child = CupertinoButton(
-        padding: EdgeInsets.zero,
-        onPressed: action.onPressed,
-        child: action.iconWidget!,
-      );
-    } else if (action.icon != null) {
-      child = CupertinoButton(
-        padding: EdgeInsets.zero,
-        onPressed: action.onPressed,
-        child: Icon(action.icon, size: 22),
-      );
-    } else {
-      child = CupertinoButton(
-        padding: EdgeInsets.zero,
-        onPressed: action.onPressed,
-        child: Text(action.title ?? '', style: const TextStyle(fontSize: 12)),
-      );
-    }
-    return SizedBox(height: 38, width: 38, child: child);
-  }
-
   @override
   Widget build(BuildContext context) {
     // Auto back button logic
@@ -376,12 +247,13 @@ class _IOS26ScaffoldState extends State<IOS26Scaffold>
     // lays out vertically, so mirror that behaviour here: keep a title-only
     // toolbar at the top (when there is a title) and render the controls in a
     // trailing vertical bar of our own.
-    final duo = _isDuoInnerDisplay;
     // iOS keeps horizontal bars on the inner display in portrait and only moves
-    // controls to the side while the display is wider than tall, so gate the
-    // vertical bar on the pose, not just on the display.
-    final size = MediaQuery.sizeOf(context);
-    final duoVerticalPose = duo && size.width > size.height;
+    // controls to the side while the display is wider than tall, so the
+    // vertical bar depends on the pose, not just on the display.
+    final duoVerticalPose = DuoLayout.isVerticalBarPose(
+      _fold,
+      MediaQuery.sizeOf(context),
+    );
     final hasTitle = widget.title != null || widget.titleWidget != null;
     final hasControls =
         widget.leading != null ||
@@ -450,10 +322,12 @@ class _IOS26ScaffoldState extends State<IOS26Scaffold>
             top: 0,
             right: 0,
             bottom: 0,
-            // Widen the band inward a little so the centred controls sit a
-            // few points off the bezel instead of hugging the display edge.
-            width: _duoBarWidth(MediaQuery.paddingOf(context)) + 12,
-            child: _buildDuoVerticalBar(context, heroLeading),
+            width: DuoLayout.bandWidth(MediaQuery.paddingOf(context)),
+            child: DuoVerticalBar(
+              leading: widget.leading ?? heroLeading,
+              actions: widget.actions ?? const <AdaptiveAppBarAction>[],
+              regions: _fold?.regions ?? const <ReservedRegion>[],
+            ),
           ),
         // Tab bar - only show if destinations exist
         if (widget.bottomNavigationBar?.items != null &&
