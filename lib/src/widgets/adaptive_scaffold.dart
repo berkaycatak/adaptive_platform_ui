@@ -242,6 +242,7 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
         route: ModalRoute.of(context),
         navigator: navigator,
         enclosingRoutes: enclosingRoutes,
+        titleOverlay: _buildIOS26TitleOverlay(),
         visible: TickerMode.valuesOf(context).enabled && Visibility.of(context),
         hasTabBar: widget.bottomNavigationBar?.items?.isNotEmpty ?? false,
       ),

@@ -9,9 +9,15 @@ import 'package:flutter/widgets.dart';
 class ToolbarChromeScope extends InheritedWidget {
   const ToolbarChromeScope({
     super.key,
+    required this.hostsToolbar,
     required this.hostsDuoControls,
     required super.child,
   });
+
+  /// True while the host draws the top toolbar (title, back button, actions)
+  /// for every page in one fixed bar. Pages then draw no toolbar of their own
+  /// and only keep their content clear of it.
+  final bool hostsToolbar;
 
   /// True while the host shows the page's controls (back button, actions) in
   /// the fixed trailing vertical bar of iPhone Duo. Pages
@@ -25,5 +31,6 @@ class ToolbarChromeScope extends InheritedWidget {
 
   @override
   bool updateShouldNotify(ToolbarChromeScope oldWidget) =>
+      hostsToolbar != oldWidget.hostsToolbar ||
       hostsDuoControls != oldWidget.hostsDuoControls;
 }
