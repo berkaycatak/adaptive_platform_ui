@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.1.112]
+* **IMPROVEMENT**: Migrated the Android plugin to built-in Kotlin. It no longer applies the Kotlin Gradle Plugin (KGP), which removes the Flutter KGP deprecation warning and keeps the plugin buildable on AGP 9 and later
+* **IMPROVEMENT**: Raised the minimum supported versions to Flutter 3.44 / Dart 3.12, and updated the Android build to AGP 9.1.0, Gradle 9.3.1, KGP 2.4.0 and compileSdk 36
+
 ## [0.1.111]
 * **NEW**: Custom SF Symbols on iOS. `AdaptiveAppBarAction`, native buttons, and the tab bar now fall back to a bundle asset (`UIImage(named:)`) when a name is not a system SF Symbol, so custom symbols or images from the app's asset catalog work (@hieutbui)
 * **NEW**: `iconWidget` on `AdaptiveAppBarAction` for a custom fallback widget (e.g. an SVG) on iOS <26 and Android (@hieutbui)
