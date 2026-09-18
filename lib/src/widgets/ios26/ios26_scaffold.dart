@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:foldable/foldable.dart';
 import '../../style/sf_symbol.dart';
 import '../../toolbar/duo_vertical_bar.dart';
+import '../../toolbar/toolbar_chrome_scope.dart';
 import '../adaptive_app_bar_action.dart';
 import '../adaptive_bottom_navigation_bar.dart';
 import '../adaptive_button.dart';
@@ -250,17 +251,21 @@ class _IOS26ScaffoldState extends State<IOS26Scaffold>
     // iOS keeps horizontal bars on the inner display in portrait and only moves
     // controls to the side while the display is wider than tall, so the
     // vertical bar depends on the pose, not just on the display.
-    final duoVerticalPose = DuoLayout.isVerticalBarPose(
-      _fold,
-      MediaQuery.sizeOf(context),
-    );
+    //
+    // With an AdaptiveToolbarHost above the navigator the host decides the
+    // pose and draws the one fixed vertical bar for every page, so this page
+    // keeps only its title. Without a host it draws its own bar.
+    final chrome = ToolbarChromeScope.maybeOf(context);
+    final duoVerticalPose =
+        chrome?.hostsDuoControls ??
+        DuoLayout.isVerticalBarPose(_fold, MediaQuery.sizeOf(context));
     final hasTitle = widget.title != null || widget.titleWidget != null;
     final hasControls =
         widget.leading != null ||
         heroLeading != null ||
         (widget.actions != null && widget.actions!.isNotEmpty);
     final showTopToolbar = duoVerticalPose ? hasTitle : hasToolbarContent;
-    final showDuoSideBar = duoVerticalPose && hasControls;
+    final showDuoSideBar = duoVerticalPose && hasControls && chrome == null;
 
     // The Liquid Glass toolbar is drawn as a Positioned overlay on top of the
     // body (see below), so, unlike CupertinoPageScaffold with a translucent
