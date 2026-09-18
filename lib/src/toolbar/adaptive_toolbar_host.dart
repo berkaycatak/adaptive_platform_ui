@@ -4,10 +4,8 @@ import 'package:flutter/widgets.dart';
 import 'package:foldable/foldable.dart';
 
 import '../platform/platform_info.dart';
-import '../style/sf_symbol.dart';
-import '../widgets/adaptive_app_bar_action.dart';
-import '../widgets/adaptive_button.dart';
 import 'duo_vertical_bar.dart';
+import 'hosted_duo_bar.dart';
 import 'toolbar_chrome_scope.dart';
 import 'toolbar_registry.dart';
 
@@ -99,68 +97,13 @@ class _AdaptiveToolbarHostState extends State<AdaptiveToolbarHost> {
                 right: 0,
                 bottom: 0,
                 width: DuoLayout.bandWidth(MediaQuery.paddingOf(context)),
-                child: _HostedDuoBar(
+                child: HostedDuoBar(
                   registry: _registry,
                   regions: fold?.regions ?? const <ReservedRegion>[],
                 ),
               ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-/// The one vertical bar of the app. It never moves; only its controls follow
-/// the page that owns the chrome.
-class _HostedDuoBar extends StatelessWidget {
-  const _HostedDuoBar({required this.registry, required this.regions});
-
-  final ToolbarRegistry registry;
-  final List<ReservedRegion> regions;
-
-  @override
-  Widget build(BuildContext context) {
-    return ListenableBuilder(
-      listenable: registry,
-      builder: (context, _) {
-        final entry = registry.active;
-        final appBar = entry?.appBar;
-
-        // No page owns the chrome (a dialog or sheet is on top), the page has
-        // no toolbar, or it draws a non-native bar of its own: the bar stays
-        // in place, empty, instead of showing another page's controls.
-        if (entry == null || appBar == null || !appBar.useNativeToolbar) {
-          return const SizedBox.shrink();
-        }
-
-        return DuoVerticalBar(
-          leading:
-              appBar.leading ??
-              (entry.impliesBackButton ? _BackButton(entry: entry) : null),
-          actions: appBar.actions ?? const <AdaptiveAppBarAction>[],
-          regions: regions,
-        );
-      },
-    );
-  }
-}
-
-/// Back for the page that owns the chrome, performed on that page's own
-/// navigator so nested navigators (tabs, shell routes) pop the right stack.
-class _BackButton extends StatelessWidget {
-  const _BackButton({required this.entry});
-
-  final ToolbarEntry entry;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 38,
-      width: 38,
-      child: AdaptiveButton.sfSymbol(
-        onPressed: () => entry.navigator?.maybePop(),
-        sfSymbol: const SFSymbol('chevron.left', size: 20),
       ),
     );
   }

@@ -47,7 +47,16 @@ class ToolbarEntry {
   bool get isActive => visible && (route?.isCurrent ?? true);
 
   /// Whether the chrome should offer a back button for this page.
-  bool get canPop => navigator?.canPop() ?? false;
+  ///
+  /// Asked of the page's own route rather than of the navigator's current
+  /// stack, so the answer stays the same while the page is being pushed,
+  /// dragged back or popped, and its back button does not flicker mid
+  /// transition.
+  bool get canPop {
+    final route = this.route;
+    if (route == null) return navigator?.canPop() ?? false;
+    return !route.isFirst || route.willHandlePopInternally;
+  }
 
   /// Whether the chrome should supply a back button on its own: the page can
   /// go back, brought no leading widget of its own, and is not a tab root.
@@ -76,6 +85,31 @@ class ToolbarRegistry extends ChangeNotifier {
   ToolbarEntry? get active {
     for (var i = _entries.length - 1; i >= 0; i--) {
       if (_entries[i].isActive) return _entries[i];
+    }
+    return null;
+  }
+
+  /// The latest version of the entry registered under [id], if still mounted.
+  ToolbarEntry? byId(Object id) {
+    for (final entry in _entries) {
+      if (entry.id == id) return entry;
+    }
+    return null;
+  }
+
+  /// The page that [entry] covers in its own navigator: the one that comes
+  /// back when [entry] is popped or dragged away. Null for a root page.
+  ToolbarEntry? below(ToolbarEntry entry) {
+    final index = _entries.indexWhere((e) => e.id == entry.id);
+    for (var i = index - 1; i >= 0; i--) {
+      final candidate = _entries[i];
+      // Not filtered by [ToolbarEntry.visible]: a covered page is kept alive
+      // with its tickers off until the page above starts to leave, and that
+      // is exactly the page being asked for.
+      if (candidate.navigator == entry.navigator &&
+          (candidate.route?.isActive ?? false)) {
+        return candidate;
+      }
     }
     return null;
   }
