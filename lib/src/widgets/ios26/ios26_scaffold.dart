@@ -450,7 +450,9 @@ class _IOS26ScaffoldState extends State<IOS26Scaffold>
             top: 0,
             right: 0,
             bottom: 0,
-            width: _duoBarWidth(MediaQuery.paddingOf(context)),
+            // Widen the band inward a little so the centred controls sit a
+            // few points off the bezel instead of hugging the display edge.
+            width: _duoBarWidth(MediaQuery.paddingOf(context)) + 12,
             child: _buildDuoVerticalBar(context, heroLeading),
           ),
         // Tab bar - only show if destinations exist
