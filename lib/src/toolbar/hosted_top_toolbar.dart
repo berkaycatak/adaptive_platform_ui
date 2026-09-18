@@ -75,44 +75,87 @@ class TopToolbarContent {
   };
 }
 
-/// Decides what to send to the native bar, and with which item transition,
-/// each time the chrome changes. Kept free of widgets so it can be tested.
-class TopToolbarNativeSync {
-  Map<String, dynamic>? _sent;
-  int _sentSwapCount = 0;
+/// One call to the native bar.
+@immutable
+class TopToolbarNativeCall {
+  const TopToolbarNativeCall(this.method, [this.arguments]);
 
-  /// The `setItems` arguments to send now, or null when the native bar is
-  /// already showing [params].
-  ///
-  /// The owner changing to another page plays the system item transition
-  /// once, in the direction the navigation went; the same page updating its
-  /// own items applies without one.
-  Map<String, dynamic>? next(
-    Map<String, dynamic> params, {
-    required int swapCount,
-    required ToolbarSwapKind swapKind,
-  }) {
-    final ownerChanged = swapCount != _sentSwapCount;
-    if (!ownerChanged && _sent != null && _deepEquals(_sent, params)) {
-      return null;
-    }
-    final first = _sent == null;
-    _sent = params;
-    _sentSwapCount = swapCount;
-    return <String, dynamic>{
-      ...params,
-      'transition': first || !ownerChanged
-          ? 'none'
-          : switch (swapKind) {
-              ToolbarSwapKind.push => 'push',
-              ToolbarSwapKind.pop => 'pop',
-              ToolbarSwapKind.swap => 'fade',
-            },
-    };
+  final String method;
+  final Map<String, dynamic>? arguments;
+
+  @override
+  String toString() => '$method($arguments)';
+}
+
+/// Decides what to tell the native bar each time the chrome changes. Kept
+/// free of widgets and channels so it can be tested.
+///
+/// A blend becomes a native item transition: `beginItemTransition` freezes a
+/// crossfade into the content the blend leads to, the widget then moves it
+/// with the blend's animation, and `endItemTransition` settles it, completed
+/// or (a cancelled back swipe) not. Without a blend, content is set at once.
+class TopToolbarNativeSync {
+  Map<String, dynamic>? _shown;
+  Map<String, dynamic>? _target;
+  int? _activeBlend;
+
+  /// Whether a native item transition is waiting to be moved and ended.
+  bool get isTransitioning => _activeBlend != null;
+
+  /// Records what the native bar was created with.
+  void created(Map<String, dynamic> params) {
+    _shown = params;
+    _target = null;
+    _activeBlend = null;
   }
 
-  /// Forgets what was sent, e.g. because the platform view was recreated.
-  void reset() => _sent = null;
+  /// [owner] is what the page in front shows. While blending, [blendCount]
+  /// identifies the blend and [target] is what it leads to; [targetWon] says,
+  /// once it is over, whether that is the page that ended up in front.
+  List<TopToolbarNativeCall> update({
+    required Map<String, dynamic> owner,
+    required int? blendCount,
+    Map<String, dynamic>? target,
+    bool targetWon = true,
+  }) {
+    final calls = <TopToolbarNativeCall>[];
+
+    if (blendCount != null && blendCount != _activeBlend) {
+      if (_activeBlend != null) {
+        // Overtaken by the next navigation: settle where it was heading.
+        calls.add(
+          const TopToolbarNativeCall('endItemTransition', {'completed': true}),
+        );
+        _shown = _target;
+      }
+      _activeBlend = blendCount;
+      _target = target ?? owner;
+      if (_deepEquals(_target, _shown)) {
+        // Both pages show the same items; nothing to fade between.
+        _activeBlend = null;
+        _ignoredBlend = blendCount;
+      } else {
+        calls.add(TopToolbarNativeCall('beginItemTransition', _target));
+      }
+    } else if (blendCount == null && _activeBlend != null) {
+      calls.add(
+        TopToolbarNativeCall('endItemTransition', {'completed': targetWon}),
+      );
+      if (targetWon) _shown = _target;
+      _activeBlend = null;
+    }
+    if (blendCount == null) _ignoredBlend = null;
+
+    if (_activeBlend == null &&
+        (blendCount == null || blendCount == _ignoredBlend) &&
+        !_deepEquals(owner, _shown)) {
+      calls.add(TopToolbarNativeCall('setItems', owner));
+      _shown = owner;
+    }
+    return calls;
+  }
+
+  int? _ignoredBlend;
 
   static bool _deepEquals(Object? a, Object? b) {
     if (a is Map && b is Map) {
@@ -185,6 +228,7 @@ class _HostedTopToolbarState extends State<HostedTopToolbar> {
   @override
   void dispose() {
     _blend.removeListener(_onBlendChanged);
+    _follow(null);
     _channel?.setMethodCallHandler(null);
     super.dispose();
   }
@@ -207,22 +251,80 @@ class _HostedTopToolbarState extends State<HostedTopToolbar> {
     return resolved.toARGB32();
   }
 
-  Future<void> _pushToNative() async {
+  /// The page the running native transition leads to, and the animation
+  /// (with its direction) that moves it.
+  Object? _targetId;
+  Map<String, dynamic>? _creationParams;
+  Animation<double>? _driver;
+  bool _targetIsUpper = true;
+
+  Map<String, dynamic> _paramsOf(ToolbarEntry? entry) {
+    final content = TopToolbarContent.of(entry, titleOnly: widget.titleOnly);
+    return content.toNativeParams(_resolveTint(content.tint));
+  }
+
+  void _pushToNative() {
     final channel = _channel;
     if (channel == null) return;
-    final content = _ownerContent;
-    final args = _sync.next(
-      content.toNativeParams(_resolveTint(content.tint)),
-      swapCount: _blend.swapCount,
-      swapKind: _blend.lastSwapKind,
+
+    // A back swipe leads to the page underneath until it is let go; every
+    // other blend leads to the page that is already the owner.
+    final swiping = _blend.isGestureBlend && _blend.upperOwns;
+    final target = _blend.isBlending
+        ? (swiping ? _blend.lower : _blend.owner)
+        : null;
+    final wasTransitioning = _sync.isTransitioning;
+
+    final calls = _sync.update(
+      owner: _paramsOf(_blend.owner),
+      blendCount: _blend.isBlending ? _blend.blendCount : null,
+      target: _blend.isBlending ? _paramsOf(target) : null,
+      targetWon: _targetId == _blend.owner?.id,
     );
+
+    if (_blend.isBlending) {
+      _targetId = target?.id;
+      _targetIsUpper = target?.id == _blend.upper?.id;
+    }
+    _follow(_sync.isTransitioning ? _blend.driver : null);
+
     final isDark = _isDark;
+    if (_sentIsDark != isDark) {
+      _sentIsDark = isDark;
+      _invoke(channel, 'setBrightness', {'isDark': isDark});
+    }
+    for (final call in calls) {
+      _invoke(channel, call.method, call.arguments);
+    }
+    if (_sync.isTransitioning && (!wasTransitioning || calls.isNotEmpty)) {
+      _sendProgress();
+    }
+  }
+
+  void _follow(Animation<double>? driver) {
+    if (identical(driver, _driver)) return;
+    _driver?.removeListener(_sendProgress);
+    _driver = driver;
+    _driver?.addListener(_sendProgress);
+  }
+
+  void _sendProgress() {
+    final channel = _channel;
+    final driver = _driver;
+    if (channel == null || driver == null) return;
+    final value = driver.value.clamp(0.0, 1.0);
+    _invoke(channel, 'updateItemTransition', {
+      'progress': _targetIsUpper ? value : 1 - value,
+    });
+  }
+
+  Future<void> _invoke(
+    MethodChannel channel,
+    String method,
+    Map<String, dynamic>? arguments,
+  ) async {
     try {
-      if (_sentIsDark != isDark) {
-        _sentIsDark = isDark;
-        await channel.invokeMethod<void>('setBrightness', {'isDark': isDark});
-      }
-      if (args != null) await channel.invokeMethod<void>('setItems', args);
+      await channel.invokeMethod<void>(method, arguments);
     } on PlatformException {
       // The platform view went away mid-call; the next one starts afresh.
     } on MissingPluginException {
@@ -234,17 +336,12 @@ class _HostedTopToolbarState extends State<HostedTopToolbar> {
     _channel?.setMethodCallHandler(null);
     _channel = MethodChannel('adaptive_platform_ui/ios26_toolbar_$id')
       ..setMethodCallHandler(_onNativeCall);
-    // Creation params already carry the first content; remember them so the
-    // same items are not sent again with a transition.
-    final content = _ownerContent;
-    _sync
-      ..reset()
-      ..next(
-        content.toNativeParams(_resolveTint(content.tint)),
-        swapCount: _blend.swapCount,
-        swapKind: _blend.lastSwapKind,
-      );
+    // Creation params already carry the first content.
+    _follow(null);
+    _sync.created(_creationParams ?? _paramsOf(_blend.owner));
     _sentIsDark = _isDark;
+    // The owner may have moved on while the view was being created.
+    _pushToNative();
   }
 
   Future<dynamic> _onNativeCall(MethodCall call) async {
@@ -327,7 +424,7 @@ class _HostedTopToolbarState extends State<HostedTopToolbar> {
       viewType: 'adaptive_platform_ui/ios26_toolbar',
       // Only read when the view is created; later content goes via setItems.
       creationParams: <String, dynamic>{
-        ...owner.toNativeParams(_resolveTint(owner.tint)),
+        ...(_creationParams ??= owner.toNativeParams(_resolveTint(owner.tint))),
         'isDark': _isDark,
       },
       creationParamsCodec: const StandardMessageCodec(),

@@ -1,7 +1,6 @@
 import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import 'package:adaptive_platform_ui/src/toolbar/hosted_duo_bar.dart';
 import 'package:adaptive_platform_ui/src/toolbar/hosted_top_toolbar.dart';
-import 'package:adaptive_platform_ui/src/toolbar/toolbar_blend.dart';
 import 'package:adaptive_platform_ui/src/toolbar/toolbar_chrome_scope.dart';
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
@@ -55,98 +54,109 @@ Finder inBar(Finder finder) => find.descendant(of: bar, matching: finder);
 void main() {
   group('TopToolbarNativeSync', () {
     Map<String, dynamic> items(String title) => {'title': title};
+    List<String> methods(List<TopToolbarNativeCall> calls) =>
+        calls.map((c) => c.method).toList();
 
-    test('the first content is applied without a transition', () {
-      final sync = TopToolbarNativeSync();
-      expect(
-        sync.next(items('Home'), swapCount: 0, swapKind: ToolbarSwapKind.swap),
-        {'title': 'Home', 'transition': 'none'},
-      );
-    });
+    TopToolbarNativeSync showing(String title) =>
+        TopToolbarNativeSync()..created(items(title));
 
     test('nothing is sent while the bar already shows the content', () {
-      final sync = TopToolbarNativeSync()
-        ..next(items('Home'), swapCount: 0, swapKind: ToolbarSwapKind.swap);
-      expect(
-        sync.next(items('Home'), swapCount: 0, swapKind: ToolbarSwapKind.swap),
-        isNull,
-      );
+      final sync = showing('Home');
+      expect(sync.update(owner: items('Home'), blendCount: null), isEmpty);
     });
 
-    test('a new owner plays the transition of the navigation, once', () {
-      final sync = TopToolbarNativeSync()
-        ..next(items('Home'), swapCount: 0, swapKind: ToolbarSwapKind.swap);
-
-      expect(
-        sync.next(
-          items('Detail'),
-          swapCount: 1,
-          swapKind: ToolbarSwapKind.push,
-        )?['transition'],
-        'push',
-      );
-      expect(
-        sync.next(
-          items('Detail'),
-          swapCount: 1,
-          swapKind: ToolbarSwapKind.push,
-        ),
-        isNull,
-      );
-      expect(
-        sync.next(
-          items('Home'),
-          swapCount: 2,
-          swapKind: ToolbarSwapKind.pop,
-        )?['transition'],
-        'pop',
-      );
-      expect(
-        sync.next(
-          items('Info'),
-          swapCount: 3,
-          swapKind: ToolbarSwapKind.swap,
-        )?['transition'],
-        'fade',
-      );
+    test('a page updating its own items is applied at once', () {
+      final sync = showing('Home');
+      final calls = sync.update(owner: items('Inbox (3)'), blendCount: null);
+      expect(methods(calls), ['setItems']);
+      expect(calls.single.arguments, items('Inbox (3)'));
     });
 
-    test('two pages with identical items still transition', () {
-      final sync = TopToolbarNativeSync()
-        ..next(items('Same'), swapCount: 0, swapKind: ToolbarSwapKind.swap);
-      expect(
-        sync.next(
-          items('Same'),
-          swapCount: 1,
-          swapKind: ToolbarSwapKind.push,
-        )?['transition'],
-        'push',
+    test('a blend becomes one native transition into its target', () {
+      final sync = showing('Home');
+
+      final begin = sync.update(
+        owner: items('Detail'),
+        blendCount: 1,
+        target: items('Detail'),
       );
+      expect(methods(begin), ['beginItemTransition']);
+      expect(begin.single.arguments, items('Detail'));
+      expect(sync.isTransitioning, isTrue);
+
+      // Further notifications of the same blend start nothing new.
+      expect(
+        sync.update(owner: items('Detail'), blendCount: 1, target: items('X')),
+        isEmpty,
+      );
+
+      final end = sync.update(owner: items('Detail'), blendCount: null);
+      expect(methods(end), ['endItemTransition']);
+      expect(end.single.arguments, {'completed': true});
+      expect(sync.isTransitioning, isFalse);
     });
 
-    test('a page updating its own items does not transition', () {
-      final sync = TopToolbarNativeSync()
-        ..next(
-          {
-            'title': 'Home',
-            'actions': [
-              {'icon': 'plus', 'spacerAfter': 0},
-            ],
-          },
-          swapCount: 0,
-          swapKind: ToolbarSwapKind.swap,
-        );
-      final args = sync.next(
-        {
-          'title': 'Home',
-          'actions': [
-            {'icon': 'minus', 'spacerAfter': 0},
-          ],
-        },
-        swapCount: 0,
-        swapKind: ToolbarSwapKind.swap,
+    test('a cancelled back swipe settles back on the page it started on', () {
+      final sync = showing('Detail');
+      sync.update(owner: items('Detail'), blendCount: 1, target: items('Home'));
+
+      final end = sync.update(
+        owner: items('Detail'),
+        blendCount: null,
+        targetWon: false,
       );
-      expect(args?['transition'], 'none');
+      expect(methods(end), ['endItemTransition']);
+      expect(end.single.arguments, {'completed': false});
+
+      // The bar shows Detail again, so nothing more is needed.
+      expect(sync.update(owner: items('Detail'), blendCount: null), isEmpty);
+    });
+
+    test('a completed back swipe needs no second transition', () {
+      final sync = showing('Detail');
+      sync.update(owner: items('Detail'), blendCount: 1, target: items('Home'));
+      // The finger lifts, the route pops: same blend, new owner.
+      expect(
+        sync.update(owner: items('Home'), blendCount: 1, target: items('Home')),
+        isEmpty,
+      );
+      final end = sync.update(owner: items('Home'), blendCount: null);
+      expect(end.single.arguments, {'completed': true});
+      expect(sync.update(owner: items('Home'), blendCount: null), isEmpty);
+    });
+
+    test('a navigation that overtakes another settles the first one', () {
+      final sync = showing('A');
+      sync.update(owner: items('B'), blendCount: 1, target: items('B'));
+      final calls = sync.update(
+        owner: items('C'),
+        blendCount: 2,
+        target: items('C'),
+      );
+      expect(methods(calls), ['endItemTransition', 'beginItemTransition']);
+      expect(calls.last.arguments, items('C'));
+    });
+
+    test('pages with identical items do not transition', () {
+      final sync = showing('Same');
+      expect(
+        sync.update(owner: items('Same'), blendCount: 1, target: items('Same')),
+        isEmpty,
+      );
+      expect(sync.isTransitioning, isFalse);
+      expect(sync.update(owner: items('Same'), blendCount: null), isEmpty);
+    });
+
+    test('items changed during a transition catch up when it ends', () {
+      final sync = showing('Home');
+      sync.update(
+        owner: items('Detail'),
+        blendCount: 1,
+        target: items('Detail'),
+      );
+      final end = sync.update(owner: items('Detail (2)'), blendCount: null);
+      expect(methods(end), ['endItemTransition', 'setItems']);
+      expect(end.last.arguments, items('Detail (2)'));
     });
   });
 
