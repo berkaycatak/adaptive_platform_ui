@@ -1,6 +1,7 @@
 import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import 'package:adaptive_platform_ui/src/toolbar/duo_vertical_bar.dart';
 import 'package:adaptive_platform_ui/src/toolbar/hosted_duo_bar.dart';
+import 'package:adaptive_platform_ui/src/toolbar/toolbar_blend.dart';
 import 'package:adaptive_platform_ui/src/toolbar/toolbar_chrome_scope.dart';
 import 'package:flutter/cupertino.dart' show CupertinoPageRoute;
 import 'package:flutter/material.dart';
@@ -170,7 +171,89 @@ void main() {
     expect(find.text('body:Tab detail'), findsNothing);
   });
 
-  testWidgets('a dialog on top empties the bar without moving it', (
+  double chromeOpacity(WidgetTester tester) => tester
+      .widget<FadeTransition>(
+        find.descendant(of: bar, matching: find.byType(FadeTransition)).first,
+      )
+      .opacity
+      .value;
+
+  testWidgets('a dialog on top dims the bar and makes it inert', (
+    tester,
+  ) async {
+    useDuoLandscape(tester);
+    final nav = GlobalKey<NavigatorState>();
+    var added = 0;
+    await tester.pumpWidget(
+      hostedApp(
+        navigatorKey: nav,
+        home: page('Home', action: Icons.add, onAction: () => added++),
+      ),
+    );
+    await tester.pump();
+    expect(chromeOpacity(tester), 1);
+
+    showDialog<void>(
+      context: nav.currentContext!,
+      barrierDismissible: false,
+      builder: (_) => const AlertDialog(title: Text('Sure?')),
+    );
+    await tester.pumpAndSettle();
+
+    // Like a navigation bar behind a sheet: still there, dimmed, not tappable.
+    expect(inBar(find.byIcon(Icons.add)), findsOneWidget);
+    expect(chromeOpacity(tester), kToolbarCoveredOpacity);
+    await tester.tap(inBar(find.byIcon(Icons.add)), warnIfMissed: false);
+    expect(added, 0);
+
+    nav.currentState!.pop();
+    await tester.pumpAndSettle();
+    expect(chromeOpacity(tester), 1);
+    await tester.tap(inBar(find.byIcon(Icons.add)));
+    expect(added, 1);
+  });
+
+  testWidgets('a dialog on the outer navigator covers a page inside a tab', (
+    tester,
+  ) async {
+    useDuoLandscape(tester);
+    final root = GlobalKey<NavigatorState>();
+    var added = 0;
+    await tester.pumpWidget(
+      hostedApp(
+        navigatorKey: root,
+        home: AdaptiveScaffold(
+          body: Navigator(
+            onGenerateRoute: (_) => MaterialPageRoute<void>(
+              builder: (_) =>
+                  page('Tab root', action: Icons.add, onAction: () => added++),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    // The tab page is still on top of its own navigator; only the route that
+    // hosts the tabs knows something landed on it.
+    showDialog<void>(
+      context: root.currentContext!,
+      barrierDismissible: false,
+      builder: (_) => const AlertDialog(title: Text('Sure?')),
+    );
+    await tester.pumpAndSettle();
+
+    expect(inBar(find.byIcon(Icons.add)), findsOneWidget);
+    expect(chromeOpacity(tester), kToolbarCoveredOpacity);
+    await tester.tap(inBar(find.byIcon(Icons.add)), warnIfMissed: false);
+    expect(added, 0);
+
+    root.currentState!.pop();
+    await tester.pumpAndSettle();
+    expect(chromeOpacity(tester), 1);
+  });
+
+  testWidgets('an opaque page without a scaffold takes the controls away', (
     tester,
   ) async {
     useDuoLandscape(tester);
@@ -183,9 +266,10 @@ void main() {
     );
     await tester.pump();
 
-    showDialog<void>(
-      context: nav.currentContext!,
-      builder: (_) => const AlertDialog(title: Text('Sure?')),
+    nav.currentState!.push(
+      MaterialPageRoute<void>(
+        builder: (_) => const ColoredBox(color: Colors.black),
+      ),
     );
     await tester.pumpAndSettle();
     expect(inBar(find.byIcon(Icons.add)), findsNothing);
