@@ -2,6 +2,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 
 import '../widgets/adaptive_app_bar.dart';
+import '../widgets/adaptive_bottom_navigation_bar.dart';
 
 /// One page's contribution to the fixed toolbar chrome.
 ///
@@ -16,7 +17,7 @@ class ToolbarEntry {
     required this.route,
     required this.navigator,
     required this.visible,
-    this.hasTabBar = false,
+    this.tabBar,
     this.enclosingRoutes = const <ModalRoute<Object?>>[],
     this.titleOverlay,
   });
@@ -51,9 +52,13 @@ class ToolbarEntry {
   /// pushed on its own navigator does, and only these routes reveal it.
   final List<ModalRoute<Object?>> enclosingRoutes;
 
+  /// The tab bar the registering scaffold shows, if any. On iPhone Duo the
+  /// chrome draws it at the bottom of the trailing bar instead.
+  final AdaptiveBottomNavigationBar? tabBar;
+
   /// Whether the registering scaffold shows a tab bar. Such a scaffold is the
   /// root of a tab layout and never gets an automatic back button.
-  final bool hasTabBar;
+  bool get hasTabBar => tabBar?.items?.isNotEmpty ?? false;
 
   bool get _isOnTop =>
       (route?.isCurrent ?? true) && enclosingRoutes.every((r) => r.isCurrent);
@@ -123,6 +128,24 @@ class ToolbarRegistry extends ChangeNotifier {
     if (active != null) return active;
     for (var i = _entries.length - 1; i >= 0; i--) {
       if (_entries[i].isCovered) return _entries[i];
+    }
+    return null;
+  }
+
+  /// The page whose tab bar belongs with [entry]: [entry] itself, or the
+  /// scaffold hosting the tabs that [entry] lives in (a shell route). Null
+  /// when [entry] is outside any tab layout, such as a page pushed on top of
+  /// the tabs, which hides the tab bar the way UIKit does.
+  ToolbarEntry? tabBarOwnerFor(ToolbarEntry? entry) {
+    if (entry == null) return null;
+    if (entry.hasTabBar) return entry;
+    for (var i = _entries.length - 1; i >= 0; i--) {
+      final candidate = _entries[i];
+      if (candidate.hasTabBar &&
+          candidate.route != null &&
+          entry.enclosingRoutes.contains(candidate.route)) {
+        return candidate;
+      }
     }
     return null;
   }

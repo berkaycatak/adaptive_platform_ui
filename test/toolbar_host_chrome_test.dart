@@ -3,7 +3,7 @@ import 'package:adaptive_platform_ui/src/toolbar/duo_vertical_bar.dart';
 import 'package:adaptive_platform_ui/src/toolbar/hosted_duo_bar.dart';
 import 'package:adaptive_platform_ui/src/toolbar/toolbar_blend.dart';
 import 'package:adaptive_platform_ui/src/toolbar/toolbar_chrome_scope.dart';
-import 'package:flutter/cupertino.dart' show CupertinoPageRoute;
+import 'package:flutter/cupertino.dart' show CupertinoIcons, CupertinoPageRoute;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:foldable/foldable.dart';
@@ -126,20 +126,20 @@ void main() {
     final nav = GlobalKey<NavigatorState>();
     await tester.pumpWidget(hostedApp(navigatorKey: nav, home: page('Home')));
     await tester.pump();
-    expect(inBar(find.byType(AdaptiveButton)), findsNothing);
+    expect(inBar(find.byType(DuoBarBackButton)), findsNothing);
 
     nav.currentState!.push(
       MaterialPageRoute<void>(builder: (_) => page('Detail')),
     );
     await tester.pumpAndSettle();
-    expect(inBar(find.byType(AdaptiveButton)), findsOneWidget);
+    expect(inBar(find.byType(DuoBarBackButton)), findsOneWidget);
 
-    await tester.tap(inBar(find.byType(AdaptiveButton)));
+    await tester.tap(inBar(find.byType(DuoBarBackButton)));
     await tester.pumpAndSettle();
 
     expect(find.text('body:Detail'), findsNothing);
     expect(find.text('body:Home'), findsOneWidget);
-    expect(inBar(find.byType(AdaptiveButton)), findsNothing);
+    expect(inBar(find.byType(DuoBarBackButton)), findsNothing);
   });
 
   testWidgets('back pops the nested navigator that owns the page', (
@@ -165,7 +165,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(inBar(find.byType(AdaptiveButton)));
+    await tester.tap(inBar(find.byType(DuoBarBackButton)));
     await tester.pumpAndSettle();
     expect(find.text('body:Tab root'), findsOneWidget);
     expect(find.text('body:Tab detail'), findsNothing);
@@ -302,7 +302,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(inBar(find.byIcon(Icons.close)), findsOneWidget);
-    expect(inBar(find.byType(AdaptiveButton)), findsNothing);
+    expect(inBar(find.byType(DuoBarBackButton)), findsNothing);
   });
 
   group('item swap follows the route transition', () {
@@ -370,7 +370,7 @@ void main() {
         MaterialPageRoute<void>(builder: (_) => page('B', action: Icons.add)),
       );
       await tester.pumpAndSettle();
-      final backRect = tester.getRect(inBar(find.byType(AdaptiveButton)));
+      final backRect = tester.getRect(inBar(find.byType(DuoBarBackButton)));
 
       nav.currentState!.push(
         MaterialPageRoute<void>(builder: (_) => page('C', action: Icons.share)),
@@ -379,9 +379,9 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 150));
 
-      expect(inBar(find.byType(AdaptiveButton)), findsOneWidget);
-      expect(opacityOf(tester, find.byType(AdaptiveButton)), 1);
-      expect(tester.getRect(inBar(find.byType(AdaptiveButton))), backRect);
+      expect(inBar(find.byType(DuoBarBackButton)), findsOneWidget);
+      expect(opacityOf(tester, find.byType(DuoBarBackButton)), 1);
+      expect(tester.getRect(inBar(find.byType(DuoBarBackButton))), backRect);
       expect(opacityOf(tester, find.byIcon(Icons.add)), lessThan(1));
       await tester.pumpAndSettle();
     });
@@ -487,6 +487,208 @@ void main() {
     expect(bar, findsOneWidget);
     expect(tester.getRect(bar).right, 466);
     expect(inBar(find.byIcon(Icons.add)), findsOneWidget);
+  });
+
+  group('tab bar in the trailing bar', () {
+    Widget tabsApp(ValueNotifier<int> index, GlobalKey<NavigatorState> tabNav) {
+      return hostedApp(
+        home: ValueListenableBuilder<int>(
+          valueListenable: index,
+          builder: (_, value, _) => AdaptiveScaffold(
+            bottomNavigationBar: AdaptiveBottomNavigationBar(
+              selectedIndex: value,
+              onTap: (i) => index.value = i,
+              items: const [
+                AdaptiveNavigationDestination(icon: Icons.home, label: 'Home'),
+                AdaptiveNavigationDestination(icon: Icons.info, label: 'Info'),
+              ],
+            ),
+            body: Navigator(
+              key: tabNav,
+              onGenerateRoute: (_) => MaterialPageRoute<void>(
+                builder: (_) => page('Root', action: Icons.add),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    testWidgets('sits at the bottom, below the toolbar items', (tester) async {
+      useDuoLandscape(tester);
+      final index = ValueNotifier<int>(0);
+      await tester.pumpWidget(tabsApp(index, GlobalKey<NavigatorState>()));
+      await tester.pump();
+
+      final tabs = tester.getRect(inBar(find.byIcon(Icons.info)));
+      final action = tester.getRect(inBar(find.byIcon(Icons.add)));
+      expect(tabs.top, greaterThan(action.bottom));
+      expect(
+        tabs.bottom,
+        lessThanOrEqualTo(duoLandscape.height - kDuoBarBottomMargin),
+      );
+
+      await tester.tap(inBar(find.byIcon(Icons.info)));
+      expect(index.value, 1);
+    });
+
+    testWidgets('stays still while pages inside the tabs change', (
+      tester,
+    ) async {
+      useDuoLandscape(tester);
+      final tabNav = GlobalKey<NavigatorState>();
+      await tester.pumpWidget(tabsApp(ValueNotifier<int>(0), tabNav));
+      await tester.pump();
+      final rect = tester.getRect(inBar(find.byIcon(Icons.home)));
+
+      tabNav.currentState!.push(
+        MaterialPageRoute<void>(builder: (_) => page('Detail')),
+      );
+      await tester.pump();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 150));
+
+      expect(inBar(find.byIcon(Icons.home)), findsOneWidget);
+      expect(opacityOf(tester, find.byIcon(Icons.home)), 1);
+      expect(tester.getRect(inBar(find.byIcon(Icons.home))), rect);
+      await tester.pumpAndSettle();
+    });
+
+    testWidgets('leaves with the tabs when a page covers them', (tester) async {
+      useDuoLandscape(tester);
+      final root = GlobalKey<NavigatorState>();
+      final index = ValueNotifier<int>(0);
+      await tester.pumpWidget(
+        MaterialApp(
+          navigatorKey: root,
+          builder: (context, child) =>
+              AdaptiveToolbarHost(debugFold: duoInnerDisplay(), child: child!),
+          home: ValueListenableBuilder<int>(
+            valueListenable: index,
+            builder: (_, value, _) => AdaptiveScaffold(
+              appBar: const AdaptiveAppBar(
+                title: 'Tabs',
+                useNativeToolbar: true,
+              ),
+              bottomNavigationBar: AdaptiveBottomNavigationBar(
+                selectedIndex: value,
+                onTap: (i) => index.value = i,
+                items: const [
+                  AdaptiveNavigationDestination(
+                    icon: Icons.home,
+                    label: 'Home',
+                  ),
+                  AdaptiveNavigationDestination(
+                    icon: Icons.info,
+                    label: 'Info',
+                  ),
+                ],
+              ),
+              body: const SizedBox.shrink(),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      expect(inBar(find.byIcon(Icons.home)), findsOneWidget);
+
+      root.currentState!.push(
+        MaterialPageRoute<void>(builder: (_) => page('Full screen')),
+      );
+      await tester.pumpAndSettle();
+      expect(inBar(find.byIcon(Icons.home)), findsNothing);
+
+      root.currentState!.pop();
+      await tester.pumpAndSettle();
+      expect(inBar(find.byIcon(Icons.home)), findsOneWidget);
+    });
+  });
+
+  testWidgets('one landscape rotation puts the bar on the left', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(678, 466);
+    tester.view.devicePixelRatio = 1;
+    tester.view.padding = const FakeViewPadding(left: 84, bottom: 34);
+    tester.view.viewPadding = const FakeViewPadding(left: 84, bottom: 34);
+    addTearDown(tester.view.reset);
+
+    await tester.pumpWidget(hostedApp(home: page('Home', action: Icons.add)));
+    await tester.pump();
+
+    expect(tester.getRect(bar).left, 0);
+    expect(tester.getRect(bar).right, lessThan(678 / 2));
+    expect(inBar(find.byIcon(Icons.add)), findsOneWidget);
+  });
+
+  testWidgets('toolbar items make room for the tab bar in a short window', (
+    tester,
+  ) async {
+    // The cover display in landscape: the tab bar stays whole and the
+    // toolbar keeps its first item plus the overflow menu.
+    tester.view.physicalSize = const Size(678, 466);
+    tester.view.devicePixelRatio = 1;
+    tester.view.padding = const FakeViewPadding(right: 84, bottom: 34);
+    tester.view.viewPadding = const FakeViewPadding(right: 84, bottom: 34);
+    addTearDown(tester.view.reset);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        builder: (context, child) => AdaptiveToolbarHost(
+          debugFold: FoldableData(
+            capabilities: FoldableData.unsupported.capabilities,
+            status: FoldableData.unsupported.status,
+            angleDegrees: FoldableData.unsupported.angleDegrees,
+            regions: const [
+              ReservedRegion(
+                kind: ReservedRegionKind.occlusion,
+                bounds: Rect.fromLTWH(594, 384, 84, 82),
+                isActive: true,
+              ),
+            ],
+            displayFeatures: const [],
+          ),
+          child: child!,
+        ),
+        home: AdaptiveScaffold(
+          appBar: AdaptiveAppBar(
+            title: 'Home',
+            useNativeToolbar: true,
+            actions: [
+              for (final icon in [Icons.undo, Icons.redo, Icons.edit])
+                AdaptiveAppBarAction(icon: icon, onPressed: () {}),
+            ],
+          ),
+          bottomNavigationBar: AdaptiveBottomNavigationBar(
+            selectedIndex: 0,
+            onTap: (_) {},
+            items: const [
+              AdaptiveNavigationDestination(icon: Icons.home, label: 'A'),
+              AdaptiveNavigationDestination(icon: Icons.info, label: 'B'),
+              AdaptiveNavigationDestination(icon: Icons.person, label: 'C'),
+              AdaptiveNavigationDestination(icon: Icons.search, label: 'D'),
+            ],
+          ),
+          body: const SizedBox.shrink(),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(tester.takeException(), isNull);
+    expect(inBar(find.byIcon(Icons.undo)), findsOneWidget);
+    expect(inBar(find.byIcon(Icons.edit)), findsNothing);
+    expect(inBar(find.byIcon(CupertinoIcons.ellipsis)), findsOneWidget);
+    // All four tabs are still there, above the camera at the bottom.
+    expect(inBar(find.byIcon(Icons.search)), findsOneWidget);
+    expect(
+      tester.getRect(inBar(find.byIcon(Icons.search))).bottom,
+      lessThan(384),
+    );
+    expect(
+      tester.getRect(inBar(find.byIcon(CupertinoIcons.ellipsis))).bottom,
+      lessThan(tester.getRect(inBar(find.byIcon(Icons.home))).top),
+    );
   });
 
   testWidgets('pages learn from the host that it draws their controls', (

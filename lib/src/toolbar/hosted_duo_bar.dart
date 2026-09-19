@@ -1,9 +1,8 @@
 import 'package:flutter/widgets.dart';
 import 'package:foldable/foldable.dart';
 
-import '../style/sf_symbol.dart';
 import '../widgets/adaptive_app_bar_action.dart';
-import '../widgets/adaptive_button.dart';
+import '../widgets/ios26/ios26_glass_capsule.dart';
 import 'duo_vertical_bar.dart';
 import 'toolbar_blend.dart';
 import 'toolbar_registry.dart';
@@ -30,6 +29,23 @@ class HostedDuoBar extends StatelessWidget {
     final upperOwns = blend.upperOwns;
     final upperOpacity = blend.upperOpacity;
     final lowerOpacity = blend.lowerOpacity;
+
+    // The tab bar belongs to the tab layout, not to a page: it stays still
+    // while pages inside the tabs change, and fades with the page when the
+    // navigation leaves or enters the tabs.
+    final upperTabs = blend.registry.tabBarOwnerFor(upperEntry);
+    final lowerTabs = blend.registry.tabBarOwnerFor(lowerEntry);
+    final tabLayers = <(ToolbarEntry, Animation<double>)>[
+      if (lowerTabs != null && lowerTabs.id != upperTabs?.id)
+        (lowerTabs, lowerOpacity),
+      if (upperTabs != null)
+        (
+          upperTabs,
+          lowerTabs?.id == upperTabs.id
+              ? kAlwaysCompleteAnimation
+              : upperOpacity,
+        ),
+    ];
 
     // The back button is one control shared by every page, drawn in a layer
     // of its own: it stays still when both pages have it, and fades with the
@@ -60,6 +76,7 @@ class HostedDuoBar extends StatelessWidget {
                 content: lower,
                 opacity: lowerOpacity,
                 interactive: !upperOwns,
+                reservedTabs: lowerTabs?.tabBar?.items?.length ?? 0,
               ),
             if (upperEntry != null && !upper.isEmpty)
               _layer(
@@ -67,17 +84,25 @@ class HostedDuoBar extends StatelessWidget {
                 content: upper,
                 opacity: upperOpacity,
                 interactive: upperOwns,
+                reservedTabs: upperTabs?.tabBar?.items?.length ?? 0,
               ),
             if (backOpacity != null)
               FadeTransition(
                 key: const ValueKey<String>('adaptive_toolbar_back'),
                 opacity: backOpacity,
                 child: DuoVerticalBar(
-                  leading: _BackButton(
-                    navigator: (upperOwns ? upper : lower).navigator,
+                  leading: DuoBarBackButton(
+                    onPressed: () =>
+                        (upperOwns ? upper : lower).navigator?.maybePop(),
                   ),
                   regions: regions,
                 ),
+              ),
+            for (final (tabs, opacity) in tabLayers)
+              FadeTransition(
+                key: ValueKey<(String, Object)>(('adaptive_tabs', tabs.id)),
+                opacity: opacity,
+                child: DuoVerticalBar(tabBar: tabs.tabBar, regions: regions),
               ),
           ],
         ),
@@ -92,6 +117,7 @@ class HostedDuoBar extends StatelessWidget {
     required _BarContent content,
     required Animation<double> opacity,
     required bool interactive,
+    required int reservedTabs,
   }) {
     return FadeTransition(
       key: key,
@@ -102,9 +128,11 @@ class HostedDuoBar extends StatelessWidget {
           leading:
               content.customLeading ??
               (content.impliesBack
-                  ? const SizedBox(width: 38, height: 38)
+                  ? const SizedBox.square(dimension: IOS26GlassCapsule.width)
                   : null),
           actions: content.actions,
+          reservedTabs: reservedTabs,
+          tint: content.tint,
           regions: regions,
         ),
       ),
@@ -119,6 +147,7 @@ class _BarContent {
     this.impliesBack = false,
     this.navigator,
     this.actions = const <AdaptiveAppBarAction>[],
+    this.tint,
   });
 
   /// No page owns the chrome (a page without an [AdaptiveScaffold] is in
@@ -135,6 +164,7 @@ class _BarContent {
       impliesBack: entry.impliesBackButton,
       navigator: entry.navigator,
       actions: appBar.actions ?? const <AdaptiveAppBarAction>[],
+      tint: appBar.tintColor,
     );
   }
 
@@ -142,26 +172,7 @@ class _BarContent {
   final bool impliesBack;
   final NavigatorState? navigator;
   final List<AdaptiveAppBarAction> actions;
+  final Color? tint;
 
   bool get isEmpty => customLeading == null && !impliesBack && actions.isEmpty;
-}
-
-/// Back for the page that owns the chrome, performed on that page's own
-/// navigator so nested navigators (tabs, shell routes) pop the right stack.
-class _BackButton extends StatelessWidget {
-  const _BackButton({required this.navigator});
-
-  final NavigatorState? navigator;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 38,
-      width: 38,
-      child: AdaptiveButton.sfSymbol(
-        onPressed: () => navigator?.maybePop(),
-        sfSymbol: const SFSymbol('chevron.left', size: 20),
-      ),
-    );
-  }
 }
