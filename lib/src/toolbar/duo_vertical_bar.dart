@@ -68,17 +68,19 @@ abstract final class DuoLayout {
     var clearance = padding.top;
     var found = false;
     for (final region in regions) {
-      if (region.kind == ReservedRegionKind.occlusion &&
-          region.isActive &&
-          region.bounds.right > stripLeft) {
-        found = true;
-      }
-      if (region.kind == ReservedRegionKind.occlusion &&
+      // Only regions that really lie in this window's trailing strip count.
+      // While the device folds or unfolds, a reading taken on the other
+      // display can still be around for a moment; its region sits outside
+      // this window and would put the bar at that display's height.
+      final inStrip =
+          region.kind == ReservedRegionKind.occlusion &&
           region.isActive &&
           region.bounds.right > stripLeft &&
-          region.bounds.bottom > clearance) {
-        clearance = region.bounds.bottom;
-      }
+          region.bounds.left < size.width &&
+          region.bounds.right <= size.width + 1;
+      if (!inStrip) continue;
+      found = true;
+      if (region.bounds.bottom > clearance) clearance = region.bounds.bottom;
     }
     // Regions arrive a moment after launch; until then stay clear of where
     // the cluster can be instead of starting underneath it.

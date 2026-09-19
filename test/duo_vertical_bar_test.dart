@@ -93,6 +93,19 @@ void main() {
       );
     });
 
+    test('a stale region from the other display is ignored while folding', () {
+      // Just folded: the window is the cover display, the regions are still
+      // the inner display's. Using them would park the bar 50pt too high.
+      expect(
+        DuoLayout.topClearance(
+          size: duoCover,
+          padding: duoPadding,
+          regions: const [duoCamera],
+        ),
+        kDuoStatusClusterFallbackHeight,
+      );
+    });
+
     test('stays clear of the cluster until regions are reported', () {
       expect(
         DuoLayout.topClearance(
