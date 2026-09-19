@@ -9,18 +9,20 @@ A Flutter package that provides adaptive platform-specific widgets with native i
 
   <img src="https://github.com/berkaycatak/adaptive_platform_ui/blob/main/img/highlight-img.png?raw=true" alt="iOS 26 Native Toolbar">
 
-## iOS 26+ Native Toolbar & Tab Bar
+## Fixed Liquid Glass Toolbar, iPhone Duo Ready
 
 <p align="center">
-  <img src="https://github.com/berkaycatak/adaptive_platform_ui/raw/main/img/appbar.gif" alt="iOS 26 Native Toolbar" width="300"/>
-  <img src="https://github.com/berkaycatak/adaptive_platform_ui/raw/main/img/bottombar.gif" alt="iOS 26 Native Tab Bar" width="300"/>
+  <img src="https://github.com/berkaycatak/adaptive_platform_ui/raw/main/img/duo_fixed_toolbar.gif" alt="Fixed Liquid Glass toolbar on iPhone Duo, open and folded" width="560"/>
+</p>
+<p align="center">
+  <img src="https://github.com/berkaycatak/adaptive_platform_ui/raw/main/img/iphone_fixed_toolbar.gif" alt="Fixed Liquid Glass toolbar on iPhone" width="300"/>
 </p>
 
+One toolbar stays in place while pages slide underneath it, and only its items change, in step with the page transition and with a back swipe. On iPhone Duo the controls move to the trailing vertical bar, open or folded. Works with any router, with nothing to set up.
+
+## iOS 26+ Native Toolbar & Tab Bar
+
   <img src="https://github.com/berkaycatak/adaptive_platform_ui/blob/main/img/bottom_nav2_p.png?raw=true" alt="iOS 26 Native Tab Bar">
-
-  <img src="https://github.com/berkaycatak/adaptive_platform_ui/blob/main/img/toolbar2_p.png?raw=true" alt="iOS 26 Native Tab Bar">
-
-![native_search](https://github.com/user-attachments/assets/da33cb62-94d7-47da-8f0c-327bbd6ee04e)
 
 Native iOS 26 UIToolbar and UITabBar with Liquid Glass blur effects, minimize behavior, and native gesture handling.
 
