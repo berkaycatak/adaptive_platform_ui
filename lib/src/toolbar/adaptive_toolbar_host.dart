@@ -89,6 +89,9 @@ class _AdaptiveToolbarHostState extends State<AdaptiveToolbarHost>
         hostsToolbar &&
         DuoLayout.isVerticalBarPose(MediaQuery.viewPaddingOf(context));
 
+    final barOnLeft =
+        DuoLayout.barSide(MediaQuery.viewPaddingOf(context)) == DuoBarSide.left;
+
     return ToolbarRegistryScope(
       registry: _registry,
       child: ToolbarChromeScope(
@@ -103,10 +106,13 @@ class _AdaptiveToolbarHostState extends State<AdaptiveToolbarHost>
             if (hostsToolbar)
               HostedTopToolbar(blend: _blend, titleOnly: hostsDuoControls),
             if (hostsDuoControls)
+              // The bar follows the hardware: the strip is on the right in
+              // most poses and on the left in one landscape rotation.
               Positioned(
                 top: 0,
-                right: 0,
                 bottom: 0,
+                left: barOnLeft ? 0 : null,
+                right: barOnLeft ? null : 0,
                 width: DuoLayout.bandWidth(MediaQuery.viewPaddingOf(context)),
                 child: HostedDuoBar(
                   blend: _blend,

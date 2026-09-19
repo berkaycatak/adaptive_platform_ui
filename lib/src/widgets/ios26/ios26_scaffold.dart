@@ -270,7 +270,10 @@ class _IOS26ScaffoldState extends State<IOS26Scaffold>
         heroLeading != null ||
         (widget.actions != null && widget.actions!.isNotEmpty);
     final showTopToolbar = duoVerticalPose ? hasTitle : hasToolbarContent;
-    final showDuoSideBar = duoVerticalPose && hasControls && chrome == null;
+    final tabs = widget.tabBarHidden ? null : widget.bottomNavigationBar;
+    final hasTabs = tabs?.items?.isNotEmpty ?? false;
+    final showDuoSideBar =
+        duoVerticalPose && (hasControls || hasTabs) && chrome == null;
 
     // The Liquid Glass toolbar is drawn as a Positioned overlay on top of the
     // body (see below), so, unlike CupertinoPageScaffold with a translucent
@@ -287,16 +290,31 @@ class _IOS26ScaffoldState extends State<IOS26Scaffold>
     // a scaffold nested in this one (a tab inside a shell) does not inset a
     // second time, and a SafeArea further down has nothing left to add.
     final mq = MediaQuery.of(context);
-    final trailingInset = duoVerticalPose ? mq.padding.right : 0.0;
+    // The strip is on the right in most poses and on the left in one
+    // landscape rotation; the controls stay aligned with the hardware.
+    final barOnLeft = DuoLayout.barSide(mq.viewPadding) == DuoBarSide.left;
+    final trailingInset = !duoVerticalPose
+        ? 0.0
+        : barOnLeft
+        ? mq.padding.left
+        : mq.padding.right;
     if (showTopToolbar || trailingInset > 0) {
-      final topInset = showTopToolbar ? kToolbarContentHeight : 0.0;
+      final topInset = !showTopToolbar
+          ? 0.0
+          : duoVerticalPose
+          ? kDuoTitleBandHeight
+          : kToolbarContentHeight;
       bodyContent = Padding(
-        padding: EdgeInsets.only(right: trailingInset),
+        padding: EdgeInsets.only(
+          left: barOnLeft ? trailingInset : 0,
+          right: barOnLeft ? 0 : trailingInset,
+        ),
         child: MediaQuery(
           data: mq.copyWith(
             padding: mq.padding.copyWith(
               top: mq.padding.top + topInset,
-              right: mq.padding.right - trailingInset,
+              left: mq.padding.left - (barOnLeft ? trailingInset : 0),
+              right: mq.padding.right - (barOnLeft ? 0 : trailingInset),
             ),
             viewPadding: mq.viewPadding.copyWith(
               top: mq.viewPadding.top + topInset,
@@ -318,38 +336,66 @@ class _IOS26ScaffoldState extends State<IOS26Scaffold>
             left: 0,
             right: 0,
             top: 0,
-            child: IOS26NativeToolbar(
-              title: widget.title,
-              leading: duoVerticalPose ? null : (widget.leading ?? heroLeading),
-              showNativeView: showNativeView,
-              actions: duoVerticalPose ? null : widget.actions,
-              tintColor: widget.tintColor,
-              titleWidget: widget.titleWidget,
-              onActionTap: (index) {
-                // Call the appropriate action callback
-                if (widget.actions != null &&
-                    index >= 0 &&
-                    index < widget.actions!.length) {
-                  widget.actions![index].onPressed();
-                }
-              },
-            ),
+            height: duoVerticalPose ? kDuoTitleBandHeight : null,
+            child: duoVerticalPose
+                // On iPhone Duo the title sits at the leading edge; the
+                // controls are in the trailing bar.
+                ? Stack(
+                    fit: StackFit.expand,
+                    clipBehavior: Clip.none,
+                    children: [
+                      const DuoTitleBackdrop(),
+                      DuoToolbarTitle(
+                        title: widget.title,
+                        titleWidget: widget.titleWidget,
+                      ),
+                    ],
+                  )
+                : IOS26NativeToolbar(
+                    title: widget.title,
+                    leading: duoVerticalPose
+                        ? null
+                        : (widget.leading ?? heroLeading),
+                    showNativeView: showNativeView,
+                    actions: duoVerticalPose ? null : widget.actions,
+                    tintColor: widget.tintColor,
+                    titleWidget: widget.titleWidget,
+                    onActionTap: (index) {
+                      // Call the appropriate action callback
+                      if (widget.actions != null &&
+                          index >= 0 &&
+                          index < widget.actions!.length) {
+                        widget.actions![index].onPressed();
+                      }
+                    },
+                  ),
           ),
         // iPhone Duo: controls in a vertical bar on the trailing edge
         if (showDuoSideBar)
           Positioned(
             top: 0,
-            right: 0,
             bottom: 0,
+            left: barOnLeft ? 0 : null,
+            right: barOnLeft ? null : 0,
             width: DuoLayout.bandWidth(MediaQuery.viewPaddingOf(context)),
             child: DuoVerticalBar(
-              leading: widget.leading ?? heroLeading,
+              leading:
+                  widget.leading ??
+                  (heroLeading == null
+                      ? null
+                      : DuoBarBackButton(
+                          onPressed: () => Navigator.of(context).maybePop(),
+                        )),
               actions: widget.actions ?? const <AdaptiveAppBarAction>[],
+              tabBar: tabs,
+              tint: widget.tintColor,
               regions: _fold?.regions ?? const <ReservedRegion>[],
             ),
           ),
         // Tab bar - only show if destinations exist
-        if (widget.bottomNavigationBar?.items != null &&
+        // On iPhone Duo the tabs are at the bottom of the trailing bar instead.
+        if (!duoVerticalPose &&
+            widget.bottomNavigationBar?.items != null &&
             widget.bottomNavigationBar!.items!.isNotEmpty &&
             widget.bottomNavigationBar!.selectedIndex != null &&
             widget.bottomNavigationBar!.onTap != null)

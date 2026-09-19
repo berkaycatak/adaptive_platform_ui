@@ -24,6 +24,7 @@ class AdaptiveAppBarAction {
     this.icon,
     this.iconWidget,
     this.title,
+    this.label,
     required this.onPressed,
     this.spacerAfter = ToolbarSpacerType.none,
     this.prominent = false,
@@ -55,6 +56,21 @@ class AdaptiveAppBarAction {
   /// Text title for the action (optional)
   /// If provided along with icons, title takes precedence
   final String? title;
+
+  /// A short name for the action, such as "Undo" or "Share". It never
+  /// changes how the action looks; it names it wherever a name is needed:
+  ///
+  /// - iPhone Duo: the entry in the overflow menu that toolbar items move
+  ///   into when the trailing bar runs out of room
+  /// - iOS: the VoiceOver label of the button
+  /// - Android: the tooltip of the button
+  ///
+  /// Give every icon action one. Unlike [title], it does not replace the icon
+  /// with text on iOS <26 and Android. Falls back to [title].
+  final String? label;
+
+  /// The name to show or speak for this action: [label], else [title].
+  String? get effectiveLabel => label ?? title;
 
   /// Callback when the action is tapped
   final VoidCallback onPressed;
@@ -94,19 +110,28 @@ class AdaptiveAppBarAction {
         other.icon == icon &&
         other.iconWidget == iconWidget &&
         other.title == title &&
+        other.label == label &&
         other.prominent == prominent &&
         other.tintColor == tintColor;
   }
 
   @override
-  int get hashCode =>
-      Object.hash(iosSymbol, icon, iconWidget, title, prominent, tintColor);
+  int get hashCode => Object.hash(
+    iosSymbol,
+    icon,
+    iconWidget,
+    title,
+    label,
+    prominent,
+    tintColor,
+  );
 
   /// Convert action to map for native platform channel (iOS 26+ only)
   Map<String, dynamic> toNativeMap() {
     return {
-      'icon': ?iosSymbol,
-      'title': ?title,
+      if (iosSymbol != null) 'icon': iosSymbol!,
+      if (title != null) 'title': title!,
+      if (effectiveLabel != null) 'label': effectiveLabel!,
       'spacerAfter': spacerAfter.index, // 0=none, 1=fixed, 2=flexible
       if (prominent) 'prominent': true,
       if (tintColor != null) 'tint': tintColor!.toARGB32(),

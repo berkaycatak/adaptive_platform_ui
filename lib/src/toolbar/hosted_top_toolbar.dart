@@ -5,6 +5,7 @@ import '../style/sf_symbol.dart';
 import '../widgets/adaptive_app_bar_action.dart';
 import '../widgets/adaptive_button.dart';
 import '../widgets/ios26/ios26_native_toolbar.dart';
+import 'duo_vertical_bar.dart';
 import 'toolbar_blend.dart';
 import 'toolbar_registry.dart';
 
@@ -129,7 +130,9 @@ class HostedTopToolbar extends StatelessWidget {
     return Align(
       alignment: Alignment.topCenter,
       child: SizedBox(
-        height: kHostedToolbarHeight + topInset,
+        height: titleOnly
+            ? kDuoTitleBandHeight
+            : kHostedToolbarHeight + topInset,
         child: IgnorePointer(
           ignoring: blend.ownerIsCovered,
           child: FadeTransition(
@@ -143,7 +146,9 @@ class HostedTopToolbar extends StatelessWidget {
                 FadeTransition(
                   key: const ValueKey<String>('adaptive_toolbar_backdrop'),
                   opacity: backdropOpacity,
-                  child: const _Backdrop(),
+                  child: titleOnly
+                      ? const DuoTitleBackdrop()
+                      : const _Backdrop(),
                 ),
                 if (lowerEntry != null && !lower.isEmpty)
                   _layer(
@@ -193,7 +198,14 @@ class HostedTopToolbar extends StatelessWidget {
       opacity: opacity,
       child: IgnorePointer(
         ignoring: !interactive,
-        child: defaultTargetPlatform == TargetPlatform.iOS
+        child: titleOnly
+            // On iPhone Duo the title sits at the leading edge and the
+            // controls are in the trailing bar, so there is no bar to draw.
+            ? DuoToolbarTitle(
+                title: content.title,
+                titleWidget: content.titleOverlay,
+              )
+            : defaultTargetPlatform == TargetPlatform.iOS
             ? IOS26NativeToolbar(
                 title: content.title,
                 titleWidget: content.titleOverlay,

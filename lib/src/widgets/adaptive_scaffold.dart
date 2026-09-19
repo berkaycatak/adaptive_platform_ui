@@ -8,6 +8,7 @@ import 'adaptive_badge.dart';
 import 'adaptive_bottom_navigation_bar.dart';
 import 'adaptive_button.dart';
 import 'ios26/ios26_scaffold.dart';
+import '../toolbar/toolbar_chrome_scope.dart';
 import '../toolbar/toolbar_registry.dart';
 
 /// Navigation destination for bottom navigation
@@ -208,6 +209,7 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.appBar != widget.appBar ||
         oldWidget.useFixedToolbar != widget.useFixedToolbar ||
+        oldWidget.tabBarHidden != widget.tabBarHidden ||
         oldWidget.bottomNavigationBar != widget.bottomNavigationBar) {
       _syncToolbarEntry();
     }
@@ -240,6 +242,24 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
     final route = ModalRoute.of(context);
     return route == null || route is PageRoute;
   }
+
+  /// The tab bar the fixed chrome may draw in the iPhone Duo trailing bar:
+  /// only the native one. A custom `CupertinoTabBar` or bottom widget
+  /// (`useNativeBottomBar: false`) is the app's own and stays where it is.
+  AdaptiveBottomNavigationBar? get _tabBarForChrome {
+    final bar = widget.bottomNavigationBar;
+    if (bar == null || widget.tabBarHidden || !bar.useNativeBottomBar) {
+      return null;
+    }
+    if (bar.items == null || bar.selectedIndex == null || bar.onTap == null) {
+      return null;
+    }
+    return bar;
+  }
+
+  bool _tabsInTrailingBar(BuildContext context) =>
+      _usesFixedToolbar(context) &&
+      (ToolbarChromeScope.maybeOf(context)?.hostsDuoControls ?? false);
 
   void _syncToolbarEntry() {
     final registry = ToolbarRegistry.maybeOf(context);
@@ -274,7 +294,7 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
         // releases after 3.35; `of` works on every supported version.
         // ignore: deprecated_member_use
         visible: TickerMode.of(context) && Visibility.of(context),
-        hasTabBar: widget.bottomNavigationBar?.items?.isNotEmpty ?? false,
+        tabBar: _tabBarForChrome,
       ),
     );
   }
@@ -569,12 +589,16 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
                     ? Stack(
                         children: [
                           widget.body ?? const SizedBox.shrink(),
-                          Positioned(
-                            left: 0,
-                            right: 0,
-                            bottom: 0,
-                            child: tabBar!,
-                          ),
+                          // On iPhone Duo the fixed chrome shows the tabs at
+                          // the bottom of the trailing bar instead, so the
+                          // bottom bar is not built at all.
+                          if (!_tabsInTrailingBar(context))
+                            Positioned(
+                              left: 0,
+                              right: 0,
+                              bottom: 0,
+                              child: tabBar!,
+                            ),
                         ],
                       )
                     : widget.body ?? const SizedBox.shrink(),
@@ -763,6 +787,7 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
                   (action.icon != null
                       ? Icon(action.icon!)
                       : const Icon(Icons.circle)),
+              tooltip: action.effectiveLabel,
               onPressed: action.onPressed,
             );
           }).toList(),
@@ -865,6 +890,7 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
                 (action.icon != null
                     ? Icon(action.icon!)
                     : const Icon(Icons.circle)),
+            tooltip: action.effectiveLabel,
             onPressed: action.onPressed,
           );
         }).toList(),
