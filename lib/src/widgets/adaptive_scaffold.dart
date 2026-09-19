@@ -221,7 +221,7 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
 
   /// Publishes this page's app bar to the fixed toolbar chrome.
   ///
-  /// Reading [ModalRoute.of], [TickerMode.valuesOf] and [Visibility.of] here
+  /// Reading [ModalRoute.of], `TickerMode.of` and [Visibility.of] here
   /// registers dependencies on the route's live status and on the page's
   /// visibility, so this re-runs exactly when the page stops (or starts) being
   /// the current route, or is hidden/shown by a tab switch: the moments the
@@ -270,7 +270,10 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
         navigator: navigator,
         enclosingRoutes: enclosingRoutes,
         titleOverlay: _buildIOS26TitleOverlay(),
-        visible: TickerMode.valuesOf(context).enabled && Visibility.of(context),
+        // `TickerMode.valuesOf` replaces this, but only exists in Flutter
+        // releases after 3.35; `of` works on every supported version.
+        // ignore: deprecated_member_use
+        visible: TickerMode.of(context) && Visibility.of(context),
         hasTabBar: widget.bottomNavigationBar?.items?.isNotEmpty ?? false,
       ),
     );
