@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.0.0]
+* **BREAKING**: The minimum iOS deployment target is now 15.0 (was 13.0). Xcode 27 no longer builds below 15.0. Set `platform :ios, '15.0'` in your `ios/Podfile` and `IPHONEOS_DEPLOYMENT_TARGET = 15.0` in the Runner project
+* **BREAKING**: On iOS 26+ the native toolbar is no longer part of a page. With `AdaptiveApp`, every `AdaptiveScaffold` with `AdaptiveAppBar(useNativeToolbar: true)` hands its app bar to one fixed toolbar above the navigator. No code change is needed for ordinary pages. `AdaptiveAppBar.leading`, `titleWidget` and `AdaptiveAppBarAction.iconWidget` are now built above the navigator, so they must not look up `Navigator.of(context)` or page-level inherited widgets from their own `context`; capture the page's context in the callback instead. `useHeroBackButton` has no effect while the fixed toolbar is in use, because the back button already stays in place. See "Migrating to 1.0.0" in the README
+* **NEW**: Fixed Liquid Glass toolbar on iOS 26+. One toolbar stays in place while pages slide underneath it, and only its items change. The outgoing page's items fade out and the incoming page's fade in, driven by the route's own animation, so the change lasts exactly as long as the page transition, follows a back swipe under the finger and reverses when the swipe is cancelled. A back button that both pages show stays put. Dialogs and sheets leave the toolbar in place, dimmed and not tappable
+* **NEW**: iPhone Duo support. On the inner display, and on the cover display while folded, toolbar controls move into a fixed vertical bar in the trailing strip the system reserves, clear of the camera and status cluster, while the title stays on top
+* **NEW**: `AdaptiveToolbarHost`, for apps that do not use `AdaptiveApp`. Install it in the app `builder`. It is router-agnostic: it relies on the widget tree only, not on a `NavigatorObserver`, so it works with `Navigator`, GoRouter (including `StatefulShellRoute`), auto_route, nested navigators and tabs
+* **NEW**: `useFixedToolbar` on `AdaptiveScaffold` (default `true`). Set it to `false` for a scaffold that does not fill the screen from the top, such as one pane of a side by side layout, so it keeps its own toolbar. Scaffolds shown in a sheet, dialog or popup do this automatically
+* **NEW**: Depends on `foldable` ^1.0.3 for the iPhone Duo reserved regions
+* **FIX**: Builds with Xcode 27: `Package.swift` now declares its `FlutterFramework` dependency
+
 ## [0.1.111]
 * **NEW**: Custom SF Symbols on iOS. `AdaptiveAppBarAction`, native buttons, and the tab bar now fall back to a bundle asset (`UIImage(named:)`) when a name is not a system SF Symbol, so custom symbols or images from the app's asset catalog work (@hieutbui)
 * **NEW**: `iconWidget` on `AdaptiveAppBarAction` for a custom fallback widget (e.g. an SVG) on iOS <26 and Android (@hieutbui)

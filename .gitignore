@@ -33,3 +33,6 @@ migrate_working_dir/
 .agent/
 .agents/
 .claude/
+
+# Swift Package Manager build output
+ios/adaptive_platform_ui/.build/

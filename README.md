@@ -187,7 +187,8 @@ slide underneath it, the bar stays where it is, and only its items change.
   on top. Item changes there follow the route transition, including a back
   swipe under the finger.
 
-Not using `AdaptiveApp`? Install the host yourself, around the navigator:
+Not using `AdaptiveApp`? Install the host yourself, around the navigator
+(see [Migrating to 1.0.0](#migrating-to-100)):
 
 ```dart
 MaterialApp(
@@ -1044,7 +1045,7 @@ Add this to your package's `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  adaptive_platform_ui: ^0.1.0
+  adaptive_platform_ui: ^1.0.0
 ```
 
 Then run:
@@ -1052,6 +1053,73 @@ Then run:
 ```bash
 flutter pub get
 ```
+
+iOS needs a deployment target of 15.0 or higher. In `ios/Podfile`:
+
+```ruby
+platform :ios, '15.0'
+```
+
+## Migrating to 1.0.0
+
+Most apps need two small steps, or none.
+
+**1. Raise the iOS deployment target to 15.0.** Set `platform :ios, '15.0'` in
+`ios/Podfile`, set the Runner target's iOS Deployment Target to 15.0 in Xcode,
+then run `pod install`. Xcode 27 does not build below 15.0.
+
+**2. Let the fixed toolbar in.** On iOS 26+ the native toolbar now lives above
+the navigator instead of inside each page.
+
+- If you use `AdaptiveApp` or `AdaptiveApp.router`, there is nothing to do.
+- If you use `MaterialApp` or `CupertinoApp` directly, add the host once:
+
+```dart
+MaterialApp(
+  builder: (context, child) => AdaptiveToolbarHost(child: child!),
+  // ...
+);
+```
+
+Without the host every page keeps drawing its own toolbar, exactly as before
+1.0.0, so nothing breaks; you just do not get the fixed toolbar or the iPhone
+Duo vertical bar.
+
+**Check these if they apply to you:**
+
+- **Custom `leading`, `titleWidget` or `iconWidget`.** They are now built above
+  the navigator. A widget that calls `Navigator.of(context)` with *its own*
+  context no longer finds the page's navigator. Use the page's context:
+
+```dart
+// Before: a widget that looks the navigator up from its own context.
+leading: const MyCloseButton(),
+
+// After: capture the page's context in the callback.
+leading: CupertinoButton(
+  onPressed: () => Navigator.of(context).pop(), // the page's context
+  child: const Icon(CupertinoIcons.xmark),
+),
+```
+
+- **A scaffold that does not start at the top of the screen**, such as one
+  pane of a side by side layout, should keep its own toolbar:
+
+```dart
+AdaptiveScaffold(
+  useFixedToolbar: false,
+  appBar: AdaptiveAppBar(title: 'Detail', useNativeToolbar: true),
+  body: ...,
+);
+```
+
+  Scaffolds inside a sheet, dialog or popup do this automatically.
+
+- **`useHeroBackButton`** has no effect with the fixed toolbar: the back button
+  already stays in place between pages.
+- **Pages pushed without an `AdaptiveScaffold`** (a full screen image viewer,
+  for example) show no toolbar, because no page owns it while they are in
+  front.
 
 ## Quick Start
 
@@ -1299,6 +1367,7 @@ This package follows Apple's Human Interface Guidelines for iOS and Material Des
 
 - Flutter SDK: >=1.17.0
 - Dart SDK: ^3.9.2
+- iOS deployment target: 15.0 or higher
 
 ## Contributing
 
