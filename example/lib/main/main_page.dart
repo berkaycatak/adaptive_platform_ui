@@ -108,6 +108,11 @@ class _MainPageState extends State<MainPage> {
           }
           break;
         case 2:
+          if (matchedLocation != RouterService.routes.profile) {
+            shouldNavigateToRoot = true;
+          }
+          break;
+        case 3:
           if (matchedLocation != RouterService.routes.search) {
             shouldNavigateToRoot = true;
           } else {

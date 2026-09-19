@@ -4,6 +4,7 @@ class RouteConstants {
   // Main tabs
   String home = '/home';
   String info = '/info';
+  String profile = '/profile';
   String search = '/search';
 
   // Demo pages
