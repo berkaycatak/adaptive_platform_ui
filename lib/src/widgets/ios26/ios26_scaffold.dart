@@ -30,6 +30,7 @@ class IOS26Scaffold extends StatefulWidget {
     this.minimizeBehavior = TabBarMinimizeBehavior.automatic,
     this.enableBlur = true,
     this.useHeroBackButton = true,
+    this.useFixedToolbar = true,
     this.tabBarHidden = false,
     this.resizeToAvoidBottomInset,
     required this.children,
@@ -47,6 +48,10 @@ class IOS26Scaffold extends StatefulWidget {
   final TabBarMinimizeBehavior minimizeBehavior;
   final bool enableBlur;
   final bool useHeroBackButton;
+
+  /// Whether the fixed toolbar host, when there is one, draws this page's
+  /// toolbar. False makes the page draw its own, as it does without a host.
+  final bool useFixedToolbar;
   final bool tabBarHidden;
   final bool? resizeToAvoidBottomInset;
   final List<Widget> children;
@@ -253,7 +258,9 @@ class _IOS26ScaffoldState extends State<IOS26Scaffold>
     // With an AdaptiveToolbarHost above the navigator the host decides the
     // pose and draws the one fixed vertical bar for every page, so this page
     // keeps only its title. Without a host it draws its own bar.
-    final chrome = ToolbarChromeScope.maybeOf(context);
+    final chrome = widget.useFixedToolbar
+        ? ToolbarChromeScope.maybeOf(context)
+        : null;
     final duoVerticalPose =
         chrome?.hostsDuoControls ??
         DuoLayout.isVerticalBarPose(MediaQuery.viewPaddingOf(context));

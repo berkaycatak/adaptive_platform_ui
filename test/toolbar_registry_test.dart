@@ -169,6 +169,61 @@ void main() {
     });
   });
 
+  group('ToolbarRegistry: scaffolds that keep their own toolbar', () {
+    testWidgets('a scaffold in a bottom sheet does not take the chrome', (
+      tester,
+    ) async {
+      final nav = GlobalKey<NavigatorState>();
+      await tester.pumpWidget(hostedApp(navigatorKey: nav, home: page('Home')));
+      await tester.pump();
+      final registry = registryOf(tester);
+
+      showModalBottomSheet<void>(
+        context: nav.currentContext!,
+        builder: (_) => SizedBox(height: 300, child: page('Sheet')),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('body:Sheet'), findsOneWidget);
+      expect(
+        registry.entries.map((e) => e.appBar?.title),
+        isNot(contains('Sheet')),
+      );
+      // The page underneath still owns the chrome, covered by the sheet.
+      expect(registry.active, isNull);
+      expect(registry.owner?.appBar?.title, 'Home');
+    });
+
+    testWidgets('useFixedToolbar: false opts a page out', (tester) async {
+      final fixed = ValueNotifier<bool>(false);
+      await tester.pumpWidget(
+        hostedApp(
+          home: ValueListenableBuilder<bool>(
+            valueListenable: fixed,
+            builder: (_, value, _) => AdaptiveScaffold(
+              useFixedToolbar: value,
+              appBar: const AdaptiveAppBar(title: 'Pane'),
+              body: const SizedBox.shrink(),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      final registry = registryOf(tester);
+      expect(registry.entries, isEmpty);
+
+      fixed.value = true;
+      await tester.pump();
+      await tester.pump();
+      expect(registry.owner?.appBar?.title, 'Pane');
+
+      fixed.value = false;
+      await tester.pump();
+      await tester.pump();
+      expect(registry.entries, isEmpty);
+    });
+  });
+
   group('ToolbarRegistry: tabs with nested navigators', () {
     // A shell scaffold (no app bar) around per-tab navigators, the shape of
     // GoRouter's StatefulShellRoute, CupertinoTabScaffold and hand-rolled

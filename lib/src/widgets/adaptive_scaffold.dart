@@ -92,6 +92,7 @@ class AdaptiveScaffold extends StatefulWidget {
     this.endDrawerEnableOpenDragGesture = true,
     this.scaffoldKey,
     this.useHeroBackButton = true,
+    this.useFixedToolbar = true,
     this.tabBarHidden = false,
   });
 
@@ -168,6 +169,17 @@ class AdaptiveScaffold extends StatefulWidget {
   /// Only affects iOS 26+. Defaults to true.
   final bool useHeroBackButton;
 
+  /// Whether this page hands its app bar to the fixed toolbar that
+  /// [AdaptiveApp] keeps above the navigator on iOS 26+ (see
+  /// [AdaptiveToolbarHost]). Defaults to true.
+  ///
+  /// Set it to false for a scaffold that does not fill the screen from the
+  /// top, such as one pane of a side by side layout: the fixed toolbar sits at
+  /// the top of the app, so such a page should keep drawing a toolbar of its
+  /// own, where it is. Scaffolds shown in a sheet, dialog or popup (any route
+  /// that is not a page) do this automatically.
+  final bool useFixedToolbar;
+
   /// Whether to hide the native tab bar (iOS 26+ only).
   /// Use this to hide the tab bar when showing modal bottom sheets
   /// to prevent native platform views from bleeding through.
@@ -195,6 +207,7 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
   void didUpdateWidget(AdaptiveScaffold oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.appBar != widget.appBar ||
+        oldWidget.useFixedToolbar != widget.useFixedToolbar ||
         oldWidget.bottomNavigationBar != widget.bottomNavigationBar) {
       _syncToolbarEntry();
     }
@@ -219,9 +232,23 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
   /// `CupertinoTabScaffold` use `Offstage` + a disabled [TickerMode], while a
   /// plain [IndexedStack] uses [Visibility.maintain], which keeps tickers
   /// enabled and is only observable through [Visibility.of].
+  /// Whether this scaffold's toolbar belongs in the fixed chrome: it asked
+  /// for it and it is a page. A sheet or dialog is not at the top of the
+  /// screen, so a scaffold inside one keeps its own toolbar.
+  bool _usesFixedToolbar(BuildContext context) {
+    if (!widget.useFixedToolbar) return false;
+    final route = ModalRoute.of(context);
+    return route == null || route is PageRoute;
+  }
+
   void _syncToolbarEntry() {
     final registry = ToolbarRegistry.maybeOf(context);
     if (registry == null) return;
+    if (!_usesFixedToolbar(context)) {
+      _toolbarRegistry?.remove(this);
+      _toolbarRegistry = null;
+      return;
+    }
     _toolbarRegistry = registry;
     final navigator = Navigator.maybeOf(context);
     // Routes of the navigators around this page's own one (tabs, shell
@@ -386,6 +413,7 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
           minimizeBehavior: widget.minimizeBehavior,
           enableBlur: widget.enableBlur,
           useHeroBackButton: widget.useHeroBackButton,
+          useFixedToolbar: _usesFixedToolbar(context),
           tabBarHidden: widget.tabBarHidden,
           resizeToAvoidBottomInset: widget.resizeToAvoidBottomInset,
           children: childrenList,
