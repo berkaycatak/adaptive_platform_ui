@@ -31,6 +31,7 @@ class _HomePageState extends State<HomePage> {
           if (PlatformInfo.isIOS26OrHigher()) ...[
             AdaptiveAppBarAction(
               iosSymbol: 'arrow.uturn.backward',
+              label: 'Undo',
               icon: Icons.undo,
 
               onPressed: () {
@@ -41,6 +42,7 @@ class _HomePageState extends State<HomePage> {
             ),
             AdaptiveAppBarAction(
               iosSymbol: 'arrow.uturn.forward',
+              label: 'Redo',
               icon: Icons.redo,
               onPressed: () {
                 if (kDebugMode) {
@@ -53,6 +55,7 @@ class _HomePageState extends State<HomePage> {
             // Markup group
             AdaptiveAppBarAction(
               iosSymbol: 'pencil.tip.crop.circle',
+              label: 'Markup',
               icon: Icons.edit,
               onPressed: () {
                 if (kDebugMode) {
@@ -62,6 +65,7 @@ class _HomePageState extends State<HomePage> {
             ),
             AdaptiveAppBarAction(
               iosSymbol: 'ellipsis.circle',
+              label: 'More',
               icon: Icons.more_horiz,
               onPressed: () {
                 if (kDebugMode) {
@@ -72,6 +76,7 @@ class _HomePageState extends State<HomePage> {
           ] else ...[
             AdaptiveAppBarAction(
               iosSymbol: 'info.circle',
+              label: 'Info',
               icon: Icons.info,
               onPressed: () {
                 RouterService.goNamed(
@@ -356,8 +361,7 @@ class _HomePageState extends State<HomePage> {
                     ? CupertinoIcons.textformat
                     : Icons.title,
                 title: 'App Bar Title',
-                description:
-                    'Subtitle and custom titleWidget in the app bar',
+                description: 'Subtitle and custom titleWidget in the app bar',
                 routeName: RouterService.routes.appBarTitle,
                 isNew: true,
               ),
