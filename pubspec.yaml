@@ -16,7 +16,7 @@ dependencies:
   # iPhone Duo (foldable) support: hinge, fold posture, reserved regions and
   # iOS size classes bridged to Dart. Used to place the iOS 26 toolbar on the
   # trailing edge on the Duo inner display.
-  foldable: ^1.0.0
+  foldable: ^1.0.3
 
   # Material and Cupertino were split out of the Flutter SDK in 3.44.
   cupertino_ui: ^1.0.0
