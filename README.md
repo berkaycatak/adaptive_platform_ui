@@ -32,13 +32,13 @@ A Flutter package that provides adaptive platform-specific widgets with native i
 ## Fixed Liquid Glass Toolbar, iPhone Duo Ready
 
 <p align="center">
-  <img src="https://github.com/berkaycatak/adaptive_platform_ui/raw/main/img/duo_fixed_toolbar.gif" alt="Fixed Liquid Glass toolbar on iPhone Duo, open and folded" width="560"/>
+  <img src="https://github.com/berkaycatak/adaptive_platform_ui/raw/main/img/duo_fixed_toolbar.gif" alt="Toolbar and tab bar in the trailing bar of iPhone Duo, in portrait and landscape" width="560"/>
 </p>
 <p align="center">
   <img src="https://github.com/berkaycatak/adaptive_platform_ui/raw/main/img/iphone_fixed_toolbar.gif" alt="Fixed Liquid Glass toolbar on iPhone" width="300"/>
 </p>
 
-One toolbar stays in place while pages slide underneath it, and only its items change, in step with the page transition and with a back swipe. On iPhone Duo the controls move to the trailing vertical bar, open or folded. Works with any router, with nothing to set up.
+One toolbar stays in place while pages slide underneath it, and only its items change, in step with the page transition and with a back swipe. On iPhone Duo the toolbar and the tab bar move to the vertical bar on the side, as native Liquid Glass capsules, in every rotation; items that do not fit move into the system overflow menu. Works with any router, with nothing to set up.
 
 ## iOS 26+ Native Toolbar & Tab Bar
 
@@ -201,11 +201,30 @@ slide underneath it, the bar stays where it is, and only its items change.
   button appears when the page can go back and pops that page's own
   navigator.
 - **Dialogs and sheets** leave the bar in place, dimmed and not tappable.
-- **iPhone Duo.** On the inner display, and on the cover display while
-  folded, iOS reserves a strip on the trailing edge. The controls move into a
-  fixed vertical bar in that strip, clear of the camera, and the title stays
-  on top. Item changes there follow the route transition, including a back
-  swipe under the finger.
+- **iPhone Duo.** On the cover display, and on the inner display in
+  landscape, iOS reserves a strip along one side for vertical controls. The
+  package lays that strip out the way the system does, from the top: the
+  status cluster, the back button, the toolbar items (each group in one
+  Liquid Glass capsule), and at the bottom the tab bar as a capsule of icons.
+  The title moves to the leading edge and the page body stays clear of the
+  strip. It follows the hardware through every rotation, including the one
+  that puts the strip on the left, and keeps clear of the camera wherever
+  the rotation puts it. On the inner display in portrait the bars stay
+  horizontal, as they do in UIKit.
+- **Overflow.** When the strip runs out of room, toolbar items move, from the
+  bottom up, into the system overflow menu, and the tab bar stays whole.
+  Give every icon action a `label` so it has a name there:
+
+```dart
+AdaptiveAppBarAction(
+  iosSymbol: 'arrow.uturn.backward',
+  icon: Icons.undo,
+  label: 'Undo', // overflow menu, VoiceOver, Android tooltip
+  onPressed: undo,
+)
+```
+
+  Unlike `title`, a `label` never replaces the icon with text.
 
 Not using `AdaptiveApp`? Install the host yourself, around the navigator
 (see [Migrating to 1.0.0](#migrating-to-100)):
@@ -1102,8 +1121,9 @@ MaterialApp(
 ```
 
 Without the host every page keeps drawing its own toolbar, exactly as before
-1.0.0, so nothing breaks; you just do not get the fixed toolbar or the iPhone
-Duo vertical bar.
+1.0.0, so nothing breaks; you just do not get the fixed toolbar, and on iPhone
+Duo the tab bar of a tab layout stays at the bottom instead of moving into
+the vertical bar.
 
 **Check these if they apply to you:**
 
