@@ -32,7 +32,7 @@ A Flutter package that provides adaptive platform-specific widgets with native i
 ## Fixed Liquid Glass Toolbar, iPhone Duo Ready
 
 <p align="center">
-  <img src="https://github.com/berkaycatak/adaptive_platform_ui/raw/main/img/duo_fixed_toolbar.gif" alt="Toolbar and tab bar in the trailing bar of iPhone Duo, in portrait and landscape" width="560"/>
+  <img src="https://github.com/berkaycatak/adaptive_platform_ui/raw/main/img/duo_trailing_bar.gif" alt="Toolbar and tab bar in the trailing bar of iPhone Duo, in portrait and landscape" width="560"/>
 </p>
 <p align="center">
   <img src="https://github.com/berkaycatak/adaptive_platform_ui/raw/main/img/iphone_fixed_toolbar.gif" alt="Fixed Liquid Glass toolbar on iPhone" width="300"/>
