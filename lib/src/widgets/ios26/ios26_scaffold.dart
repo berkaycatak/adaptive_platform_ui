@@ -280,21 +280,30 @@ class _IOS26ScaffoldState extends State<IOS26Scaffold>
     // offset hacks. Content still scrolls behind it (scroll-edge effect)
     // because SafeArea insets rather than clips.
     //
-    // The Duo vertical bar needs no extra inset: it lives inside the trailing
-    // strip the system already reserves (`padding.right`), which SafeArea
-    // honours on its own. Adding more would over-inset the body.
-    if (showTopToolbar) {
-      final mq = MediaQuery.of(context);
-      bodyContent = MediaQuery(
-        data: mq.copyWith(
-          padding: mq.padding.copyWith(
-            top: mq.padding.top + kToolbarContentHeight,
+    // On iPhone Duo the body is also kept out of the trailing strip, the way
+    // UIKit keeps content out of it: that strip holds the status cluster and
+    // the vertical bar, and a page that does not use SafeArea would otherwise
+    // run underneath both. The inset is taken from `padding` and consumed, so
+    // a scaffold nested in this one (a tab inside a shell) does not inset a
+    // second time, and a SafeArea further down has nothing left to add.
+    final mq = MediaQuery.of(context);
+    final trailingInset = duoVerticalPose ? mq.padding.right : 0.0;
+    if (showTopToolbar || trailingInset > 0) {
+      final topInset = showTopToolbar ? kToolbarContentHeight : 0.0;
+      bodyContent = Padding(
+        padding: EdgeInsets.only(right: trailingInset),
+        child: MediaQuery(
+          data: mq.copyWith(
+            padding: mq.padding.copyWith(
+              top: mq.padding.top + topInset,
+              right: mq.padding.right - trailingInset,
+            ),
+            viewPadding: mq.viewPadding.copyWith(
+              top: mq.viewPadding.top + topInset,
+            ),
           ),
-          viewPadding: mq.viewPadding.copyWith(
-            top: mq.viewPadding.top + kToolbarContentHeight,
-          ),
+          child: bodyContent,
         ),
-        child: bodyContent,
       );
     }
 
