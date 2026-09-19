@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.0.1]
+* **FIX**: 📱 **iPhone Duo: the tab bar now lives in the vertical bar**, at the bottom of it, the way the system lays it out. In 1.0.0 it stayed at the bottom of the screen. The strip now reads, from the top: status cluster, back button, toolbar items, tab bar. Measured against a native UIKit app on the iPhone Duo simulator
+* **FIX**: iPhone Duo: the vertical bar follows the hardware through every rotation. On the cover display in landscape it stays on the side, including the rotation that puts the strip on the left, and it keeps clear of the camera wherever the rotation puts it (top or bottom of the strip). In 1.0.0 rotating fell back to horizontal bars. The inner display in portrait keeps horizontal bars, as it does in UIKit
+* **IMPROVEMENT**: iPhone Duo: toolbar items are grouped into native Liquid Glass capsules, one per group (groups are split by `spacerAfter`), with the back button as a round control on top, matching the system's sizes and spacing. The title moves to the leading edge, and content scrolling under it is blurred and faded like the system's scroll edge effect
+* **NEW**: iPhone Duo: when the strip runs out of room, toolbar items move, from the bottom up, into the system overflow menu while the tab bar stays whole. A group can be split, so its first items stay visible
+* **NEW**: `label` on `AdaptiveAppBarAction`, a short name such as "Undo". It names the action in the iPhone Duo overflow menu, for VoiceOver on iOS, and as the tooltip on Android. Unlike `title`, it never replaces the icon with text. Give every icon action one
+* **FIX**: iPhone Duo: an action with only `icon` or `iconWidget` (no `iosSymbol`) showed up empty in the vertical bar
+* **FIX**: A custom bottom bar (`useNativeBottomBar: false`) is left where it is on iPhone Duo; only the native tab bar moves into the vertical bar
+* **FIX**: Example app: the Profile tab had no route, so Search could not be opened and Profile opened Search
+
 ## [1.0.0]
 * **BREAKING**: The minimum iOS deployment target is now 15.0 (was 13.0). Xcode 27 no longer builds below 15.0. Set `platform :ios, '15.0'` in your `ios/Podfile` and `IPHONEOS_DEPLOYMENT_TARGET = 15.0` in the Runner project
 * **BREAKING**: On iOS 26+ the native toolbar is no longer part of a page. With `AdaptiveApp`, every `AdaptiveScaffold` with `AdaptiveAppBar(useNativeToolbar: true)` hands its app bar to one fixed toolbar above the navigator. No code change is needed for ordinary pages. `AdaptiveAppBar.leading`, `titleWidget` and `AdaptiveAppBarAction.iconWidget` are now built above the navigator, so they must not look up `Navigator.of(context)` or page-level inherited widgets from their own `context`; capture the page's context in the callback instead. `useHeroBackButton` has no effect while the fixed toolbar is in use, because the back button already stays in place. See "Migrating to 1.0.0" in the README
