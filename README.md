@@ -7,6 +7,26 @@
 
 A Flutter package that provides adaptive platform-specific widgets with native iOS 26+ designs, traditional Cupertino widgets for older iOS versions, and Material Design for Android.
 
+> **Upgrading from 0.1.x?** Read [Migrating to 1.0.0](#migrating-to-100) first: the iOS deployment target is now 15.0, and on iOS 26+ the toolbar is fixed above the navigator.
+
+## Contents
+
+- **[Migrating to 1.0.0](#migrating-to-100)**
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+- [Fixed Liquid Glass Toolbar, iPhone Duo Ready](#fixed-liquid-glass-toolbar-iphone-duo-ready)
+- [iOS 26+ Native Toolbar & Tab Bar](#ios-26-native-toolbar--tab-bar)
+- [Features](#features)
+- [Widget Showcase](#widget-showcase)
+- [Usage](#usage)
+- [Platform Detection](#platform-detection)
+- [iOS 26 Native Features](#ios-26-native-features)
+- [Example App](#example-app)
+- [Widget Catalog](#widget-catalog)
+- [iOS Version Support](#ios-version-support)
+- [Requirements](#requirements)
+- [Contributing](#contributing)
+
   <img src="https://github.com/berkaycatak/adaptive_platform_ui/blob/main/img/highlight-img.png?raw=true" alt="iOS 26 Native Toolbar">
 
 ## Fixed Liquid Glass Toolbar, iPhone Duo Ready
