@@ -7,8 +7,8 @@ screenshots:
     path: img/liquid-glass-demo.png
 
 environment:
-  sdk: ^3.9.2
-  flutter: ">=1.17.0"
+  sdk: ^3.12.0
+  flutter: ">=3.44.0"
 
 dependencies:
   flutter:
