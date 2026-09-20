@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../platform/platform_info.dart';
+import '../toolbar/adaptive_toolbar_host.dart';
 
 /// Platform-specific configuration for MaterialApp
 class MaterialAppData {
@@ -311,15 +312,18 @@ class AdaptiveApp extends StatelessWidget {
       );
     }
 
-    // Combine user's builder with our theme builder
+    // Install the fixed toolbar chrome above the navigator but inside our
+    // theme wrapper (so the chrome picks up the Cupertino theme), then apply
+    // the user's builder outermost.
+    Widget hostedThemeBuilder(BuildContext context, Widget? child) =>
+        wrapWithThemeMode(
+          context,
+          AdaptiveToolbarHost(child: child ?? const SizedBox.shrink()),
+        );
     final effectiveBuilder = builder != null
-        ? (BuildContext context, Widget? child) {
-            // First apply our theme wrapper
-            final themedChild = wrapWithThemeMode(context, child);
-            // Then apply user's builder
-            return builder!(context, themedChild);
-          }
-        : wrapWithThemeMode;
+        ? (BuildContext context, Widget? child) =>
+              builder!(context, hostedThemeBuilder(context, child))
+        : hostedThemeBuilder;
 
     if (isRouter) {
       return CupertinoApp.router(
@@ -392,6 +396,15 @@ class AdaptiveApp extends StatelessWidget {
   ) {
     final config = material?.call(context, platform) ?? const MaterialAppData();
 
+    // Install the fixed toolbar chrome above the navigator, then apply the
+    // user's builder outermost.
+    Widget materialBuilder(BuildContext context, Widget? child) {
+      final hosted = AdaptiveToolbarHost(
+        child: child ?? const SizedBox.shrink(),
+      );
+      return builder != null ? builder!(context, hosted) : hosted;
+    }
+
     if (isRouter) {
       return MaterialApp.router(
         key: key,
@@ -400,7 +413,7 @@ class AdaptiveApp extends StatelessWidget {
         routeInformationParser: routeInformationParser,
         routerDelegate: routerDelegate,
         backButtonDispatcher: backButtonDispatcher,
-        builder: builder,
+        builder: materialBuilder,
         title: title,
         onGenerateTitle: onGenerateTitle,
         color: config.color,
@@ -438,7 +451,7 @@ class AdaptiveApp extends StatelessWidget {
       onGenerateInitialRoutes: onGenerateInitialRoutes,
       onUnknownRoute: onUnknownRoute,
       navigatorObservers: navigatorObservers,
-      builder: builder,
+      builder: materialBuilder,
       title: title,
       onGenerateTitle: onGenerateTitle,
       color: config.color,

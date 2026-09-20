@@ -82,7 +82,12 @@ class iOS26ToolbarPlatformView: NSObject, FlutterPlatformView {
             containerView.overrideUserInterfaceStyle = isDark ? .dark : .light
         }
 
-        setupGradient()
+        // The fixed toolbar host stacks one bar per page and fades them, so it
+        // draws a single gradient of its own behind them instead.
+        let showsGradient = (args as? [String: Any])?["showsGradient"] as? Bool ?? true
+        if showsGradient {
+            setupGradient()
+        }
         setupNavigationBar()
 
         if let params = args as? [String: Any] {
@@ -230,6 +235,9 @@ class iOS26ToolbarPlatformView: NSObject, FlutterPlatformView {
 
                 if let btn = button {
                     btn.tag = index
+                    if let label = action["label"] as? String {
+                        btn.accessibilityLabel = label
+                    }
 
                     // Apply prominent style (iOS 26+)
                     if action["prominent"] as? Bool == true {

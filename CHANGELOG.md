@@ -1,8 +1,25 @@
 # Changelog
 
-## [0.1.112]
-* **IMPROVEMENT**: Migrated the Android plugin to built-in Kotlin. It no longer applies the Kotlin Gradle Plugin (KGP), which removes the Flutter KGP deprecation warning and keeps the plugin buildable on AGP 9 and later
-* **IMPROVEMENT**: Raised the minimum supported versions to Flutter 3.44 / Dart 3.12, and updated the Android build to AGP 9.1.0, Gradle 9.3.1, KGP 2.4.0 and compileSdk 36
+## [1.0.1]
+* **FIX**: 📱 **iPhone Duo: the tab bar now lives in the vertical bar**, at the bottom of it, the way the system lays it out. In 1.0.0 it stayed at the bottom of the screen. The strip now reads, from the top: status cluster, back button, toolbar items, tab bar. Measured against a native UIKit app on the iPhone Duo simulator
+* **FIX**: iPhone Duo: the vertical bar follows the hardware through every rotation. On the cover display in landscape it stays on the side, including the rotation that puts the strip on the left, and it keeps clear of the camera wherever the rotation puts it (top or bottom of the strip). In 1.0.0 rotating fell back to horizontal bars. The inner display in portrait keeps horizontal bars, as it does in UIKit
+* **IMPROVEMENT**: iPhone Duo: toolbar items are grouped into native Liquid Glass capsules, one per group (groups are split by `spacerAfter`), with the back button as a round control on top, matching the system's sizes and spacing. The title moves to the leading edge, and content scrolling under it is blurred and faded like the system's scroll edge effect
+* **NEW**: iPhone Duo: when the strip runs out of room, toolbar items move, from the bottom up, into the system overflow menu while the tab bar stays whole. A group can be split, so its first items stay visible
+* **NEW**: `label` on `AdaptiveAppBarAction`, a short name such as "Undo". It names the action in the iPhone Duo overflow menu, for VoiceOver on iOS, and as the tooltip on Android. Unlike `title`, it never replaces the icon with text. Give every icon action one
+* **FIX**: iPhone Duo: an action with only `icon` or `iconWidget` (no `iosSymbol`) showed up empty in the vertical bar
+* **FIX**: A custom bottom bar (`useNativeBottomBar: false`) is left where it is on iPhone Duo; only the native tab bar moves into the vertical bar
+* **FIX**: Example app: the Profile tab had no route, so Search could not be opened and Profile opened Search
+
+## [1.0.0]
+* **BREAKING**: The minimum iOS deployment target is now 15.0 (was 13.0). Xcode 27 no longer builds below 15.0. Set `platform :ios, '15.0'` in your `ios/Podfile` and `IPHONEOS_DEPLOYMENT_TARGET = 15.0` in the Runner project
+* **BREAKING**: On iOS 26+ the native toolbar is no longer part of a page. With `AdaptiveApp`, every `AdaptiveScaffold` with `AdaptiveAppBar(useNativeToolbar: true)` hands its app bar to one fixed toolbar above the navigator. No code change is needed for ordinary pages. `AdaptiveAppBar.leading`, `titleWidget` and `AdaptiveAppBarAction.iconWidget` are now built above the navigator, so they must not look up `Navigator.of(context)` or page-level inherited widgets from their own `context`; capture the page's context in the callback instead. `useHeroBackButton` has no effect while the fixed toolbar is in use, because the back button already stays in place. See "Migrating to 1.0.0" in the README
+* **NEW**: 📱 **iPhone Duo support.** Apple's foldable iPhone works out of the box, open and folded. On the inner display, and on the cover display while folded, toolbar controls move into a fixed vertical bar in the trailing strip the system reserves, clear of the camera and status cluster, while the title stays on top. Nothing to set up
+* **NEW**: On iPhone Duo the scaffold keeps the page body out of the trailing strip, the way UIKit does, so a page that does not use `SafeArea` no longer runs underneath the status cluster and the vertical bar
+* **NEW**: Fixed Liquid Glass toolbar on iOS 26+. One toolbar stays in place while pages slide underneath it, and only its items change. The outgoing page's items fade out and the incoming page's fade in, driven by the route's own animation, so the change lasts exactly as long as the page transition, follows a back swipe under the finger and reverses when the swipe is cancelled. A back button that both pages show stays put. Dialogs and sheets leave the toolbar in place, dimmed and not tappable
+* **NEW**: `AdaptiveToolbarHost`, for apps that do not use `AdaptiveApp`. Install it in the app `builder`. It is router-agnostic: it relies on the widget tree only, not on a `NavigatorObserver`, so it works with `Navigator`, GoRouter (including `StatefulShellRoute`), auto_route, nested navigators and tabs
+* **NEW**: `useFixedToolbar` on `AdaptiveScaffold` (default `true`). Set it to `false` for a scaffold that does not fill the screen from the top, such as one pane of a side by side layout, so it keeps its own toolbar. Scaffolds shown in a sheet, dialog or popup do this automatically
+* **NEW**: Depends on `foldable` ^1.0.3 for the iPhone Duo reserved regions
+* **FIX**: Builds with Xcode 27: `Package.swift` now declares its `FlutterFramework` dependency
 
 ## [0.1.111]
 * **NEW**: Custom SF Symbols on iOS. `AdaptiveAppBarAction`, native buttons, and the tab bar now fall back to a bundle asset (`UIImage(named:)`) when a name is not a system SF Symbol, so custom symbols or images from the app's asset catalog work (@hieutbui)

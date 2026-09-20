@@ -7,20 +7,42 @@
 
 A Flutter package that provides adaptive platform-specific widgets with native iOS 26+ designs, traditional Cupertino widgets for older iOS versions, and Material Design for Android.
 
+> **Upgrading from 0.1.x?** Read [Migrating to 1.0.0](#migrating-to-100) first: the iOS deployment target is now 15.0, and on iOS 26+ the toolbar is fixed above the navigator.
+
+## Contents
+
+- **[Migrating to 1.0.0](#migrating-to-100)**
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+- [Fixed Liquid Glass Toolbar, iPhone Duo Ready](#fixed-liquid-glass-toolbar-iphone-duo-ready)
+- [iOS 26+ Native Toolbar & Tab Bar](#ios-26-native-toolbar--tab-bar)
+- [Features](#features)
+- [Widget Showcase](#widget-showcase)
+- [Usage](#usage)
+- [Platform Detection](#platform-detection)
+- [iOS 26 Native Features](#ios-26-native-features)
+- [Example App](#example-app)
+- [Widget Catalog](#widget-catalog)
+- [iOS Version Support](#ios-version-support)
+- [Requirements](#requirements)
+- [Contributing](#contributing)
+
   <img src="https://github.com/berkaycatak/adaptive_platform_ui/blob/main/img/highlight-img.png?raw=true" alt="iOS 26 Native Toolbar">
+
+## Fixed Liquid Glass Toolbar, iPhone Duo Ready
+
+<p align="center">
+  <img src="https://github.com/berkaycatak/adaptive_platform_ui/raw/main/img/duo_trailing_bar.gif" alt="Toolbar and tab bar in the trailing bar of iPhone Duo, in portrait and landscape" width="560"/>
+</p>
+<p align="center">
+  <img src="https://github.com/berkaycatak/adaptive_platform_ui/raw/main/img/iphone_fixed_toolbar.gif" alt="Fixed Liquid Glass toolbar on iPhone" width="300"/>
+</p>
+
+One toolbar stays in place while pages slide underneath it, and only its items change, in step with the page transition and with a back swipe. On iPhone Duo the toolbar and the tab bar move to the vertical bar on the side, as native Liquid Glass capsules, in every rotation; items that do not fit move into the system overflow menu. Works with any router, with nothing to set up.
 
 ## iOS 26+ Native Toolbar & Tab Bar
 
-<p align="center">
-  <img src="https://github.com/berkaycatak/adaptive_platform_ui/raw/main/img/appbar.gif" alt="iOS 26 Native Toolbar" width="300"/>
-  <img src="https://github.com/berkaycatak/adaptive_platform_ui/raw/main/img/bottombar.gif" alt="iOS 26 Native Tab Bar" width="300"/>
-</p>
-
   <img src="https://github.com/berkaycatak/adaptive_platform_ui/blob/main/img/bottom_nav2_p.png?raw=true" alt="iOS 26 Native Tab Bar">
-
-  <img src="https://github.com/berkaycatak/adaptive_platform_ui/blob/main/img/toolbar2_p.png?raw=true" alt="iOS 26 Native Tab Bar">
-
-![native_search](https://github.com/user-attachments/assets/da33cb62-94d7-47da-8f0c-327bbd6ee04e)
 
 Native iOS 26 UIToolbar and UITabBar with Liquid Glass blur effects, minimize behavior, and native gesture handling.
 
@@ -157,6 +179,64 @@ Adaptive Bottom Navigation Bar (Destinations):
 <p align="center">
   <img src="https://raw.githubusercontent.com/berkaycatak/adaptive_platform_ui/refs/heads/main/img/bottom_nav_p.png" alt="Native Toolbar"/>
 </p>
+
+
+### Fixed Liquid Glass toolbar and iPhone Duo
+
+On iOS 26+ the native toolbar is not part of a page. `AdaptiveApp` keeps one
+toolbar above the navigator, the way a `UINavigationController` does: pages
+slide underneath it, the bar stays where it is, and only its items change.
+
+- **Nothing to set up.** Use `AdaptiveApp` (or `AdaptiveApp.router`) and give
+  your pages an `AdaptiveAppBar(useNativeToolbar: true)`. Each
+  `AdaptiveScaffold` publishes its app bar when it appears and withdraws it
+  when it leaves.
+- **Any router.** It relies on the widget tree only, not on a
+  `NavigatorObserver`, so it works with `Navigator`, GoRouter (including
+  `StatefulShellRoute`), auto_route, nested navigators and tabs.
+- **Items follow the page transition.** The outgoing page's items fade out
+  and the incoming page's fade in, driven by the route's own animation, so it lasts exactly as
+  long as the page transition, follows a back swipe under the finger and
+  reverses when the swipe is cancelled. Switching tabs crossfades. The back
+  button appears when the page can go back and pops that page's own
+  navigator.
+- **Dialogs and sheets** leave the bar in place, dimmed and not tappable.
+- **iPhone Duo.** On the cover display, and on the inner display in
+  landscape, iOS reserves a strip along one side for vertical controls. The
+  package lays that strip out the way the system does, from the top: the
+  status cluster, the back button, the toolbar items (each group in one
+  Liquid Glass capsule), and at the bottom the tab bar as a capsule of icons.
+  The title moves to the leading edge and the page body stays clear of the
+  strip. It follows the hardware through every rotation, including the one
+  that puts the strip on the left, and keeps clear of the camera wherever
+  the rotation puts it. On the inner display in portrait the bars stay
+  horizontal, as they do in UIKit.
+- **Overflow.** When the strip runs out of room, toolbar items move, from the
+  bottom up, into the system overflow menu, and the tab bar stays whole.
+  Give every icon action a `label` so it has a name there:
+
+```dart
+AdaptiveAppBarAction(
+  iosSymbol: 'arrow.uturn.backward',
+  icon: Icons.undo,
+  label: 'Undo', // overflow menu, VoiceOver, Android tooltip
+  onPressed: undo,
+)
+```
+
+  Unlike `title`, a `label` never replaces the icon with text.
+
+Not using `AdaptiveApp`? Install the host yourself, around the navigator
+(see [Migrating to 1.0.0](#migrating-to-100)):
+
+```dart
+MaterialApp(
+  builder: (context, child) => AdaptiveToolbarHost(child: child!),
+  // ...
+);
+```
+
+Without a host every page draws its own toolbar, as before.
 
 
 ### AdaptiveButton
@@ -1004,7 +1084,7 @@ Add this to your package's `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  adaptive_platform_ui: ^0.1.0
+  adaptive_platform_ui: ^1.0.0
 ```
 
 Then run:
@@ -1012,6 +1092,74 @@ Then run:
 ```bash
 flutter pub get
 ```
+
+iOS needs a deployment target of 15.0 or higher. In `ios/Podfile`:
+
+```ruby
+platform :ios, '15.0'
+```
+
+## Migrating to 1.0.0
+
+Most apps need two small steps, or none.
+
+**1. Raise the iOS deployment target to 15.0.** Set `platform :ios, '15.0'` in
+`ios/Podfile`, set the Runner target's iOS Deployment Target to 15.0 in Xcode,
+then run `pod install`. Xcode 27 does not build below 15.0.
+
+**2. Let the fixed toolbar in.** On iOS 26+ the native toolbar now lives above
+the navigator instead of inside each page.
+
+- If you use `AdaptiveApp` or `AdaptiveApp.router`, there is nothing to do.
+- If you use `MaterialApp` or `CupertinoApp` directly, add the host once:
+
+```dart
+MaterialApp(
+  builder: (context, child) => AdaptiveToolbarHost(child: child!),
+  // ...
+);
+```
+
+Without the host every page keeps drawing its own toolbar, exactly as before
+1.0.0, so nothing breaks; you just do not get the fixed toolbar, and on iPhone
+Duo the tab bar of a tab layout stays at the bottom instead of moving into
+the vertical bar.
+
+**Check these if they apply to you:**
+
+- **Custom `leading`, `titleWidget` or `iconWidget`.** They are now built above
+  the navigator. A widget that calls `Navigator.of(context)` with *its own*
+  context no longer finds the page's navigator. Use the page's context:
+
+```dart
+// Before: a widget that looks the navigator up from its own context.
+leading: const MyCloseButton(),
+
+// After: capture the page's context in the callback.
+leading: CupertinoButton(
+  onPressed: () => Navigator.of(context).pop(), // the page's context
+  child: const Icon(CupertinoIcons.xmark),
+),
+```
+
+- **A scaffold that does not start at the top of the screen**, such as one
+  pane of a side by side layout, should keep its own toolbar:
+
+```dart
+AdaptiveScaffold(
+  useFixedToolbar: false,
+  appBar: AdaptiveAppBar(title: 'Detail', useNativeToolbar: true),
+  body: ...,
+);
+```
+
+  Scaffolds inside a sheet, dialog or popup do this automatically.
+
+- **`useHeroBackButton`** has no effect with the fixed toolbar: the back button
+  already stays in place between pages.
+- **Pages pushed without an `AdaptiveScaffold`** (a full screen image viewer,
+  for example) show no toolbar, because no page owns it while they are in
+  front.
 
 ## Quick Start
 
@@ -1259,6 +1407,7 @@ This package follows Apple's Human Interface Guidelines for iOS and Material Des
 
 - Flutter SDK: >=1.17.0
 - Dart SDK: ^3.9.2
+- iOS deployment target: 15.0 or higher
 
 ## Contributing
 

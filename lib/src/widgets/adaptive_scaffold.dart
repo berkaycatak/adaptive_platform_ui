@@ -8,6 +8,8 @@ import 'adaptive_badge.dart';
 import 'adaptive_bottom_navigation_bar.dart';
 import 'adaptive_button.dart';
 import 'ios26/ios26_scaffold.dart';
+import '../toolbar/toolbar_chrome_scope.dart';
+import '../toolbar/toolbar_registry.dart';
 
 /// Navigation destination for bottom navigation
 class AdaptiveNavigationDestination {
@@ -91,6 +93,7 @@ class AdaptiveScaffold extends StatefulWidget {
     this.endDrawerEnableOpenDragGesture = true,
     this.scaffoldKey,
     this.useHeroBackButton = true,
+    this.useFixedToolbar = true,
     this.tabBarHidden = false,
   });
 
@@ -167,6 +170,17 @@ class AdaptiveScaffold extends StatefulWidget {
   /// Only affects iOS 26+. Defaults to true.
   final bool useHeroBackButton;
 
+  /// Whether this page hands its app bar to the fixed toolbar that
+  /// [AdaptiveApp] keeps above the navigator on iOS 26+ (see
+  /// [AdaptiveToolbarHost]). Defaults to true.
+  ///
+  /// Set it to false for a scaffold that does not fill the screen from the
+  /// top, such as one pane of a side by side layout: the fixed toolbar sits at
+  /// the top of the app, so such a page should keep drawing a toolbar of its
+  /// own, where it is. Scaffolds shown in a sheet, dialog or popup (any route
+  /// that is not a page) do this automatically.
+  final bool useFixedToolbar;
+
   /// Whether to hide the native tab bar (iOS 26+ only).
   /// Use this to hide the tab bar when showing modal bottom sheets
   /// to prevent native platform views from bleeding through.
@@ -179,6 +193,111 @@ class AdaptiveScaffold extends StatefulWidget {
 class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
   final GlobalKey<_MinimizableTabBarState> _tabBarKey =
       GlobalKey<_MinimizableTabBarState>();
+
+  /// The fixed toolbar chrome this page publishes its app bar to, if an
+  /// [AdaptiveToolbarHost] is installed above the navigator.
+  ToolbarRegistry? _toolbarRegistry;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _syncToolbarEntry();
+  }
+
+  @override
+  void didUpdateWidget(AdaptiveScaffold oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.appBar != widget.appBar ||
+        oldWidget.useFixedToolbar != widget.useFixedToolbar ||
+        oldWidget.tabBarHidden != widget.tabBarHidden ||
+        oldWidget.bottomNavigationBar != widget.bottomNavigationBar) {
+      _syncToolbarEntry();
+    }
+  }
+
+  @override
+  void dispose() {
+    _toolbarRegistry?.remove(this);
+    super.dispose();
+  }
+
+  /// Publishes this page's app bar to the fixed toolbar chrome.
+  ///
+  /// Reading [ModalRoute.of], `TickerMode.of` and [Visibility.of] here
+  /// registers dependencies on the route's live status and on the page's
+  /// visibility, so this re-runs exactly when the page stops (or starts) being
+  /// the current route, or is hidden/shown by a tab switch: the moments the
+  /// chrome has to pick another page's items. No-op when no host is installed.
+  ///
+  /// Both visibility signals are needed because tab containers hide pages
+  /// differently: GoRouter's `StatefulShellRoute.indexedStack` and
+  /// `CupertinoTabScaffold` use `Offstage` + a disabled [TickerMode], while a
+  /// plain [IndexedStack] uses [Visibility.maintain], which keeps tickers
+  /// enabled and is only observable through [Visibility.of].
+  /// Whether this scaffold's toolbar belongs in the fixed chrome: it asked
+  /// for it and it is a page. A sheet or dialog is not at the top of the
+  /// screen, so a scaffold inside one keeps its own toolbar.
+  bool _usesFixedToolbar(BuildContext context) {
+    if (!widget.useFixedToolbar) return false;
+    final route = ModalRoute.of(context);
+    return route == null || route is PageRoute;
+  }
+
+  /// The tab bar the fixed chrome may draw in the iPhone Duo trailing bar:
+  /// only the native one. A custom `CupertinoTabBar` or bottom widget
+  /// (`useNativeBottomBar: false`) is the app's own and stays where it is.
+  AdaptiveBottomNavigationBar? get _tabBarForChrome {
+    final bar = widget.bottomNavigationBar;
+    if (bar == null || widget.tabBarHidden || !bar.useNativeBottomBar) {
+      return null;
+    }
+    if (bar.items == null || bar.selectedIndex == null || bar.onTap == null) {
+      return null;
+    }
+    return bar;
+  }
+
+  bool _tabsInTrailingBar(BuildContext context) =>
+      _usesFixedToolbar(context) &&
+      (ToolbarChromeScope.maybeOf(context)?.hostsDuoControls ?? false);
+
+  void _syncToolbarEntry() {
+    final registry = ToolbarRegistry.maybeOf(context);
+    if (registry == null) return;
+    if (!_usesFixedToolbar(context)) {
+      _toolbarRegistry?.remove(this);
+      _toolbarRegistry = null;
+      return;
+    }
+    _toolbarRegistry = registry;
+    final navigator = Navigator.maybeOf(context);
+    // Routes of the navigators around this page's own one (tabs, shell
+    // routes). `Navigator.maybeOf` would hand a navigator's context straight
+    // back to itself, so step to its ancestor explicitly.
+    final enclosingRoutes = <ModalRoute<Object?>>[];
+    var outer = navigator?.context;
+    while (outer != null) {
+      final route = ModalRoute.of(outer);
+      if (route == null) break;
+      enclosingRoutes.add(route);
+      outer = outer.findAncestorStateOfType<NavigatorState>()?.context;
+    }
+    registry.upsert(
+      ToolbarEntry(
+        id: this,
+        appBar: widget.appBar,
+        route: ModalRoute.of(context),
+        navigator: navigator,
+        enclosingRoutes: enclosingRoutes,
+        titleOverlay: _buildIOS26TitleOverlay(),
+        // `TickerMode.valuesOf` replaces this, but only exists in Flutter
+        // releases after 3.35; `of` works on every supported version.
+        // ignore: deprecated_member_use
+        visible: TickerMode.of(context) && Visibility.of(context),
+        tabBar: _tabBarForChrome,
+      ),
+    );
+  }
 
   /// Builds the app bar title area, optionally with a subtitle below it.
   ///
@@ -317,6 +436,7 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
           minimizeBehavior: widget.minimizeBehavior,
           enableBlur: widget.enableBlur,
           useHeroBackButton: widget.useHeroBackButton,
+          useFixedToolbar: _usesFixedToolbar(context),
           tabBarHidden: widget.tabBarHidden,
           resizeToAvoidBottomInset: widget.resizeToAvoidBottomInset,
           children: childrenList,
@@ -469,12 +589,16 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
                     ? Stack(
                         children: [
                           widget.body ?? const SizedBox.shrink(),
-                          Positioned(
-                            left: 0,
-                            right: 0,
-                            bottom: 0,
-                            child: tabBar!,
-                          ),
+                          // On iPhone Duo the fixed chrome shows the tabs at
+                          // the bottom of the trailing bar instead, so the
+                          // bottom bar is not built at all.
+                          if (!_tabsInTrailingBar(context))
+                            Positioned(
+                              left: 0,
+                              right: 0,
+                              bottom: 0,
+                              child: tabBar!,
+                            ),
                         ],
                       )
                     : widget.body ?? const SizedBox.shrink(),
@@ -658,9 +782,12 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
               );
             }
             return IconButton(
-              icon: action.iconWidget ?? (action.icon != null
-                  ? Icon(action.icon!)
-                  : const Icon(Icons.circle)),
+              icon:
+                  action.iconWidget ??
+                  (action.icon != null
+                      ? Icon(action.icon!)
+                      : const Icon(Icons.circle)),
+              tooltip: action.effectiveLabel,
               onPressed: action.onPressed,
             );
           }).toList(),
@@ -758,9 +885,12 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
             );
           }
           return IconButton(
-            icon: action.iconWidget ?? (action.icon != null
-                ? Icon(action.icon!)
-                : const Icon(Icons.circle)),
+            icon:
+                action.iconWidget ??
+                (action.icon != null
+                    ? Icon(action.icon!)
+                    : const Icon(Icons.circle)),
+            tooltip: action.effectiveLabel,
             onPressed: action.onPressed,
           );
         }).toList(),
