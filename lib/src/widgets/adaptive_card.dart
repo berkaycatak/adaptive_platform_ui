@@ -30,6 +30,8 @@ class AdaptiveCard extends StatelessWidget {
     required this.child,
     this.padding,
     this.borderRadius,
+    this.borderColor,
+    this.borderWidth,
   });
 
   /// The card's background color
@@ -79,6 +81,18 @@ class AdaptiveCard extends StatelessWidget {
   /// On Android: Uses this if shape is not provided
   final BorderRadius? borderRadius;
 
+  /// Colour of the card's border on iOS
+  ///
+  /// Defaults to a hairline separator. Ignored on Android, where the border
+  /// comes from [shape].
+  final Color? borderColor;
+
+  /// Width of the card's border on iOS
+  ///
+  /// Defaults to 0.5 (a hairline), or to 1.0 when [borderColor] is set
+  /// without a width, so a deliberate colour is actually visible.
+  final double? borderWidth;
+
   @override
   Widget build(BuildContext context) {
     final content = padding != null
@@ -93,6 +107,8 @@ class AdaptiveCard extends StatelessWidget {
         clipBehavior: clipBehavior ?? Clip.none,
         semanticContainer: semanticContainer,
         borderRadius: borderRadius,
+        borderColor: borderColor,
+        borderWidth: borderWidth,
         child: content,
       );
     }
@@ -141,6 +157,8 @@ class _IOSCard extends StatelessWidget {
     required this.clipBehavior,
     required this.semanticContainer,
     required this.borderRadius,
+    required this.borderColor,
+    required this.borderWidth,
     required this.child,
   });
 
@@ -149,6 +167,8 @@ class _IOSCard extends StatelessWidget {
   final Clip clipBehavior;
   final bool semanticContainer;
   final BorderRadius? borderRadius;
+  final Color? borderColor;
+  final double? borderWidth;
   final Widget child;
 
   @override
@@ -170,10 +190,12 @@ class _IOSCard extends StatelessWidget {
         color: backgroundColor,
         borderRadius: radius,
         border: Border.all(
-          color: isDark
-              ? CupertinoColors.systemGrey6
-              : CupertinoColors.separator,
-          width: 0.5,
+          color:
+              borderColor ??
+              (isDark
+                  ? CupertinoColors.systemGrey6
+                  : CupertinoColors.separator),
+          width: borderWidth ?? (borderColor != null ? 1.0 : 0.5),
         ),
         boxShadow: isDark
             ? null

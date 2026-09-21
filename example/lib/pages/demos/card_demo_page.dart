@@ -67,6 +67,40 @@ class _CardDemoPageState extends State<CardDemoPage> {
         const SizedBox(height: 24),
         _buildSection(
           context,
+          title: 'Custom Border (iOS)',
+          description:
+              'borderColor and borderWidth override the hairline separator',
+          child: Column(
+            children: [
+              AdaptiveCard(
+                margin: const EdgeInsets.only(bottom: 16),
+                padding: const EdgeInsets.all(16),
+                borderColor: PlatformInfo.isIOS
+                    ? CupertinoTheme.of(context).primaryColor
+                    : Colors.blue,
+                child: Text(
+                  'Border in the accent color',
+                  style: _getTextStyle(context),
+                ),
+              ),
+              AdaptiveCard(
+                margin: const EdgeInsets.only(bottom: 16),
+                padding: const EdgeInsets.all(16),
+                borderColor: PlatformInfo.isIOS
+                    ? CupertinoColors.systemRed
+                    : Colors.red,
+                borderWidth: 2,
+                child: Text(
+                  'Two-point red border',
+                  style: _getTextStyle(context),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 24),
+        _buildSection(
+          context,
           title: 'Custom Colors',
           description: 'Cards with custom background colors',
           child: Column(
