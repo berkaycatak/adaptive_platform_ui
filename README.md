@@ -329,6 +329,12 @@ if (result != null) {
 
 ### AdaptiveContextMenu
 
+<p align="center">
+  <img src="img/context-menu-ios26.jpg" alt="iOS 26 Liquid Glass context menu" width="250"/>
+  <img src="img/context-menu-ios18.jpg" alt="iOS 18 Cupertino context menu" width="250"/>
+  <img src="img/context-menu-android.jpg" alt="Android Material context menu" width="250"/>
+</p>
+
 ```dart
 AdaptiveContextMenu(
   actions: [
@@ -362,6 +368,7 @@ AdaptiveContextMenu(
 )
 ```
 
+**iOS 26+**: Native context menu with Liquid Glass.
 **iOS**: Uses `CupertinoContextMenu` with preview and native animations.
 **Android**: Uses `PopupMenuButton` with Material Design styling.
 
@@ -1374,7 +1381,7 @@ Currently available adaptive widgets:
 - ✅ **AdaptiveTooltip** - Platform-specific tooltips
 - ✅ **AdaptiveSnackBar** - Platform-specific notification snackbars
 - ✅ **AdaptiveAlertDialog** - Native alert dialogs with text input support
-- ✅ **AdaptiveContextMenu** - Long-press context menus with platform-specific styling
+- ✅ **AdaptiveContextMenu** - Long-press context menus, Liquid Glass `UIMenu` on iOS 26+
 - ✅ **AdaptivePopupMenuButton** - Native popup menus
 - ✅ **AdaptiveDatePicker** - Platform-specific date selection dialogs
 - ✅ **AdaptiveTimePicker** - Platform-specific time selection dialogs
