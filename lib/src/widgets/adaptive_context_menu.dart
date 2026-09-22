@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import '../platform/platform_info.dart';
+import 'ios26/ios26_context_menu.dart';
 
 /// A context menu action item
 class AdaptiveContextMenuAction {
@@ -54,10 +55,9 @@ class AdaptiveContextMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // iOS 26+ - Use CupertinoContextMenu
-    // Note: Native iOS 26 UIContextMenu could be implemented with platform view for enhanced visuals
+    // iOS 26+ - Native UIMenu with Liquid Glass
     if (PlatformInfo.isIOS26OrHigher()) {
-      return _buildCupertinoContextMenu(context);
+      return _buildIOS26ContextMenu(context);
     }
 
     // iOS <26 - Use CupertinoContextMenu
@@ -150,5 +150,9 @@ class AdaptiveContextMenu extends StatelessWidget {
         actions[selectedIndex].onPressed();
       }
     });
+  }
+
+  Widget _buildIOS26ContextMenu(BuildContext context) {
+    return IOS26ContextMenu(actions: actions, child: child);
   }
 }
