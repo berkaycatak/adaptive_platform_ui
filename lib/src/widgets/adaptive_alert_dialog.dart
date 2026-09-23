@@ -71,7 +71,8 @@ class AdaptiveAlertDialog {
 
       return showCupertinoDialog<void>(
         context: context,
-        barrierColor: CupertinoColors.transparent,
+        useRootNavigator: true,
+        barrierColor: Colors.black.withValues(alpha: 0.35),
         builder: (context) => IOS26AlertDialog(
           title: title,
           message: message,
@@ -219,6 +220,8 @@ class AdaptiveAlertDialog {
 
       return showCupertinoDialog<String?>(
         context: context,
+        useRootNavigator: true,
+        barrierColor: Colors.black.withValues(alpha: 0.35),
         builder: (context) => IOS26AlertDialog(
           title: title,
           message: message,
