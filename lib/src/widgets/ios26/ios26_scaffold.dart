@@ -427,6 +427,8 @@ class _IOS26ScaffoldState extends State<IOS26Scaffold>
                       minimizeBehavior: widget.minimizeBehavior,
                       showNativeView: showNativeView,
                       hidden: widget.tabBarHidden,
+                      gestureBlockingPolicy:
+                          widget.bottomNavigationBar!.gestureBlockingPolicy,
                     )
                   : IOS26NativeTabBar(
                       destinations: widget.bottomNavigationBar!.items!,
@@ -436,6 +438,8 @@ class _IOS26ScaffoldState extends State<IOS26Scaffold>
                       minimizeBehavior: widget.minimizeBehavior,
                       showNativeView: showNativeView,
                       hidden: widget.tabBarHidden,
+                      gestureBlockingPolicy:
+                          widget.bottomNavigationBar!.gestureBlockingPolicy,
                     ),
             ),
           ),

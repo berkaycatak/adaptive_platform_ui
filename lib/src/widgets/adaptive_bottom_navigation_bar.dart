@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart';
 import 'adaptive_scaffold.dart';
 
 /// Configuration for an adaptive bottom navigation bar
@@ -25,6 +26,8 @@ class AdaptiveBottomNavigationBar {
     this.bottomNavigationBar,
     this.selectedItemColor,
     this.unselectedItemColor,
+    this.gestureBlockingPolicy =
+        UiKitViewGestureBlockingPolicy.fallbackToPluginDefault,
   });
 
   /// Navigation items for bottom navigation bar
@@ -88,6 +91,19 @@ class AdaptiveBottomNavigationBar {
   /// If null, uses platform defaults.
   final Color? unselectedItemColor;
 
+  /// How the iOS 26+ native tab bar receives touches (iOS 26+ with
+  /// [useNativeBottomBar] only).
+  ///
+  /// The default keeps the plugin's `eager` policy, under which Flutter holds
+  /// the touches back until its gesture arena accepts them. The native
+  /// `UITabBar` does not recognize a short tap delivered that late, so a quick
+  /// tap can fail to switch tabs while a longer press works.
+  /// [UiKitViewGestureBlockingPolicy.doNotBlockGesture] hands the touches to
+  /// the bar right away. Flutter then only blocks them where its own content
+  /// covers the bar, so leave the default if the bar sits inside a Flutter
+  /// gesture that should win over it, such as a `PageView`.
+  final UiKitViewGestureBlockingPolicy gestureBlockingPolicy;
+
   /// Creates a copy of this bottom navigation bar with the given fields replaced
   AdaptiveBottomNavigationBar copyWith({
     List<AdaptiveNavigationDestination>? items,
@@ -98,6 +114,7 @@ class AdaptiveBottomNavigationBar {
     Widget? bottomNavigationBar,
     Color? selectedItemColor,
     Color? unselectedItemColor,
+    UiKitViewGestureBlockingPolicy? gestureBlockingPolicy,
   }) {
     return AdaptiveBottomNavigationBar(
       items: items ?? this.items,
@@ -108,6 +125,8 @@ class AdaptiveBottomNavigationBar {
       bottomNavigationBar: bottomNavigationBar ?? this.bottomNavigationBar,
       selectedItemColor: selectedItemColor ?? this.selectedItemColor,
       unselectedItemColor: unselectedItemColor ?? this.unselectedItemColor,
+      gestureBlockingPolicy:
+          gestureBlockingPolicy ?? this.gestureBlockingPolicy,
     );
   }
 }

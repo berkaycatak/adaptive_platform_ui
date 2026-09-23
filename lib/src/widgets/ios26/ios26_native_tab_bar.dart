@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
+import '../adaptive_bottom_navigation_bar.dart';
 import '../adaptive_scaffold.dart';
 
 /// Native iOS 26 tab bar using UITabBar platform view
@@ -19,6 +20,8 @@ class IOS26NativeTabBar extends StatefulWidget {
     this.minimizeBehavior = TabBarMinimizeBehavior.automatic,
     this.showNativeView = true,
     this.hidden = false,
+    this.gestureBlockingPolicy =
+        UiKitViewGestureBlockingPolicy.fallbackToPluginDefault,
   });
 
   final List<AdaptiveNavigationDestination> destinations;
@@ -38,6 +41,9 @@ class IOS26NativeTabBar extends StatefulWidget {
   /// Tab bar minimize behavior (iOS 26+)
   /// Controls how the tab bar minimizes when scrolling
   final TabBarMinimizeBehavior minimizeBehavior;
+
+  /// See [AdaptiveBottomNavigationBar.gestureBlockingPolicy].
+  final UiKitViewGestureBlockingPolicy gestureBlockingPolicy;
 
   @override
   State<IOS26NativeTabBar> createState() => _IOS26NativeTabBarState();
@@ -220,6 +226,7 @@ class _IOS26NativeTabBarState extends State<IOS26NativeTabBar> {
               creationParams: creationParams,
               creationParamsCodec: const StandardMessageCodec(),
               onPlatformViewCreated: _onCreated,
+              gestureBlockingPolicy: widget.gestureBlockingPolicy,
               gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
                 Factory<TapGestureRecognizer>(() => TapGestureRecognizer()),
               },
