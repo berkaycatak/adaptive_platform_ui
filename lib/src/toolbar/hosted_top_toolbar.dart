@@ -317,12 +317,15 @@ class _FallbackBar extends StatelessWidget {
               ),
             ),
             for (final action in content.actions)
-              CupertinoButton(
-                padding: EdgeInsets.zero,
-                onPressed: action.onPressed,
-                child: action.icon != null
-                    ? Icon(action.icon)
-                    : Text(action.title ?? ''),
+              Builder(
+                builder: (context) => CupertinoButton(
+                  padding: EdgeInsets.zero,
+                  onPressed: () =>
+                      action.press(context, navigator: content.navigator),
+                  child: action.icon != null
+                      ? Icon(action.icon)
+                      : Text(action.title ?? ''),
+                ),
               ),
           ],
         ),

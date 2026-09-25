@@ -1,5 +1,8 @@
 # Changelog
 
+## [Unreleased]
+* **NEW**: `menuItems` and `onMenuItemSelected` on `AdaptiveAppBarAction`. Tapping the action opens a menu instead of calling `onPressed`, like the "more" button of a system app. On iOS 26+ it is a native `UIMenu` shown at the bar button, in the fixed toolbar as well; on iOS <26 an action sheet; on Android a popup menu at the button. Takes the `AdaptivePopupMenuItem` and `AdaptivePopupMenuDivider` entries of `AdaptivePopupMenuButton`. On iPhone Duo the menu opens from the action's glass capsule; an action that moved into the overflow menu opens it as an action sheet. `onPressed` is now optional for an action with a menu
+
 ## [1.0.1]
 * **FIX**: 📱 **iPhone Duo: the tab bar now lives in the vertical bar**, at the bottom of it, the way the system lays it out. In 1.0.0 it stayed at the bottom of the screen. The strip now reads, from the top: status cluster, back button, toolbar items, tab bar. Measured against a native UIKit app on the iPhone Duo simulator
 * **FIX**: iPhone Duo: the vertical bar follows the hardware through every rotation. On the cover display in landscape it stays on the side, including the rotation that puts the strip on the left, and it keeps clear of the camera wherever the rotation puts it (top or bottom of the strip). In 1.0.0 rotating fell back to horizontal bars. The inner display in portrait keeps horizontal bars, as it does in UIKit

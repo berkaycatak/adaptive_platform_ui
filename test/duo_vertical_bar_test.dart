@@ -1,6 +1,7 @@
 import 'package:adaptive_platform_ui/src/toolbar/duo_vertical_bar.dart';
 import 'package:adaptive_platform_ui/src/widgets/adaptive_app_bar_action.dart';
 import 'package:adaptive_platform_ui/src/widgets/ios26/ios26_glass_capsule.dart';
+import 'package:adaptive_platform_ui/src/widgets/ios26/ios26_popup_menu_button.dart';
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -314,6 +315,57 @@ void main() {
           .firstWhere((c) => c.items.single.menu != null);
       expect(overflow.items.single.menu!.map((e) => e.title), ['', 'Delete']);
       expect(overflow.items.single.menu!.last.symbol, isNotNull);
+    });
+
+    testWidgets('an action\'s menu is a native menu in its capsule', (
+      tester,
+    ) async {
+      final selected = <(String, int)>[];
+      AdaptiveAppBarAction action(String name) => AdaptiveAppBarAction(
+        iosSymbol: 'symbol.$name',
+        menuItems: const [
+          AdaptivePopupMenuItem(label: 'First', icon: 'eye'),
+          AdaptivePopupMenuDivider(),
+          AdaptivePopupMenuItem(label: 'Second'),
+        ],
+        onMenuItemSelected: (index, _) => selected.add((name, index)),
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: MediaQuery(
+            data: const MediaQueryData(
+              size: Size(951, 669),
+              padding: duoPadding,
+              viewPadding: duoPadding,
+            ),
+            child: Align(
+              alignment: Alignment.topRight,
+              child: SizedBox(
+                width: DuoLayout.bandWidth(duoPadding),
+                height: 669,
+                child: DuoVerticalBar(
+                  actions: [action('a'), action('b')],
+                  regions: const [duoCamera],
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final capsule = tester
+          .widgetList<IOS26GlassCapsule>(find.byType(IOS26GlassCapsule))
+          .firstWhere((c) => c.items.length == 2);
+      expect(capsule.items.first.menu!.map((e) => e.title), [
+        'First',
+        'Second',
+      ]);
+      expect(capsule.items.first.menu!.first.symbol, 'eye');
+
+      // Ids tell the actions apart and keep the index into menuItems.
+      capsule.onMenuTap!(capsule.items.last.menu!.last.id);
+      expect(selected, [('b', 2)]);
     });
 
     testWidgets('the title sits at the leading edge', (tester) async {

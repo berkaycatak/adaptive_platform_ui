@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 
 import '../adaptive_app_bar_action.dart';
 import '../adaptive_scaffold.dart';
+import 'ios26_popup_menu_button.dart';
 
 /// One control inside an [IOS26GlassCapsule].
 @immutable
@@ -24,16 +25,30 @@ class GlassCapsuleItem {
   });
 
   /// A toolbar action. Needs an SF Symbol or a title; see [canShow].
-  factory GlassCapsuleItem.fromAction(AdaptiveAppBarAction action) =>
-      GlassCapsuleItem(
-        symbol: action.iosSymbol,
-        title: action.iosSymbol == null ? action.title : null,
-        label: action.effectiveLabel,
-        tint: action.tintColor,
-        fallback:
-            action.iconWidget ??
-            (action.icon != null ? Icon(action.icon, size: 22) : null),
-      );
+  /// Menu entries report `menuIdBase + index` through onMenuTap
+  factory GlassCapsuleItem.fromAction(
+    AdaptiveAppBarAction action, {
+    int menuIdBase = 0,
+  }) => GlassCapsuleItem(
+    symbol: action.iosSymbol,
+    title: action.iosSymbol == null ? action.title : null,
+    label: action.effectiveLabel,
+    tint: action.tintColor,
+    fallback:
+        action.iconWidget ??
+        (action.icon != null ? Icon(action.icon, size: 22) : null),
+    menu: action.hasMenu
+        ? [
+            for (var i = 0; i < action.menuItems!.length; i++)
+              if (action.menuItems![i] case final AdaptivePopupMenuItem item)
+                GlassCapsuleMenuEntry(
+                  id: menuIdBase + i,
+                  title: item.label,
+                  symbol: item.icon is String ? item.icon as String : null,
+                ),
+          ]
+        : null,
+  );
 
   /// A tab. The icon may be an SF Symbol name, an asset path, or an
   /// [AssetImage], [FileImage] or [NetworkImage] (shown as a round avatar).

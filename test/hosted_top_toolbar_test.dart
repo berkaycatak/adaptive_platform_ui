@@ -237,6 +237,41 @@ void main() {
       expect(inBar(find.text('Home')), findsOneWidget);
     });
 
+    testWidgets('a Flutter-drawn bar opens an action\'s menu', (tester) async {
+      usePhone(tester);
+      final selected = <String>[];
+      await tester.pumpWidget(
+        hostedApp(
+          home: AdaptiveScaffold(
+            appBar: AdaptiveAppBar(
+              title: 'Game',
+              useNativeToolbar: true,
+              actions: [
+                AdaptiveAppBarAction(
+                  icon: Icons.more_horiz,
+                  label: 'More',
+                  menuItems: const [
+                    AdaptivePopupMenuItem(label: 'Hide game'),
+                    AdaptivePopupMenuItem(label: 'Report'),
+                  ],
+                  onMenuItemSelected: (_, item) => selected.add(item.label),
+                ),
+              ],
+            ),
+            body: const SizedBox.shrink(),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      await tester.tap(inBar(find.byIcon(Icons.more_horiz)));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Report'));
+      await tester.pumpAndSettle();
+
+      expect(selected, ['Report']);
+    });
+
     testWidgets('on iPhone Duo the top bar keeps the title only', (
       tester,
     ) async {
