@@ -132,6 +132,8 @@ class iOS26ToolbarPlatformView: NSObject, FlutterPlatformView {
 
     private func setupNavigationBar() {
         containerView.backgroundColor = .clear
+        // Keeps glass buttons from turning blue after a menu closes
+        containerView.tintColor = .label
 
         // Make navigation bar transparent to show gradient behind
         navigationBar.translatesAutoresizingMaskIntoConstraints = false
@@ -217,7 +219,20 @@ class iOS26ToolbarPlatformView: NSObject, FlutterPlatformView {
             for (index, action) in actions.enumerated() {
                 var button: UIBarButtonItem?
 
-                if let icon = action["icon"] as? String {
+                if let menuEntries = action["menu"] as? [[String: Any]] {
+                    let menu = makeMenu(menuEntries, actionIndex: index)
+                    if let icon = action["icon"] as? String {
+                        button = UIBarButtonItem(
+                            image: UIImage(systemName: icon) ?? UIImage(named: icon),
+                            menu: menu
+                        )
+                    } else {
+                        button = UIBarButtonItem(
+                            title: action["title"] as? String,
+                            menu: menu
+                        )
+                    }
+                } else if let icon = action["icon"] as? String {
                     button = UIBarButtonItem(
                         image: UIImage(systemName: icon) ?? UIImage(named: icon),
                         style: .plain,
@@ -289,6 +304,47 @@ class iOS26ToolbarPlatformView: NSObject, FlutterPlatformView {
         navigationItem.rightBarButtonItems = rightGroup.reversed()
     }
 
+    /// Builds the menu of a bar button; dividers split it into inline groups
+    private func makeMenu(_ entries: [[String: Any]], actionIndex: Int) -> UIMenu {
+        var groups: [[UIMenuElement]] = []
+        var current: [UIMenuElement] = []
+
+        for (itemIndex, entry) in entries.enumerated() {
+            if entry["divider"] as? Bool == true {
+                if !current.isEmpty { groups.append(current); current = [] }
+                continue
+            }
+
+            let title = entry["title"] as? String ?? ""
+            let image = (entry["icon"] as? String).flatMap {
+                UIImage(systemName: $0) ?? UIImage(named: $0)
+            }
+            var attributes: UIMenuElement.Attributes = []
+            if entry["enabled"] as? Bool == false { attributes.insert(.disabled) }
+            if entry["destructive"] as? Bool == true { attributes.insert(.destructive) }
+
+            let subtitle = entry["subtitle"] as? String
+            let action = UIAction(
+                title: title,
+                subtitle: subtitle?.isEmpty == false ? subtitle : nil,
+                image: image,
+                attributes: attributes
+            ) { [weak self] _ in
+                self?.channel.invokeMethod(
+                    "onMenuItemTapped",
+                    arguments: ["action": actionIndex, "item": itemIndex]
+                )
+            }
+            current.append(action)
+        }
+        if !current.isEmpty { groups.append(current) }
+
+        return UIMenu(
+            title: "",
+            children: groups.map { UIMenu(title: "", options: .displayInline, children: $0) }
+        )
+    }
+
     @objc private func leadingTapped() {
         channel.invokeMethod("onLeadingTapped", arguments: nil)
     }
@@ -342,7 +398,7 @@ class iOS26ToolbarPlatformView: NSObject, FlutterPlatformView {
                             }
                         }
                     } else if tintValue is NSNull {
-                        containerView.tintColor = nil
+                        containerView.tintColor = .label
                         navigationBar.tintColor = nil
                         for item in (navigationItem.leftBarButtonItems ?? []) + (navigationItem.rightBarButtonItems ?? []) {
                             if !perActionTintTags.contains(item.tag) {

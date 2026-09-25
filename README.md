@@ -159,6 +159,32 @@ AdaptiveScaffold(
   body: YourContent(),
 )
 ```
+**Toolbar menu:**
+
+Give an action `menuItems` instead of `onPressed` and tapping it opens a menu,
+like the "more" button of a system app. On iOS 26+ it is a native `UIMenu`
+shown at the bar button; on iOS <26 an action sheet; on Android a popup menu
+at the button.
+
+```dart
+AdaptiveAppBarAction(
+  iosSymbol: 'ellipsis',
+  icon: Icons.more_horiz,
+  label: 'More',
+  menuItems: const [
+    AdaptivePopupMenuItem(label: 'Share', icon: 'square.and.arrow.up'),
+    AdaptivePopupMenuItem(label: 'Hide', icon: 'eye.slash'),
+    AdaptivePopupMenuDivider(),
+    AdaptivePopupMenuItem(label: 'Delete', icon: 'trash', isDestructive: true),
+  ],
+  onMenuItemSelected: (index, item) => handle(item.label),
+)
+```
+
+`index` is the entry's position in `menuItems`, dividers included. When an
+entry changes, e.g. "Hide" turning into "Show", the bar picks it up on the
+next build.
+
 **No AppBar or Bottom Navigation:**
 ```dart
 // If appBar and bottomNavigationBar are null, neither will be shown

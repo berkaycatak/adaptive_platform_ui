@@ -223,6 +223,21 @@ class _IOS26NativeToolbarState extends State<IOS26NativeToolbar> {
       case 'onLeadingTapped':
         widget.onLeadingTap?.call();
         break;
+      case 'onMenuItemTapped':
+        if (call.arguments is Map) {
+          final args = call.arguments as Map;
+          final actionIndex = args['action'] as int?;
+          final itemIndex = args['item'] as int?;
+          final actions = widget.actions;
+          if (actions != null &&
+              actionIndex != null &&
+              itemIndex != null &&
+              actionIndex >= 0 &&
+              actionIndex < actions.length) {
+            actions[actionIndex].selectMenuItem(itemIndex);
+          }
+        }
+        break;
       case 'onActionTapped':
         if (call.arguments is Map) {
           final index = (call.arguments as Map)['index'] as int?;
@@ -241,12 +256,14 @@ class _IOS26NativeToolbarState extends State<IOS26NativeToolbar> {
           ? Row(
               mainAxisSize: MainAxisSize.min,
               children: widget.actions!.map((action) {
-                return CupertinoButton(
-                  padding: EdgeInsets.zero,
-                  onPressed: action.onPressed,
-                  child: action.icon != null
-                      ? Icon(action.icon)
-                      : Text(action.title ?? ''),
+                return Builder(
+                  builder: (context) => CupertinoButton(
+                    padding: EdgeInsets.zero,
+                    onPressed: () => action.press(context),
+                    child: action.icon != null
+                        ? Icon(action.icon)
+                        : Text(action.title ?? ''),
+                  ),
                 );
               }).toList(),
             )

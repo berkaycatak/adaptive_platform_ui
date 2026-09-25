@@ -32,7 +32,41 @@ class _PopupMenuDemoPageState extends State<PopupMenuDemoPage> {
   @override
   Widget build(BuildContext context) {
     return AdaptiveScaffold(
-      appBar: AdaptiveAppBar(title: 'Popup Menu Demo'),
+      appBar: AdaptiveAppBar(
+        title: 'Popup Menu Demo',
+        actions: [
+          // A toolbar button that opens a menu instead of reporting a tap.
+          AdaptiveAppBarAction(
+            iosSymbol: 'ellipsis',
+            icon: Icons.more_horiz,
+            label: 'More',
+            menuItems: [
+              AdaptivePopupMenuItem(
+                label: 'Share',
+                icon: PlatformInfo.isIOS26OrHigher()
+                    ? 'square.and.arrow.up'
+                    : Icons.share,
+              ),
+              AdaptivePopupMenuItem(
+                label: 'Hide',
+                icon: PlatformInfo.isIOS26OrHigher()
+                    ? 'eye.slash'
+                    : Icons.visibility_off,
+              ),
+              const AdaptivePopupMenuDivider(),
+              AdaptivePopupMenuItem(
+                label: 'Delete',
+                icon: PlatformInfo.isIOS26OrHigher() ? 'trash' : Icons.delete,
+                isDestructive: true,
+              ),
+            ],
+            onMenuItemSelected: (index, item) => setState(() {
+              _selectedAction = 'Toolbar menu: ${item.label}';
+              _selectedValue = 'index $index';
+            }),
+          ),
+        ],
+      ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: _buildContent(),

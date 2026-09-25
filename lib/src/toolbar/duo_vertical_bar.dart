@@ -355,6 +355,7 @@ class DuoVerticalBar extends StatelessWidget {
     this.reservedTabs = 0,
     this.tint,
     this.regions = const <ReservedRegion>[],
+    this.navigator,
   });
 
   /// Primary navigation control (back, close), placed first.
@@ -375,6 +376,9 @@ class DuoVerticalBar extends StatelessWidget {
 
   /// Tint for the toolbar items.
   final Color? tint;
+
+  /// The page's navigator, for menus opened from a bar above the navigator.
+  final NavigatorState? navigator;
 
   /// Reserved regions reported by the system, used to clear the camera.
   final List<ReservedRegion> regions;
@@ -498,16 +502,19 @@ class DuoVerticalBar extends StatelessWidget {
     for (final group in shown) {
       if (group.isNotEmpty) add(_ActionCapsule(actions: group, tint: tint));
     }
-    if (overflow.isNotEmpty) add(_OverflowCapsule(actions: overflow));
+    if (overflow.isNotEmpty) {
+      add(_OverflowCapsule(actions: overflow, navigator: navigator));
+    }
     return children;
   }
 }
 
 /// The items that did not fit, behind the system's ellipsis menu.
 class _OverflowCapsule extends StatelessWidget {
-  const _OverflowCapsule({required this.actions});
+  const _OverflowCapsule({required this.actions, this.navigator});
 
   final List<AdaptiveAppBarAction> actions;
+  final NavigatorState? navigator;
 
   @override
   Widget build(BuildContext context) {
@@ -533,8 +540,11 @@ class _OverflowCapsule extends StatelessWidget {
           ),
         ],
         onTap: (_) {},
+        // Menus can't nest in the overflow menu, so they open as action sheets
         onMenuTap: (id) {
-          if (id >= 0 && id < actions.length) actions[id].onPressed();
+          if (id >= 0 && id < actions.length) {
+            actions[id].press(context, navigator: navigator);
+          }
         },
       ),
     );
@@ -545,6 +555,9 @@ class _OverflowCapsule extends StatelessWidget {
 class _ActionCapsule extends StatelessWidget {
   const _ActionCapsule({required this.actions, this.tint});
 
+  /// Menu entry id offset per action, as a capsule has one onMenuTap
+  static const int _menuIdStride = 1000;
+
   final List<AdaptiveAppBarAction> actions;
   final Color? tint;
 
@@ -554,9 +567,21 @@ class _ActionCapsule extends StatelessWidget {
       width: IOS26GlassCapsule.width,
       height: IOS26GlassCapsule.actionsHeight(actions.length),
       child: IOS26GlassCapsule(
-        items: [for (final a in actions) GlassCapsuleItem.fromAction(a)],
+        items: [
+          for (var i = 0; i < actions.length; i++)
+            GlassCapsuleItem.fromAction(
+              actions[i],
+              menuIdBase: i * _menuIdStride,
+            ),
+        ],
         tint: tint,
         onTap: (index) => actions[index].onPressed(),
+        onMenuTap: (id) {
+          final index = id ~/ _menuIdStride;
+          if (index >= 0 && index < actions.length) {
+            actions[index].selectMenuItem(id % _menuIdStride);
+          }
+        },
       ),
     );
   }

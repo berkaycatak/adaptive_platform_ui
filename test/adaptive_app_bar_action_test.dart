@@ -234,5 +234,77 @@ void main() {
 
       expect(map['spacerAfter'], 2); // ToolbarSpacerType.flexible.index
     });
+
+    group('menuItems', () {
+      AdaptiveAppBarAction menuAction({
+        String hideLabel = 'Hide',
+        void Function(int, AdaptivePopupMenuItem<dynamic>)? onSelected,
+      }) => AdaptiveAppBarAction(
+        iosSymbol: 'ellipsis',
+        menuItems: [
+          AdaptivePopupMenuItem(label: hideLabel, icon: 'eye.slash'),
+          const AdaptivePopupMenuDivider(),
+          const AdaptivePopupMenuItem(label: 'Delete', isDestructive: true),
+          const AdaptivePopupMenuItem(label: 'Later', enabled: false),
+        ],
+        onMenuItemSelected: onSelected ?? (_, _) {},
+      );
+
+      test('needs either onPressed or menuItems', () {
+        expect(
+          () => AdaptiveAppBarAction(iosSymbol: 'ellipsis'),
+          throwsAssertionError,
+        );
+      });
+
+      test('needs onMenuItemSelected with menuItems', () {
+        expect(
+          () => AdaptiveAppBarAction(
+            iosSymbol: 'ellipsis',
+            menuItems: const [AdaptivePopupMenuItem(label: 'Hide')],
+          ),
+          throwsAssertionError,
+        );
+      });
+
+      test('toNativeMap sends the entries, dividers included', () {
+        final map = menuAction().toNativeMap();
+
+        expect(map['menu'], [
+          {'title': 'Hide', 'icon': 'eye.slash'},
+          {'divider': true},
+          {'title': 'Delete', 'destructive': true},
+          {'title': 'Later', 'enabled': false},
+        ]);
+      });
+
+      test('toNativeMap has no menu for a plain action', () {
+        final map = AdaptiveAppBarAction(
+          iosSymbol: 'info.circle',
+          onPressed: () {},
+        ).toNativeMap();
+
+        expect(map.containsKey('menu'), isFalse);
+      });
+
+      test('a changed entry makes the action unequal', () {
+        expect(menuAction(), menuAction());
+        expect(menuAction().hashCode, menuAction().hashCode);
+        expect(menuAction(), isNot(menuAction(hideLabel: 'Show')));
+      });
+
+      test('selectMenuItem reports the entry and its index', () {
+        final selected = <(int, String)>[];
+        final action = menuAction(
+          onSelected: (index, item) => selected.add((index, item.label)),
+        );
+
+        action.selectMenuItem(2);
+        action.selectMenuItem(1); // divider
+        action.selectMenuItem(9); // out of range
+
+        expect(selected, [(2, 'Delete')]);
+      });
+    });
   });
 }
