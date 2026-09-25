@@ -294,6 +294,7 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
         // releases after 3.35; `of` works on every supported version.
         // ignore: deprecated_member_use
         visible: TickerMode.of(context) && Visibility.of(context),
+        shownInPlace: Visibility.of(context),
         tabBar: _tabBarForChrome,
       ),
     );

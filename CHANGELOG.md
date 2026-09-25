@@ -1,5 +1,8 @@
 # Changelog
 
+## [Unreleased]
+* **FIX**: Dragging back from a page pushed over a tab layout built on an `IndexedStack` showed the bar of the last mounted tab (e.g. its title) instead of the selected one. Tabs hidden in place are now skipped when the fixed toolbar looks for the page underneath
+
 ## [1.0.1]
 * **FIX**: 📱 **iPhone Duo: the tab bar now lives in the vertical bar**, at the bottom of it, the way the system lays it out. In 1.0.0 it stayed at the bottom of the screen. The strip now reads, from the top: status cluster, back button, toolbar items, tab bar. Measured against a native UIKit app on the iPhone Duo simulator
 * **FIX**: iPhone Duo: the vertical bar follows the hardware through every rotation. On the cover display in landscape it stays on the side, including the rotation that puts the strip on the left, and it keeps clear of the camera wherever the rotation puts it (top or bottom of the strip). In 1.0.0 rotating fell back to horizontal bars. The inner display in portrait keeps horizontal bars, as it does in UIKit
