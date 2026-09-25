@@ -148,6 +148,7 @@ class HostedDuoBar extends StatelessWidget {
             reservedTabs: reservedTabs,
             tint: content.tint,
             regions: regions,
+            navigator: content.navigator,
           ),
         ),
       ),
