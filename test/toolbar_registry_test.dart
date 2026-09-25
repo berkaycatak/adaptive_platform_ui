@@ -167,6 +167,25 @@ void main() {
       expect(registry.entries, hasLength(1));
       expect(registry.active?.appBar?.title, 'Saved');
     });
+
+    testWidgets('below a pushed page is the selected tab, not a hidden one', (
+      tester,
+    ) async {
+      final nav = GlobalKey<NavigatorState>();
+      await tester.pumpWidget(
+        hostedApp(
+          navigatorKey: nav,
+          home: plainIndexedStack(0, [page('Games'), page('Profile')]),
+        ),
+      );
+      nav.currentState!.push(
+        MaterialPageRoute<void>(builder: (_) => page('Detail')),
+      );
+      await tester.pumpAndSettle();
+
+      final registry = registryOf(tester);
+      expect(registry.below(registry.active!)?.appBar?.title, 'Games');
+    });
   });
 
   group('ToolbarRegistry: scaffolds that keep their own toolbar', () {

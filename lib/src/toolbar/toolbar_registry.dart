@@ -17,6 +17,7 @@ class ToolbarEntry {
     required this.route,
     required this.navigator,
     required this.visible,
+    this.shownInPlace = true,
     this.tabBar,
     this.enclosingRoutes = const <ModalRoute<Object?>>[],
     this.titleOverlay,
@@ -45,6 +46,9 @@ class ToolbarEntry {
   /// False while the page is kept alive but not on screen, e.g. a
   /// non-selected tab of an IndexedStack.
   final bool visible;
+
+  /// False for a non-selected tab of an IndexedStack, even when covered
+  final bool shownInPlace;
 
   /// The routes of the navigators this page's navigator is nested in, nearest
   /// first: for a page inside a tab or shell route, the route that hosts the
@@ -167,7 +171,9 @@ class ToolbarRegistry extends ChangeNotifier {
       // Not filtered by [ToolbarEntry.visible]: a covered page is kept alive
       // with its tickers off until the page above starts to leave, and that
       // is exactly the page being asked for.
+      // Hidden tabs share the route with the selected one
       if (candidate.navigator == entry.navigator &&
+          candidate.shownInPlace &&
           (candidate.route?.isActive ?? false)) {
         return candidate;
       }
