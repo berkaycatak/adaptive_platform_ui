@@ -165,6 +165,40 @@ class AdaptivePopupMenuButton<T> {
     );
   }
 
+  /// Opens [items] for a button drawn elsewhere, such as an app bar action:
+  /// an action sheet on iOS, a popup menu at [context]'s button otherwise.
+  /// Buttons above the navigator pass the page's [navigator].
+  static Future<void> show<T>(
+    BuildContext context, {
+    required List<AdaptivePopupMenuEntry> items,
+    required void Function(int index, AdaptivePopupMenuItem<T> entry)
+    onSelected,
+    NavigatorState? navigator,
+  }) async {
+    final menuContext =
+        (navigator ?? Navigator.maybeOf(context))?.overlay?.context;
+    if (menuContext == null) return;
+    if (PlatformInfo.isIOS) {
+      return _showMenu<T>(menuContext, null, items, onSelected);
+    }
+    final button = context.findRenderObject() as RenderBox?;
+    final overlay = menuContext.findRenderObject() as RenderBox?;
+    if (button == null || overlay == null) return;
+    // Global coordinates, as the button may sit in a bar above the navigator
+    final topLeft = overlay.globalToLocal(button.localToGlobal(Offset.zero));
+    final selected = await showMenu<int>(
+      context: menuContext,
+      position: RelativeRect.fromRect(
+        topLeft & button.size,
+        Offset.zero & overlay.size,
+      ),
+      items: _materialMenuItems<T>(menuContext, items),
+    );
+    if (selected != null && items[selected] is AdaptivePopupMenuItem<T>) {
+      onSelected(selected, items[selected] as AdaptivePopupMenuItem<T>);
+    }
+  }
+
   static Widget _buildActionSheetContent<T>(AdaptivePopupMenuItem<T> item) {
     final hasImage = item.imageBytes != null;
     final hasSubtitle = item.subtitle != null && item.subtitle!.isNotEmpty;
@@ -203,6 +237,82 @@ class AdaptivePopupMenuButton<T> {
         ),
       ],
     );
+  }
+
+  static List<PopupMenuEntry<int>> _materialMenuItems<T>(
+    BuildContext context,
+    List<AdaptivePopupMenuEntry> items,
+  ) {
+    final menuItems = <PopupMenuEntry<int>>[];
+
+    for (var i = 0; i < items.length; i++) {
+      if (items[i] is AdaptivePopupMenuDivider) {
+        menuItems.add(const PopupMenuDivider());
+      } else if (items[i] is AdaptivePopupMenuItem<T>) {
+        final item = items[i] as AdaptivePopupMenuItem<T>;
+        final labelStyle = item.isDestructive
+            ? TextStyle(color: Theme.of(context).colorScheme.error)
+            : null;
+        final hasSubtitle = item.subtitle != null && item.subtitle!.isNotEmpty;
+        menuItems.add(
+          PopupMenuItem<int>(
+            value: i,
+            enabled: item.enabled,
+            child: Row(
+              children: [
+                if (item.imageBytes != null) ...[
+                  ClipOval(
+                    child: Image.memory(
+                      item.imageBytes!,
+                      width: 32,
+                      height: 32,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                ] else if (item.icon != null) ...[
+                  Icon(
+                    item.icon is IconData
+                        ? item.icon as IconData
+                        : Icons.circle,
+                    size: 20,
+                    color: item.isDestructive
+                        ? Theme.of(context).colorScheme.error
+                        : null,
+                  ),
+                  const SizedBox(width: 12),
+                ],
+                Expanded(
+                  child: hasSubtitle
+                      ? Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(item.label, style: labelStyle),
+                            Text(
+                              item.subtitle!,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.copyWith(
+                                    color: Theme.of(context)
+                                        .textTheme
+                                        .bodySmall
+                                        ?.color
+                                        ?.withValues(alpha: 0.7),
+                                  ),
+                            ),
+                          ],
+                        )
+                      : Text(item.label, style: labelStyle),
+                ),
+              ],
+            ),
+          ),
+        );
+      }
+    }
+    return menuItems;
   }
 
   static Future<void> _showMenu<T>(
@@ -304,75 +414,10 @@ class _MaterialPopupMenuButtonState<T>
     extends State<_MaterialPopupMenuButton<T>> {
   @override
   Widget build(BuildContext context) {
-    final menuItems = <PopupMenuEntry<int>>[];
-
-    for (var i = 0; i < widget.items.length; i++) {
-      if (widget.items[i] is AdaptivePopupMenuDivider) {
-        menuItems.add(const PopupMenuDivider());
-      } else if (widget.items[i] is AdaptivePopupMenuItem<T>) {
-        final item = widget.items[i] as AdaptivePopupMenuItem<T>;
-        final labelStyle = item.isDestructive
-            ? TextStyle(color: Theme.of(context).colorScheme.error)
-            : null;
-        final hasSubtitle = item.subtitle != null && item.subtitle!.isNotEmpty;
-        menuItems.add(
-          PopupMenuItem<int>(
-            value: i,
-            enabled: item.enabled,
-            child: Row(
-              children: [
-                if (item.imageBytes != null) ...[
-                  ClipOval(
-                    child: Image.memory(
-                      item.imageBytes!,
-                      width: 32,
-                      height: 32,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                ] else if (item.icon != null) ...[
-                  Icon(
-                    item.icon is IconData
-                        ? item.icon as IconData
-                        : Icons.circle,
-                    size: 20,
-                    color: item.isDestructive
-                        ? Theme.of(context).colorScheme.error
-                        : null,
-                  ),
-                  const SizedBox(width: 12),
-                ],
-                Expanded(
-                  child: hasSubtitle
-                      ? Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(item.label, style: labelStyle),
-                            Text(
-                              item.subtitle!,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodySmall
-                                  ?.copyWith(
-                                    color: Theme.of(context)
-                                        .textTheme
-                                        .bodySmall
-                                        ?.color
-                                        ?.withValues(alpha: 0.7),
-                                  ),
-                            ),
-                          ],
-                        )
-                      : Text(item.label, style: labelStyle),
-                ),
-              ],
-            ),
-          ),
-        );
-      }
-    }
+    final menuItems = AdaptivePopupMenuButton._materialMenuItems<T>(
+      context,
+      widget.items,
+    );
 
     // Custom widget case
     if (widget.isCustomWidget) {

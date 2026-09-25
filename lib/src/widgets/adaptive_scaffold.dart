@@ -493,10 +493,12 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
                       } else {
                         actionChild = const Icon(CupertinoIcons.circle);
                       }
-                      return CupertinoButton(
-                        padding: EdgeInsets.zero,
-                        onPressed: action.onPressed,
-                        child: actionChild,
+                      return Builder(
+                        builder: (context) => CupertinoButton(
+                          padding: EdgeInsets.zero,
+                          onPressed: () => action.press(context),
+                          child: actionChild,
+                        ),
                       );
                     }).toList(),
                   )
@@ -697,10 +699,12 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
                     } else {
                       actionChild = const Icon(CupertinoIcons.circle);
                     }
-                    return CupertinoButton(
-                      padding: EdgeInsets.zero,
-                      onPressed: action.onPressed,
-                      child: actionChild,
+                    return Builder(
+                      builder: (context) => CupertinoButton(
+                        padding: EdgeInsets.zero,
+                        onPressed: () => action.press(context),
+                        child: actionChild,
+                      ),
                     );
                   }).toList(),
                 )
@@ -776,19 +780,23 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
           centerTitle: widget.appBar!.titleWidget != null,
           actions: widget.appBar!.actions?.map((action) {
             if (action.title != null) {
-              return TextButton(
-                onPressed: action.onPressed,
-                child: Text(action.title!),
+              return Builder(
+                builder: (context) => TextButton(
+                  onPressed: () => action.press(context),
+                  child: Text(action.title!),
+                ),
               );
             }
-            return IconButton(
-              icon:
-                  action.iconWidget ??
-                  (action.icon != null
-                      ? Icon(action.icon!)
-                      : const Icon(Icons.circle)),
-              tooltip: action.effectiveLabel,
-              onPressed: action.onPressed,
+            return Builder(
+              builder: (context) => IconButton(
+                icon:
+                    action.iconWidget ??
+                    (action.icon != null
+                        ? Icon(action.icon!)
+                        : const Icon(Icons.circle)),
+                tooltip: action.effectiveLabel,
+                onPressed: () => action.press(context),
+              ),
             );
           }).toList(),
           leading: widget.appBar!.leading,
@@ -879,19 +887,23 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
         centerTitle: widget.appBar!.titleWidget != null,
         actions: widget.appBar!.actions?.map((action) {
           if (action.title != null) {
-            return TextButton(
-              onPressed: action.onPressed,
-              child: Text(action.title!),
+            return Builder(
+              builder: (context) => TextButton(
+                onPressed: () => action.press(context),
+                child: Text(action.title!),
+              ),
             );
           }
-          return IconButton(
-            icon:
-                action.iconWidget ??
-                (action.icon != null
-                    ? Icon(action.icon!)
-                    : const Icon(Icons.circle)),
-            tooltip: action.effectiveLabel,
-            onPressed: action.onPressed,
+          return Builder(
+            builder: (context) => IconButton(
+              icon:
+                  action.iconWidget ??
+                  (action.icon != null
+                      ? Icon(action.icon!)
+                      : const Icon(Icons.circle)),
+              tooltip: action.effectiveLabel,
+              onPressed: () => action.press(context),
+            ),
           );
         }).toList(),
         leading: widget.appBar!.leading,
