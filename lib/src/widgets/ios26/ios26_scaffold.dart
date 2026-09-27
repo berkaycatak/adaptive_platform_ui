@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:flutter/cupertino.dart';
+import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:foldable/foldable.dart';
 import '../../style/sf_symbol.dart';
 import '../../toolbar/duo_vertical_bar.dart';

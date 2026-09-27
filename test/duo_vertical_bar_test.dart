@@ -1,8 +1,8 @@
 import 'package:adaptive_platform_ui/src/toolbar/duo_vertical_bar.dart';
 import 'package:adaptive_platform_ui/src/widgets/adaptive_app_bar_action.dart';
 import 'package:adaptive_platform_ui/src/widgets/ios26/ios26_glass_capsule.dart';
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
-import 'package:flutter/material.dart';
+import 'package:cupertino_ui/cupertino_ui.dart' show CupertinoIcons;
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:foldable/foldable.dart';
 
