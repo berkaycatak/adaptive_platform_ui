@@ -1,5 +1,5 @@
 import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:cupertino_ui/cupertino_ui.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});

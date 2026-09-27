@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:flutter/cupertino.dart';
+import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:flutter/foundation.dart' show ValueListenable;
 import 'package:foldable/foldable.dart';
 import '../../platform/platform_info.dart';
