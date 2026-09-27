@@ -17,8 +17,8 @@ dependencies:
   flutter:
     sdk: flutter
   # cupertino: ^0.0.1
-  flutter_localizations:
-    sdk: flutter
+  material_ui: ^1.0.0
+  cupertino_ui: ^1.0.0
 
 dev_dependencies:
   flutter_test:

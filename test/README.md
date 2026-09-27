@@ -122,7 +122,7 @@ The test suite covers:
 Each test file follows this structure:
 
 ```dart
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 
@@ -168,7 +168,7 @@ When adding tests for new widgets:
 Example:
 
 ```dart
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 
