@@ -1,8 +1,10 @@
 import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
+import 'package:adaptive_platform_ui/src/platform/system_vertical_bar.dart';
 import 'package:adaptive_platform_ui/src/toolbar/duo_vertical_bar.dart';
 import 'package:adaptive_platform_ui/src/toolbar/hosted_duo_bar.dart';
 import 'package:adaptive_platform_ui/src/toolbar/toolbar_blend.dart';
 import 'package:adaptive_platform_ui/src/toolbar/toolbar_chrome_scope.dart';
+import 'package:adaptive_platform_ui/src/widgets/ios26/ios26_scaffold.dart';
 import 'package:flutter/cupertino.dart' show CupertinoIcons, CupertinoPageRoute;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -10,6 +12,9 @@ import 'package:foldable/foldable.dart';
 
 /// Geometry measured on the iPhone Duo inner display (iOS 27.1 simulator).
 const Size duoLandscape = Size(951, 669);
+
+/// Split View on the inner display, measured on the iOS 27.1 simulator.
+const Size duoSplitPane = Size(469, 669);
 
 FoldableData duoInnerDisplay() => FoldableData(
   capabilities: FoldableData.unsupported.capabilities,
@@ -27,26 +32,45 @@ FoldableData duoInnerDisplay() => FoldableData(
   verticalSizeClass: SizeClass.regular,
 );
 
-Widget page(String title, {IconData? action, VoidCallback? onAction}) =>
-    AdaptiveScaffold(
-      appBar: AdaptiveAppBar(
-        title: title,
-        useNativeToolbar: true,
-        actions: [
-          if (action != null)
-            AdaptiveAppBarAction(icon: action, onPressed: onAction ?? () {}),
-        ],
-      ),
-      body: Center(child: Text('body:$title')),
-    );
+Widget page(
+  String title, {
+  IconData? action,
+  VoidCallback? onAction,
+  bool tabs = false,
+  Widget? body,
+}) => AdaptiveScaffold(
+  appBar: AdaptiveAppBar(
+    title: title,
+    useNativeToolbar: true,
+    actions: [
+      if (action != null)
+        AdaptiveAppBarAction(icon: action, onPressed: onAction ?? () {}),
+    ],
+  ),
+  bottomNavigationBar: tabs
+      ? AdaptiveBottomNavigationBar(
+          selectedIndex: 0,
+          onTap: (_) {},
+          items: const [
+            AdaptiveNavigationDestination(icon: Icons.home, label: 'Home'),
+            AdaptiveNavigationDestination(icon: Icons.info, label: 'Info'),
+          ],
+        )
+      : null,
+  body: body ?? Center(child: Text('body:$title')),
+);
 
 Widget hostedApp({
   required Widget home,
   GlobalKey<NavigatorState>? navigatorKey,
+  SystemVerticalBarEdge? edge,
 }) => MaterialApp(
   navigatorKey: navigatorKey,
-  builder: (context, child) =>
-      AdaptiveToolbarHost(debugFold: duoInnerDisplay(), child: child!),
+  builder: (context, child) => AdaptiveToolbarHost(
+    debugFold: duoInnerDisplay(),
+    debugVerticalBarEdge: edge,
+    child: child!,
+  ),
   home: home,
 );
 
@@ -56,6 +80,40 @@ void useDuoLandscape(WidgetTester tester) {
   tester.view.padding = const FakeViewPadding(right: 84, bottom: 34);
   tester.view.viewPadding = const FakeViewPadding(right: 84, bottom: 34);
   addTearDown(tester.view.reset);
+}
+
+/// A Split View pane of the inner display with the insets measured there.
+void useDuoPane(WidgetTester tester, FakeViewPadding padding) {
+  tester.view.physicalSize = duoSplitPane;
+  tester.view.devicePixelRatio = 1;
+  tester.view.padding = padding;
+  tester.view.viewPadding = padding;
+  addTearDown(tester.view.reset);
+}
+
+/// Insets of the leading pane (no side inset) and of the trailing pane.
+const FakeViewPadding duoLeftPane = FakeViewPadding(bottom: 34);
+const FakeViewPadding duoRightPane = FakeViewPadding(right: 84, bottom: 34);
+
+/// Counts taps in its own State, to tell a rebuilt route from a kept one.
+class _Counter extends StatefulWidget {
+  const _Counter();
+
+  @override
+  State<_Counter> createState() => _CounterState();
+}
+
+class _CounterState extends State<_Counter> {
+  int count = 0;
+
+  @override
+  Widget build(BuildContext context) => Align(
+    alignment: Alignment.topLeft,
+    child: GestureDetector(
+      onTap: () => setState(() => count++),
+      child: Text('count:$count'),
+    ),
+  );
 }
 
 /// The fixed chrome. It layers one [DuoVerticalBar] per page involved in a
@@ -726,5 +784,249 @@ void main() {
     await tester.pump();
     expect(bar, findsNothing);
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('leading Split View pane: bar on the left, body clear of it', (
+    tester,
+  ) async {
+    useDuoPane(tester, duoLeftPane);
+    await tester.pumpWidget(
+      hostedApp(
+        edge: SystemVerticalBarEdge.left,
+        home: page('Home', action: Icons.add, tabs: true),
+      ),
+    );
+    await tester.pump();
+
+    expect(tester.takeException(), isNull);
+    final barRect = tester.getRect(bar);
+    expect(barRect.left, 0);
+    expect(barRect.width, kDuoVerticalBarWidth + kDuoVerticalBarBezelInset);
+    expect(inBar(find.byIcon(Icons.add)), findsOneWidget);
+    // The tabs are in the bar, not along the bottom of the window.
+    expect(inBar(find.byIcon(Icons.home)), findsOneWidget);
+    expect(
+      tester.getRect(inBar(find.byIcon(Icons.home))).bottom,
+      lessThanOrEqualTo(duoSplitPane.height - kDuoBarBottomMargin),
+    );
+    // Controls start near the top, not 170 pt down waiting for regions that
+    // never come.
+    expect(tester.getTopLeft(inBar(find.byIcon(Icons.add))).dy, lessThan(80));
+    // The title starts to the right of the strip.
+    expect(
+      tester
+          .getTopLeft(
+            find.descendant(
+              of: find.byType(DuoToolbarTitle),
+              matching: find.text('Home'),
+            ),
+          )
+          .dx,
+      greaterThanOrEqualTo(kDuoVerticalBarWidth),
+    );
+  });
+
+  testWidgets('moving between panes keeps the navigator state', (tester) async {
+    // The host wraps a navigator of its own, without a GlobalKey: MaterialApp
+    // keys its navigator, which would let it survive being moved in the
+    // element tree and hide the very thing under test.
+    Widget app(SystemVerticalBarEdge? edge) => MaterialApp(
+      builder: (context, _) => AdaptiveToolbarHost(
+        debugFold: duoInnerDisplay(),
+        debugVerticalBarEdge: edge,
+        child: Navigator(
+          onGenerateRoute: (_) =>
+              MaterialPageRoute<void>(builder: (_) => page('Home')),
+        ),
+      ),
+    );
+    Future<void> moveTo(
+      FakeViewPadding padding,
+      SystemVerticalBarEdge? edge,
+    ) async {
+      tester.view.padding = padding;
+      tester.view.viewPadding = padding;
+      // The same widget tree, with only the host's inputs changed.
+      await tester.pumpWidget(app(edge));
+      await tester.pump();
+    }
+
+    useDuoPane(tester, duoRightPane);
+    await tester.pumpWidget(app(null));
+    await tester.pump();
+
+    final nav = tester.state<NavigatorState>(find.byType(Navigator));
+    nav.push(
+      MaterialPageRoute<void>(
+        builder: (_) => page('Detail', body: const _Counter()),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('count:0'));
+    await tester.pump();
+    await tester.tap(find.text('count:1'));
+    await tester.pump();
+    expect(find.text('count:2'), findsOneWidget);
+    final rightBar = tester.getRect(bar);
+    expect(rightBar.right, duoSplitPane.width);
+
+    // Swap to the leading pane: the system reserves nothing and the host adds
+    // the strip itself; then back, then to a pose with no vertical bar.
+    await moveTo(duoLeftPane, SystemVerticalBarEdge.left);
+    expect(tester.getRect(bar).left, 0);
+    expect(find.text('count:2'), findsOneWidget);
+
+    await moveTo(duoRightPane, SystemVerticalBarEdge.right);
+    expect(tester.getRect(bar), rightBar);
+    expect(find.text('count:2'), findsOneWidget);
+
+    await moveTo(duoLeftPane, SystemVerticalBarEdge.none);
+    expect(bar, findsNothing);
+    expect(find.text('count:2'), findsOneWidget);
+
+    await moveTo(duoLeftPane, SystemVerticalBarEdge.left);
+    expect(tester.getRect(bar).left, 0);
+    expect(find.text('count:2'), findsOneWidget);
+
+    // Still the same route: it pops back to the page below.
+    nav.pop();
+    await tester.pumpAndSettle();
+    expect(find.text('body:Home'), findsOneWidget);
+  });
+
+  group('the body of a scaffold in the leading Split View pane', () {
+    final bodyText = find.text('body:Home');
+
+    testWidgets('clears the bar the host draws, and consumes the strip', (
+      tester,
+    ) async {
+      useDuoPane(tester, duoLeftPane);
+      EdgeInsets? padding;
+      await tester.pumpWidget(
+        hostedApp(
+          edge: SystemVerticalBarEdge.left,
+          home: IOS26Scaffold(
+            title: 'Home',
+            children: [
+              Builder(
+                builder: (context) {
+                  padding = MediaQuery.paddingOf(context);
+                  return const Align(
+                    alignment: Alignment.topLeft,
+                    child: Text('body:Home'),
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(
+        tester.getTopLeft(bodyText).dx,
+        greaterThanOrEqualTo(kDuoVerticalBarWidth),
+      );
+      // Consumed, so a SafeArea in the page does not inset a second time.
+      expect(padding!.left, 0);
+    });
+
+    testWidgets('clears the bar it draws itself without a host', (
+      tester,
+    ) async {
+      useDuoPane(tester, duoLeftPane);
+      await tester.pumpWidget(
+        MaterialApp(
+          home: IOS26Scaffold(
+            title: 'Home',
+            actions: [AdaptiveAppBarAction(icon: Icons.add, onPressed: () {})],
+            debugVerticalBarEdge: SystemVerticalBarEdge.left,
+            children: const [
+              Align(alignment: Alignment.topLeft, child: Text('body:Home')),
+            ],
+          ),
+        ),
+      );
+      await tester.pump();
+
+      final barRect = tester.getRect(find.byType(DuoVerticalBar));
+      expect(barRect.left, 0);
+      expect(barRect.width, kDuoVerticalBarWidth + kDuoVerticalBarBezelInset);
+      expect(tester.getTopLeft(find.byIcon(Icons.add)).dy, lessThan(80));
+      expect(
+        tester.getTopLeft(bodyText).dx,
+        greaterThanOrEqualTo(kDuoVerticalBarWidth),
+      );
+      expect(
+        tester
+            .getTopLeft(
+              find.descendant(
+                of: find.byType(DuoToolbarTitle),
+                matching: find.text('Home'),
+              ),
+            )
+            .dx,
+        greaterThanOrEqualTo(kDuoVerticalBarWidth),
+      );
+    });
+
+    testWidgets('one that draws its own bar under a host takes the host pose', (
+      tester,
+    ) async {
+      useDuoPane(tester, duoLeftPane);
+      await tester.pumpWidget(
+        hostedApp(
+          edge: SystemVerticalBarEdge.left,
+          home: IOS26Scaffold(
+            title: 'Home',
+            useFixedToolbar: false,
+            actions: [AdaptiveAppBarAction(icon: Icons.add, onPressed: () {})],
+            children: const [
+              Align(alignment: Alignment.topLeft, child: Text('body:Home')),
+            ],
+          ),
+        ),
+      );
+      await tester.pump();
+
+      final ownBar = find.byType(DuoVerticalBar);
+      expect(ownBar, findsOneWidget);
+      expect(tester.getRect(ownBar).left, 0);
+      // The strip is bar-only: no waiting for regions (170 pt fallback).
+      expect(
+        tester
+            .getTopLeft(
+              find.descendant(of: ownBar, matching: find.byIcon(Icons.add)),
+            )
+            .dy,
+        lessThan(80),
+      );
+      // The host already added the strip; the scaffold must not add it again.
+      expect(tester.getTopLeft(bodyText).dx, kDuoVerticalBarWidth);
+    });
+
+    testWidgets('a scaffold nested in it does not inset a second time', (
+      tester,
+    ) async {
+      useDuoPane(tester, duoLeftPane);
+      await tester.pumpWidget(
+        MaterialApp(
+          home: IOS26Scaffold(
+            debugVerticalBarEdge: SystemVerticalBarEdge.left,
+            children: [
+              IOS26Scaffold(
+                debugVerticalBarEdge: SystemVerticalBarEdge.left,
+                children: const [
+                  Align(alignment: Alignment.topLeft, child: Text('body:Home')),
+                ],
+              ),
+            ],
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(tester.getTopLeft(bodyText).dx, kDuoVerticalBarWidth);
+    });
   });
 }

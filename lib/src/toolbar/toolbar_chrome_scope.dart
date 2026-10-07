@@ -20,8 +20,8 @@ class ToolbarChromeScope extends InheritedWidget {
   final bool hostsToolbar;
 
   /// True while the host shows the page's controls (back button, actions) in
-  /// the fixed trailing vertical bar of iPhone Duo. Pages
-  /// then keep only their title at the top.
+  /// the fixed vertical bar of iPhone Duo, on whichever edge the pose puts it
+  /// (see `DuoPose`). Pages then keep only their title at the top.
   final bool hostsDuoControls;
 
   /// The nearest scope, or null when no host is installed and the page must
