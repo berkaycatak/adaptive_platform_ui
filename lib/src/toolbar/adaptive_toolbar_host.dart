@@ -1,9 +1,11 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:foldable/foldable.dart';
 
 import '../platform/platform_info.dart';
+import '../platform/system_vertical_bar.dart';
 import 'duo_vertical_bar.dart';
 import 'hosted_duo_bar.dart';
 import 'hosted_top_toolbar.dart';
@@ -27,6 +29,7 @@ class AdaptiveToolbarHost extends StatefulWidget {
     super.key,
     required this.child,
     @visibleForTesting this.debugFold,
+    @visibleForTesting this.debugVerticalBarEdge,
   });
 
   /// The navigator (or whatever the app's `builder` receives).
@@ -36,6 +39,11 @@ class AdaptiveToolbarHost extends StatefulWidget {
   /// iOS 26 check, so the chrome can be exercised in widget tests anywhere.
   @visibleForTesting
   final FoldableData? debugFold;
+
+  /// Replaces the system's vertical bar edge in widget tests, where the
+  /// platform channel it comes from does not exist.
+  @visibleForTesting
+  final SystemVerticalBarEdge? debugVerticalBarEdge;
 
   @override
   State<AdaptiveToolbarHost> createState() => _AdaptiveToolbarHostState();
@@ -51,6 +59,14 @@ class _AdaptiveToolbarHostState extends State<AdaptiveToolbarHost>
   FoldableData? _fold;
   StreamSubscription<FoldableData>? _foldSub;
 
+  /// The system's vertical bar edge; null wherever the chrome is never drawn
+  /// and in tests, where no platform channel answers.
+  ValueListenable<SystemVerticalBarEdge>? _edge;
+
+  /// What the debug log last reported, to print only the changes.
+  SystemVerticalBarEdge _loggedEdge = SystemVerticalBarEdge.unknown;
+  DuoPose? _loggedPose;
+
   @override
   void initState() {
     super.initState();
@@ -62,6 +78,9 @@ class _AdaptiveToolbarHostState extends State<AdaptiveToolbarHost>
         _onFoldChanged,
         onError: (Object _) {},
       );
+      // The side the bar belongs on comes from the system, not from insets:
+      // the leading Split View pane has none to read.
+      _edge = SystemVerticalBar.edge..addListener(_onEdgeChanged);
     }
   }
 
@@ -70,8 +89,14 @@ class _AdaptiveToolbarHostState extends State<AdaptiveToolbarHost>
     setState(() => _fold = data);
   }
 
+  void _onEdgeChanged() {
+    if (!mounted) return;
+    setState(() {});
+  }
+
   @override
   void dispose() {
+    _edge?.removeListener(_onEdgeChanged);
     _foldSub?.cancel();
     _blend.dispose();
     _registry.dispose();
@@ -85,43 +110,96 @@ class _AdaptiveToolbarHostState extends State<AdaptiveToolbarHost>
     // toolbar; elsewhere pages keep their own Cupertino / Material bars.
     final hostsToolbar =
         widget.debugFold != null || PlatformInfo.isIOS26OrHigher();
-    final hostsDuoControls =
-        hostsToolbar &&
-        DuoLayout.isVerticalBarPose(MediaQuery.viewPaddingOf(context));
-
-    final barOnLeft =
-        DuoLayout.barSide(MediaQuery.viewPaddingOf(context)) == DuoBarSide.left;
+    final edge =
+        widget.debugVerticalBarEdge ??
+        _edge?.value ??
+        SystemVerticalBarEdge.unknown;
+    // Resolved once: the bar, the title and the pages all read this decision.
+    final pose = hostsToolbar
+        ? DuoLayout.resolvePose(MediaQuery.viewPaddingOf(context), edge)
+        : null;
+    assert(() {
+      // Pose bugs only reproduce on a Duo; this makes a report actionable.
+      if (edge != _loggedEdge || pose != _loggedPose) {
+        _loggedEdge = edge;
+        _loggedPose = pose;
+        debugPrint(
+          'AdaptiveToolbarHost: Duo pose ${pose ?? 'none'} '
+          '(edge: ${edge.name})',
+        );
+      }
+      return true;
+    }());
 
     return ToolbarRegistryScope(
       registry: _registry,
       child: ToolbarChromeScope(
         hostsToolbar: hostsToolbar,
-        hostsDuoControls: hostsDuoControls,
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            // Always the first child at a stable position, so toggling the
-            // chrome never rebuilds the navigator from scratch.
-            widget.child,
-            if (hostsToolbar)
-              HostedTopToolbar(blend: _blend, titleOnly: hostsDuoControls),
-            if (hostsDuoControls)
-              // The bar follows the hardware: the strip is on the right in
-              // most poses and on the left in one landscape rotation.
-              Positioned(
-                top: 0,
-                bottom: 0,
-                left: barOnLeft ? 0 : null,
-                right: barOnLeft ? null : 0,
-                width: DuoLayout.bandWidth(MediaQuery.viewPaddingOf(context)),
-                child: HostedDuoBar(
-                  blend: _blend,
-                  regions: fold?.regions ?? const <ReservedRegion>[],
+        hostsDuoControls: pose != null,
+        child: DuoPoseScope(
+          pose: pose,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              // Always the first child at a stable position, so toggling the
+              // chrome never rebuilds the navigator from scratch. The
+              // MediaQuery in it is always here too, even when it changes
+              // nothing:
+              // adding it only in some poses would move the navigator in the
+              // element tree whenever the pose changes (moving between Split
+              // View panes), and rebuild every route.
+              _BarInset(pose: pose, child: widget.child),
+              if (hostsToolbar)
+                HostedTopToolbar(blend: _blend, titleOnly: pose != null),
+              if (pose != null)
+                // The bar sits on whichever edge the pose names: the right in
+                // most poses, the left in the leading Split View pane.
+                Positioned(
+                  top: 0,
+                  bottom: 0,
+                  left: pose.onLeft ? 0 : null,
+                  right: pose.onLeft ? null : 0,
+                  width: pose.bandWidth,
+                  child: HostedDuoBar(
+                    blend: _blend,
+                    regions: fold?.regions ?? const <ReservedRegion>[],
+                  ),
                 ),
-              ),
-          ],
+            ],
+          ),
         ),
       ),
+    );
+  }
+}
+
+/// Gives the pages the inset the system would have added for a vertical bar
+/// it does not draw: in the leading Split View pane the system wants a bar
+/// there but reserves no strip for it, since UIKit only insets for bars it
+/// draws itself. Add that inset here, as UIKit does for a native app, so a
+/// page's SafeArea and the scaffold's body inset keep clear of the bar.
+///
+/// Always builds a [MediaQuery], with the data unchanged when there is nothing
+/// to add, and is a widget of its own so the host does not depend on the whole
+/// [MediaQueryData] (every keyboard frame would rebuild the chrome).
+class _BarInset extends StatelessWidget {
+  const _BarInset({required this.pose, required this.child});
+
+  final DuoPose? pose;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final mq = MediaQuery.of(context);
+    final pose = this.pose;
+    return MediaQuery(
+      data: pose == null || pose.reservedBySystem
+          ? mq
+          : mq.copyWith(
+              padding: pose.addStrip(mq.padding),
+              viewPadding: pose.addStrip(mq.viewPadding),
+            ),
+      child: child,
     );
   }
 }

@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+* **FIX**: iPhone Duo: in Split View, an app in the left pane now shows its controls and tab bar in a vertical bar on the left edge, as native apps do. It used to fall back to horizontal bars. The side now comes from the system's vertical bar edge (iOS 27.1) instead of the safe-area insets alone
+  * Adds a Swift source file. With CocoaPods and a path or git dependency, if the iOS build fails with `cannot find 'VerticalBarEdgeStreamHandler' in scope`, run `pod install` in your `ios/` folder
+* **FIX**: iPhone Duo: in the left Split View pane the package reserves the strip itself, as UIKit only adds that inset for bars it draws, so the page body and `SafeArea` stay clear of the bar. The controls start near the top of the pane, since there is no camera there
+* **IMPROVEMENT**: iPhone Duo: when the system gives no inset for the strip, its width now matches the system's 84 pt (it was 60 pt)
+
 ## [1.0.1]
 * **FIX**: 📱 **iPhone Duo: the tab bar now lives in the vertical bar**, at the bottom of it, the way the system lays it out. In 1.0.0 it stayed at the bottom of the screen. The strip now reads, from the top: status cluster, back button, toolbar items, tab bar. Measured against a native UIKit app on the iPhone Duo simulator
 * **FIX**: iPhone Duo: the vertical bar follows the hardware through every rotation. On the cover display in landscape it stays on the side, including the rotation that puts the strip on the left, and it keeps clear of the camera wherever the rotation puts it (top or bottom of the strip). In 1.0.0 rotating fell back to horizontal bars. The inner display in portrait keeps horizontal bars, as it does in UIKit

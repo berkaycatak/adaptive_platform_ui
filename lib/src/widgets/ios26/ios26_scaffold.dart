@@ -1,7 +1,10 @@
 import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart' show ValueListenable;
 import 'package:foldable/foldable.dart';
+import '../../platform/platform_info.dart';
+import '../../platform/system_vertical_bar.dart';
 import '../../style/sf_symbol.dart';
 import '../../toolbar/duo_vertical_bar.dart';
 import '../../toolbar/toolbar_chrome_scope.dart';
@@ -33,6 +36,7 @@ class IOS26Scaffold extends StatefulWidget {
     this.useFixedToolbar = true,
     this.tabBarHidden = false,
     this.resizeToAvoidBottomInset,
+    @visibleForTesting this.debugVerticalBarEdge,
     required this.children,
   });
 
@@ -56,6 +60,11 @@ class IOS26Scaffold extends StatefulWidget {
   final bool? resizeToAvoidBottomInset;
   final List<Widget> children;
 
+  /// Replaces the system's vertical bar edge in widget tests, where the
+  /// platform channel it comes from does not exist.
+  @visibleForTesting
+  final SystemVerticalBarEdge? debugVerticalBarEdge;
+
   @override
   State<IOS26Scaffold> createState() => _IOS26ScaffoldState();
 }
@@ -71,6 +80,10 @@ class _IOS26ScaffoldState extends State<IOS26Scaffold>
   FoldableData? _fold;
   StreamSubscription<FoldableData>? _foldSub;
 
+  /// The system's vertical bar edge, for a page that draws its own bar and so
+  /// has no host to ask. Null off iOS 26, where no channel answers.
+  ValueListenable<SystemVerticalBarEdge>? _edge;
+
   @override
   void initState() {
     super.initState();
@@ -83,6 +96,14 @@ class _IOS26ScaffoldState extends State<IOS26Scaffold>
       curve: Curves.easeInOut,
     );
     _listenToFold();
+    if (PlatformInfo.isIOS26OrHigher()) {
+      _edge = SystemVerticalBar.edge..addListener(_onEdgeChanged);
+    }
+  }
+
+  void _onEdgeChanged() {
+    if (!mounted) return;
+    setState(() {});
   }
 
   /// Seeds [_fold] with the current snapshot and follows fold / size-class
@@ -100,6 +121,7 @@ class _IOS26ScaffoldState extends State<IOS26Scaffold>
 
   @override
   void dispose() {
+    _edge?.removeListener(_onEdgeChanged);
     _foldSub?.cancel();
     _tabBarController.dispose();
     super.dispose();
@@ -261,9 +283,33 @@ class _IOS26ScaffoldState extends State<IOS26Scaffold>
     final chrome = widget.useFixedToolbar
         ? ToolbarChromeScope.maybeOf(context)
         : null;
-    final duoVerticalPose =
-        chrome?.hostsDuoControls ??
-        DuoLayout.isVerticalBarPose(MediaQuery.viewPaddingOf(context));
+    var mq = MediaQuery.of(context);
+    // A scope above (the host, or an outer scaffold) has already decided the
+    // pose, and has put any strip the system did not reserve into the
+    // MediaQuery. Only without one resolve it here.
+    final scope = DuoPoseScope.maybeOf(context);
+    final pose = scope != null
+        ? scope.pose
+        : DuoLayout.resolvePose(
+            mq.viewPadding,
+            widget.debugVerticalBarEdge ??
+                _edge?.value ??
+                SystemVerticalBarEdge.unknown,
+          );
+    final duoVerticalPose = pose != null;
+    if (chrome == null &&
+        pose != null &&
+        !pose.reservedBySystem &&
+        (pose.onLeft ? mq.viewPadding.left : mq.viewPadding.right) == 0) {
+      // Nothing above reserved the strip (the leading Split View pane): add it
+      // the way UIKit does for a native app, so the body clears the bar. A
+      // scaffold nested in this one, or one under a host, finds the inset
+      // already in place and does not add it again.
+      mq = mq.copyWith(
+        padding: pose.addStrip(mq.padding),
+        viewPadding: pose.addStrip(mq.viewPadding),
+      );
+    }
     final hasTitle = widget.title != null || widget.titleWidget != null;
     final hasControls =
         widget.leading != null ||
@@ -289,10 +335,10 @@ class _IOS26ScaffoldState extends State<IOS26Scaffold>
     // run underneath both. The inset is taken from `padding` and consumed, so
     // a scaffold nested in this one (a tab inside a shell) does not inset a
     // second time, and a SafeArea further down has nothing left to add.
-    final mq = MediaQuery.of(context);
-    // The strip is on the right in most poses and on the left in one
-    // landscape rotation; the controls stay aligned with the hardware.
-    final barOnLeft = DuoLayout.barSide(mq.viewPadding) == DuoBarSide.left;
+    //
+    // The strip is on the right in most poses and on the left in the leading
+    // Split View pane; the pose says which.
+    final barOnLeft = pose?.onLeft ?? false;
     final trailingInset = !duoVerticalPose
         ? 0.0
         : barOnLeft
@@ -377,7 +423,7 @@ class _IOS26ScaffoldState extends State<IOS26Scaffold>
             bottom: 0,
             left: barOnLeft ? 0 : null,
             right: barOnLeft ? null : 0,
-            width: DuoLayout.bandWidth(MediaQuery.viewPaddingOf(context)),
+            width: pose.bandWidth,
             child: DuoVerticalBar(
               leading:
                   widget.leading ??
@@ -448,6 +494,10 @@ class _IOS26ScaffoldState extends State<IOS26Scaffold>
         widget.bottomNavigationBar?.items != null &&
         widget.bottomNavigationBar!.items!.isNotEmpty;
 
+    // The title and the own bar read the pose from the scope, so they agree
+    // with the body inset above.
+    final scoped = DuoPoseScope(pose: pose, child: stackContent);
+
     return CupertinoPageScaffold(
       // When a native tab bar is present it sits in Positioned(bottom: 0)
       // inside a Stack. If the scaffold resizes for the keyboard the tab bar
@@ -458,9 +508,9 @@ class _IOS26ScaffoldState extends State<IOS26Scaffold>
       child: hasBottomNav
           ? NotificationListener<ScrollNotification>(
               onNotification: _handleScrollNotification,
-              child: stackContent,
+              child: scoped,
             )
-          : stackContent,
+          : scoped,
     );
   }
 }
