@@ -1,6 +1,8 @@
 import 'package:adaptive_platform_ui_example/service/router/router_service.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
+// `flutter_localizations` owns the localization delegates below; the UI
+// packages export their own copies, so hide them here to keep one meaning.
+import 'package:cupertino_ui/cupertino_ui.dart' hide GlobalCupertinoLocalizations;
+import 'package:material_ui/material_ui.dart' hide GlobalMaterialLocalizations;
 import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 

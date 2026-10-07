@@ -3,7 +3,7 @@
 [![CI](https://github.com/berkaycatak/adaptive_platform_ui/workflows/CI/badge.svg)](https://github.com/berkaycatak/adaptive_platform_ui/actions)
 [![Release](https://github.com/berkaycatak/adaptive_platform_ui/workflows/Release/badge.svg)](https://github.com/berkaycatak/adaptive_platform_ui/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-[![Flutter](https://img.shields.io/badge/Flutter-%3E%3D3.0.0-blue.svg)](https://flutter.dev)
+[![Flutter](https://img.shields.io/badge/Flutter-%3E%3D3.47.0-blue.svg)](https://flutter.dev)
 
 A Flutter package that provides adaptive platform-specific widgets with native iOS 26+ designs, traditional Cupertino widgets for older iOS versions, and Material Design for Android.
 
@@ -1405,7 +1405,7 @@ This package follows Apple's Human Interface Guidelines for iOS and Material Des
 
 ## Requirements
 
-- Flutter SDK: >=1.17.0
+- Flutter SDK: >=3.47.0 (required by `material_ui` and `cupertino_ui`, the design libraries this package builds on)
 - Dart SDK: ^3.9.2
 - iOS deployment target: 15.0 or higher
 
