@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 
 void main() {
+  _badgeTextTests();
   group('AdaptiveSnackBar', () {
     testWidgets('shows snackbar with message', (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -615,4 +616,54 @@ void main() {
       expect(find.text('10'), findsOneWidget);
     });
   });
+}
+
+void _badgeTextTests() {
+  testWidgets(
+    'AdaptiveBottomNavigationBar renders badgeText and colors off iOS 26',
+    (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: AdaptiveScaffold(
+            body: const SizedBox.shrink(),
+            bottomNavigationBar: AdaptiveBottomNavigationBar(
+              selectedIndex: 0,
+              onTap: (_) {},
+              items: const [
+                AdaptiveNavigationDestination(
+                  icon: Icons.home,
+                  label: 'Home',
+                  badgeText: 'NEW',
+                  badgeColor: Colors.green,
+                  badgeTextColor: Colors.black,
+                ),
+                AdaptiveNavigationDestination(
+                  icon: Icons.info,
+                  label: 'Info',
+                  badgeCount: 3,
+                ),
+                AdaptiveNavigationDestination(icon: Icons.person, label: 'Me'),
+              ],
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      // badgeText wins over badgeCount and carries its colors.
+      expect(find.text('NEW'), findsWidgets);
+      final badge = tester.widget<AdaptiveBadge>(
+        find.ancestor(
+          of: find.text('NEW').first,
+          matching: find.byType(AdaptiveBadge),
+        ),
+      );
+      expect(badge.backgroundColor, Colors.green);
+      expect(badge.textColor, Colors.black);
+      expect(find.text('3'), findsWidgets);
+      // One badge per badged item: the Material bar builds only the icon
+      // that is currently shown for each destination.
+      expect(find.byType(AdaptiveBadge), findsNWidgets(2));
+    },
+  );
 }

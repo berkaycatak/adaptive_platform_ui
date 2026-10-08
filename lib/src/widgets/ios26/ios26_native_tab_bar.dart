@@ -174,7 +174,7 @@ class _IOS26NativeTabBarState extends State<IOS26NativeTabBar> {
       .map((e) => _extractNetworkUrl(e.selectedIcon ?? e.icon))
       .toList();
 
-  // ROA-267 / native badge styling: badge content + colors mapped to the
+  // Native badge styling: badge content + colors mapped to the
   // native side (UITabBarItem.badgeValue / .badgeColor / badge text attrs).
   List<String?> _mapBadgeTexts() =>
       widget.destinations.map((e) => e.badgeText).toList();
@@ -184,7 +184,10 @@ class _IOS26NativeTabBarState extends State<IOS26NativeTabBar> {
       .toList();
 
   List<int?> _mapBadgeTextColors() => widget.destinations
-      .map((e) => e.badgeTextColor != null ? _colorToARGB(e.badgeTextColor!) : null)
+      .map(
+        (e) =>
+            e.badgeTextColor != null ? _colorToARGB(e.badgeTextColor!) : null,
+      )
       .toList();
 
   @override
@@ -555,7 +558,9 @@ class _IOS26NativeTabBarState extends State<IOS26NativeTabBar> {
         await ch.invokeMethod('setStyle', style);
       }
 
-      await ch.invokeMethod('setSelectedIndex', {'index': widget.selectedIndex});
+      await ch.invokeMethod('setSelectedIndex', {
+        'index': widget.selectedIndex,
+      });
       _lastIndex = widget.selectedIndex;
       await _requestIntrinsicSize();
     } catch (_) {}
