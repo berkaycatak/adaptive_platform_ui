@@ -207,12 +207,12 @@ slide underneath it, the bar stays where it is, and only its items change.
   status cluster, the back button, the toolbar items (each group in one
   Liquid Glass capsule), and at the bottom the tab bar as a capsule of icons.
   The title moves to the leading edge and the page body stays clear of the
-  strip. It stays where the system reserves the strip in every rotation (on
-  the inner display, both landscape rotations put it on the right) and keeps
-  clear of the camera wherever the rotation puts it. In Split View on the
-  inner display, an app in the left pane gets the bar on its left edge, like
-  native apps, and the page body and `SafeArea` stay clear of it. On the
-  inner display in portrait the bars stay horizontal, as they do in UIKit.
+  strip. It follows the hardware through every rotation, including the one
+  that puts the strip on the left, and keeps clear of the camera wherever
+  the rotation puts it. In Split View, an app in the left pane gets the bar
+  on its left edge, like native apps, even though the system reserves no
+  strip there; the page body and `SafeArea` stay clear of it. On the inner
+  display in portrait the bars stay horizontal, as they do in UIKit.
 - **Overflow.** When the strip runs out of room, toolbar items move, from the
   bottom up, into the system overflow menu, and the tab bar stays whole.
   Give every icon action a `label` so it has a name there:
