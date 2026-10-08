@@ -12,6 +12,8 @@
 * **FIX**: iOS: the selected `AdaptiveRadio` is drawn as a ring with an inner dot, as in UIKit, instead of a filled circle (@luflow, #154)
 * **NEW**: `borderColor` and `borderWidth` on `AdaptiveCard` for iOS; the default stays a hairline separator (@luflow, #153)
 * **IMPROVEMENT**: Example app adopts the UIScene lifecycle, matching Flutter's template (@luflow, #151)
+* **FIX**: iOS 26 alert dialogs: the primary button now takes `CupertinoTheme.primaryColor` instead of a hardcoded system blue (@Qian-Samuel, #121)
+* **NEW**: `badgeText`, `badgeColor` and `badgeTextColor` on `AdaptiveNavigationDestination`. Arbitrary badge text and colors on the iOS 26+ native tab bar (`UITabBarItem.badgeValue` / `badgeColor`), and the same fields drawn through `AdaptiveBadge` on iOS <26 and Android; a transparent `badgeColor` with a glyph gives a dot indicator (@terrykang90, #127)
 
 ## [1.0.1]
 * **FIX**: 📱 **iPhone Duo: the tab bar now lives in the vertical bar**, at the bottom of it, the way the system lays it out. In 1.0.0 it stayed at the bottom of the screen. The strip now reads, from the top: status cluster, back button, toolbar items, tab bar. Measured against a native UIKit app on the iPhone Duo simulator
