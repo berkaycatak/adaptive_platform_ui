@@ -297,7 +297,7 @@ AdaptiveAlertDialog.show(
 );
 
 // Alert dialog with text input
-final result = await AdaptiveAlertDialog.show(
+final result = await AdaptiveAlertDialog.inputShow(
   context: context,
   title: 'Enter Your Name',
   message: 'Please provide your name',
