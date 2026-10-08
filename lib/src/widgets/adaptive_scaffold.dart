@@ -126,6 +126,7 @@ class AdaptiveScaffold extends StatefulWidget {
     this.enableToolbarGradient = true,
     this.extendBodyBehindAppBar = false,
     this.extendBody = false,
+    this.backgroundColor,
     this.drawer,
     this.endDrawer,
     this.drawerScrimColor,
@@ -183,6 +184,11 @@ class AdaptiveScaffold extends StatefulWidget {
   /// instead of the scaffold background (#144). On iOS 26+ the body already
   /// sits under the native tab bar.
   final bool extendBody;
+
+  /// Background colour of the page on every platform. Null keeps the
+  /// platform default: the Material or Cupertino theme's scaffold colour
+  /// (#60, #95).
+  final Color? backgroundColor;
 
   /// A panel displayed to the side of the body, often hidden on mobile.
   /// On Android, passed directly to the Material Scaffold.
@@ -464,6 +470,7 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
           titleWidget: _buildIOS26TitleOverlay(),
           minimizeBehavior: widget.minimizeBehavior,
           enableBlur: widget.enableBlur,
+          backgroundColor: widget.backgroundColor,
           useHeroBackButton: widget.useHeroBackButton,
           useFixedToolbar: _usesFixedToolbar(context),
           tabBarHidden: widget.tabBarHidden,
@@ -877,6 +884,7 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
         floatingActionButton: widget.floatingActionButton,
         extendBodyBehindAppBar: widget.extendBodyBehindAppBar,
         extendBody: widget.extendBody,
+        backgroundColor: widget.backgroundColor,
         drawer: widget.drawer,
         endDrawer: widget.endDrawer,
         drawerScrimColor: widget.drawerScrimColor,
@@ -942,6 +950,7 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
       floatingActionButton: widget.floatingActionButton,
       extendBodyBehindAppBar: widget.extendBodyBehindAppBar,
       extendBody: widget.extendBody,
+      backgroundColor: widget.backgroundColor,
       drawer: widget.drawer,
       endDrawer: widget.endDrawer,
       drawerScrimColor: widget.drawerScrimColor,

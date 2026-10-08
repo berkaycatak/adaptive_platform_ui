@@ -122,6 +122,8 @@ class AdaptivePopupMenuButton<T> {
   /// [icon] can be either:
   /// - String (SF Symbol) for iOS 26+
   /// - IconData for iOS <26 and Android
+  /// [iconSize] is the glyph's point size on every platform; the button
+  /// itself stays [size] wide and tall.
   static Widget icon<T>({
     Key? key,
     required dynamic icon,
@@ -130,6 +132,7 @@ class AdaptivePopupMenuButton<T> {
     onSelected,
     Color? tint,
     double size = 44.0,
+    double? iconSize,
     PopupButtonStyle buttonStyle = PopupButtonStyle.glass,
   }) {
     // iOS 26+ - Use native iOS 26 popup menu button (expects String - SF Symbol)
@@ -140,6 +143,7 @@ class AdaptivePopupMenuButton<T> {
         onSelected: onSelected,
         tint: tint,
         size: size,
+        iconSize: iconSize,
         buttonStyle: buttonStyle,
       );
     }
@@ -152,6 +156,7 @@ class AdaptivePopupMenuButton<T> {
         onSelected: onSelected,
         tint: tint,
         size: size,
+        iconSize: iconSize,
       );
     }
 
@@ -163,7 +168,10 @@ class AdaptivePopupMenuButton<T> {
         child: CupertinoButton(
           padding: const EdgeInsets.all(4),
           onPressed: () => _showMenu<T>(context, null, items, onSelected),
-          child: Icon(icon is IconData ? icon : CupertinoIcons.ellipsis),
+          child: Icon(
+            icon is IconData ? icon : CupertinoIcons.ellipsis,
+            size: iconSize,
+          ),
         ),
       ),
     );
@@ -442,6 +450,7 @@ class _MaterialPopupMenuButton<T> extends StatefulWidget {
     this.height = 32.0,
   }) : icon = null,
        size = null,
+       iconSize = null,
        child = null;
 
   const _MaterialPopupMenuButton.icon({
@@ -450,6 +459,7 @@ class _MaterialPopupMenuButton<T> extends StatefulWidget {
     required this.onSelected,
     this.tint,
     this.size = 44.0,
+    this.iconSize,
   }) : label = null,
        height = null,
        child = null;
@@ -462,7 +472,8 @@ class _MaterialPopupMenuButton<T> extends StatefulWidget {
   }) : label = null,
        icon = null,
        height = null,
-       size = null;
+       size = null,
+       iconSize = null;
 
   final String? label;
   final dynamic icon; // IconData for Android
@@ -472,6 +483,7 @@ class _MaterialPopupMenuButton<T> extends StatefulWidget {
   final Color? tint;
   final double? height;
   final double? size;
+  final double? iconSize;
 
   bool get isIconButton => icon != null;
   bool get isCustomWidget => child != null;
@@ -512,6 +524,7 @@ class _MaterialPopupMenuButtonState<T>
           icon: Icon(
             widget.icon is IconData ? widget.icon as IconData : Icons.more_vert,
             color: widget.tint,
+            size: widget.iconSize,
           ),
           itemBuilder: (context) => menuItems,
           onSelected: (index) {

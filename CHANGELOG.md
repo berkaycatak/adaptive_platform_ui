@@ -27,6 +27,9 @@
 * **FIX**: `AdaptiveScaffold` with a native tab bar mounted its body once per destination, so every page's `initState` ran as many times as there were tabs, and again on each tab switch. The body is now mounted once and kept across tab switches (#76)
 * **FIX**: `AdaptiveSwitch` on iOS 18 and below is system green again instead of the theme's blue tint, matching every other switch on those versions (#94)
 * **NEW**: `AdaptiveScaffold.extendBody` lets the body run under a custom floating bottom bar on Android and iOS 18 and below, so the bar's margins show the content instead of the scaffold background (#144)
+* **NEW**: `AdaptiveScaffold.backgroundColor` sets the page background on every platform, including the iOS 26 native scaffold (#60, #95)
+* **NEW**: `AdaptivePopupMenuButton.icon` takes `iconSize`, the glyph's point size on Android, iOS 18 and the iOS 26 native button (#139)
+* **FIX**: Example: the Info page no longer overflows on the repository URL row (#50)
 
 ## [1.0.1]
 * **FIX**: 📱 **iPhone Duo: the tab bar now lives in the vertical bar**, at the bottom of it, the way the system lays it out. In 1.0.0 it stayed at the bottom of the screen. The strip now reads, from the top: status cluster, back button, toolbar items, tab bar. Measured against a native UIKit app on the iPhone Duo simulator

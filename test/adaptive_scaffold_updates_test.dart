@@ -72,4 +72,34 @@ void main() {
     await tester.pumpWidget(build(extendBody: true));
     expect(tester.getSize(find.byType(SizedBox).first).height, screen.height);
   });
+
+  testWidgets('backgroundColor reaches the Material scaffold', (tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: AdaptiveScaffold(
+          backgroundColor: Color(0xFF123456),
+          body: SizedBox(),
+        ),
+      ),
+    );
+    final scaffold = tester.widget<Scaffold>(find.byType(Scaffold).last);
+    expect(scaffold.backgroundColor, const Color(0xFF123456));
+  });
+
+  testWidgets('popup menu icon button applies iconSize', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: AdaptivePopupMenuButton.icon<String>(
+            icon: Icons.more_vert,
+            iconSize: 31,
+            items: [AdaptivePopupMenuItem<String>(label: 'One', value: 'one')],
+            onSelected: (_, __) {},
+          ),
+        ),
+      ),
+    );
+    final icon = tester.widget<Icon>(find.byIcon(Icons.more_vert));
+    expect(icon.size, 31);
+  });
 }

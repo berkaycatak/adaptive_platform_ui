@@ -24,6 +24,7 @@ class iOS26PopupMenuButtonView: NSObject, FlutterPlatformView {
 
         var title: String? = nil
         var iconName: String? = nil
+        var iconSize: CGFloat? = nil
         var makeRound: Bool = false
         var isDark: Bool = false
         var tint: UIColor? = nil
@@ -42,6 +43,7 @@ class iOS26PopupMenuButtonView: NSObject, FlutterPlatformView {
         if let dict = args as? [String: Any] {
             if let t = dict["buttonTitle"] as? String { title = t }
             if let s = dict["buttonIconName"] as? String { iconName = s }
+            if let n = dict["buttonIconSize"] as? NSNumber { iconSize = CGFloat(n.doubleValue) }
             if let r = dict["round"] as? NSNumber { makeRound = r.boolValue }
             if let v = dict["isDark"] as? NSNumber { isDark = v.boolValue }
             if let tintArgb = dict["tint"] as? NSNumber { tint = UIColor(argb: tintArgb.intValue) }
@@ -95,7 +97,7 @@ class iOS26PopupMenuButtonView: NSObject, FlutterPlatformView {
         // Set button content (hide if custom widget is used)
         if !isCustomWidget {
             applyButtonStyle(buttonStyle: buttonStyle, round: makeRound)
-            setButtonContent(title: title, icon: iconName)
+            setButtonContent(title: title, icon: iconName, iconSize: iconSize)
         } else {
             // Make button fully transparent but functional
             button.backgroundColor = .clear
@@ -157,7 +159,8 @@ class iOS26PopupMenuButtonView: NSObject, FlutterPlatformView {
                 if let args = call.arguments as? [String: Any] {
                     let title = args["buttonTitle"] as? String
                     let iconName = args["buttonIconName"] as? String
-                    self.setButtonContent(title: title, icon: iconName)
+                    let iconSize = (args["buttonIconSize"] as? NSNumber).map { CGFloat($0.doubleValue) }
+                    self.setButtonContent(title: title, icon: iconName, iconSize: iconSize)
                     result(nil)
                 } else { result(FlutterError(code: "bad_args", message: "Missing button content", details: nil)) }
             default:
@@ -361,17 +364,20 @@ class iOS26PopupMenuButtonView: NSObject, FlutterPlatformView {
         }
     }
 
-    private func setButtonContent(title: String?, icon: String?) {
+    private func setButtonContent(title: String?, icon: String?, iconSize: CGFloat?) {
+        // A point size from Dart sizes the symbol; without one UIKit picks it.
+        let symbolConfig = iconSize.map { UIImage.SymbolConfiguration(pointSize: $0) }
+        let image = icon.flatMap { UIImage(systemName: $0, withConfiguration: symbolConfig) }
         if #available(iOS 15.0, *) {
             var cfg = button.configuration ?? .plain()
             cfg.title = title
-            if let iconName = icon, let image = UIImage(systemName: iconName) {
+            if let image = image {
                 cfg.image = image
             }
             button.configuration = cfg
         } else {
             button.setTitle(title, for: .normal)
-            if let iconName = icon, let image = UIImage(systemName: iconName) {
+            if let image = image {
                 button.setImage(image, for: .normal)
             }
         }

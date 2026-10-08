@@ -295,6 +295,19 @@ AdaptiveButton.icon(
   onPressed: () {},
   icon: Icons.favorite,
 )
+
+// Fully circular icon button: a square box plus a capsule corner style
+// (useSmoothRectangleBorder: false) on iOS 26, borderRadius elsewhere
+SizedBox(
+  width: 44,
+  height: 44,
+  child: AdaptiveButton.sfSymbol(
+    onPressed: () {},
+    sfSymbol: const SFSymbol('plus', size: 20),
+    useSmoothRectangleBorder: false,
+    borderRadius: BorderRadius.circular(22),
+  ),
+)
 ```
 
 ### AdaptiveAlertDialog
@@ -436,6 +449,7 @@ AdaptivePopupMenuButton.text<String>(
 // Icon button with popup menu
 AdaptivePopupMenuButton.icon<String>(
   icon: 'ellipsis.circle',
+  iconSize: 28, // glyph size; the button stays `size` wide
   items: [...],
   onSelected: (index, item) { },
   buttonStyle: PopupButtonStyle.glass,

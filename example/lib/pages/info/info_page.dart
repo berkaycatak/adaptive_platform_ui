@@ -116,15 +116,24 @@ class _InfoPageState extends State<InfoPage> {
         backgroundColor: CupertinoColors.systemBackground,
         children: rows
             .map(
-              (row) => CupertinoListTile(
-                title: Text(row.label),
-                trailing: Text(
-                  row.value,
-                  style: TextStyle(
-                    color: CupertinoColors.secondaryLabel.resolveFrom(context),
-                  ),
-                ),
-              ),
+              (row) => row.isLong
+                  // A long value (the repository URL) gets its own line
+                  // instead of overflowing the tile (#50).
+                  ? CupertinoListTile(
+                      title: Text(row.label),
+                      subtitle: Text(row.value),
+                    )
+                  : CupertinoListTile(
+                      title: Text(row.label),
+                      trailing: Text(
+                        row.value,
+                        style: TextStyle(
+                          color: CupertinoColors.secondaryLabel.resolveFrom(
+                            context,
+                          ),
+                        ),
+                      ),
+                    ),
             )
             .toList(),
       );
@@ -140,14 +149,20 @@ class _InfoPageState extends State<InfoPage> {
               .map(
                 (row) => ListTile(
                   title: Text(row.label),
-                  trailing: Text(
-                    row.value,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Theme.of(
-                        context,
-                      ).textTheme.bodySmall?.color?.withValues(alpha: 0.7),
-                    ),
-                  ),
+                  subtitle: row.isLong ? Text(row.value) : null,
+                  trailing: row.isLong
+                      ? null
+                      : Text(
+                          row.value,
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(
+                                color: Theme.of(context)
+                                    .textTheme
+                                    .bodySmall
+                                    ?.color
+                                    ?.withValues(alpha: 0.7),
+                              ),
+                        ),
                   dense: true,
                 ),
               )
@@ -163,4 +178,7 @@ class _InfoRow {
   final String value;
 
   _InfoRow(this.label, this.value);
+
+  /// Values this long do not fit beside the label on a phone.
+  bool get isLong => value.length > 30;
 }

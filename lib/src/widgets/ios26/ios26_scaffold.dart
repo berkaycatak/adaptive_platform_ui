@@ -36,6 +36,7 @@ class IOS26Scaffold extends StatefulWidget {
     this.useFixedToolbar = true,
     this.tabBarHidden = false,
     this.resizeToAvoidBottomInset,
+    this.backgroundColor,
     @visibleForTesting this.debugVerticalBarEdge,
     required this.children,
   });
@@ -56,6 +57,9 @@ class IOS26Scaffold extends StatefulWidget {
   /// Whether the fixed toolbar host, when there is one, draws this page's
   /// toolbar. False makes the page draw its own, as it does without a host.
   final bool useFixedToolbar;
+
+  /// Page background; null keeps the Cupertino theme's scaffold colour.
+  final Color? backgroundColor;
   final bool tabBarHidden;
   final bool? resizeToAvoidBottomInset;
   final List<Widget> children;
@@ -500,6 +504,7 @@ class _IOS26ScaffoldState extends State<IOS26Scaffold>
     final scoped = DuoPoseScope(pose: pose, child: stackContent);
 
     return CupertinoPageScaffold(
+      backgroundColor: widget.backgroundColor,
       // When a native tab bar is present it sits in Positioned(bottom: 0)
       // inside a Stack. If the scaffold resizes for the keyboard the tab bar
       // floats above it — non-standard on iOS. Disable the resize so the
