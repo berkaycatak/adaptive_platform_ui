@@ -13,6 +13,7 @@ the release is cut.
 | @sergi-labhouse | iPhone Duo: vertical bar on the left in the leading Split View pane, via `UITraitCollection.verticalBarEdge`; the system reserves no strip there, so the host adds it | #169 |
 | @luflow | Radio drawn as a ring with an inner dot; `borderColor` and `borderWidth` on `AdaptiveCard`; example app on the UIScene lifecycle | #154, #153, #151 |
 | @goalbypro, @bryandelgado99 | Android JVM 17 target for the plugin module (report, and the fix taken from the larger tooling PR) | #119, #160 |
+| @Anderzzon | 44-point circular back button in the fixed toolbar, matching the native one | #171 |
 | @itsatifsiddiqui | Native Liquid Glass context menu on iOS 26+ | #161 |
 | @DFelten | Native menus on app bar actions, in the fixed toolbar and the Duo capsule as well | #163 |
 | @luflow | Section titles in menus on all three platforms; example app on Swift Package Manager | #149, #150 |
