@@ -2,6 +2,7 @@ import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import 'package:adaptive_platform_ui/src/toolbar/hosted_duo_bar.dart';
 import 'package:adaptive_platform_ui/src/toolbar/hosted_top_toolbar.dart';
 import 'package:adaptive_platform_ui/src/toolbar/toolbar_chrome_scope.dart';
+import 'package:flutter/cupertino.dart' show CupertinoPageRoute;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:foldable/foldable.dart';
@@ -179,6 +180,57 @@ void main() {
       expect(opacityOf(tester, find.text('B')), lessThan(1));
       await tester.pumpAndSettle();
     });
+
+    testWidgets(
+      'a back swipe reversed again and again keeps semantics intact',
+      (tester) async {
+        // A screen reader is on, so semantics nodes exist for the bar. Each
+        // page layer is a FadeTransition; one that reaches zero opacity used
+        // to drop its semantics and restore them when the swipe came back,
+        // which tripped SemanticsNode._replaceChildren mid gesture.
+        usePhone(tester);
+        final semantics = tester.ensureSemantics();
+        final nav = GlobalKey<NavigatorState>();
+        await tester.pumpWidget(
+          hostedApp(
+            navigatorKey: nav,
+            home: page('Home', action: Icons.add),
+          ),
+        );
+        await tester.pump();
+        nav.currentState!.push(
+          CupertinoPageRoute<void>(
+            builder: (_) => page('Detail', action: Icons.share),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        final gesture = await tester.startGesture(const Offset(4, 300));
+        await gesture.moveBy(const Offset(40, 0));
+        for (var i = 0; i < 4; i++) {
+          // All the way across, so the leaving layer hits zero opacity, and
+          // back to the start, a few times without lifting the finger.
+          await gesture.moveBy(const Offset(360, 0));
+          await tester.pump();
+          await tester.pump(const Duration(milliseconds: 16));
+          await gesture.moveBy(const Offset(-360, 0));
+          await tester.pump();
+          await tester.pump(const Duration(milliseconds: 16));
+          expect(tester.takeException(), isNull, reason: 'pass $i');
+        }
+        await gesture.up();
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull);
+        expect(find.text('body:Detail'), findsOneWidget);
+
+        // The hidden page's bar is not read out while it is hidden.
+        expect(
+          find.descendant(of: bar, matching: find.byIcon(Icons.add)),
+          findsNothing,
+        );
+        semantics.dispose();
+      },
+    );
 
     testWidgets('pages are told the host draws their toolbar', (tester) async {
       usePhone(tester);
