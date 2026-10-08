@@ -71,6 +71,35 @@ Finder get backButton => inBar(find.byType(AdaptiveButton));
 
 void main() {
   group('HostedTopToolbar', () {
+    testWidgets('back fills the toolbar height and is tappable near its edge', (
+      tester,
+    ) async {
+      usePhone(tester);
+      tester.view.display.size = tester.view.physicalSize;
+      addTearDown(tester.view.display.resetSize);
+      final nav = GlobalKey<NavigatorState>();
+      await tester.pumpWidget(hostedApp(navigatorKey: nav, home: page('Home')));
+      await tester.pump();
+      nav.currentState!.push(
+        MaterialPageRoute<void>(builder: (_) => page('Detail')),
+      );
+      await tester.pumpAndSettle();
+
+      final rect = tester.getRect(backButton);
+      expect(rect.size, const Size(44, 44));
+      expect(rect.topLeft, const Offset(16, 62));
+      expect(rect.bottom, 62 + kHostedToolbarHeight);
+      final button = tester.widget<AdaptiveButton>(backButton);
+      expect(button.size, AdaptiveButtonSize.large);
+      expect(button.useSmoothRectangleBorder, isFalse);
+
+      // This point is above the old 38-point button's bounds.
+      await tester.tapAt(rect.topCenter + const Offset(0, 1));
+      await tester.pumpAndSettle();
+      expect(find.text('body:Detail'), findsNothing);
+      expect(backButton, findsNothing);
+    });
+
     testWidgets('one fixed bar at the top shows the page in front', (
       tester,
     ) async {

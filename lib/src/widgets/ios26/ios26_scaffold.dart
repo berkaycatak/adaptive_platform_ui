@@ -211,6 +211,7 @@ class _IOS26ScaffoldState extends State<IOS26Scaffold>
           child: AdaptiveButton.sfSymbol(
             onPressed: () => Navigator.of(context).pop(),
             sfSymbol: SFSymbol("chevron.left", size: 20),
+            useSmoothRectangleBorder: false,
           ),
         );
         heroLeading = widget.useHeroBackButton

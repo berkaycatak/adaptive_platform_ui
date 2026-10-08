@@ -168,7 +168,7 @@ class HostedTopToolbar extends StatelessWidget {
                   Positioned(
                     key: const ValueKey<String>('adaptive_toolbar_back'),
                     left: 16 + (_isWindowed(context) ? 62 : 0),
-                    bottom: 3,
+                    bottom: 0,
                     child: FadeTransition(
                       key: const ValueKey<String>('adaptive_toolbar_back_fade'),
                       opacity: backOpacity,
@@ -298,11 +298,13 @@ class _BackButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 38,
-      width: 38,
+      height: kHostedToolbarHeight,
+      width: kHostedToolbarHeight,
       child: AdaptiveButton.sfSymbol(
         onPressed: () => navigator?.maybePop(),
         sfSymbol: const SFSymbol('chevron.left', size: 20),
+        size: AdaptiveButtonSize.large,
+        useSmoothRectangleBorder: false,
       ),
     );
   }
