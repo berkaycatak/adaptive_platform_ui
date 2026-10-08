@@ -497,7 +497,10 @@ void main() {
             child: Align(
               alignment: Alignment.topRight,
               child: SizedBox(
-                width: DuoLayout.bandWidth(duoPadding),
+                width: DuoLayout.resolvePose(
+                  duoPadding,
+                  SystemVerticalBarEdge.unknown,
+                )!.bandWidth,
                 height: 669,
                 child: DuoVerticalBar(
                   actions: [action('a'), action('b')],
