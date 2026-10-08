@@ -14,6 +14,12 @@
 * **IMPROVEMENT**: Example app adopts the UIScene lifecycle, matching Flutter's template (@luflow, #151)
 * **FIX**: iOS 26 alert dialogs: the primary button now takes `CupertinoTheme.primaryColor` instead of a hardcoded system blue (@Qian-Samuel, #121)
 * **NEW**: `badgeText`, `badgeColor` and `badgeTextColor` on `AdaptiveNavigationDestination`. Arbitrary badge text and colors on the iOS 26+ native tab bar (`UITabBarItem.badgeValue` / `badgeColor`), and the same fields drawn through `AdaptiveBadge` on iOS <26 and Android; a transparent `badgeColor` with a glyph gives a dot indicator (@terrykang90, #127)
+* **NEW**: `menuItems` and `onMenuItemSelected` on `AdaptiveAppBarAction` turn an app bar action into a menu button: a native `UIMenu` on iOS 26+ (in the fixed toolbar and the iPhone Duo capsule too), an action sheet on iOS <26, a popup menu on Android (@DFelten, #163)
+* **NEW**: `AdaptivePopupMenuDivider(title:)` names the group that follows it: an inline section title in the native iOS 26 menu, a heading in the action sheet on iOS <26, a heading row on Android (@luflow, #149)
+* **NEW**: `selected` on `AdaptivePopupMenuItem` shows the current choice: the system checkmark in native iOS menus, a trailing check on Android, a leading check in the iOS <26 action sheet (@gem85247, #147)
+* **FIX**: iOS 26 `AdaptiveButton` in child mode (icon or custom child): `minSize` is now a minimum instead of a fixed width (a `Size(0, h)` no longer collapses the button), and the content gets the same 16pt horizontal padding as the other platforms, so such buttons can come out slightly wider than before (@gem85247, #147)
+* **FIX**: iOS 26 tab bar: the app's text direction is also written to `traitOverrides.layoutDirection`, so the selected Liquid Glass item follows the app locale when it differs from the device locale (@KhalidSaud, #140)
+* **IMPROVEMENT**: Example app moved from CocoaPods to Swift Package Manager (@luflow, #150)
 
 ## [1.0.1]
 * **FIX**: 📱 **iPhone Duo: the tab bar now lives in the vertical bar**, at the bottom of it, the way the system lays it out. In 1.0.0 it stayed at the bottom of the screen. The strip now reads, from the top: status cluster, back button, toolbar items, tab bar. Measured against a native UIKit app on the iPhone Duo simulator
