@@ -28,13 +28,16 @@ android {
     namespace 'com.berkaycatak.adaptive_platform_ui'
     compileSdk 34
 
+    // Java and Kotlin must agree. Consumer apps on AGP 8 / Kotlin 2 force
+    // Kotlin to 17 project wide, and Gradle then refuses a Java target of
+    // 1.8 for this module ("Inconsistent JVM-target compatibility").
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
 
     kotlinOptions {
-        jvmTarget = '1.8'
+        jvmTarget = '17'
     }
 
     sourceSets {

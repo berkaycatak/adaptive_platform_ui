@@ -8,6 +8,10 @@
 * **FIX**: iOS 26: reversing an interactive back swipe under the fixed toolbar could throw `SemanticsNode._replaceChildren` with a screen reader on. Every layer of the fixed chrome now keeps its semantics attached, and the layer that is not in front is excluded explicitly, so VoiceOver never lands on invisible items. Reported and diagnosed by @Anderzzon (#166)
 * **FIX**: iOS: `resizeToAvoidBottomInset` is now honored on the plain page branch (no app bar, no tab bar) and in the drawer wrapper, so a body anchored to the bottom is no longer lifted above the keyboard when it is set to `false` (@Danilo-Mota, #158)
 * **FIX**: Fixed toolbar: dragging back from a page pushed over an `IndexedStack` tab layout showed the bar of the last mounted tab instead of the selected one (@DFelten, #164)
+* **FIX**: Android: the plugin module now targets JVM 17 for both Java and Kotlin. Apps on AGP 8 / Kotlin 2 that force Kotlin to 17 failed with "Inconsistent JVM-target compatibility" (@goalbypro reported it in #119, @bryandelgado99 proposed the fix in #160)
+* **FIX**: iOS: the selected `AdaptiveRadio` is drawn as a ring with an inner dot, as in UIKit, instead of a filled circle (@luflow, #154)
+* **NEW**: `borderColor` and `borderWidth` on `AdaptiveCard` for iOS; the default stays a hairline separator (@luflow, #153)
+* **IMPROVEMENT**: Example app adopts the UIScene lifecycle, matching Flutter's template (@luflow, #151)
 
 ## [1.0.1]
 * **FIX**: 📱 **iPhone Duo: the tab bar now lives in the vertical bar**, at the bottom of it, the way the system lays it out. In 1.0.0 it stayed at the bottom of the screen. The strip now reads, from the top: status cluster, back button, toolbar items, tab bar. Measured against a native UIKit app on the iPhone Duo simulator
