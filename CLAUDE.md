@@ -39,7 +39,7 @@ cd example && flutter pub get && flutter run
 flutter pub publish --dry-run
 ```
 
-CI uses Flutter 3.35.6 stable. CI pipeline: analyze -> test -> build example APK.
+CI uses Flutter 3.47.2 stable. CI pipeline: analyze -> test -> build example APK.
 
 ## Architecture
 
