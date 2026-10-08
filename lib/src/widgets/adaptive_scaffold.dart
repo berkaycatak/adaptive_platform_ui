@@ -53,24 +53,43 @@ class AdaptiveNavigationDestination {
   /// On iOS <26 and Android: Uses AdaptiveBadge widget
   final int? badgeCount;
 
-  /// Arbitrary badge text — maps 1:1 to `UITabBarItem.badgeValue` on iOS 26+.
-  /// Use it for "NEW", "!", a glyph, etc. Takes precedence over [badgeCount]
-  /// when non-null.
+  /// Arbitrary badge text, such as "NEW", "!" or a glyph. Takes precedence
+  /// over [badgeCount] when non-null.
   ///
-  /// Tip: combine `badgeText: "●"` + [badgeColor] `Colors.transparent` +
-  /// [badgeTextColor] to render a clean dot indicator (no pill background),
-  /// Threads/Instagram style.
+  /// - iOS 26+: `UITabBarItem.badgeValue`
+  /// - iOS <26 and Android: the label of the [AdaptiveBadge] drawn on the icon
+  ///
+  /// Tip: combine `badgeText: "●"` with a transparent [badgeColor] and a
+  /// [badgeTextColor] to render a dot indicator without a pill background.
   final String? badgeText;
 
-  /// Badge background color — maps to `UITabBarItem.badgeColor` on iOS 26+.
-  /// Defaults to the platform's default badge color (system red) when null.
-  /// Set to a transparent color to remove the pill background (e.g. for a dot).
+  /// Badge background color. Null means the platform default (system red).
+  /// A transparent color removes the pill background, e.g. for a dot.
+  ///
+  /// - iOS 26+: `UITabBarItem.badgeColor`
+  /// - iOS <26 and Android: [AdaptiveBadge.backgroundColor]
   final Color? badgeColor;
 
-  /// Badge text/glyph color — maps to the badge text attributes' foreground
-  /// color on iOS 26+. Defaults to the platform default (white) when null.
-  /// Pair with a transparent [badgeColor] to color a dot glyph.
+  /// Badge text color. Null means the platform default (white).
+  ///
+  /// - iOS 26+: the badge's text attributes
+  /// - iOS <26 and Android: [AdaptiveBadge.textColor]
   final Color? badgeTextColor;
+
+  /// Whether this destination shows a badge on any platform.
+  bool get hasBadge =>
+      (badgeText != null && badgeText!.isNotEmpty) ||
+      (badgeCount != null && badgeCount! > 0);
+
+  /// [child] with this destination's badge drawn on it, for the iOS <26 and
+  /// Android tab bars. The native iOS 26+ bar draws its own badge.
+  Widget wrapWithBadge(Widget child) => AdaptiveBadge(
+    label: badgeText,
+    count: badgeText == null ? badgeCount : null,
+    backgroundColor: badgeColor,
+    textColor: badgeTextColor,
+    child: child,
+  );
 
   /// Add flexible space after this tab item (iOS 26+ only)
   /// Useful for creating grouped tabs (e.g., left group and right group)
@@ -574,15 +593,9 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
                   platform: TargetPlatform.iOS,
                 );
 
-                if (dest.badgeCount != null && dest.badgeCount! > 0) {
-                  iconWidget = AdaptiveBadge(
-                    count: dest.badgeCount,
-                    child: iconWidget,
-                  );
-                  activeIconWidget = AdaptiveBadge(
-                    count: dest.badgeCount,
-                    child: activeIconWidget,
-                  );
+                if (dest.hasBadge) {
+                  iconWidget = dest.wrapWithBadge(iconWidget);
+                  activeIconWidget = dest.wrapWithBadge(activeIconWidget);
                 }
 
                 return BottomNavigationBarItem(
@@ -847,15 +860,9 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
               platform: TargetPlatform.android,
             );
 
-            if (dest.badgeCount != null && dest.badgeCount! > 0) {
-              iconWidget = AdaptiveBadge(
-                count: dest.badgeCount,
-                child: iconWidget,
-              );
-              selectedIconWidget = AdaptiveBadge(
-                count: dest.badgeCount,
-                child: selectedIconWidget,
-              );
+            if (dest.hasBadge) {
+              iconWidget = dest.wrapWithBadge(iconWidget);
+              selectedIconWidget = dest.wrapWithBadge(selectedIconWidget);
             }
 
             return NavigationDestination(
