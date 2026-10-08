@@ -10,13 +10,13 @@ the release is cut.
 | Who | What | Where |
 |---|---|---|
 | @Danilo-Mota | Found and fixed `resizeToAvoidBottomInset` being ignored on the plain iOS page branch and in the drawer wrapper, with exact measurements | #158, #159 |
+| @DFelten | Fixed toolbar showing the wrong tab's bar while a route is dragged back, with `IndexedStack` tabs | #164 |
 | @Anderzzon | Found the semantics assertion when a back swipe is reversed under the fixed toolbar, and traced it to `FadeTransition` dropping semantics at zero opacity | #166, fixed in #170 |
 
 ### Under review
 
 | Who | What | Where |
 |---|---|---|
-| @DFelten | Fixed toolbar showing the wrong tab's bar while a route is dragged back, with `IndexedStack` tabs | #164 |
 | @sergi-labhouse | iPhone Duo: vertical bar on the left in the leading Split View pane, via `UITraitCollection.verticalBarEdge` | #169 |
 | @primer03, @DFelten | Taps not reaching the iOS 26 native tab bar; two approaches, one to pick | #141, #162 |
 | @bryandelgado99 | Android build tooling update, stops applying the Kotlin Gradle Plugin from the plugin | #160 |

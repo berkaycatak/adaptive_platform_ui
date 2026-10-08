@@ -47,7 +47,11 @@ class ToolbarEntry {
   /// non-selected tab of an IndexedStack.
   final bool visible;
 
-  /// False for a non-selected tab of an IndexedStack, even when covered
+  /// False while the page is hidden in place by its parent, e.g. a
+  /// non-selected tab of an `IndexedStack`. Unlike [visible] this stays
+  /// false when a route covers the page too, which is what [ToolbarRegistry.below]
+  /// needs: a covered page has its tickers off as well, so [visible] cannot
+  /// tell the two apart.
   final bool shownInPlace;
 
   /// The routes of the navigators this page's navigator is nested in, nearest
@@ -171,7 +175,8 @@ class ToolbarRegistry extends ChangeNotifier {
       // Not filtered by [ToolbarEntry.visible]: a covered page is kept alive
       // with its tickers off until the page above starts to leave, and that
       // is exactly the page being asked for.
-      // Hidden tabs share the route with the selected one
+      // Tabs of an IndexedStack share one route and one navigator with the
+      // selected tab; only the one shown in place is the page underneath.
       if (candidate.navigator == entry.navigator &&
           candidate.shownInPlace &&
           (candidate.route?.isActive ?? false)) {
