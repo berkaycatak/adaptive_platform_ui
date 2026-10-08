@@ -39,21 +39,31 @@ class ContextMenuDemoPage extends StatelessWidget {
               actions: [
                 AdaptiveContextMenuAction(
                   title: 'Edit',
-                  icon: PlatformInfo.isIOS ? CupertinoIcons.pencil : Icons.edit,
+                  icon: PlatformInfo.isIOS26OrHigher()
+                      ? 'pencil'
+                      : PlatformInfo.isIOS
+                      ? CupertinoIcons.pencil
+                      : Icons.edit,
                   onPressed: () {
                     _showSnackbar(context, 'Edit pressed');
                   },
                 ),
                 AdaptiveContextMenuAction(
                   title: 'Share',
-                  icon: PlatformInfo.isIOS ? CupertinoIcons.share : Icons.share,
+                  icon: PlatformInfo.isIOS26OrHigher()
+                      ? 'square.and.arrow.up'
+                      : PlatformInfo.isIOS
+                      ? CupertinoIcons.share
+                      : Icons.share,
                   onPressed: () {
                     _showSnackbar(context, 'Share pressed');
                   },
                 ),
                 AdaptiveContextMenuAction(
                   title: 'Delete',
-                  icon: PlatformInfo.isIOS
+                  icon: PlatformInfo.isIOS26OrHigher()
+                      ? 'trash'
+                      : PlatformInfo.isIOS
                       ? CupertinoIcons.trash
                       : Icons.delete,
                   isDestructive: true,
@@ -74,7 +84,9 @@ class ContextMenuDemoPage extends StatelessWidget {
               actions: [
                 AdaptiveContextMenuAction(
                   title: 'View',
-                  icon: PlatformInfo.isIOS
+                  icon: PlatformInfo.isIOS26OrHigher()
+                      ? 'eye'
+                      : PlatformInfo.isIOS
                       ? CupertinoIcons.eye
                       : Icons.visibility,
                   onPressed: () {
@@ -83,7 +95,9 @@ class ContextMenuDemoPage extends StatelessWidget {
                 ),
                 AdaptiveContextMenuAction(
                   title: 'Download',
-                  icon: PlatformInfo.isIOS
+                  icon: PlatformInfo.isIOS26OrHigher()
+                      ? 'icloud.and.arrow.down'
+                      : PlatformInfo.isIOS
                       ? CupertinoIcons.cloud_download
                       : Icons.download,
                   onPressed: () {
@@ -92,7 +106,9 @@ class ContextMenuDemoPage extends StatelessWidget {
                 ),
                 AdaptiveContextMenuAction(
                   title: 'Set as Wallpaper',
-                  icon: PlatformInfo.isIOS
+                  icon: PlatformInfo.isIOS26OrHigher()
+                      ? 'photo'
+                      : PlatformInfo.isIOS
                       ? CupertinoIcons.photo
                       : Icons.wallpaper,
                   onPressed: () {
@@ -118,14 +134,20 @@ class ContextMenuDemoPage extends StatelessWidget {
               actions: [
                 AdaptiveContextMenuAction(
                   title: 'Reply',
-                  icon: PlatformInfo.isIOS ? CupertinoIcons.reply : Icons.reply,
+                  icon: PlatformInfo.isIOS26OrHigher()
+                      ? 'arrowshape.turn.up.left'
+                      : PlatformInfo.isIOS
+                      ? CupertinoIcons.reply
+                      : Icons.reply,
                   onPressed: () {
                     _showSnackbar(context, 'Reply pressed');
                   },
                 ),
                 AdaptiveContextMenuAction(
                   title: 'Forward',
-                  icon: PlatformInfo.isIOS
+                  icon: PlatformInfo.isIOS26OrHigher()
+                      ? 'arrowshape.turn.up.right'
+                      : PlatformInfo.isIOS
                       ? CupertinoIcons.arrowshape_turn_up_right
                       : Icons.forward,
                   onPressed: () {
@@ -134,7 +156,9 @@ class ContextMenuDemoPage extends StatelessWidget {
                 ),
                 AdaptiveContextMenuAction(
                   title: 'Copy',
-                  icon: PlatformInfo.isIOS
+                  icon: PlatformInfo.isIOS26OrHigher()
+                      ? 'doc.on.doc'
+                      : PlatformInfo.isIOS
                       ? CupertinoIcons.doc_on_doc
                       : Icons.copy,
                   onPressed: () {
@@ -143,7 +167,9 @@ class ContextMenuDemoPage extends StatelessWidget {
                 ),
                 AdaptiveContextMenuAction(
                   title: 'Delete',
-                  icon: PlatformInfo.isIOS
+                  icon: PlatformInfo.isIOS26OrHigher()
+                      ? 'trash'
+                      : PlatformInfo.isIOS
                       ? CupertinoIcons.trash
                       : Icons.delete,
                   isDestructive: true,
@@ -170,7 +196,9 @@ class ContextMenuDemoPage extends StatelessWidget {
               actions: [
                 AdaptiveContextMenuAction(
                   title: 'Open',
-                  icon: PlatformInfo.isIOS
+                  icon: PlatformInfo.isIOS26OrHigher()
+                      ? 'folder'
+                      : PlatformInfo.isIOS
                       ? CupertinoIcons.folder_open
                       : Icons.open_in_new,
                   onPressed: () {
@@ -179,7 +207,9 @@ class ContextMenuDemoPage extends StatelessWidget {
                 ),
                 AdaptiveContextMenuAction(
                   title: 'Rename',
-                  icon: PlatformInfo.isIOS
+                  icon: PlatformInfo.isIOS26OrHigher()
+                      ? 'pencil'
+                      : PlatformInfo.isIOS
                       ? CupertinoIcons.pencil
                       : Icons.drive_file_rename_outline,
                   onPressed: () {
@@ -188,7 +218,9 @@ class ContextMenuDemoPage extends StatelessWidget {
                 ),
                 AdaptiveContextMenuAction(
                   title: 'Move',
-                  icon: PlatformInfo.isIOS
+                  icon: PlatformInfo.isIOS26OrHigher()
+                      ? 'folder'
+                      : PlatformInfo.isIOS
                       ? CupertinoIcons.folder
                       : Icons.drive_file_move,
                   onPressed: () {
@@ -197,14 +229,20 @@ class ContextMenuDemoPage extends StatelessWidget {
                 ),
                 AdaptiveContextMenuAction(
                   title: 'Share',
-                  icon: PlatformInfo.isIOS ? CupertinoIcons.share : Icons.share,
+                  icon: PlatformInfo.isIOS26OrHigher()
+                      ? 'square.and.arrow.up'
+                      : PlatformInfo.isIOS
+                      ? CupertinoIcons.share
+                      : Icons.share,
                   onPressed: () {
                     _showSnackbar(context, 'Share pressed');
                   },
                 ),
                 AdaptiveContextMenuAction(
                   title: 'Delete',
-                  icon: PlatformInfo.isIOS
+                  icon: PlatformInfo.isIOS26OrHigher()
+                      ? 'trash'
+                      : PlatformInfo.isIOS
                       ? CupertinoIcons.trash
                       : Icons.delete,
                   isDestructive: true,
