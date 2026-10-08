@@ -172,8 +172,13 @@ class HostedTopToolbar extends StatelessWidget {
                     child: FadeTransition(
                       key: const ValueKey<String>('adaptive_toolbar_back_fade'),
                       opacity: backOpacity,
-                      child: _BackButton(
-                        navigator: (upperOwns ? upper : lower).navigator,
+                      alwaysIncludeSemantics: true,
+                      child: ExcludeSemantics(
+                        // Fading out with the page that is leaving.
+                        excluding: !(upperOwns ? upperBack : lowerBack),
+                        child: _BackButton(
+                          navigator: (upperOwns ? upper : lower).navigator,
+                        ),
                       ),
                     ),
                   ),
@@ -193,33 +198,42 @@ class HostedTopToolbar extends StatelessWidget {
     required Animation<double> opacity,
     required bool interactive,
   }) {
+    // alwaysIncludeSemantics: a layer that fades to zero during a back swipe
+    // must not drop its semantics and restore them when the swipe comes back;
+    // doing that mid gesture trips SemanticsNode._replaceChildren with the
+    // native bar inside. The layer that is not the page in front is excluded
+    // explicitly instead, so a screen reader never lands on invisible items.
     return FadeTransition(
       key: key,
       opacity: opacity,
-      child: IgnorePointer(
-        ignoring: !interactive,
-        child: titleOnly
-            // On iPhone Duo the title sits at the leading edge and the
-            // controls are in the trailing bar, so there is no bar to draw.
-            ? DuoToolbarTitle(
-                title: content.title,
-                titleWidget: content.titleOverlay,
-              )
-            : defaultTargetPlatform == TargetPlatform.iOS
-            ? IOS26NativeToolbar(
-                title: content.title,
-                titleWidget: content.titleOverlay,
-                leading: content.customLeading,
-                actions: content.actions,
-                tintColor: content.tint,
-                showsGradient: false,
-                onActionTap: (index) {
-                  if (index >= 0 && index < content.actions.length) {
-                    content.actions[index].onPressed();
-                  }
-                },
-              )
-            : _FallbackBar(content: content),
+      alwaysIncludeSemantics: true,
+      child: ExcludeSemantics(
+        excluding: !interactive,
+        child: IgnorePointer(
+          ignoring: !interactive,
+          child: titleOnly
+              // On iPhone Duo the title sits at the leading edge and the
+              // controls are in the trailing bar, so there is no bar to draw.
+              ? DuoToolbarTitle(
+                  title: content.title,
+                  titleWidget: content.titleOverlay,
+                )
+              : defaultTargetPlatform == TargetPlatform.iOS
+              ? IOS26NativeToolbar(
+                  title: content.title,
+                  titleWidget: content.titleOverlay,
+                  leading: content.customLeading,
+                  actions: content.actions,
+                  tintColor: content.tint,
+                  showsGradient: false,
+                  onActionTap: (index) {
+                    if (index >= 0 && index < content.actions.length) {
+                      content.actions[index].onPressed();
+                    }
+                  },
+                )
+              : _FallbackBar(content: content),
+        ),
       ),
     );
   }
