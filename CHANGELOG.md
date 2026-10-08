@@ -1,6 +1,7 @@
 # Changelog
 
 ## [Unreleased]
+* **FIX**: iOS 26: the fixed toolbar's automatic back button is now a 44-point circle like the native one, instead of a 38-point rounded square, and sits level with the title. The page-owned toolbar's back button is circular too (@Anderzzon, #171)
 * **FIX**: iPhone Duo: in Split View, an app in the left pane now shows its controls and tab bar in a vertical bar on the left edge, as native apps do. It used to fall back to horizontal bars. The side now comes from the system's vertical bar edge (iOS 27.1) instead of the safe-area insets alone (@sergi-labhouse)
   * Adds a Swift source file. With CocoaPods and a path or git dependency, if the iOS build fails with `cannot find 'VerticalBarEdgeStreamHandler' in scope`, run `pod install` in your `ios/` folder
 * **FIX**: iPhone Duo: in the left Split View pane the package reserves the strip itself, as UIKit only adds that inset for bars it draws, so the page body and `SafeArea` stay clear of the bar. The controls start near the top of the pane, since there is no camera there (@sergi-labhouse)
