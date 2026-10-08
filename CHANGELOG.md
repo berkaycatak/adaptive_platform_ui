@@ -22,6 +22,10 @@
 * **IMPROVEMENT**: Example app moved from CocoaPods to Swift Package Manager (@luflow, #150)
 * **NEW**: `AdaptiveContextMenu` on iOS 26+ is a native `UIContextMenuInteraction` with Liquid Glass: the child lifts as the preview and the actions are a `UIMenu` (title, SF Symbol, disabled, destructive). iOS <26 and Android are unchanged. Pass an SF Symbol name as `icon` for the iOS 26 menu (@itsatifsiddiqui, #161)
 * **NEW**: The plugin now also gains `iOS26ContextMenuView`; CocoaPods users on a path or git dependency may need `pod install` to pick up the new Swift files
+* **FIX**: Adding or removing `AdaptiveAppBar.actions` within the same page now reaches the iOS 26 native toolbar even when the list starts out `null`. Before, the change only showed after leaving and re-entering the page (#84)
+* **FIX**: `AdaptiveScaffold` with a native tab bar mounted its body once per destination, so every page's `initState` ran as many times as there were tabs, and again on each tab switch. The body is now mounted once and kept across tab switches (#76)
+* **FIX**: `AdaptiveSwitch` on iOS 18 and below is system green again instead of the theme's blue tint, matching every other switch on those versions (#94)
+* **NEW**: `AdaptiveScaffold.extendBody` lets the body run under a custom floating bottom bar on Android and iOS 18 and below, so the bar's margins show the content instead of the scaffold background (#144)
 
 ## [1.0.1]
 * **FIX**: 📱 **iPhone Duo: the tab bar now lives in the vertical bar**, at the bottom of it, the way the system lays it out. In 1.0.0 it stayed at the bottom of the screen. The strip now reads, from the top: status cluster, back button, toolbar items, tab bar. Measured against a native UIKit app on the iPhone Duo simulator

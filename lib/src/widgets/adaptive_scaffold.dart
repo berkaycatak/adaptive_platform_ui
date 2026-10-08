@@ -125,6 +125,7 @@ class AdaptiveScaffold extends StatefulWidget {
     this.enableBlur = true,
     this.enableToolbarGradient = true,
     this.extendBodyBehindAppBar = false,
+    this.extendBody = false,
     this.drawer,
     this.endDrawer,
     this.drawerScrimColor,
@@ -175,6 +176,13 @@ class AdaptiveScaffold extends StatefulWidget {
   /// When true, the body will extend behind the app bar, allowing for
   /// immersive content. When false, the body will start below the app bar.
   final bool extendBodyBehindAppBar;
+
+  /// Whether the body extends under [bottomNavigationBar] on Android and on
+  /// iOS 18 and below, like [Scaffold.extendBody]. Set it when the bar is
+  /// a custom floating one with margins, so the body shows through them
+  /// instead of the scaffold background (#144). On iOS 26+ the body already
+  /// sits under the native tab bar.
+  final bool extendBody;
 
   /// A panel displayed to the side of the body, often hidden on mobile.
   /// On Android, passed directly to the Material Scaffold.
@@ -421,30 +429,11 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
 
     // iOS 26+ with native toolbar enabled - Use IOS26Scaffold
     if (PlatformInfo.isIOS26OrHigher() && useNativeToolbar) {
-      // For GoRouter compatibility: Use body directly if it's StatefulNavigationShell
-      // Otherwise replicate body for each destination
-      List<Widget> childrenList;
-      final bodyType = widget.body?.runtimeType.toString() ?? '';
-      final isNavigationShell = bodyType.contains('StatefulNavigationShell');
-
-      if (isNavigationShell) {
-        // GoRouter's StatefulNavigationShell already manages children
-        // Don't replicate, just use it directly
-        childrenList = [widget.body ?? const SizedBox.shrink()];
-      } else if (widget.bottomNavigationBar?.items != null &&
-          widget.bottomNavigationBar!.items!.isNotEmpty) {
-        // Tab-based navigation: replicate single body for all tabs with unique keys
-        childrenList = List.generate(
-          widget.bottomNavigationBar!.items!.length,
-          (index) => KeyedSubtree(
-            key: ValueKey('tab_$index'),
-            child: widget.body ?? const SizedBox.shrink(),
-          ),
-        );
-      } else {
-        // Single page: just one body
-        childrenList = [widget.body ?? const SizedBox.shrink()];
-      }
+      // The body is the app's own tab switcher (an `IndexedStack`, a
+      // `StatefulNavigationShell`, `pages[index]`...), so it is mounted
+      // exactly once. Earlier versions built one copy per tab, which ran
+      // every page's `initState` once per destination (#76).
+      List<Widget> childrenList = [widget.body ?? const SizedBox.shrink()];
 
       // Wrap children with Stack if floatingActionButton is provided
       if (widget.floatingActionButton != null) {
@@ -467,9 +456,6 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
 
       return _wrapWithDrawerIfNeeded(
         IOS26Scaffold(
-          key: ValueKey(
-            'ios26_scaffold_${widget.bottomNavigationBar?.selectedIndex ?? 0}_${widget.body?.runtimeType.toString() ?? "empty"}',
-          ),
           bottomNavigationBar: widget.bottomNavigationBar,
           title: widget.appBar?.title,
           actions: widget.appBar?.actions,
@@ -890,6 +876,7 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
         bottomNavigationBar: bottomNavBar,
         floatingActionButton: widget.floatingActionButton,
         extendBodyBehindAppBar: widget.extendBodyBehindAppBar,
+        extendBody: widget.extendBody,
         drawer: widget.drawer,
         endDrawer: widget.endDrawer,
         drawerScrimColor: widget.drawerScrimColor,
@@ -954,6 +941,7 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
       resizeToAvoidBottomInset: widget.resizeToAvoidBottomInset,
       floatingActionButton: widget.floatingActionButton,
       extendBodyBehindAppBar: widget.extendBodyBehindAppBar,
+      extendBody: widget.extendBody,
       drawer: widget.drawer,
       endDrawer: widget.endDrawer,
       drawerScrimColor: widget.drawerScrimColor,

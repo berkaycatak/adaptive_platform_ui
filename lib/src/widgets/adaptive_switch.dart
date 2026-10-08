@@ -73,8 +73,10 @@ class AdaptiveSwitch extends StatelessWidget {
       return CupertinoSwitch(
         value: value,
         onChanged: onChanged,
-        activeTrackColor:
-            activeColor ?? CupertinoTheme.of(context).primaryColor,
+        // Null keeps CupertinoSwitch's own system green, the colour every
+        // pre-26 iOS switch has; the theme's primary colour is the blue
+        // tint and is wrong here (#94).
+        activeTrackColor: activeColor,
         thumbColor: thumbColor,
       );
     }
