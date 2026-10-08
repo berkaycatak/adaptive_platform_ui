@@ -30,6 +30,8 @@
 * **NEW**: `AdaptiveScaffold.backgroundColor` sets the page background on every platform, including the iOS 26 native scaffold (#60, #95)
 * **NEW**: `AdaptivePopupMenuButton.icon` takes `iconSize`, the glyph's point size on Android, iOS 18 and the iOS 26 native button (#139)
 * **FIX**: Example: the Info page no longer overflows on the repository URL row (#50)
+* **FIX**: `AdaptiveTabBarView` labels are readable on every background: on Android a custom or transparent `backgroundColor` now gets contrasting labels instead of white, and on iOS the selected segment's label contrasts with `selectedColor` (black thumb, white text). `unselectedColor` now reaches the iOS segments, and `selectedLabelColor` sets the selected label explicitly (#37)
+* **FIX**: An opaque `AdaptiveScaffold.backgroundColor` also sets the status bar style, so a dark page in a light theme keeps light status icons. A page's own `AnnotatedRegion<SystemUiOverlayStyle>` still takes precedence (#77)
 
 ## [1.0.1]
 * **FIX**: 📱 **iPhone Duo: the tab bar now lives in the vertical bar**, at the bottom of it, the way the system lays it out. In 1.0.0 it stayed at the bottom of the screen. The strip now reads, from the top: status cluster, back button, toolbar items, tab bar. Measured against a native UIKit app on the iPhone Duo simulator

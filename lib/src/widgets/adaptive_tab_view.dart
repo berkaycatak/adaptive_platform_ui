@@ -31,6 +31,7 @@ class AdaptiveTabBarView extends StatefulWidget {
     this.backgroundColor,
     this.selectedColor,
     this.unselectedColor,
+    this.selectedLabelColor,
   });
 
   /// Tab labels
@@ -44,18 +45,32 @@ class AdaptiveTabBarView extends StatefulWidget {
 
   /// Background color for the tab bar
   /// On iOS: Background color of the segmented control
-  /// On Android: Background color of the TabBar
+  /// On Android: Background color of the TabBar. Null paints the theme's
+  /// primary colour with white labels; any other colour, including
+  /// `Colors.transparent`, gets labels that contrast with it (#37).
   final Color? backgroundColor;
 
   /// Color for the selected tab
-  /// On iOS: Thumb color of the selected segment
-  /// On Android: Label color of the selected tab
+  /// On iOS: Thumb color of the selected segment; its label switches to a
+  /// contrasting colour unless [selectedLabelColor] is set
+  /// On Android: Label and indicator color of the selected tab
   final Color? selectedColor;
 
   /// Color for unselected tabs
   /// On iOS: Text color of unselected segments
   /// On Android: Label color of unselected tabs
   final Color? unselectedColor;
+
+  /// Label color of the selected tab on every platform. Null derives it:
+  /// from [selectedColor] on iOS (white on a dark thumb, black on a light
+  /// one) and from [backgroundColor] on Android.
+  final Color? selectedLabelColor;
+
+  /// White on dark colours, black on light ones, for text drawn over [on].
+  static Color contrastingLabelFor(Color on) =>
+      ThemeData.estimateBrightnessForColor(on) == Brightness.dark
+      ? Colors.white
+      : Colors.black;
 
   @override
   State<AdaptiveTabBarView> createState() => _AdaptiveTabBarViewState();
@@ -109,6 +124,14 @@ class _AdaptiveTabBarViewState extends State<AdaptiveTabBarView>
     }
   }
 
+  /// The selected segment's label on iOS: the caller's choice, else a
+  /// colour that contrasts with the thumb when one was given (#37).
+  Color? get _iosSelectedLabelColor {
+    if (widget.selectedLabelColor != null) return widget.selectedLabelColor;
+    final thumb = widget.selectedColor;
+    return thumb == null ? null : AdaptiveTabBarView.contrastingLabelFor(thumb);
+  }
+
   @override
   Widget build(BuildContext context) {
     // iOS implementation - Uses AdaptiveSegmentedControl
@@ -127,6 +150,8 @@ class _AdaptiveTabBarViewState extends State<AdaptiveTabBarView>
               onValueChanged: _onSegmentChanged,
               height: 40.0,
               color: widget.selectedColor,
+              textColor: widget.unselectedColor,
+              selectedTextColor: _iosSelectedLabelColor,
             ),
           ),
           // Content with PageView for iOS
@@ -143,11 +168,24 @@ class _AdaptiveTabBarViewState extends State<AdaptiveTabBarView>
 
     // Android - Material Design implementation
     if (PlatformInfo.isAndroid) {
+      final theme = Theme.of(context);
       final defaultBackgroundColor =
-          widget.backgroundColor ?? Theme.of(context).primaryColor;
-      final defaultSelectedColor = widget.selectedColor ?? Colors.white;
+          widget.backgroundColor ?? theme.primaryColor;
+      // Labels must contrast with what they are drawn on: white on the
+      // primary-coloured bar, the surface text colour on a transparent or
+      // light custom background (#37).
+      final bg = widget.backgroundColor;
+      final Color onBackground = bg == null
+          ? Colors.white
+          : bg.a < 0.5 ||
+                ThemeData.estimateBrightnessForColor(bg) == Brightness.light
+          ? theme.colorScheme.onSurface
+          : Colors.white;
+      final defaultSelectedColor = widget.selectedColor ?? onBackground;
+      final defaultSelectedLabelColor =
+          widget.selectedLabelColor ?? defaultSelectedColor;
       final defaultUnselectedColor =
-          widget.unselectedColor ?? Colors.white.withValues(alpha: 0.7);
+          widget.unselectedColor ?? onBackground.withValues(alpha: 0.7);
 
       return Column(
         children: [
@@ -157,7 +195,7 @@ class _AdaptiveTabBarViewState extends State<AdaptiveTabBarView>
               controller: _materialController,
               tabs: widget.tabs.map((label) => Tab(text: label)).toList(),
               indicatorColor: defaultSelectedColor,
-              labelColor: defaultSelectedColor,
+              labelColor: defaultSelectedLabelColor,
               unselectedLabelColor: defaultUnselectedColor,
             ),
           ),
@@ -183,6 +221,8 @@ class _AdaptiveTabBarViewState extends State<AdaptiveTabBarView>
             onValueChanged: _onSegmentChanged,
             height: 40.0,
             color: widget.selectedColor,
+            textColor: widget.unselectedColor,
+            selectedTextColor: _iosSelectedLabelColor,
           ),
         ),
         Expanded(

@@ -1,5 +1,6 @@
 import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 /// Regression tests for in-place scaffold updates (#84, #144). They run on
@@ -101,5 +102,24 @@ void main() {
     );
     final icon = tester.widget<Icon>(find.byIcon(Icons.more_vert));
     expect(icon.size, 31);
+  });
+
+  testWidgets('an opaque dark backgroundColor requests light status icons', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: AdaptiveScaffold(backgroundColor: Colors.black, body: SizedBox()),
+      ),
+    );
+    final region = tester.widget<AnnotatedRegion<SystemUiOverlayStyle>>(
+      find.byType(AnnotatedRegion<SystemUiOverlayStyle>).first,
+    );
+    expect(region.value.statusBarIconBrightness, Brightness.light);
+
+    await tester.pumpWidget(
+      const MaterialApp(home: AdaptiveScaffold(body: SizedBox())),
+    );
+    expect(find.byType(AnnotatedRegion<SystemUiOverlayStyle>), findsNothing);
   });
 }

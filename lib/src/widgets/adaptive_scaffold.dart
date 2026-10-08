@@ -1,6 +1,7 @@
 import 'package:adaptive_platform_ui/src/widgets/ios26/ios26_native_tab_bar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../platform/platform_info.dart';
 import '../style/sf_symbol.dart';
 import 'adaptive_app_bar.dart';
@@ -187,7 +188,9 @@ class AdaptiveScaffold extends StatefulWidget {
 
   /// Background colour of the page on every platform. Null keeps the
   /// platform default: the Material or Cupertino theme's scaffold colour
-  /// (#60, #95).
+  /// (#60, #95). An opaque colour also sets the status bar style to
+  /// contrast with it, so a dark page in a light theme keeps a readable
+  /// status bar (#77).
   final Color? backgroundColor;
 
   /// A panel displayed to the side of the body, often hidden on mobile.
@@ -429,6 +432,21 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
 
   @override
   Widget build(BuildContext context) {
+    final page = _buildPage(context);
+    final bg = widget.backgroundColor;
+    if (bg == null || bg.a < 0.5) return page;
+    // A page that sets its own background keeps the status bar legible
+    // over it, whatever the app theme says: light icons on a dark page and
+    // dark icons on a light one. Pages without a colour follow the theme
+    // through AdaptiveApp, and an inner AnnotatedRegion still wins (#77).
+    final dark = ThemeData.estimateBrightnessForColor(bg) == Brightness.dark;
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: dark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
+      child: page,
+    );
+  }
+
+  Widget _buildPage(BuildContext context) {
     final useNativeToolbar = widget.appBar?.useNativeToolbar ?? false;
     final useNativeBottomBar =
         widget.bottomNavigationBar?.useNativeBottomBar ?? true;
