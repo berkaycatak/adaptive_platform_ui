@@ -13,6 +13,7 @@ the release is cut.
 | @sergi-labhouse | iPhone Duo: vertical bar on the left in the leading Split View pane, via `UITraitCollection.verticalBarEdge`; the system reserves no strip there, so the host adds it | #169 |
 | @luflow | Radio drawn as a ring with an inner dot; `borderColor` and `borderWidth` on `AdaptiveCard`; example app on the UIScene lifecycle | #154, #153, #151 |
 | @goalbypro, @bryandelgado99 | Android JVM 17 target for the plugin module (report, and the fix taken from the larger tooling PR) | #119, #160 |
+| @itsatifsiddiqui | Native Liquid Glass context menu on iOS 26+ | #161 |
 | @DFelten | Native menus on app bar actions, in the fixed toolbar and the Duo capsule as well | #163 |
 | @luflow | Section titles in menus on all three platforms; example app on Swift Package Manager | #149, #150 |
 | @gem85247 | `selected` checkmark on popup menu items; child-mode button sizing fix | #147 |
@@ -27,7 +28,6 @@ the release is cut.
 | Who | What | Where |
 |---|---|---|
 | @primer03, @DFelten | Taps not reaching the iOS 26 native tab bar; needs Flutter 3.47's gesture blocking policy | #141, #162 |
-| @itsatifsiddiqui | Native Liquid Glass context menu on iOS 26+ | #161 |
 | @pento, @Crucialjun, @robert-virkus | Migration to `material_ui` / `cupertino_ui` (Flutter 3.47); three PRs for the same change | #145, #146, #168, #167 |
 
 ## 1.0.1
