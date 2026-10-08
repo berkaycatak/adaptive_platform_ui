@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [1.0.2]
 * **FIX**: iOS 26: the fixed toolbar's automatic back button is now a 44-point circle like the native one, instead of a 38-point rounded square, and sits level with the title. The page-owned toolbar's back button is circular too (@Anderzzon, #171)
 * **FIX**: iPhone Duo: in Split View, an app in the left pane now shows its controls and tab bar in a vertical bar on the left edge, as native apps do. It used to fall back to horizontal bars. The side now comes from the system's vertical bar edge (iOS 27.1) instead of the safe-area insets alone (@sergi-labhouse)
   * Adds a Swift source file. With CocoaPods and a path or git dependency, if the iOS build fails with `cannot find 'VerticalBarEdgeStreamHandler' in scope`, run `pod install` in your `ios/` folder
@@ -32,6 +32,8 @@
 * **FIX**: Example: the Info page no longer overflows on the repository URL row (#50)
 * **FIX**: `AdaptiveTabBarView` labels are readable on every background: on Android a custom or transparent `backgroundColor` now gets contrasting labels instead of white, and on iOS the selected segment's label contrasts with `selectedColor` (black thumb, white text). `unselectedColor` now reaches the iOS segments, and `selectedLabelColor` sets the selected label explicitly (#37)
 * **FIX**: An opaque `AdaptiveScaffold.backgroundColor` also sets the status bar style, so a dark page in a light theme keeps light status icons. A page's own `AnnotatedRegion<SystemUiOverlayStyle>` still takes precedence (#77)
+
+Thanks to everyone who shaped this release with code, reports and reviews: @luflow, @sergi-labhouse, @DFelten, @gem85247, @Anderzzon, @itsatifsiddiqui, @Danilo-Mota, @terrykang90, @KhalidSaud, @Qian-Samuel, @goalbypro, @bryandelgado99, @primer03, @pento, @Crucialjun, @robert-virkus and the reporters of #76, #84, #94, #144, #37, #77, #50, #139, #60 and #95. Who did what is in [CONTRIBUTORS.md](https://github.com/berkaycatak/adaptive_platform_ui/blob/main/CONTRIBUTORS.md).
 
 ## [1.0.1]
 * **FIX**: 📱 **iPhone Duo: the tab bar now lives in the vertical bar**, at the bottom of it, the way the system lays it out. In 1.0.0 it stayed at the bottom of the screen. The strip now reads, from the top: status cluster, back button, toolbar items, tab bar. Measured against a native UIKit app on the iPhone Duo simulator

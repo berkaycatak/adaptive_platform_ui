@@ -5,7 +5,7 @@ and the credits. Names are GitHub handles. The "Unreleased" section collects
 everything merged since the last release and is folded into CHANGELOG.md when
 the release is cut.
 
-## Unreleased (1.0.2)
+## 1.0.2
 
 | Who | What | Where |
 |---|---|---|
