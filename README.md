@@ -253,6 +253,17 @@ AdaptiveAppBarAction(
 ```
 
   Unlike `title`, a `label` never replaces the icon with text.
+- **Badges.** A toolbar item in the strip can carry a count, drawn in the
+  same red badge as the tabs ("99+" above 99). Other toolbars ignore it:
+
+```dart
+AdaptiveAppBarAction(
+  iosSymbol: 'bell',
+  label: 'Notifications',
+  badgeCount: unreadCount, // null or 0: no badge
+  onPressed: openNotifications,
+)
+```
 
 Not using `AdaptiveApp`? Install the host yourself, around the navigator
 (see [Migrating to 1.0.0](#migrating-to-100)):

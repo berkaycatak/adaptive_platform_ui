@@ -23,6 +23,17 @@ class _BadgeNavigationDemoPageState extends State<BadgeNavigationDemoPage> {
       appBar: AdaptiveAppBar(
         leading: PlatformInfo.isIOS26OrHigher() ? popButton(context) : null,
         title: 'Badge Navigation Demo',
+        actions: [
+          // On iPhone Duo the action joins the tabs in the vertical bar and
+          // shows its count there.
+          AdaptiveAppBarAction(
+            iosSymbol: 'bell',
+            icon: Icons.notifications_outlined,
+            label: 'Notifications',
+            badgeCount: _notificationsBadgeCount,
+            onPressed: () => setState(() => _notificationsBadgeCount = 0),
+          ),
+        ],
       ),
       body: _buildContent(),
       bottomNavigationBar: AdaptiveBottomNavigationBar(

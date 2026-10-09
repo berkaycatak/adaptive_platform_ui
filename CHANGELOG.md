@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+* **NEW**: `AdaptiveAppBarAction.badgeCount` for a count badge on a toolbar action
+  * iOS 26+ (iPhone Duo vertical bar): the native glass capsule draws the same red badge it draws for tabs, showing "99+" above 99
+  * Other toolbars, iOS <26 and Android: ignored
+  * Null or 0 shows no badge. Part of `==` and `hashCode`, so changing the count updates the bar
+
 ## [1.0.2]
 * **FIX**: iOS 26: the fixed toolbar's automatic back button is now a 44-point circle like the native one, instead of a 38-point rounded square, and sits level with the title. The page-owned toolbar's back button is circular too (@Anderzzon, #171)
 * **FIX**: iPhone Duo: in Split View, an app in the left pane now shows its controls and tab bar in a vertical bar on the left edge, as native apps do. It used to fall back to horizontal bars. The side now comes from the system's vertical bar edge (iOS 27.1) instead of the safe-area insets alone (@sergi-labhouse)
