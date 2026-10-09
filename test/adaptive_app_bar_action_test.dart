@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
+import 'package:adaptive_platform_ui/src/widgets/ios26/ios26_glass_capsule.dart';
 
 void main() {
   group('AdaptiveAppBarAction', () {
@@ -305,6 +306,78 @@ void main() {
 
         expect(selected, [(2, 'Delete')]);
       });
+    });
+  });
+
+  group('AdaptiveAppBarAction.badgeCount', () {
+    test('defaults to null', () {
+      final action = AdaptiveAppBarAction(iosSymbol: 'bell', onPressed: () {});
+
+      expect(action.badgeCount, isNull);
+    });
+
+    test('stores the given count', () {
+      final action = AdaptiveAppBarAction(
+        iosSymbol: 'bell',
+        badgeCount: 5,
+        onPressed: () {},
+      );
+
+      expect(action.badgeCount, 5);
+    });
+
+    test('is part of equality and hashCode', () {
+      AdaptiveAppBarAction bell(int? count) => AdaptiveAppBarAction(
+        iosSymbol: 'bell',
+        badgeCount: count,
+        onPressed: () {},
+      );
+
+      expect(bell(3), equals(bell(3)));
+      expect(bell(3).hashCode, equals(bell(3).hashCode));
+      expect(bell(3), isNot(equals(bell(4))));
+      expect(bell(3), isNot(equals(bell(null))));
+    });
+
+    test('is not sent through toNativeMap', () {
+      // The native toolbar does not draw action badges; only the glass
+      // capsule does, through GlassCapsuleItem.
+      final map = AdaptiveAppBarAction(
+        iosSymbol: 'bell',
+        badgeCount: 5,
+        onPressed: () {},
+      ).toNativeMap();
+
+      expect(map.containsKey('badge'), isFalse);
+      expect(map.containsKey('badgeCount'), isFalse);
+    });
+  });
+
+  group('GlassCapsuleItem.fromAction badge', () {
+    GlassCapsuleItem itemFor(int? count) => GlassCapsuleItem.fromAction(
+      AdaptiveAppBarAction(
+        iosSymbol: 'bell',
+        badgeCount: count,
+        onPressed: () {},
+      ),
+    );
+
+    test('passes the action badgeCount through', () {
+      expect(itemFor(7).badge, 7);
+      expect(itemFor(7).toNativeMap()['badge'], 7);
+    });
+
+    test('sends counts above 99 as is (native code shows 99+)', () {
+      expect(itemFor(150).toNativeMap()['badge'], 150);
+    });
+
+    test('sends no badge for null', () {
+      expect(itemFor(null).badge, isNull);
+      expect(itemFor(null).toNativeMap().containsKey('badge'), isFalse);
+    });
+
+    test('sends no badge for 0', () {
+      expect(itemFor(0).toNativeMap().containsKey('badge'), isFalse);
     });
   });
 }

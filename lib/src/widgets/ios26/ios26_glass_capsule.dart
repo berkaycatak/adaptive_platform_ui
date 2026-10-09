@@ -34,6 +34,7 @@ class GlassCapsuleItem {
     title: action.iosSymbol == null ? action.title : null,
     label: action.effectiveLabel,
     tint: action.tintColor,
+    badge: action.badgeCount,
     fallback:
         action.iconWidget ??
         (action.icon != null ? Icon(action.icon, size: 22) : null),

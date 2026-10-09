@@ -34,6 +34,7 @@ class AdaptiveAppBarAction {
     this.spacerAfter = ToolbarSpacerType.none,
     this.prominent = false,
     this.tintColor,
+    this.badgeCount,
   }) : assert(
          iosSymbol != null ||
              icon != null ||
@@ -149,6 +150,27 @@ class AdaptiveAppBarAction {
   /// - iOS <26 / Android: Ignored
   final Color? tintColor;
 
+  /// A count shown in a red badge on the action, like a tab's
+  /// `AdaptiveNavigationDestination.badgeCount`.
+  ///
+  /// **Platform behavior:**
+  /// - **iOS 26+ (iPhone Duo vertical bar)**: Drawn by the native glass
+  ///   capsule, the same badge the tabs use. Counts above 99 show as "99+".
+  /// - **Other iOS 26+ toolbars, iOS <26, Android**: Ignored
+  ///
+  /// Null or 0 shows no badge.
+  ///
+  /// Example:
+  /// ```dart
+  /// AdaptiveAppBarAction(
+  ///   iosSymbol: 'bell',
+  ///   label: 'Notifications',
+  ///   badgeCount: unreadCount,
+  ///   onPressed: openNotifications,
+  /// )
+  /// ```
+  final int? badgeCount;
+
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
@@ -160,6 +182,7 @@ class AdaptiveAppBarAction {
         other.label == label &&
         other.prominent == prominent &&
         other.tintColor == tintColor &&
+        other.badgeCount == badgeCount &&
         listEquals(_menuSignature, other._menuSignature);
   }
 
@@ -172,6 +195,7 @@ class AdaptiveAppBarAction {
     label,
     prominent,
     tintColor,
+    badgeCount,
     Object.hashAll(_menuSignature ?? const []),
   );
 
