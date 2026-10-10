@@ -1,10 +1,7 @@
 # Changelog
 
 ## [Unreleased]
-* **NEW**: `AdaptiveAppBarAction.badgeCount` for a count badge on a toolbar action
-  * iOS 26+ (iPhone Duo vertical bar): the native glass capsule draws the same red badge it draws for tabs, showing "99+" above 99
-  * Other toolbars, iOS <26 and Android: ignored
-  * Null or 0 shows no badge. Part of `==` and `hashCode`, so changing the count updates the bar
+* **NEW**: `AdaptiveAppBarAction.badgeCount` puts a count badge on a toolbar action: the native glass capsule draws it in the iPhone Duo bar ("99+" above 99), and iOS 18 and Android draw an `AdaptiveBadge` on the icon. The horizontal iOS 26 toolbar ignores it, as `UIBarButtonItem` has no badge. Null or 0 shows nothing (@keithcheehui, #174)
 
 ## [1.0.2]
 * **FIX**: iOS 26: the fixed toolbar's automatic back button is now a 44-point circle like the native one, instead of a 38-point rounded square, and sits level with the title. The page-owned toolbar's back button is circular too (@Anderzzon, #171)

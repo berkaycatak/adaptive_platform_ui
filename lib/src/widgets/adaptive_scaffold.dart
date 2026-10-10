@@ -547,6 +547,7 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
                       } else {
                         actionChild = const Icon(CupertinoIcons.circle);
                       }
+                      actionChild = action.wrapWithBadge(actionChild);
                       return Builder(
                         builder: (context) => CupertinoButton(
                           padding: EdgeInsets.zero,
@@ -747,6 +748,7 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
                     } else {
                       actionChild = const Icon(CupertinoIcons.circle);
                     }
+                    actionChild = action.wrapWithBadge(actionChild);
                     return Builder(
                       builder: (context) => CupertinoButton(
                         padding: EdgeInsets.zero,
@@ -841,11 +843,12 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
             }
             return Builder(
               builder: (context) => IconButton(
-                icon:
-                    action.iconWidget ??
-                    (action.icon != null
-                        ? Icon(action.icon!)
-                        : const Icon(Icons.circle)),
+                icon: action.wrapWithBadge(
+                  action.iconWidget ??
+                      (action.icon != null
+                          ? Icon(action.icon!)
+                          : const Icon(Icons.circle)),
+                ),
                 tooltip: action.effectiveLabel,
                 onPressed: () => action.press(context),
               ),
@@ -944,11 +947,12 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
           }
           return Builder(
             builder: (context) => IconButton(
-              icon:
-                  action.iconWidget ??
-                  (action.icon != null
-                      ? Icon(action.icon!)
-                      : const Icon(Icons.circle)),
+              icon: action.wrapWithBadge(
+                action.iconWidget ??
+                    (action.icon != null
+                        ? Icon(action.icon!)
+                        : const Icon(Icons.circle)),
+              ),
               tooltip: action.effectiveLabel,
               onPressed: () => action.press(context),
             ),

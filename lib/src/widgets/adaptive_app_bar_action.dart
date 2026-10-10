@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import 'adaptive_badge.dart';
 import 'adaptive_popup_menu_button.dart';
 
 /// Spacer type for toolbar items (iOS 26+ only)
@@ -156,7 +157,9 @@ class AdaptiveAppBarAction {
   /// **Platform behavior:**
   /// - **iOS 26+ (iPhone Duo vertical bar)**: Drawn by the native glass
   ///   capsule, the same badge the tabs use. Counts above 99 show as "99+".
-  /// - **Other iOS 26+ toolbars, iOS <26, Android**: Ignored
+  /// - **iOS <26, Android**: An [AdaptiveBadge] drawn on the icon.
+  /// - **iOS 26+ horizontal toolbar**: Ignored; `UIBarButtonItem` has no
+  ///   badge.
   ///
   /// Null or 0 shows no badge.
   ///
@@ -170,6 +173,14 @@ class AdaptiveAppBarAction {
   /// )
   /// ```
   final int? badgeCount;
+
+  /// [child] with [badgeCount] drawn on it for the Flutter-rendered
+  /// toolbars; [child] itself when there is no count to show.
+  Widget wrapWithBadge(Widget child) {
+    final count = badgeCount;
+    if (count == null || count <= 0) return child;
+    return AdaptiveBadge(count: count, child: child);
+  }
 
   @override
   bool operator ==(Object other) {

@@ -380,4 +380,31 @@ void main() {
       expect(itemFor(0).toNativeMap().containsKey('badge'), isFalse);
     });
   });
+
+  group('AdaptiveAppBarAction.wrapWithBadge', () {
+    testWidgets('draws an AdaptiveBadge on Flutter toolbars', (tester) async {
+      final badged = AdaptiveAppBarAction(
+        icon: Icons.notifications,
+        badgeCount: 7,
+        onPressed: () {},
+      );
+      final plain = AdaptiveAppBarAction(
+        icon: Icons.settings,
+        badgeCount: 0,
+        onPressed: () {},
+      );
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Row(
+            children: [
+              badged.wrapWithBadge(const Icon(Icons.notifications)),
+              plain.wrapWithBadge(const Icon(Icons.settings)),
+            ],
+          ),
+        ),
+      );
+      expect(find.byType(AdaptiveBadge), findsOneWidget);
+      expect(find.text('7'), findsOneWidget);
+    });
+  });
 }
