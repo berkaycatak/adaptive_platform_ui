@@ -141,9 +141,11 @@ class ToolbarRegistry extends ChangeNotifier {
   }
 
   /// The page whose tab bar belongs with [entry]: [entry] itself, or the
-  /// scaffold hosting the tabs that [entry] lives in (a shell route). Null
-  /// when [entry] is outside any tab layout, such as a page pushed on top of
-  /// the tabs, which hides the tab bar the way UIKit does.
+  /// scaffold hosting the tabs that [entry] lives in: a shell route around
+  /// the page's own navigator, or the very route the page is built on, as a
+  /// detail pane of a two-pane layout is (#173). Null when [entry] is
+  /// outside any tab layout, such as a page pushed on top of the tabs, which
+  /// hides the tab bar the way UIKit does.
   ToolbarEntry? tabBarOwnerFor(ToolbarEntry? entry) {
     if (entry == null) return null;
     if (entry.hasTabBar) return entry;
@@ -151,7 +153,8 @@ class ToolbarRegistry extends ChangeNotifier {
       final candidate = _entries[i];
       if (candidate.hasTabBar &&
           candidate.route != null &&
-          entry.enclosingRoutes.contains(candidate.route)) {
+          (entry.route == candidate.route ||
+              entry.enclosingRoutes.contains(candidate.route))) {
         return candidate;
       }
     }

@@ -396,4 +396,68 @@ void main() {
       expect(tester.takeException(), isNull);
     });
   });
+
+  group('ToolbarRegistry: tab bar owner', () {
+    final tabs = AdaptiveBottomNavigationBar(
+      selectedIndex: 0,
+      onTap: (_) {},
+      items: const [
+        AdaptiveNavigationDestination(icon: 'house.fill', label: 'Home'),
+        AdaptiveNavigationDestination(icon: 'star', label: 'Starred'),
+      ],
+    );
+
+    // A detail pane built inside the tab scaffold (two-pane layout) shares
+    // the tab scaffold's route and is not pushed, so it has no enclosing
+    // routes of its own; the tab bar still belongs with it (#173).
+    test('a pane on the tab scaffold\'s own route keeps the tab bar', () {
+      final registry = ToolbarRegistry();
+      final route = MaterialPageRoute<void>(builder: (_) => const SizedBox());
+      final shell = ToolbarEntry(
+        id: 'shell',
+        appBar: null,
+        route: route,
+        navigator: null,
+        visible: true,
+        tabBar: tabs,
+      );
+      final pane = ToolbarEntry(
+        id: 'pane',
+        appBar: null,
+        route: route,
+        navigator: null,
+        visible: true,
+      );
+      registry.upsert(shell);
+      registry.upsert(pane);
+      expect(registry.tabBarOwnerFor(pane), same(registry.byId('shell')));
+    });
+
+    test('a page pushed above the tabs has no tab bar owner', () {
+      final registry = ToolbarRegistry();
+      final shellRoute = MaterialPageRoute<void>(
+        builder: (_) => const SizedBox(),
+      );
+      final pushed = MaterialPageRoute<void>(builder: (_) => const SizedBox());
+      registry.upsert(
+        ToolbarEntry(
+          id: 'shell',
+          appBar: null,
+          route: shellRoute,
+          navigator: null,
+          visible: true,
+          tabBar: tabs,
+        ),
+      );
+      final page = ToolbarEntry(
+        id: 'page',
+        appBar: null,
+        route: pushed,
+        navigator: null,
+        visible: true,
+      );
+      registry.upsert(page);
+      expect(registry.tabBarOwnerFor(page), isNull);
+    });
+  });
 }
