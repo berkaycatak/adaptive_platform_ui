@@ -268,9 +268,11 @@ class _IOS26NativeToolbarState extends State<IOS26NativeToolbar> {
                   builder: (context) => CupertinoButton(
                     padding: EdgeInsets.zero,
                     onPressed: () => action.press(context),
-                    child: action.icon != null
-                        ? Icon(action.icon)
-                        : Text(action.title ?? ''),
+                    child: action.wrapWithBadge(
+                      action.icon != null
+                          ? Icon(action.icon)
+                          : Text(action.title ?? ''),
+                    ),
                   ),
                 );
               }).toList(),

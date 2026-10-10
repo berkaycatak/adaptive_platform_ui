@@ -254,7 +254,8 @@ AdaptiveAppBarAction(
 
   Unlike `title`, a `label` never replaces the icon with text.
 - **Badges.** A toolbar item in the strip can carry a count, drawn in the
-  same red badge as the tabs ("99+" above 99). Other toolbars ignore it:
+  same red badge as the tabs ("99+" above 99). iOS 18 and Android draw it on
+  the icon; the horizontal iOS 26 toolbar ignores it:
 
 ```dart
 AdaptiveAppBarAction(
