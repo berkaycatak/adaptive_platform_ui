@@ -1,8 +1,7 @@
 import 'package:adaptive_platform_ui_example/service/router/router_service.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
+import 'package:cupertino_ui/cupertino_ui.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 
 void main() {
   runApp(const AdaptivePlatformUIDemo());
@@ -41,12 +40,8 @@ class _AdaptivePlatformUIDemoState extends State<AdaptivePlatformUIDemo> {
         useMaterial3: true,
         brightness: Brightness.dark,
       ),
-      localizationsDelegates: [
-        // Important!
-        GlobalMaterialLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-      ],
+      // Important!
+      localizationsDelegates: GlobalMaterialLocalizations.delegates,
       locale: const Locale('en'),
       supportedLocales: [
         const Locale('en'), // English

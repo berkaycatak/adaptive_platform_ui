@@ -1,5 +1,5 @@
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
+import 'package:cupertino_ui/cupertino_ui.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:adaptive_platform_ui/src/platform/platform_info.dart';
 
 /// A platform-adaptive expansion tile widget that provides expandable/collapsible content.

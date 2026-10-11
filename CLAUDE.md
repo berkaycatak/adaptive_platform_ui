@@ -39,7 +39,7 @@ cd example && flutter pub get && flutter run
 flutter pub publish --dry-run
 ```
 
-CI uses Flutter 3.35.6 stable. CI pipeline: analyze -> test -> build example APK.
+CI uses Flutter 3.47.0 stable. CI pipeline: analyze -> test -> build example APK.
 
 ## Architecture
 
@@ -92,3 +92,5 @@ Located in `ios/Classes/`:
 - **New widgets**: Follow the `Adaptive*` naming pattern, implement all three platform paths, add test file in `test/`, add demo page in `example/lib/pages/demos/`
 - **Colors in platform channels**: Passed as ARGB integers or hex strings
 - **Icons for iOS 26+**: Use `SFSymbol` class (`lib/src/style/sf_symbol.dart`) for native Apple SF Symbols
+- **Material/Cupertino imports**: This package is built on the standalone `material_ui` and `cupertino_ui` packages, not the Flutter SDK's built-in design libraries. Import `package:material_ui/material_ui.dart` and `package:cupertino_ui/cupertino_ui.dart`; never `package:flutter/material.dart` or `package:flutter/cupertino.dart` — the types are distinct despite the identical names, and mixing them produces type errors at the boundary.
+- **Testing tooltips**: `flutter_test`'s `find.byTooltip` checks `is Tooltip` against the SDK `Tooltip`, not `material_ui`'s. It still finds a `material_ui` tooltip through the underlying `RawTooltip`'s semantics, but misses one with `excludeFromSemantics: true` or an empty message. Use `find.byWidgetPredicate((w) => w is Tooltip && w.message == …)` instead.
