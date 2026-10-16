@@ -60,11 +60,17 @@ public class AdaptivePlatformUiPlugin: NSObject, FlutterPlugin {
             withId: "adaptive_platform_ui/ios26_context_menu"
         )
 
-        // Register iOS 26 TabBar platform view factory
+        // Register iOS 26 TabBar platform view factory.
+        // With the default (eager) policy the engine holds the UITabBar's touches
+        // until the Dart gesture arena accepts them, which arrives asynchronously.
+        // A quick tap ends before that and the tab bar drops it, so only a
+        // press-and-drag switches tabs. "Do not block" hands the touches to the
+        // tab bar right away (flutter/flutter#175099).
         let ios26TabBarFactory = iOS26TabBarViewFactory(messenger: registrar.messenger())
         registrar.register(
             ios26TabBarFactory,
-            withId: "adaptive_platform_ui/ios26_tab_bar"
+            withId: "adaptive_platform_ui/ios26_tab_bar",
+            gestureRecognizersBlockingPolicy: doNotBlockGesturePolicy
         )
 
         // Register iOS 26 Toolbar platform view factory
@@ -95,4 +101,13 @@ public class AdaptivePlatformUiPlugin: NSObject, FlutterPlugin {
         )
         verticalBarEdgeChannel.setStreamHandler(VerticalBarEdgeStreamHandler(registrar: registrar))
     }
+
+    /// `FlutterPlatformViewGestureRecognizersBlockingPolicyDoNotBlockGesture`,
+    /// added in Flutter 3.47. It is spelled by its raw value (Eager = 0,
+    /// WaitUntilTouchesEnded = 1, DoNotBlockGesture = 2) so the plugin still
+    /// compiles against older Flutter headers, which do not declare it. An older
+    /// engine does not know the value: it still delays the touches as before
+    /// and never blocks them.
+    private static let doNotBlockGesturePolicy =
+        FlutterPlatformViewGestureRecognizersBlockingPolicy(rawValue: 2)
 }
