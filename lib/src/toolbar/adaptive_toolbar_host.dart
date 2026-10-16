@@ -136,6 +136,7 @@ class _AdaptiveToolbarHostState extends State<AdaptiveToolbarHost>
       child: ToolbarChromeScope(
         hostsToolbar: hostsToolbar,
         hostsDuoControls: pose != null,
+        onSheetCover: _blend.setSheetCover,
         child: DuoPoseScope(
           pose: pose,
           child: Stack(

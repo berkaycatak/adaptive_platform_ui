@@ -1,6 +1,7 @@
 # Changelog
 
 ## [Unreleased]
+* **NEW**: `AdaptiveBottomSheet.show` presents a modal bottom sheet with your own widgets that rests at `AdaptiveSheetDetent`s (`medium`, `large` or any fraction), snaps between them and dismisses when dragged down. iOS 26+ draws a floating Liquid Glass sheet on a native `UIVisualEffectView` background that meets the screen edges at full height; iOS 18 and below use `showCupertinoSheet` for full-height sheets and the opaque iOS sheet for smaller detents; Android uses Material 3 `showModalBottomSheet`. Under the fixed toolbar, the toolbar fades out as a sheet rises over it, since it is drawn above every route. `IOS26BottomSheetRoute` is exported for direct use
 * **NEW**: Choose the iOS 26+ toolbar backdrop with `AdaptiveAppBar.scrollEdgeEffectStyle`. The default `soft` gradually blurs scrolling content and fades it toward the page background behind the horizontal title, `hard` shows a tinted blur and hairline when scrolled under, and `none` leaves the controls over the page.
 * **FIX**: Reserve space for the automatic back button so long iOS 26 toolbar titles truncate before they reach it.
 * **FIX**: iPhone Duo: a detail pane built inside the tab scaffold (a two-pane layout, nothing pushed) kept the tab bar hidden once it became the chrome owner, because the owner lookup only recognised shell routes around a nested navigator. A pane on the tab scaffold's own route now keeps the tab bar; pages pushed above the tabs still hide it (reported and diagnosed by @monster-echo, #173)

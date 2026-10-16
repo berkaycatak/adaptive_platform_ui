@@ -27,7 +27,8 @@ class ToolbarBlend extends ChangeNotifier {
       _cover = AnimationController(
         vsync: vsync,
         duration: kToolbarItemSwapDuration,
-      ) {
+      ),
+      _sheetCover = AnimationController(vsync: vsync) {
     registry.addListener(_onRegistryChanged);
     // A dialog pushed on an outer navigator covers a page inside a tab
     // without that page, or the registry, hearing of it. Every route owns a
@@ -44,6 +45,10 @@ class ToolbarBlend extends ChangeNotifier {
 
   /// 0 while the owner is in front, 1 while a dialog or sheet covers it.
   final AnimationController _cover;
+
+  /// How far a bottom sheet has risen over the chrome: 0 while it is clear
+  /// of it, 1 once it covers it. Set by the sheet as it moves.
+  final AnimationController _sheetCover;
 
   Object? _ownerId;
   Animation<double>? _driver;
@@ -68,10 +73,20 @@ class ToolbarBlend extends ChangeNotifier {
   /// must not react.
   bool get ownerIsCovered => owner?.isCovered ?? false;
 
-  /// Opacity of the whole chrome: full in front, dimmed while covered.
-  late final Animation<double> chromeOpacity = _cover.drive(
-    Tween<double>(begin: 1, end: kToolbarCoveredOpacity),
+  /// Opacity of the whole chrome: full in front, dimmed while covered, and
+  /// gone while a bottom sheet rises over it.
+  late final Animation<double> chromeOpacity = AnimationMin<double>(
+    _cover.drive(Tween<double>(begin: 1, end: kToolbarCoveredOpacity)),
+    _sheetCover.drive(Tween<double>(begin: 1, end: 0)),
   );
+
+  /// Reports how far a bottom sheet covers the chrome, from 0 (clear of it)
+  /// to 1 (over it). The chrome is drawn above every route, so a sheet that
+  /// reaches the top would otherwise sit under it.
+  void setSheetCover(double value) {
+    if (_disposed) return;
+    _sheetCover.value = value.clamp(0.0, 1.0);
+  }
 
   /// Whether two pages are being blended right now.
   bool get isBlending => _driver != null;
@@ -277,6 +292,7 @@ class ToolbarBlend extends ChangeNotifier {
     _stopBlend();
     _swap.dispose();
     _cover.dispose();
+    _sheetCover.dispose();
     super.dispose();
   }
 }
