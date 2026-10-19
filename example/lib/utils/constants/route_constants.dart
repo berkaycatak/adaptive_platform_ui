@@ -26,6 +26,7 @@ class RouteConstants {
   String snackbar = 'snackbar';
   String datePicker = 'date-picker';
   String timePicker = 'time-picker';
+  String bottomSheet = 'bottom-sheet';
   String listTile = 'list-tile';
   String textField = 'text-field';
   String tabView = 'tab-view';

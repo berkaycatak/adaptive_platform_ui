@@ -11,6 +11,7 @@ class ToolbarChromeScope extends InheritedWidget {
     super.key,
     required this.hostsToolbar,
     required this.hostsDuoControls,
+    this.onSheetCover,
     required super.child,
   });
 
@@ -23,6 +24,14 @@ class ToolbarChromeScope extends InheritedWidget {
   /// the fixed vertical bar of iPhone Duo, on whichever edge the pose puts it
   /// (see `DuoPose`). Pages then keep only their title at the top.
   final bool hostsDuoControls;
+
+  /// Called with how far a bottom sheet covers the hosted toolbar, from 0
+  /// to 1. The toolbar is drawn above every route, so it fades out instead.
+  final ValueSetter<double>? onSheetCover;
+
+  /// The nearest scope's [onSheetCover], without depending on the scope.
+  static ValueSetter<double>? sheetCoverReporterOf(BuildContext context) =>
+      context.getInheritedWidgetOfExactType<ToolbarChromeScope>()?.onSheetCover;
 
   /// The nearest scope, or null when no host is installed and the page must
   /// draw its whole toolbar itself.

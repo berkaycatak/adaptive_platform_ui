@@ -55,6 +55,8 @@ export 'src/widgets/adaptive_tooltip.dart';
 export 'src/widgets/adaptive_slider.dart';
 export 'src/widgets/adaptive_segmented_control.dart';
 export 'src/widgets/adaptive_alert_dialog.dart';
+export 'src/widgets/adaptive_bottom_sheet.dart';
+export 'src/widgets/ios_bottom_sheet_route.dart';
 export 'src/widgets/adaptive_popup_menu_button.dart';
 export 'src/widgets/adaptive_context_menu.dart';
 export 'src/widgets/adaptive_scaffold.dart';

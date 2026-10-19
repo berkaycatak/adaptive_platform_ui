@@ -6,8 +6,16 @@ import 'package:flutter/foundation.dart';
 /// This class helps determine the current platform and iOS version
 /// to enable adaptive widget rendering based on platform capabilities.
 class PlatformInfo {
+  /// Forces [isIOS] in tests; null uses the real platform
+  @visibleForTesting
+  static bool? debugIsIOSOverride;
+
+  /// Forces the major [iOSVersion] in tests; null parses the real version
+  @visibleForTesting
+  static int? debugIOSVersionOverride;
+
   /// Returns true if the current platform is iOS
-  static bool get isIOS => !kIsWeb && Platform.isIOS;
+  static bool get isIOS => debugIsIOSOverride ?? (!kIsWeb && Platform.isIOS);
 
   /// Returns true if the current platform is Android
   static bool get isAndroid => !kIsWeb && Platform.isAndroid;
@@ -33,6 +41,8 @@ class PlatformInfo {
   /// Example: For iOS 26.1.2, returns 26
   static int get iOSVersion {
     if (!isIOS) return 0;
+    final override = debugIOSVersionOverride;
+    if (override != null) return override;
 
     try {
       final version = Platform.operatingSystemVersion;

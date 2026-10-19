@@ -27,7 +27,8 @@ class ToolbarBlend extends ChangeNotifier {
       _cover = AnimationController(
         vsync: vsync,
         duration: kToolbarItemSwapDuration,
-      ) {
+      ),
+      _sheetCover = AnimationController(vsync: vsync) {
     registry.addListener(_onRegistryChanged);
     // A dialog pushed on an outer navigator covers a page inside a tab
     // without that page, or the registry, hearing of it. Every route owns a
@@ -44,6 +45,9 @@ class ToolbarBlend extends ChangeNotifier {
 
   /// 0 while the owner is in front, 1 while a dialog or sheet covers it.
   final AnimationController _cover;
+
+  /// 0 with no sheet, 1 while a bottom sheet covers the toolbar.
+  final AnimationController _sheetCover;
 
   Object? _ownerId;
   Animation<double>? _driver;
@@ -68,10 +72,19 @@ class ToolbarBlend extends ChangeNotifier {
   /// must not react.
   bool get ownerIsCovered => owner?.isCovered ?? false;
 
-  /// Opacity of the whole chrome: full in front, dimmed while covered.
-  late final Animation<double> chromeOpacity = _cover.drive(
-    Tween<double>(begin: 1, end: kToolbarCoveredOpacity),
+  /// Opacity of the whole chrome: full in front, dimmed while covered,
+  /// hidden under a bottom sheet.
+  late final Animation<double> chromeOpacity = AnimationMin<double>(
+    _cover.drive(Tween<double>(begin: 1, end: kToolbarCoveredOpacity)),
+    _sheetCover.drive(Tween<double>(begin: 1, end: 0)),
   );
+
+  /// Fades the chrome out as a bottom sheet covers it, from 0 (no sheet) to
+  /// 1 (hidden). Sheets report this through `ToolbarChromeScope.onSheetCover`.
+  void setSheetCover(double value) {
+    if (_disposed) return;
+    _sheetCover.value = value.clamp(0.0, 1.0);
+  }
 
   /// Whether two pages are being blended right now.
   bool get isBlending => _driver != null;
@@ -277,6 +290,7 @@ class ToolbarBlend extends ChangeNotifier {
     _stopBlend();
     _swap.dispose();
     _cover.dispose();
+    _sheetCover.dispose();
     super.dispose();
   }
 }

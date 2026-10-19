@@ -22,6 +22,7 @@ import 'package:adaptive_platform_ui_example/pages/demos/switch_demo_page.dart';
 import 'package:adaptive_platform_ui_example/pages/demos/tooltip_demo_page.dart';
 import 'package:adaptive_platform_ui_example/pages/demos/date_picker_demo_page.dart';
 import 'package:adaptive_platform_ui_example/pages/demos/time_picker_demo_page.dart';
+import 'package:adaptive_platform_ui_example/pages/demos/bottom_sheet_demo_page.dart';
 import 'package:adaptive_platform_ui_example/pages/demos/list_tile_demo_page.dart';
 import 'package:adaptive_platform_ui_example/pages/demos/text_field_demo_page.dart';
 import 'package:adaptive_platform_ui_example/pages/demos/tab_view_demo_page.dart';
@@ -211,6 +212,11 @@ class RouterService {
                     name: routes.timePicker,
                     path: routes.timePicker,
                     builder: (context, state) => const TimePickerDemoPage(),
+                  ),
+                  GoRoute(
+                    name: routes.bottomSheet,
+                    path: routes.bottomSheet,
+                    builder: (context, state) => const BottomSheetDemoPage(),
                   ),
                   GoRoute(
                     name: routes.listTile,

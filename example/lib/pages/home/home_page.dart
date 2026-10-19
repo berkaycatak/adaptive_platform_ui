@@ -259,6 +259,15 @@ class _HomePageState extends State<HomePage> {
               ),
               _DemoItem(
                 icon: PlatformInfo.isIOS
+                    ? CupertinoIcons.rectangle_dock
+                    : Icons.vertical_align_bottom,
+                title: 'Bottom Sheet',
+                description:
+                    'Modal sheets with detents, Liquid Glass on iOS 26',
+                routeName: RouterService.routes.bottomSheet,
+              ),
+              _DemoItem(
+                icon: PlatformInfo.isIOS
                     ? CupertinoIcons.list_bullet
                     : Icons.list,
                 title: 'List Tile',

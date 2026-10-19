@@ -380,6 +380,57 @@ if (result != null) {
 }
 ```
 
+### AdaptiveBottomSheet
+
+<p align="center">
+  <img src="img/bottom-sheet-ios26.jpg" alt="iOS 26 Liquid Glass bottom sheet at medium height" width="250"/>
+  <img src="img/bottom-sheet-ios26-large.jpg" alt="iOS 26 Liquid Glass bottom sheet at full height" width="250"/>
+  <img src="img/bottom-sheet-ios18.jpg" alt="iOS 18 opaque bottom sheet at medium height" width="250"/>
+</p>
+
+```dart
+// A sheet that opens at half height and can be dragged to full height
+final choice = await AdaptiveBottomSheet.show<String>(
+  context: context,
+  detents: const [AdaptiveSheetDetent.medium, AdaptiveSheetDetent.large],
+  builder: (context) => ListView(
+    children: [
+      AdaptiveListTile(
+        title: const Text('Share'),
+        onTap: () => Navigator.of(context).pop('share'),
+      ),
+    ],
+  ),
+);
+
+// A fixed-height sheet that only closes from a button inside it
+await AdaptiveBottomSheet.show<void>(
+  context: context,
+  detents: const [AdaptiveSheetDetent.fraction(0.35)],
+  isDismissible: false,
+  builder: (context) => const MyCheckoutSummary(),
+);
+```
+
+The contents are your own widgets, so they share the app's theme, providers and navigator. The sheet rests at its `detents`, snaps between them, and dismisses when dragged down past the smallest one (unless `isDismissible` is `false`).
+
+**iOS, full height only** (`detents: [AdaptiveSheetDetent.large]`): the system page sheet, `showCupertinoSheet`; the page behind it recedes.
+**iOS 26+, other detents**: A floating Liquid Glass sheet on a native `UIVisualEffectView` background; it meets the screen edges at full height.
+**iOS <26, other detents**: the opaque edge-to-edge iOS sheet.
+**Android**: Material 3 `showModalBottomSheet` with a drag handle.
+
+Dragging the handle or any non-scrolling part of the contents moves the sheet; a scroll view inside the contents scrolls on its own. For a long document, pass `scrollableBuilder` instead of `builder`: it hands your scroll view a controller the sheet creates and disposes.
+
+```dart
+await AdaptiveBottomSheet.show<void>(
+  context: context,
+  scrollableBuilder: (context, controller) => ListView(
+    controller: controller,
+    children: const [Text('Terms of Service')],
+  ),
+);
+```
+
 ### AdaptiveContextMenu
 
 <p align="center">
@@ -1451,6 +1502,7 @@ Currently available adaptive widgets:
 - ✅ **AdaptiveTooltip** - Platform-specific tooltips
 - ✅ **AdaptiveSnackBar** - Platform-specific notification snackbars
 - ✅ **AdaptiveAlertDialog** - Native alert dialogs with text input support
+- ✅ **AdaptiveBottomSheet** - Modal bottom sheets with detents, Liquid Glass on iOS 26+
 - ✅ **AdaptiveContextMenu** - Long-press context menus, Liquid Glass `UIMenu` on iOS 26+
 - ✅ **AdaptivePopupMenuButton** - Native popup menus
 - ✅ **AdaptiveDatePicker** - Platform-specific date selection dialogs
