@@ -58,6 +58,38 @@ class AdaptiveAlertDialog {
     Color? iconColor,
     String? oneTimeCode,
   }) {
+    return AdaptiveAlertDialog.showWithResult(
+      context: context,
+      title: title,
+      message: message,
+      actionsBuilder: (_) => actions,
+      icon: icon,
+      iconSize: iconSize,
+      iconColor: iconColor,
+      oneTimeCode: oneTimeCode,
+    );
+  }
+
+  /// Shows a standard adaptive alert dialog
+  ///
+  /// The [icon] parameter accepts:
+  /// - iOS 26+: String (SF Symbol name, e.g., "checkmark.circle.fill")
+  /// - iOS <26: IconData (e.g., CupertinoIcons.checkmark_alt_circle_fill)
+  /// - Android: IconData (e.g., Icons.check_circle)
+  ///
+  /// Returns a `Future<T?>` that resolves to the value passed to
+  /// `Navigator.pop(context, value)` when the dialog is dismissed, or
+  /// `null` if dismissed without a value.
+  static Future<T?> showWithResult<T>({
+    required BuildContext context,
+    required String title,
+    String? message,
+    required List<AlertAction> Function(BuildContext) actionsBuilder,
+    dynamic icon,
+    double? iconSize,
+    Color? iconColor,
+    String? oneTimeCode,
+  }) {
     // iOS 26+ - Use native iOS 26 alert dialog
     if (PlatformInfo.isIOS26OrHigher()) {
       // Convert icon to String if needed for iOS 26 (expects SF Symbol)
@@ -69,13 +101,13 @@ class AdaptiveAlertDialog {
         // If IconData is provided on iOS 26+, ignore it (iOS 26 uses SF Symbols)
       }
 
-      return showCupertinoDialog<void>(
+      return showCupertinoDialog<T>(
         context: context,
         barrierColor: CupertinoColors.transparent,
         builder: (context) => IOS26AlertDialog(
           title: title,
           message: message,
-          actions: actions,
+          actions: actionsBuilder(context),
           icon: iconString,
           iconSize: iconSize,
           iconColor: iconColor,
@@ -87,7 +119,7 @@ class AdaptiveAlertDialog {
 
     // iOS 18 and below - Use CupertinoAlertDialog
     if (PlatformInfo.isIOS) {
-      return showCupertinoDialog<void>(
+      return showCupertinoDialog<T>(
         context: context,
         builder: (context) {
           Widget? contentWidget;
@@ -154,6 +186,7 @@ class AdaptiveAlertDialog {
             );
           }
 
+          final dialogRoute = ModalRoute.of(context);
           return CupertinoAlertDialog(
             title: Text(title),
             content: contentWidget != null
@@ -162,11 +195,13 @@ class AdaptiveAlertDialog {
                     child: contentWidget,
                   )
                 : null,
-            actions: actions.map((action) {
+            actions: actionsBuilder(context).map((action) {
               return CupertinoDialogAction(
                 onPressed: () {
-                  Navigator.of(context).pop();
                   action.onPressed();
+                  if (dialogRoute?.isCurrent ?? true) {
+                    Navigator.of(context).pop();
+                  }
                 },
                 isDefaultAction: action.style == AlertActionStyle.primary,
                 isDestructiveAction:
@@ -180,11 +215,11 @@ class AdaptiveAlertDialog {
     }
 
     // Android - Use Material Design AlertDialog
-    return _showMaterialDialog(
+    return _showMaterialDialog<T>(
       context: context,
       title: title,
       message: message,
-      actions: actions,
+      actionsBuilder: actionsBuilder,
       icon: icon,
       iconSize: iconSize,
       iconColor: iconColor,
@@ -279,6 +314,7 @@ class AdaptiveAlertDialog {
             ),
           );
 
+          final dialogRoute = ModalRoute.of(context);
           return CupertinoAlertDialog(
             title: Text(title),
             content: Padding(
@@ -288,17 +324,19 @@ class AdaptiveAlertDialog {
             actions: actions.map((action) {
               return CupertinoDialogAction(
                 onPressed: () {
-                  if (action.style == AlertActionStyle.cancel) {
-                    // Cancel button returns null
-                    Navigator.of(context).pop<String?>(null);
-                  } else {
-                    // Other buttons return the entered text
-                    final text = textController.text.trim();
-                    Navigator.of(
-                      context,
-                    ).pop<String?>(text.isNotEmpty ? text : null);
-                  }
                   action.onPressed();
+                  if (dialogRoute?.isCurrent ?? true) {
+                    if (action.style == AlertActionStyle.cancel) {
+                      // Cancel button returns null
+                      Navigator.of(context).pop<String?>(null);
+                    } else {
+                      // Other buttons return the entered text
+                      final text = textController.text.trim();
+                      Navigator.of(
+                        context,
+                      ).pop<String?>(text.isNotEmpty ? text : null);
+                    }
+                  }
                 },
                 isDefaultAction: action.style == AlertActionStyle.primary,
                 isDestructiveAction:
@@ -316,7 +354,7 @@ class AdaptiveAlertDialog {
       context: context,
       title: title,
       message: message,
-      actions: actions,
+      actionsBuilder: (_) => actions,
       icon: icon,
       iconSize: iconSize,
       iconColor: iconColor,
@@ -330,7 +368,7 @@ class AdaptiveAlertDialog {
     required BuildContext context,
     required String title,
     String? message,
-    required List<AlertAction> actions,
+    required List<AlertAction> Function(BuildContext) actionsBuilder,
     dynamic icon,
     double? iconSize,
     Color? iconColor,
@@ -404,6 +442,7 @@ class AdaptiveAlertDialog {
         }
 
         // Separate actions by type
+        final actions = actionsBuilder(context);
         final normalActions = actions
             .where((a) => a.style != AlertActionStyle.cancel)
             .toList();
@@ -416,6 +455,7 @@ class AdaptiveAlertDialog {
           ),
         );
 
+        final dialogRoute = ModalRoute.of(context);
         return AlertDialog(
           title: Text(title),
           content: contentWidget,
@@ -425,13 +465,15 @@ class AdaptiveAlertDialog {
             if (actions.any((a) => a.style == AlertActionStyle.cancel))
               TextButton(
                 onPressed: () {
-                  // Cancel button always returns null for input dialogs
-                  if (input != null) {
-                    Navigator.of(context).pop<String?>(null);
-                  } else {
-                    Navigator.of(context).pop();
-                  }
                   cancelAction.onPressed();
+                  if (dialogRoute?.isCurrent ?? true) {
+                    // Cancel button always returns null for input dialogs
+                    if (input != null) {
+                      Navigator.of(context).pop<String?>(null);
+                    } else {
+                      Navigator.of(context).pop();
+                    }
+                  }
                 },
                 child: Text(cancelAction.title),
               ),
@@ -460,17 +502,19 @@ class AdaptiveAlertDialog {
               return TextButton(
                 onPressed: action.enabled
                     ? () {
-                        if (input != null) {
-                          // Input dialog - return the text
-                          final text = textController.text.trim();
-                          Navigator.of(
-                            context,
-                          ).pop<String?>(text.isNotEmpty ? text : null);
-                        } else {
-                          // Normal dialog - just close
-                          Navigator.of(context).pop();
-                        }
                         action.onPressed();
+                        if (dialogRoute?.isCurrent ?? true) {
+                          if (input != null) {
+                            // Input dialog - return the text
+                            final text = textController.text.trim();
+                            Navigator.of(
+                              context,
+                            ).pop<String?>(text.isNotEmpty ? text : null);
+                          } else {
+                            // Normal dialog - just close
+                            Navigator.of(context).pop();
+                          }
+                        }
                       }
                     : null,
                 style: buttonColor != null

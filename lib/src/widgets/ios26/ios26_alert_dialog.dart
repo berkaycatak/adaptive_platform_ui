@@ -189,14 +189,17 @@ class _IOS26AlertDialogState extends State<IOS26AlertDialog> {
     }
 
     // Fallback to CupertinoAlertDialog
+    final dialogRoute = ModalRoute.of(context);
     return CupertinoAlertDialog(
       title: Text(widget.title),
       content: widget.message != null ? Text(widget.message!) : null,
       actions: widget.actions.map((action) {
         return CupertinoDialogAction(
           onPressed: () {
-            Navigator.of(context).pop();
             action.onPressed();
+            if (dialogRoute?.isCurrent ?? true) {
+              Navigator.of(context).pop();
+            }
           },
           isDefaultAction: action.style == AlertActionStyle.defaultAction,
           isDestructiveAction: action.style == AlertActionStyle.destructive,
@@ -223,8 +226,20 @@ class _IOS26AlertDialogState extends State<IOS26AlertDialog> {
       if (idx != null && idx >= 0 && idx < widget.actions.length) {
         final action = widget.actions[idx];
 
-        // Dismiss the dialog with appropriate value
-        if (mounted) {
+        // Capture the route *before* running the callback: if the caller
+        // pops from inside `onPressed`, this route is removed from the
+        // navigator history and `isCurrent` flips to false immediately,
+        // letting us tell "caller already dismissed" apart from
+        // "caller wants the framework to dismiss".
+        final route = ModalRoute.of(context);
+
+        // 1. Let the caller pop a value (or perform side effects) first.
+        action.onPressed();
+
+        // 2. Fall back to framework dismissal only if the caller did not
+        //    already close the dialog. Guarded by `mounted` because the
+        //    caller may have already torn down this State.
+        if (mounted && (route?.isCurrent ?? true)) {
           if (widget.input != null) {
             // Input dialog
             if (action.style == AlertActionStyle.cancel) {
@@ -239,9 +254,6 @@ class _IOS26AlertDialogState extends State<IOS26AlertDialog> {
             Navigator.of(context).pop();
           }
         }
-
-        // Then call the action
-        action.onPressed();
       }
     }
     return null;
