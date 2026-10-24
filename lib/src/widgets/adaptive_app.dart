@@ -278,39 +278,13 @@ class AdaptiveApp extends StatelessWidget {
 
     // CupertinoApp doesn't have themeMode like MaterialApp
     // We need to wrap the app content in a builder to detect brightness and apply the theme
-    Widget wrapWithThemeMode(BuildContext context, Widget? child) {
-      // Determine if we should use dark mode
-      Brightness effectiveBrightness;
-
-      if (themeMode == ThemeMode.dark) {
-        effectiveBrightness = Brightness.dark;
-      } else if (themeMode == ThemeMode.light) {
-        effectiveBrightness = Brightness.light;
-      } else {
-        // ThemeMode.system - get from platform
-        effectiveBrightness = MediaQuery.platformBrightnessOf(context);
-      }
-
-      final isDark = effectiveBrightness == Brightness.dark;
-
-      // Apply the appropriate theme and ensure MediaQuery has correct brightness
-      final theme = isDark ? effectiveDarkTheme : effectiveLightTheme;
-
-      return MediaQuery(
-        data: MediaQuery.of(
-          context,
-        ).copyWith(platformBrightness: effectiveBrightness),
-        // Keep the status bar legible: light icons on dark backgrounds and
-        // vice versa. Without this, forcing a ThemeMode that differs from the
-        // system brightness leaves the status bar in the wrong style.
-        child: AnnotatedRegion<SystemUiOverlayStyle>(
-          value: isDark
-              ? SystemUiOverlayStyle.light
-              : SystemUiOverlayStyle.dark,
-          child: CupertinoTheme(data: theme, child: child!),
-        ),
-      );
-    }
+    Widget wrapWithThemeMode(BuildContext context, Widget? child) =>
+        CupertinoThemeModeScope(
+          themeMode: themeMode,
+          lightTheme: effectiveLightTheme,
+          darkTheme: effectiveDarkTheme,
+          child: child!,
+        );
 
     // Install the fixed toolbar chrome above the navigator but inside our
     // theme wrapper (so the chrome picks up the Cupertino theme), then apply
@@ -494,5 +468,57 @@ class AdaptiveApp extends StatelessWidget {
       return PlatformTarget.desktop;
     }
     return PlatformTarget.other;
+  }
+}
+
+/// Applies [themeMode] below a [CupertinoApp], which has no theme mode of its
+/// own: the matching theme, the brightness in [MediaQuery], the status bar
+/// style and the default text style.
+@visibleForTesting
+class CupertinoThemeModeScope extends StatelessWidget {
+  const CupertinoThemeModeScope({
+    super.key,
+    required this.themeMode,
+    required this.lightTheme,
+    required this.darkTheme,
+    required this.child,
+  });
+
+  final ThemeMode? themeMode;
+  final CupertinoThemeData lightTheme;
+  final CupertinoThemeData darkTheme;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final effectiveBrightness = switch (themeMode) {
+      ThemeMode.dark => Brightness.dark,
+      ThemeMode.light => Brightness.light,
+      _ => MediaQuery.platformBrightnessOf(context),
+    };
+    final isDark = effectiveBrightness == Brightness.dark;
+
+    return MediaQuery(
+      data: MediaQuery.of(
+        context,
+      ).copyWith(platformBrightness: effectiveBrightness),
+      // Keep the status bar legible: light icons on dark backgrounds and
+      // vice versa. Without this, forcing a ThemeMode that differs from the
+      // system brightness leaves the status bar in the wrong style.
+      child: AnnotatedRegion<SystemUiOverlayStyle>(
+        value: isDark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
+        child: CupertinoTheme(
+          data: isDark ? darkTheme : lightTheme,
+          // CupertinoApp derives the default text style from `theme:`, which
+          // is always the light one, so plain text would stay black in dark.
+          child: Builder(
+            builder: (context) => DefaultTextStyle(
+              style: CupertinoTheme.of(context).textTheme.textStyle,
+              child: child,
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
