@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 
 /// Native iOS 26 switch implementation using platform views
@@ -144,22 +143,36 @@ class _IOS26SwitchState extends State<IOS26Switch> {
   Widget build(BuildContext context) {
     // Only use native implementation on iOS
     if (!kIsWeb && Platform.isIOS) {
-      final platformView = UiKitView(
-        viewType: 'adaptive_platform_ui/ios26_switch',
-        creationParams: _buildCreationParams(),
-        creationParamsCodec: const StandardMessageCodec(),
-        gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
-          Factory<HorizontalDragGestureRecognizer>(
-            () => HorizontalDragGestureRecognizer(),
-          ),
-          Factory<TapGestureRecognizer>(() => TapGestureRecognizer()),
-        },
+      // The native view only draws: Flutter's tap recognizer wins the arena
+      // against it, so UIKit never saw the tap. Flutter decides, the native
+      // side follows through `setValue`.
+      final platformView = IgnorePointer(
+        child: UiKitView(
+          viewType: 'adaptive_platform_ui/ios26_switch',
+          creationParams: _buildCreationParams(),
+          creationParamsCodec: const StandardMessageCodec(),
+        ),
       );
 
-      return SizedBox(
-        width: 63, // Standard iOS switch width
-        height: 29, // Standard iOS switch height
-        child: platformView,
+      void set(bool value) {
+        final onChanged = widget.onChanged;
+        if (onChanged == null || value == widget.value) return;
+        HapticFeedback.lightImpact();
+        onChanged(value);
+      }
+
+      return GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () => set(!widget.value),
+        onHorizontalDragEnd: (details) {
+          final velocity = details.primaryVelocity ?? 0;
+          if (velocity != 0) set(velocity > 0);
+        },
+        child: SizedBox(
+          width: 63, // Standard iOS switch width
+          height: 29, // Standard iOS switch height
+          child: platformView,
+        ),
       );
     }
 
