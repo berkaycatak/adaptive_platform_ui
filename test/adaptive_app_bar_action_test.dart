@@ -339,17 +339,27 @@ void main() {
       expect(bell(3), isNot(equals(bell(null))));
     });
 
-    test('is not sent through toNativeMap', () {
-      // The native toolbar does not draw action badges; only the glass
-      // capsule does, through GlassCapsuleItem.
+    test('is sent through toNativeMap as the item badge', () {
       final map = AdaptiveAppBarAction(
         iosSymbol: 'bell',
         badgeCount: 5,
         onPressed: () {},
       ).toNativeMap();
 
-      expect(map.containsKey('badge'), isFalse);
+      expect(map['badge'], 5);
       expect(map.containsKey('badgeCount'), isFalse);
+    });
+
+    test('sends no badge for null or 0', () {
+      for (final count in [null, 0, -1]) {
+        final map = AdaptiveAppBarAction(
+          iosSymbol: 'bell',
+          badgeCount: count,
+          onPressed: () {},
+        ).toNativeMap();
+
+        expect(map.containsKey('badge'), isFalse, reason: 'count: $count');
+      }
     });
   });
 

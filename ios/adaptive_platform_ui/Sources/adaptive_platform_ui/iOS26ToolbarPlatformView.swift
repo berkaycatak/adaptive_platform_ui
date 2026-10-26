@@ -254,6 +254,17 @@ class iOS26ToolbarPlatformView: NSObject, FlutterPlatformView {
                         btn.accessibilityLabel = label
                     }
 
+                    // Badge (iOS 26+): UIKit draws the count.
+                    // The bar is built from the platform channel, on the main
+                    // thread; the badge API is main-actor isolated.
+                    if let count = action["badge"] as? Int, count > 0 {
+                        if #available(iOS 26.0, *) {
+                            MainActor.assumeIsolated {
+                                btn.badge = .count(count)
+                            }
+                        }
+                    }
+
                     // Apply prominent style (iOS 26+)
                     if action["prominent"] as? Bool == true {
                         if #available(iOS 26.0, *) {

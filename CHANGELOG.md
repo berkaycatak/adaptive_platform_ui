@@ -1,8 +1,9 @@
 # Changelog
 
 ## [Unreleased]
+* **NEW**: The horizontal iOS 26 toolbar now draws `AdaptiveAppBarAction.badgeCount` as the item's own `UIBarButtonItem.badge` (new in iOS 26); it used to ignore it, on the assumption that `UIBarButtonItem` has no badge
 * **FIX**: iPhone Duo: a detail pane built inside the tab scaffold (a two-pane layout, nothing pushed) kept the tab bar hidden once it became the chrome owner, because the owner lookup only recognised shell routes around a nested navigator. A pane on the tab scaffold's own route now keeps the tab bar; pages pushed above the tabs still hide it (reported and diagnosed by @monster-echo, #173)
-* **NEW**: `AdaptiveAppBarAction.badgeCount` puts a count badge on a toolbar action: the native glass capsule draws it in the iPhone Duo bar ("99+" above 99), and iOS 18 and Android draw an `AdaptiveBadge` on the icon. The horizontal iOS 26 toolbar ignores it, as `UIBarButtonItem` has no badge. Null or 0 shows nothing (@keithcheehui, #174)
+* **NEW**: `AdaptiveAppBarAction.badgeCount` puts a count badge on a toolbar action: the native glass capsule draws it in the iPhone Duo bar ("99+" above 99), and iOS 18 and Android draw an `AdaptiveBadge` on the icon. Null or 0 shows nothing (@keithcheehui, #174)
 
 ## [1.0.2]
 * **FIX**: iOS 26: the fixed toolbar's automatic back button is now a 44-point circle like the native one, instead of a 38-point rounded square, and sits level with the title. The page-owned toolbar's back button is circular too (@Anderzzon, #171)

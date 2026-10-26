@@ -158,8 +158,8 @@ class AdaptiveAppBarAction {
   /// - **iOS 26+ (iPhone Duo vertical bar)**: Drawn by the native glass
   ///   capsule, the same badge the tabs use. Counts above 99 show as "99+".
   /// - **iOS <26, Android**: An [AdaptiveBadge] drawn on the icon.
-  /// - **iOS 26+ horizontal toolbar**: Ignored; `UIBarButtonItem` has no
-  ///   badge.
+  /// - **iOS 26+ horizontal toolbar**: The item's own `UIBarButtonItem.badge`
+  ///   (new in iOS 26), drawn by UIKit.
   ///
   /// Null or 0 shows no badge.
   ///
@@ -231,6 +231,7 @@ class AdaptiveAppBarAction {
   Map<String, dynamic> toNativeMap() {
     return {
       if (iosSymbol != null) 'icon': iosSymbol!,
+      if (badgeCount != null && badgeCount! > 0) 'badge': badgeCount!,
       if (title != null) 'title': title!,
       if (effectiveLabel != null) 'label': effectiveLabel!,
       'spacerAfter': spacerAfter.index, // 0=none, 1=fixed, 2=flexible
