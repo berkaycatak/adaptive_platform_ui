@@ -253,9 +253,10 @@ AdaptiveAppBarAction(
 ```
 
   Unlike `title`, a `label` never replaces the icon with text.
-- **Badges.** A toolbar item in the strip can carry a count, drawn in the
-  same red badge as the tabs ("99+" above 99). iOS 18 and Android draw it on
-  the icon; the horizontal iOS 26 toolbar ignores it:
+- **Badges.** A toolbar item can carry a count. The iPhone Duo strip draws it
+  in the same red badge as the tabs ("99+" above 99), the horizontal iOS 26
+  toolbar sets the item's own `UIBarButtonItem.badge` (new in iOS 26), and
+  iOS 18 and Android draw it on the icon:
 
 ```dart
 AdaptiveAppBarAction(
@@ -263,6 +264,22 @@ AdaptiveAppBarAction(
   label: 'Notifications',
   badgeCount: unreadCount, // null or 0: no badge
   onPressed: openNotifications,
+)
+```
+
+- **Pictures.** `iconImage` (PNG or JPEG bytes) shows a picture, such as a
+  profile photo, in place of the symbol: round and as it is (not tinted) on the
+  iOS 26 toolbar, a round `Image.memory` elsewhere. The native item decodes it
+  at the size it draws, and falls back to `iosSymbol` if the bytes do not
+  decode. Keep the bytes small: they cross the platform channel on every
+  change. Give the action a `label`, which is what VoiceOver reads:
+
+```dart
+AdaptiveAppBarAction(
+  iosSymbol: 'person.crop.circle', // until the photo is ready
+  iconImage: photoBytes,
+  label: 'My profile',
+  onPressed: openProfile,
 )
 ```
 

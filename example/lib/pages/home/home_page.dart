@@ -226,6 +226,15 @@ class _HomePageState extends State<HomePage> {
               ),
               _DemoItem(
                 icon: PlatformInfo.isIOS
+                    ? CupertinoIcons.person_crop_circle
+                    : Icons.account_circle_outlined,
+                title: 'Toolbar Picture',
+                description: 'A picture and a count on toolbar actions',
+                routeName: RouterService.routes.toolbarPicture,
+                isNew: true,
+              ),
+              _DemoItem(
+                icon: PlatformInfo.isIOS
                     ? CupertinoIcons.info_circle
                     : Icons.info_outline,
                 title: 'Tooltip',

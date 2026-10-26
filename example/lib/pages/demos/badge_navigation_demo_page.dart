@@ -24,8 +24,9 @@ class _BadgeNavigationDemoPageState extends State<BadgeNavigationDemoPage> {
         leading: PlatformInfo.isIOS26OrHigher() ? popButton(context) : null,
         title: 'Badge Navigation Demo',
         actions: [
-          // On iPhone Duo the action joins the tabs in the vertical bar and
-          // shows its count there.
+          // The count is the item's own badge on the iOS 26 toolbar. On iPhone
+          // Duo the action joins the tabs in the vertical bar and shows its
+          // count there.
           AdaptiveAppBarAction(
             iosSymbol: 'bell',
             icon: Icons.notifications_outlined,

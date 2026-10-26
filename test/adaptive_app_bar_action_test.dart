@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
@@ -339,17 +342,77 @@ void main() {
       expect(bell(3), isNot(equals(bell(null))));
     });
 
-    test('is not sent through toNativeMap', () {
-      // The native toolbar does not draw action badges; only the glass
-      // capsule does, through GlassCapsuleItem.
+    test('is sent through toNativeMap as the item badge', () {
       final map = AdaptiveAppBarAction(
         iosSymbol: 'bell',
         badgeCount: 5,
         onPressed: () {},
       ).toNativeMap();
 
-      expect(map.containsKey('badge'), isFalse);
+      expect(map['badge'], 5);
       expect(map.containsKey('badgeCount'), isFalse);
+    });
+
+    test('sends no badge for null or 0', () {
+      for (final count in [null, 0, -1]) {
+        final map = AdaptiveAppBarAction(
+          iosSymbol: 'bell',
+          badgeCount: count,
+          onPressed: () {},
+        ).toNativeMap();
+
+        expect(map.containsKey('badge'), isFalse, reason: 'count: $count');
+      }
+    });
+  });
+
+  group('AdaptiveAppBarAction.iconImage', () {
+    final picture = Uint8List.fromList([1, 2, 3, 4]);
+
+    test('is enough on its own to make an action', () {
+      final action = AdaptiveAppBarAction(
+        iconImage: picture,
+        label: 'Mi perfil',
+        onPressed: () {},
+      );
+
+      expect(action.iconImage, picture);
+      expect(action.iosSymbol, isNull);
+    });
+
+    test('is sent through toNativeMap as image bytes', () {
+      final map = AdaptiveAppBarAction(
+        iosSymbol: 'person.crop.circle',
+        iconImage: picture,
+        onPressed: () {},
+      ).toNativeMap();
+
+      expect(map['image'], picture);
+      // The symbol goes along as what the item shows if the bytes do not
+      // decode.
+      expect(map['icon'], 'person.crop.circle');
+    });
+
+    test('is left out of toNativeMap when there is none', () {
+      final map = AdaptiveAppBarAction(
+        iosSymbol: 'bell',
+        onPressed: () {},
+      ).toNativeMap();
+
+      expect(map.containsKey('image'), isFalse);
+    });
+
+    test('is part of equality and hashCode by content', () {
+      AdaptiveAppBarAction avatar(List<int>? bytes) => AdaptiveAppBarAction(
+        iosSymbol: 'person.crop.circle',
+        iconImage: bytes == null ? null : Uint8List.fromList(bytes),
+        onPressed: () {},
+      );
+
+      expect(avatar([1, 2]), equals(avatar([1, 2])));
+      expect(avatar([1, 2]).hashCode, equals(avatar([1, 2]).hashCode));
+      expect(avatar([1, 2]), isNot(equals(avatar([1, 3]))));
+      expect(avatar([1, 2]), isNot(equals(avatar(null))));
     });
   });
 
@@ -405,6 +468,48 @@ void main() {
       );
       expect(find.byType(AdaptiveBadge), findsOneWidget);
       expect(find.text('7'), findsOneWidget);
+    });
+  });
+
+  group('AdaptiveAppBarAction.imageWidget', () {
+    // A 1x1 PNG.
+    final png = base64Decode(
+      'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGP4z8DwHwAFAA'
+      'H/q842iQAAAABJRU5ErkJggg==',
+    );
+
+    test('is null without an iconImage', () {
+      expect(
+        AdaptiveAppBarAction(iosSymbol: 'bell', onPressed: () {}).imageWidget,
+        isNull,
+      );
+    });
+
+    testWidgets('is a round picture on the Flutter toolbars', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: AdaptiveScaffold(
+            appBar: AdaptiveAppBar(
+              title: 'Inicio',
+              actions: [
+                AdaptiveAppBarAction(
+                  iosSymbol: 'person.crop.circle',
+                  icon: Icons.person,
+                  iconImage: png,
+                  label: 'Mi perfil',
+                  onPressed: () {},
+                ),
+              ],
+            ),
+            body: const SizedBox.shrink(),
+          ),
+        ),
+      );
+
+      expect(find.byType(ClipOval), findsOneWidget);
+      expect(find.byType(Image), findsOneWidget);
+      // The picture takes the place of the icon.
+      expect(find.byIcon(Icons.person), findsNothing);
     });
   });
 }

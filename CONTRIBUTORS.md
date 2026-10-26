@@ -11,6 +11,8 @@ the release is cut.
 | --- | --- | --- |
 | @monster-echo | Found that a two-pane detail pane inside the tab scaffold lost the tab bar, and pinpointed the owner lookup to fix | #173 |
 | @keithcheehui | `badgeCount` on toolbar actions, drawn by the Duo capsule, and on iOS 18 and Android | #174 |
+| @furbina-saludai | `badgeCount` on the horizontal iOS 26 toolbar, as the item's own `UIBarButtonItem.badge` | #183 |
+| @furbina-saludai | `iconImage` on toolbar actions: a round picture, such as a profile photo, in place of the symbol | #184 |
 
 ## 1.0.2
 

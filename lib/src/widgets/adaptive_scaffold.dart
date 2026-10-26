@@ -542,6 +542,8 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
                         actionChild = Text(action.title!);
                       } else if (action.iconWidget != null) {
                         actionChild = action.iconWidget!;
+                      } else if (action.imageWidget != null) {
+                        actionChild = action.imageWidget!;
                       } else if (action.icon != null) {
                         actionChild = Icon(action.icon!);
                       } else {
@@ -743,6 +745,8 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
                       actionChild = Text(action.title!);
                     } else if (action.iconWidget != null) {
                       actionChild = action.iconWidget!;
+                    } else if (action.imageWidget != null) {
+                      actionChild = action.imageWidget!;
                     } else if (action.icon != null) {
                       actionChild = Icon(action.icon!);
                     } else {
@@ -845,6 +849,7 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
               builder: (context) => IconButton(
                 icon: action.wrapWithBadge(
                   action.iconWidget ??
+                      action.imageWidget ??
                       (action.icon != null
                           ? Icon(action.icon!)
                           : const Icon(Icons.circle)),
@@ -949,6 +954,7 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
             builder: (context) => IconButton(
               icon: action.wrapWithBadge(
                 action.iconWidget ??
+                    action.imageWidget ??
                     (action.icon != null
                         ? Icon(action.icon!)
                         : const Icon(Icons.circle)),
