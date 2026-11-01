@@ -423,4 +423,30 @@ void main() {
       expect(find.byIcon(Icons.more_vert), findsOneWidget);
     });
   });
+
+  test('showSelectedIcon defaults to true and can be turned off', () {
+    void onValueChanged(int _) {}
+    expect(
+      AdaptiveSegmentedControl(
+        labels: const ['A', 'B'],
+        selectedIndex: 0,
+        onValueChanged: onValueChanged,
+      ).showSelectedIcon,
+      isTrue,
+    );
+    expect(
+      AdaptiveSegmentedControl(
+        labels: const ['A', 'B'],
+        selectedIndex: 0,
+        onValueChanged: onValueChanged,
+        showSelectedIcon: false,
+      ).showSelectedIcon,
+      isFalse,
+    );
+  });
+
+  // NOTE: that showSelectedIcon reaches the SegmentedButton is not covered
+  // here. That path is only selected when PlatformInfo.isAndroid, which reads
+  // the real host OS via dart:io (ignores debugDefaultTargetPlatformOverride),
+  // so it's unreachable in a host widget test.
 }

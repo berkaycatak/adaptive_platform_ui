@@ -24,6 +24,7 @@ class AdaptiveSegmentedControl extends StatelessWidget {
     this.iconColor,
     this.textColor,
     this.selectedTextColor,
+    this.showSelectedIcon = true,
   });
 
   /// Segment labels to display, in order
@@ -61,6 +62,13 @@ class AdaptiveSegmentedControl extends StatelessWidget {
 
   /// Optional text color for the selected segment.
   final Color? selectedTextColor;
+
+  /// Whether Android shows a check mark on the selected segment.
+  ///
+  /// Material's `SegmentedButton` marks the selected segment with a check by
+  /// default; set this to false to show the selection by colour alone, as
+  /// iOS does. Ignored on iOS.
+  final bool showSelectedIcon;
 
   @override
   Widget build(BuildContext context) {
@@ -231,6 +239,7 @@ class AdaptiveSegmentedControl extends StatelessWidget {
     Widget control = SegmentedButton<int>(
       segments: segments,
       selected: {selectedIndex},
+      showSelectedIcon: showSelectedIcon,
       onSelectionChanged: enabled
           ? (Set<int> newSelection) {
               if (newSelection.isNotEmpty) {
