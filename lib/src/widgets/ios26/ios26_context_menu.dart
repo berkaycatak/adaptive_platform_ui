@@ -53,8 +53,7 @@ class _IOS26ContextMenuState extends State<IOS26ContextMenu> {
     final labels = widget.actions.map((a) => a.title).toList();
     return Listener(
       onPointerDown: (_) => _sendPreview(),
-      child: Stack(
-        fit: StackFit.passthrough,
+      child: _ChildFirstHitTestStack(
         children: [
           RepaintBoundary(key: _boundaryKey, child: widget.child),
           Positioned.fill(
@@ -128,5 +127,46 @@ class _IOS26ContextMenuState extends State<IOS26ContextMenu> {
     try {
       await channel.invokeMethod('setBrightness', {'isDark': _lastIsDark});
     } catch (_) {}
+  }
+}
+
+/// Paints the platform view on top but hit tests [child] first, so its
+/// recognizers join the arena before the platform view's. A plain tap then goes
+/// to the child, and the native menu still gets the touch once a long press wins.
+class _ChildFirstHitTestStack extends Stack {
+  const _ChildFirstHitTestStack({super.children})
+    : super(fit: StackFit.passthrough);
+
+  @override
+  RenderStack createRenderObject(BuildContext context) =>
+      _RenderChildFirstHitTestStack(
+        fit: fit,
+        textDirection: Directionality.maybeOf(context),
+      );
+}
+
+class _RenderChildFirstHitTestStack extends RenderStack {
+  _RenderChildFirstHitTestStack({super.fit, super.textDirection});
+
+  // Tests every child, even after a hit, so the platform view always gets the
+  // pointer down. Without it the engine drops the touch and long press breaks.
+  @override
+  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
+    var isHit = false;
+    var child = firstChild;
+    while (child != null) {
+      final parentData = child.parentData! as StackParentData;
+      final hitChild = child;
+      isHit =
+          result.addWithPaintOffset(
+            offset: parentData.offset,
+            position: position,
+            hitTest: (result, transformed) =>
+                hitChild.hitTest(result, position: transformed),
+          ) ||
+          isHit;
+      child = parentData.nextSibling;
+    }
+    return isHit;
   }
 }
