@@ -185,6 +185,17 @@ class iOS26ToolbarPlatformView: NSObject, FlutterPlatformView {
         // Leading/Back button
         var leadingItems: [UIBarButtonItem] = []
 
+        // UIKit lays out the title between its bar items. Account for Back,
+        // which Flutter draws above this bar during navigation transitions.
+        if let width = params["backButtonWidth"] as? CGFloat, width > 0 {
+            let space = UIView(frame: CGRect(x: 0, y: 0, width: width, height: 1))
+            space.isUserInteractionEnabled = false
+            let item = UIBarButtonItem(customView: space)
+            item.isAccessibilityElement = false
+            if #available(iOS 26.0, *) { item.hidesSharedBackground = true }
+            leadingItems.append(item)
+        }
+
         if let leading = params["leading"] as? String {
             let leadingButton: UIBarButtonItem
             if leading.isEmpty {

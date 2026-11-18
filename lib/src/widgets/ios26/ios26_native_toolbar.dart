@@ -12,6 +12,7 @@ class IOS26NativeToolbar extends StatefulWidget {
     super.key,
     this.title,
     this.leading,
+    this.backButtonWidth = 0,
     this.leadingText,
     this.actions,
     this.onLeadingTap,
@@ -25,6 +26,10 @@ class IOS26NativeToolbar extends StatefulWidget {
 
   final String? title;
   final Widget? leading;
+
+  /// Width occupied by the overlaid automatic back button and its window offset.
+  final double backButtonWidth;
+  static const double leadingInset = 16;
   final String? leadingText;
   final List<AdaptiveAppBarAction>? actions;
   final VoidCallback? onLeadingTap;
@@ -58,6 +63,7 @@ class _IOS26NativeToolbarState extends State<IOS26NativeToolbar> {
   bool? _lastIsDark;
   int? _lastTint;
   List<AdaptiveAppBarAction>? _lastActions;
+  double? _lastBackButtonWidth;
 
   bool get _isDark =>
       MediaQuery.platformBrightnessOf(context) == Brightness.dark;
@@ -117,14 +123,18 @@ class _IOS26NativeToolbarState extends State<IOS26NativeToolbar> {
     // empty one both mean "no actions", so going from null to a real list
     // (or back) has to reach the native bar too (#84).
     final actions = widget.actions;
-    if (!_actionsEqual(_lastActions, actions)) {
+    final backButtonWidth = widget.backButtonWidth;
+    if (!_actionsEqual(_lastActions, actions) ||
+        _lastBackButtonWidth != backButtonWidth) {
       try {
         final params = <String, dynamic>{
+          'backButtonWidth': backButtonWidth,
           if (actions != null && actions.isNotEmpty)
             'actions': actions.map((a) => a.toNativeMap()).toList(),
         };
         await ch.invokeMethod('updateActions', params);
         _lastActions = actions != null ? List.of(actions) : null;
+        _lastBackButtonWidth = backButtonWidth;
       } catch (e) {
         // Ignore errors if platform view is not yet ready
       }
@@ -165,8 +175,14 @@ class _IOS26NativeToolbarState extends State<IOS26NativeToolbar> {
     }
 
     final safePadding = MediaQuery.of(context).padding.top;
+    final titleInset = widget.backButtonWidth == 0
+        ? 0.0
+        : IOS26NativeToolbar.leadingInset +
+              widget.backButtonWidth +
+              NavigationToolbar.kMiddleSpacing;
 
     final creationParams = <String, dynamic>{
+      if (widget.backButtonWidth > 0) 'backButtonWidth': widget.backButtonWidth,
       // Hide native title when a titleWidget overlay is provided
       if (widget.title != null && widget.titleWidget == null)
         'title': widget.title!,
@@ -195,7 +211,7 @@ class _IOS26NativeToolbarState extends State<IOS26NativeToolbar> {
             ),
           if (widget.leading != null)
             Positioned(
-              left: 16,
+              left: IOS26NativeToolbar.leadingInset,
               bottom: 3,
               child: Align(
                 alignment: Alignment.centerLeft,
@@ -204,8 +220,8 @@ class _IOS26NativeToolbarState extends State<IOS26NativeToolbar> {
             ),
           if (widget.titleWidget != null)
             Positioned(
-              left: 0,
-              right: 0,
+              left: titleInset,
+              right: titleInset,
               top: safePadding,
               bottom: 0,
               child: Center(child: widget.titleWidget!),
@@ -223,6 +239,7 @@ class _IOS26NativeToolbarState extends State<IOS26NativeToolbar> {
         ? _colorToARGB(widget.tintColor!)
         : null;
     _lastActions = widget.actions != null ? List.of(widget.actions!) : null;
+    _lastBackButtonWidth = widget.backButtonWidth;
   }
 
   Future<dynamic> _handleMethodCall(MethodCall call) async {

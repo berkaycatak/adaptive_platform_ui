@@ -105,6 +105,8 @@ class HostedTopToolbar extends StatelessWidget {
 
     final upperBack = upper.impliesBack && upper.customLeading == null;
     final lowerBack = lower.impliesBack && lower.customLeading == null;
+    final windowInset = _isWindowed(context) ? 62.0 : 0.0;
+    final backWidth = windowInset + kHostedToolbarHeight;
     final Animation<double>? backOpacity = switch ((upperBack, lowerBack)) {
       (true, true) => kAlwaysCompleteAnimation,
       (true, false) => upperOpacity,
@@ -154,6 +156,7 @@ class HostedTopToolbar extends StatelessWidget {
                   _layer(
                     key: ValueKey<Object>(lowerEntry.id),
                     content: lower,
+                    backButtonWidth: lowerBack ? backWidth : 0,
                     opacity: lowerOpacity,
                     interactive: !upperOwns,
                   ),
@@ -161,13 +164,14 @@ class HostedTopToolbar extends StatelessWidget {
                   _layer(
                     key: ValueKey<Object>(upperEntry.id),
                     content: upper,
+                    backButtonWidth: upperBack ? backWidth : 0,
                     opacity: upperOpacity,
                     interactive: upperOwns,
                   ),
                 if (backOpacity != null)
                   Positioned(
                     key: const ValueKey<String>('adaptive_toolbar_back'),
-                    left: 16 + (_isWindowed(context) ? 62 : 0),
+                    left: IOS26NativeToolbar.leadingInset + windowInset,
                     bottom: 0,
                     child: FadeTransition(
                       key: const ValueKey<String>('adaptive_toolbar_back_fade'),
@@ -195,6 +199,7 @@ class HostedTopToolbar extends StatelessWidget {
   Widget _layer({
     required Key key,
     required TopToolbarContent content,
+    required double backButtonWidth,
     required Animation<double> opacity,
     required bool interactive,
   }) {
@@ -223,6 +228,7 @@ class HostedTopToolbar extends StatelessWidget {
                   title: content.title,
                   titleWidget: content.titleOverlay,
                   leading: content.customLeading,
+                  backButtonWidth: backButtonWidth,
                   actions: content.actions,
                   tintColor: content.tint,
                   showsGradient: false,
