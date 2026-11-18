@@ -3,6 +3,7 @@ import 'package:adaptive_platform_ui/src/toolbar/hosted_duo_bar.dart';
 import 'package:adaptive_platform_ui/src/toolbar/hosted_top_toolbar.dart';
 import 'package:adaptive_platform_ui/src/toolbar/toolbar_chrome_scope.dart';
 import 'package:cupertino_ui/cupertino_ui.dart' show CupertinoPageRoute;
+import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:foldable/foldable.dart';
@@ -71,6 +72,61 @@ Finder get backButton => inBar(find.byType(AdaptiveButton));
 
 void main() {
   group('HostedTopToolbar', () {
+    testWidgets(
+      'long titles reserve the shared back button in the native bar',
+      (tester) async {
+        usePhone(tester);
+        tester.view.display.size = tester.view.physicalSize;
+        addTearDown(tester.view.display.resetSize);
+        tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+          SystemChannels.platform_views,
+          (_) async => null,
+        );
+        final nav = GlobalKey<NavigatorState>();
+        await tester.pumpWidget(
+          hostedApp(navigatorKey: nav, home: page('Home')),
+        );
+        await tester.pumpAndSettle();
+        Map nativeItems() =>
+            tester
+                    .widget<UiKitView>(inBar(find.byType(UiKitView)))
+                    .creationParams
+                as Map;
+        expect(nativeItems(), isNot(contains('backButtonWidth')));
+
+        const title =
+            'A long example title that takes up the entire navigation bar';
+        nav.currentState!.push(
+          MaterialPageRoute<void>(builder: (_) => page(title)),
+        );
+        await tester.pumpAndSettle();
+        expect(nativeItems()['title'], title);
+        expect(
+          nativeItems()['backButtonWidth'],
+          tester.getSize(backButton).width,
+        );
+
+        nav.currentState!.push(
+          MaterialPageRoute<void>(
+            builder: (_) => const AdaptiveScaffold(
+              appBar: AdaptiveAppBar(
+                titleWidget: Text(
+                  title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        final label = tester.getRect(inBar(find.text(title)));
+        expect(label.left, greaterThan(tester.getRect(backButton).right));
+        expect(label.center.dx, tester.getCenter(bar).dx);
+      },
+      variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+    );
+
     testWidgets('back fills the toolbar height and is tappable near its edge', (
       tester,
     ) async {

@@ -8,6 +8,8 @@ void main() {
   testWidgets('page-owned toolbar uses a circular automatic back button', (
     tester,
   ) async {
+    tester.view.display.size = tester.view.physicalSize;
+    addTearDown(tester.view.display.resetSize);
     final nav = GlobalKey<NavigatorState>();
     await tester.pumpWidget(
       MaterialApp(
@@ -36,6 +38,7 @@ void main() {
     expect(toolbar.leading, isNotNull);
     final back = find.byType(AdaptiveButton);
     expect(back, findsOneWidget);
+    expect(toolbar.backButtonWidth, tester.getSize(back).width);
     expect(
       tester.widget<AdaptiveButton>(back).useSmoothRectangleBorder,
       isFalse,

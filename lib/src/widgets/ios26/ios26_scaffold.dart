@@ -197,6 +197,7 @@ class _IOS26ScaffoldState extends State<IOS26Scaffold>
     // Auto back button logic
     // Priority: custom leading widget > Hero back button
     Widget? heroLeading;
+    var backButtonWidth = 0.0;
 
     final canPop = Navigator.of(context).canPop();
 
@@ -205,13 +206,16 @@ class _IOS26ScaffoldState extends State<IOS26Scaffold>
         (widget.bottomNavigationBar?.items == null ||
             widget.bottomNavigationBar!.items!.isEmpty) &&
         canPop) {
+      const backSize = 38.0;
+      // Leave room for the iPadOS window controls beside Back.
+      final windowInset = _getIsWindowed() ? 62.0 : 0.0;
+      backButtonWidth = windowInset + backSize;
       final isCurrent = ModalRoute.of(context)?.isCurrent ?? true;
       if (isCurrent) {
         final backButton = Container(
-          // 62px accounts for the iPadOS system window toolbar width in windowed mode
-          margin: EdgeInsets.only(left: _getIsWindowed() ? 62 : 0),
-          height: 38,
-          width: 38,
+          margin: EdgeInsets.only(left: windowInset),
+          height: backSize,
+          width: backSize,
           child: AdaptiveButton.sfSymbol(
             onPressed: () => Navigator.of(context).pop(),
             sfSymbol: SFSymbol("chevron.left", size: 20),
@@ -227,7 +231,7 @@ class _IOS26ScaffoldState extends State<IOS26Scaffold>
               )
             : backButton;
       } else {
-        const placeholder = SizedBox(height: 38, width: 38);
+        const placeholder = SizedBox(height: backSize, width: backSize);
         heroLeading = widget.useHeroBackButton
             ? const Hero(tag: 'adaptive_back_button', child: placeholder)
             : placeholder;
@@ -404,6 +408,7 @@ class _IOS26ScaffoldState extends State<IOS26Scaffold>
                   )
                 : IOS26NativeToolbar(
                     title: widget.title,
+                    backButtonWidth: backButtonWidth,
                     leading: duoVerticalPose
                         ? null
                         : (widget.leading ?? heroLeading),
