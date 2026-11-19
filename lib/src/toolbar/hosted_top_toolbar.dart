@@ -121,6 +121,10 @@ class HostedTopToolbar extends StatelessWidget {
         ? AdaptiveScrollEdgeEffectStyle.none
         : lowerEntry!.backdropStyle;
 
+    final upperEdge = upperEntry?.hardEdge;
+    final lowerEdge = lowerEntry?.hardEdge;
+    final transition = blend.driver;
+
     return Align(
       alignment: Alignment.topCenter,
       child: SizedBox(
@@ -144,9 +148,30 @@ class HostedTopToolbar extends StatelessWidget {
                     child: ToolbarBackdrop(
                       style: lowerStyle,
                       titleOnly: titleOnly,
+                      hardEdge: lowerEdge,
                     ),
                   ),
-                if (upperStyle != AdaptiveScrollEdgeEffectStyle.none)
+                // Keep a single blur when two hard edges meet. Its surface
+                // color follows the route animation in either direction.
+                if (transition != null &&
+                    upperStyle == AdaptiveScrollEdgeEffectStyle.hard &&
+                    lowerStyle == upperStyle &&
+                    lowerEdge != null &&
+                    upperEdge != null &&
+                    lowerEdge != upperEdge)
+                  AnimatedBuilder(
+                    animation: transition,
+                    builder: (_, _) => ToolbarBackdrop(
+                      style: upperStyle,
+                      titleOnly: titleOnly,
+                      hardEdge: lerpHardEdge(
+                        lowerEdge,
+                        upperEdge,
+                        transition.value,
+                      ),
+                    ),
+                  )
+                else if (upperStyle != AdaptiveScrollEdgeEffectStyle.none)
                   FadeTransition(
                     opacity: lowerEntry == null || upperStyle == lowerStyle
                         ? kAlwaysCompleteAnimation
@@ -154,6 +179,7 @@ class HostedTopToolbar extends StatelessWidget {
                     child: ToolbarBackdrop(
                       style: upperStyle,
                       titleOnly: titleOnly,
+                      hardEdge: upperEdge,
                     ),
                   ),
                 if (lowerEntry != null && !lower.isEmpty)

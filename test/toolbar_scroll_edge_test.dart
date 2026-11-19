@@ -1,6 +1,12 @@
 import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import 'package:adaptive_platform_ui/src/toolbar/toolbar_backdrop.dart';
-import 'package:flutter/cupertino.dart' show CupertinoPageRoute;
+import 'package:flutter/cupertino.dart'
+    show
+        CupertinoColors,
+        CupertinoDynamicColor,
+        CupertinoPageRoute,
+        CupertinoTheme,
+        CupertinoThemeData;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -61,7 +67,10 @@ void main() {
         const boundary = Key('scrolling detail');
         await tester.pumpWidget(
           MaterialApp(
-            theme: ThemeData(brightness: appearance),
+            theme: ThemeData(
+              brightness: appearance,
+              scaffoldBackgroundColor: paper,
+            ),
             home: Align(
               alignment: Alignment.topLeft,
               child: RepaintBoundary(
@@ -114,15 +123,15 @@ void main() {
             int detail(int y) => stripeDetail(y * scale);
             // The solid fields measure tint. Normalizing the fine stripes by
             // that contrast measures the blur independently of the tint.
-            expect(toneRange(60), inInclusiveRange(45, 57));
-            expect(detail(60), greaterThan(4));
+            expect(toneRange(60), closeTo(25.5, 2));
+            expect(detail(60), greaterThan(1));
             expect(toneRange(108), greaterThan(toneRange(60) + 12));
             expect(toneRange(115), greaterThan(toneRange(108)));
             // Two points above the separator, less of the bright page shows
             // through in dark mode. The title contrast is checked above.
             final expectedLowerContrast = appearance == Brightness.dark
-                ? 137
-                : 158;
+                ? 140
+                : 162;
             expect(toneRange(116), closeTo(expectedLowerContrast, 5));
             double strokeContrast(int y) => detail(y) / toneRange(y);
             expect(strokeContrast(98), greaterThan(strokeContrast(60) + 0.10));
@@ -170,12 +179,13 @@ void main() {
     tester,
   ) async {
     const key = Key('blank dark surface');
+    const surface = Color(0xff403060);
     final scale = pixelRatios.currentValue!;
     tester.view.devicePixelRatio = scale.toDouble();
     addTearDown(tester.view.resetDevicePixelRatio);
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData.dark(),
+        theme: ThemeData.dark().copyWith(scaffoldBackgroundColor: surface),
         home: Align(
           alignment: Alignment.topLeft,
           child: RepaintBoundary(
@@ -189,7 +199,7 @@ void main() {
                   const Row(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Expanded(child: ColoredBox(color: Colors.black)),
+                      Expanded(child: ColoredBox(color: surface)),
                       Expanded(child: ColoredBox(color: Color(0xff404040))),
                       Expanded(child: ColoredBox(color: Color(0xff204060))),
                     ],
@@ -221,15 +231,14 @@ void main() {
         for (final x in [25, 80, 135]) {
           for (var c = 0; c < 3; c++) {
             final page = channel(x, edge + 2, c);
-            // A flat dark field keeps its tone as the blur clears.
-            final dimmed = 0.2 * page;
-            for (var row = 76 * scale; row < edge; row++) {
-              expect(
-                channel(x, row, c),
-                closeTo(dimmed, 2),
-                reason:
-                    'A blank surface changed brightness at physical row $row',
-              );
+            final surfaceChannel = channel(25, edge + 2, c);
+            final title = channel(x, 60 * scale, c);
+            expect(title, closeTo(0.90 * surfaceChannel + 0.10 * page, 2));
+            if (x == 25) {
+              // A patch of bare scaffold keeps its color through the falloff.
+              for (var row = 76 * scale; row < edge; row++) {
+                expect(channel(x, row, c), closeTo(surfaceChannel, 2));
+              }
             }
             final backdrop = channel(x, edge - 1, c);
             expect(
@@ -389,7 +398,159 @@ void main() {
     expect(scroll.offset, 80);
   });
 
+  testWidgets('a back swipe blends the two hard scaffold colors', (
+    tester,
+  ) async {
+    usePhone(tester);
+    const first = Color(0xff602040);
+    const second = Color(0xff204060);
+    final nav = GlobalKey<NavigatorState>();
+    final rootScroll = ScrollController(initialScrollOffset: 80);
+    final detailScroll = ScrollController(initialScrollOffset: 80);
+    addTearDown(rootScroll.dispose);
+    addTearDown(detailScroll.dispose);
+    Widget page(Color surface, ScrollController scroll) => AdaptiveScaffold(
+      backgroundColor: surface,
+      appBar: const AdaptiveAppBar(title: 'Page', scrollEdgeEffectStyle: hard),
+      body: ListView(
+        controller: scroll,
+        children: const [SizedBox(height: 3000)],
+      ),
+    );
+    Color? color() =>
+        tester.widget<ToolbarBackdrop>(backdrop).hardEdge?.surface;
+    await tester.pumpWidget(
+      hostedApp(navigatorKey: nav, home: page(first, rootScroll)),
+    );
+    await tester.pumpAndSettle();
+    expect(color(), first);
+    final route = CupertinoPageRoute<void>(
+      builder: (_) => page(second, detailScroll),
+    );
+    nav.currentState!.push(route);
+    await tester.pumpAndSettle();
+    expect(color(), second);
+    final gesture = await tester.startGesture(const Offset(4, 300));
+    await gesture.moveBy(const Offset(45, 0));
+    await tester.pump();
+    await gesture.moveBy(const Offset(200, 0));
+    await tester.pump();
+    final progress = route.animation!.value;
+    expect(progress, inExclusiveRange(0, 1));
+    expect(color(), Color.lerp(first, second, progress));
+    await gesture.moveBy(const Offset(-200, 0));
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(color(), second);
+    nav.currentState!.pop();
+    await tester.pumpAndSettle();
+    expect(color(), first);
+  });
+
   for (final hosted in [false, true]) {
+    testWidgets(
+      'hard edge renders the page surface (hosted: $hosted)',
+      (tester) async {
+        usePhone(tester);
+        tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+          SystemChannels.platform_views,
+          (_) async => null,
+        );
+        const boundary = Key('page surface');
+        const content = Color(0xff566376);
+        const darkPage = Color(0xff602040);
+        const lightPage = Color(0xffd6e8fc);
+        const dynamicSurface = CupertinoDynamicColor.withBrightness(
+          color: Color(0xffcce0dd),
+          darkColor: Color(0xff304650),
+        );
+        final scroll = ScrollController(initialScrollOffset: 180);
+        addTearDown(scroll.dispose);
+        Future<void> check(
+          ThemeData theme,
+          Color expected, {
+          Color? override,
+        }) async {
+          final page = CupertinoTheme(
+            data: CupertinoThemeData(
+              brightness: theme.brightness,
+              scaffoldBackgroundColor: theme.scaffoldBackgroundColor,
+            ),
+            child: AdaptiveScaffold(
+              backgroundColor: override,
+              appBar: const AdaptiveAppBar(
+                title: 'Page',
+                scrollEdgeEffectStyle: hard,
+              ),
+              body: ListView(
+                padding: EdgeInsets.zero,
+                controller: scroll,
+                children: const [
+                  ColoredBox(color: content, child: SizedBox(height: 3000)),
+                ],
+              ),
+            ),
+          );
+          await tester.pumpWidget(
+            RepaintBoundary(
+              key: boundary,
+              child: hosted ? hostedApp(home: page) : MaterialApp(home: page),
+            ),
+          );
+          await tester.pumpAndSettle();
+          expect(backdrop, findsOneWidget);
+          await tester.runAsync(() async {
+            final image = await tester
+                .renderObject<RenderRepaintBoundary>(find.byKey(boundary))
+                .toImage();
+            try {
+              final rgba = (await image.toByteData())!;
+              final offset = 4 * (60 * image.width + 290);
+              final tint = Color.alphaBlend(
+                expected.withValues(alpha: expected.a * 0.90),
+                content,
+              );
+              for (final (i, value) in [tint.r, tint.g, tint.b].indexed) {
+                expect(rgba.getUint8(offset + i), closeTo(value * 255, 2));
+              }
+              final line = 4 * (117 * image.width + 290);
+              final previous = line - 4 * image.width;
+              final separator = CupertinoColors.opaqueSeparator.color;
+              for (final (i, lightChannel) in [
+                separator.r,
+                separator.g,
+                separator.b,
+              ].indexed) {
+                final filtered = rgba.getUint8(previous + i);
+                final lineChannel = theme.brightness == Brightness.dark
+                    ? filtered + (255 - filtered) * 0.10
+                    : lightChannel * 255;
+                expect(rgba.getUint8(line + i), closeTo(lineChannel, 6));
+              }
+            } finally {
+              image.dispose();
+            }
+          });
+        }
+
+        final dark = ThemeData.dark().copyWith(
+          scaffoldBackgroundColor: darkPage,
+        );
+        final light = ThemeData.light().copyWith(
+          scaffoldBackgroundColor: lightPage,
+        );
+        await check(dark, darkPage);
+        await check(dark, dynamicSurface.darkColor, override: dynamicSurface);
+        await check(light, dynamicSurface.color, override: dynamicSurface);
+        const translucent = Color(0x80604080);
+        await check(light, translucent, override: translucent);
+        await check(light, Colors.transparent, override: Colors.transparent);
+        await check(light, lightPage);
+      },
+      variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+    );
+
     testWidgets(
       'style changes preserve the native view and action channel (hosted: $hosted)',
       (tester) async {

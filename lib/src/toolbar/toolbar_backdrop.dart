@@ -1,4 +1,4 @@
-import 'dart:ui' show ImageFilter;
+import 'dart:ui' show ImageFilter, lerpDouble;
 
 import 'package:flutter/cupertino.dart';
 
@@ -15,37 +15,72 @@ AdaptiveScrollEdgeEffectStyle visibleToolbarBackdrop(
     ? AdaptiveScrollEdgeEffectStyle.none
     : style;
 
+/// The page-resolved colors and edge opacity of a hard toolbar.
+typedef HardEdgeAppearance = ({
+  Color surface,
+  Color separator,
+  double edgeOpacity,
+});
+
+HardEdgeAppearance resolveHardEdge(
+  BuildContext context,
+  Color? backgroundColor,
+) {
+  final dark = CupertinoTheme.brightnessOf(context) == Brightness.dark;
+  return (
+    // Match CupertinoPageScaffold, even when the fixed host is outside the
+    // page's theme or the page overrides its background with a dynamic color.
+    surface:
+        CupertinoDynamicColor.maybeResolve(backgroundColor, context) ??
+        CupertinoTheme.of(context).scaffoldBackgroundColor,
+    separator: dark
+        ? const Color(0x1AFFFFFF)
+        : CupertinoColors.opaqueSeparator.resolveFrom(context),
+    edgeOpacity: dark ? 0.40 : 0.30,
+  );
+}
+
+HardEdgeAppearance lerpHardEdge(
+  HardEdgeAppearance from,
+  HardEdgeAppearance to,
+  double t,
+) => (
+  surface: Color.lerp(from.surface, to.surface, t)!,
+  separator: Color.lerp(from.separator, to.separator, t)!,
+  edgeOpacity: lerpDouble(from.edgeOpacity, to.edgeOpacity, t)!,
+);
+
 /// Paints behind the controls within the horizontal toolbar or Duo title band.
 class ToolbarBackdrop extends StatelessWidget {
   const ToolbarBackdrop({
     super.key,
     required this.style,
     required this.titleOnly,
+    this.hardEdge,
   });
 
   final AdaptiveScrollEdgeEffectStyle style;
   final bool titleOnly;
+  final HardEdgeAppearance? hardEdge;
 
   @override
   Widget build(BuildContext context) => switch (style) {
     AdaptiveScrollEdgeEffectStyle.none => const SizedBox.shrink(),
     AdaptiveScrollEdgeEffectStyle.soft =>
       titleOnly ? const DuoTitleBackdrop() : const _SoftBackdrop(),
-    AdaptiveScrollEdgeEffectStyle.hard => const _HardBackdrop(),
+    AdaptiveScrollEdgeEffectStyle.hard => _HardBackdrop(
+      appearance: hardEdge ?? resolveHardEdge(context, null),
+    ),
   };
 }
 
 class _HardBackdrop extends StatelessWidget {
-  const _HardBackdrop();
+  const _HardBackdrop({required this.appearance});
+
+  final HardEdgeAppearance appearance;
 
   @override
   Widget build(BuildContext context) {
-    final dark = CupertinoTheme.brightnessOf(context) == Brightness.dark;
-    final surface = CupertinoColors.systemBackground.resolveFrom(context);
-    // The native dark hairline approximates 10% white over the filtered edge.
-    final separator = dark
-        ? const Color(0x1AFFFFFF)
-        : CupertinoColors.opaqueSeparator.resolveFrom(context);
     final pixel = 1 / MediaQuery.devicePixelRatioOf(context);
     return IgnorePointer(
       child: Stack(
@@ -59,7 +94,7 @@ class _HardBackdrop extends StatelessWidget {
               position: DecorationPosition.foreground,
               decoration: BoxDecoration(
                 border: Border(
-                  bottom: BorderSide(color: separator, width: pixel),
+                  bottom: BorderSide(color: appearance.separator, width: pixel),
                 ),
               ),
               child: ClipRect(
@@ -76,11 +111,7 @@ class _HardBackdrop extends StatelessWidget {
                       filter: ImageFilter.blur(sigmaX: 2.34, sigmaY: 2.34),
                       child: CustomPaint(painter: _HardEdgeGradient.blurMask),
                     ),
-                    if (dark)
-                      CustomPaint(painter: _HardEdgeGradient.darkShadows),
-                    CustomPaint(
-                      painter: _HardEdgeGradient.tint(surface, dark: dark),
-                    ),
+                    CustomPaint(painter: _HardEdgeGradient.tint(appearance)),
                   ],
                 ),
               ),
@@ -95,35 +126,23 @@ class _HardBackdrop extends StatelessWidget {
 class _HardEdgeGradient extends CustomPainter {
   const _HardEdgeGradient(this.gradient, this.blendMode);
 
-  factory _HardEdgeGradient.tint(Color surface, {required bool dark}) =>
-      _HardEdgeGradient(
-        _gradient(
-          surface,
-          (t) => 1 - _transmission(t, dark ? _darkEdgeTransmission : 0.70),
-        ),
-        BlendMode.srcOver,
-      );
+  factory _HardEdgeGradient.tint(HardEdgeAppearance appearance) {
+    // Native hard edges leave about 10% of the scrolling content visible at
+    // title height. The tint gradually clears toward the separator.
+    const titleOpacity = 0.90;
+    return _HardEdgeGradient(
+      _gradient(
+        appearance.surface,
+        (t) => titleOpacity + (appearance.edgeOpacity - titleOpacity) * t * t,
+      ),
+      BlendMode.srcOver,
+    );
+  }
 
   final LinearGradient gradient;
   final BlendMode blendMode;
   static const _height = 32.0;
   static const _intervals = 16;
-  static const _titleTransmission = 0.20;
-  static const _darkEdgeTransmission = 0.60;
-
-  static double _transmission(double t, double atEdge) =>
-      _titleTransmission + (atEdge - _titleTransmission) * t * t * t;
-
-  // Black in overlay mode darkens shadows and preserves white. As the tint
-  // clears, compensate for exactly that change on dark pixels so an empty
-  // surface keeps its tone all the way from the title to the separator.
-  static final darkShadows = _HardEdgeGradient(
-    _gradient(
-      const Color(0xFF000000),
-      (t) => 1 - _titleTransmission / _transmission(t, _darkEdgeTransmission),
-    ),
-    BlendMode.overlay,
-  );
 
   // Applied inside the stronger blur layer so both blurs crossfade.
   static final blurMask = _HardEdgeGradient(
@@ -139,7 +158,7 @@ class _HardEdgeGradient extends CustomPainter {
     end: Alignment.bottomCenter,
     colors: List.generate(
       _intervals + 1,
-      (i) => color.withValues(alpha: opacityAt(i / _intervals)),
+      (i) => color.withValues(alpha: color.a * opacityAt(i / _intervals)),
     ),
   );
 
