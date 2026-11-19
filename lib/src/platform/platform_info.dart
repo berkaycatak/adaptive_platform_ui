@@ -54,11 +54,15 @@ class PlatformInfo {
     return 0;
   }
 
+  /// Selects the iOS 26 widget path in tests without a device.
+  @visibleForTesting
+  static bool? debugIOS26OrHigher;
+
   /// Returns true if iOS version is 26 or higher
   ///
   /// This is used to determine if iOS 26+ specific widgets should be used.
   static bool isIOS26OrHigher() {
-    return isIOS && iOSVersion >= 26;
+    return debugIOS26OrHigher ?? (isIOS && iOSVersion >= 26);
   }
 
   /// Returns true if iOS version is 18 or lower (pre-iOS 26)

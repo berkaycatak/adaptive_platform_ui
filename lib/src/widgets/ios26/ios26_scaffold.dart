@@ -7,7 +7,9 @@ import '../../platform/platform_info.dart';
 import '../../platform/system_vertical_bar.dart';
 import '../../style/sf_symbol.dart';
 import '../../toolbar/duo_vertical_bar.dart';
+import '../../toolbar/toolbar_backdrop.dart';
 import '../../toolbar/toolbar_chrome_scope.dart';
+import '../adaptive_app_bar.dart';
 import '../adaptive_app_bar_action.dart';
 import '../adaptive_bottom_navigation_bar.dart';
 import '../adaptive_button.dart';
@@ -15,10 +17,7 @@ import '../adaptive_scaffold.dart';
 import 'ios26_native_tab_bar.dart';
 import 'ios26_native_toolbar.dart';
 
-/// Height of the iOS 26 Liquid Glass toolbar's content area (excluding the
-/// status bar), matching [IOS26NativeToolbar]'s default height. The toolbar is
-/// an overlay, so this amount is added to the body's top padding.
-const double kToolbarContentHeight = 44.0;
+export '../../toolbar/toolbar_backdrop.dart' show kToolbarContentHeight;
 
 /// Native iOS 26 scaffold with UITabBar
 class IOS26Scaffold extends StatefulWidget {
@@ -29,6 +28,7 @@ class IOS26Scaffold extends StatefulWidget {
     this.actions,
     this.leading,
     this.tintColor,
+    this.backdropStyle = AdaptiveScrollEdgeEffectStyle.soft,
     this.titleWidget,
     this.minimizeBehavior = TabBarMinimizeBehavior.automatic,
     this.enableBlur = true,
@@ -46,6 +46,7 @@ class IOS26Scaffold extends StatefulWidget {
   final List<AdaptiveAppBarAction>? actions;
   final Widget? leading;
   final Color? tintColor;
+  final AdaptiveScrollEdgeEffectStyle backdropStyle;
 
   /// Custom widget overlaid at the toolbar's title position.
   /// When set, the native title is hidden and this widget is centered instead.
@@ -353,32 +354,31 @@ class _IOS26ScaffoldState extends State<IOS26Scaffold>
         : barOnLeft
         ? mq.padding.left
         : mq.padding.right;
-    if (showTopToolbar || trailingInset > 0) {
-      final topInset = !showTopToolbar
-          ? 0.0
-          : duoVerticalPose
-          ? kDuoTitleBandHeight
-          : kToolbarContentHeight;
-      bodyContent = Padding(
-        padding: EdgeInsets.only(
-          left: barOnLeft ? trailingInset : 0,
-          right: barOnLeft ? 0 : trailingInset,
-        ),
-        child: MediaQuery(
-          data: mq.copyWith(
-            padding: mq.padding.copyWith(
-              top: mq.padding.top + topInset,
-              left: mq.padding.left - (barOnLeft ? trailingInset : 0),
-              right: mq.padding.right - (barOnLeft ? 0 : trailingInset),
-            ),
-            viewPadding: mq.viewPadding.copyWith(
-              top: mq.viewPadding.top + topInset,
-            ),
+    // Keep the body mounted when the last toolbar action is hidden or restored.
+    final topInset = !showTopToolbar
+        ? 0.0
+        : duoVerticalPose
+        ? kDuoTitleBandHeight
+        : kToolbarContentHeight;
+    bodyContent = Padding(
+      padding: EdgeInsets.only(
+        left: barOnLeft ? trailingInset : 0,
+        right: barOnLeft ? 0 : trailingInset,
+      ),
+      child: MediaQuery(
+        data: mq.copyWith(
+          padding: mq.padding.copyWith(
+            top: mq.padding.top + topInset,
+            left: mq.padding.left - (barOnLeft ? trailingInset : 0),
+            right: mq.padding.right - (barOnLeft ? 0 : trailingInset),
           ),
-          child: bodyContent,
+          viewPadding: mq.viewPadding.copyWith(
+            top: mq.viewPadding.top + topInset,
+          ),
         ),
-      );
-    }
+        child: bodyContent,
+      ),
+    );
 
     // Build the stack content
     final stackContent = Stack(
@@ -391,33 +391,36 @@ class _IOS26ScaffoldState extends State<IOS26Scaffold>
             left: 0,
             right: 0,
             top: 0,
-            height: duoVerticalPose ? kDuoTitleBandHeight : null,
-            child: duoVerticalPose
-                // On iPhone Duo the title sits at the leading edge; the
-                // controls are in the trailing bar.
-                ? Stack(
-                    fit: StackFit.expand,
-                    clipBehavior: Clip.none,
-                    children: [
-                      const DuoTitleBackdrop(),
-                      DuoToolbarTitle(
-                        title: widget.title,
-                        titleWidget: widget.titleWidget,
-                      ),
-                    ],
+            height: duoVerticalPose
+                ? kDuoTitleBandHeight
+                : mq.padding.top + kToolbarContentHeight,
+            child: Stack(
+              fit: StackFit.expand,
+              clipBehavior: Clip.none,
+              children: [
+                if (widget.backdropStyle !=
+                        AdaptiveScrollEdgeEffectStyle.none &&
+                    (duoVerticalPose || showNativeView))
+                  ToolbarBackdrop(
+                    style: widget.backdropStyle,
+                    titleOnly: duoVerticalPose,
+                  ),
+                if (duoVerticalPose)
+                  DuoToolbarTitle(
+                    title: widget.title,
+                    titleWidget: widget.titleWidget,
                   )
-                : IOS26NativeToolbar(
+                else
+                  IOS26NativeToolbar(
                     title: widget.title,
                     backButtonWidth: backButtonWidth,
-                    leading: duoVerticalPose
-                        ? null
-                        : (widget.leading ?? heroLeading),
+                    leading: widget.leading ?? heroLeading,
                     showNativeView: showNativeView,
-                    actions: duoVerticalPose ? null : widget.actions,
+                    showsGradient: false,
+                    actions: widget.actions,
                     tintColor: widget.tintColor,
                     titleWidget: widget.titleWidget,
                     onActionTap: (index) {
-                      // Call the appropriate action callback
                       if (widget.actions != null &&
                           index >= 0 &&
                           index < widget.actions!.length) {
@@ -425,6 +428,8 @@ class _IOS26ScaffoldState extends State<IOS26Scaffold>
                       }
                     },
                   ),
+              ],
+            ),
           ),
         // iPhone Duo: controls in a vertical bar on the trailing edge
         if (showDuoSideBar)
