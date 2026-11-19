@@ -14,6 +14,29 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'hosted_top_toolbar_test.dart' show hostedApp, inBar, usePhone;
 
+typedef _ReadPixel = int Function(int x, int y, [int channel]);
+
+Future<_ReadPixel> _capturePixels(
+  WidgetTester tester,
+  Key boundary, {
+  int scale = 1,
+}) async {
+  final readPixel = await tester.runAsync<_ReadPixel>(() async {
+    final image = await tester
+        .renderObject<RenderRepaintBoundary>(find.byKey(boundary))
+        .toImage(pixelRatio: scale.toDouble());
+    try {
+      final bytes = (await image.toByteData())!;
+      final width = image.width;
+      return (int x, int y, [int channel = 0]) =>
+          bytes.getUint8(4 * (y * width + x) + channel);
+    } finally {
+      image.dispose();
+    }
+  });
+  return readPixel!;
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   setUp(() {
@@ -108,68 +131,51 @@ void main() {
           ),
         );
         await tester.pumpAndSettle();
-        await tester.runAsync(() async {
-          final image = await tester
-              .renderObject<RenderRepaintBoundary>(find.byKey(boundary))
-              .toImage(pixelRatio: scale.toDouble());
-          try {
-            final pixels = (await image.toByteData())!;
-            int pixel(int x, int y) =>
-                pixels.getUint8(4 * (y * image.width + x));
-            int level(int x, int y) => pixel(x * scale, y * scale);
-            int toneRange(int y) => (level(12, y) - level(108, y)).abs();
-            int stripeDetail(int row) =>
-                (pixel(46 * scale, row) - pixel(50 * scale, row)).abs();
-            int detail(int y) => stripeDetail(y * scale);
-            // The solid fields measure tint. Normalizing the fine stripes by
-            // that contrast measures the blur independently of the tint.
-            expect(toneRange(60), closeTo(25.5, 2));
-            expect(detail(60), greaterThan(1));
-            expect(toneRange(108), greaterThan(toneRange(60) + 12));
-            expect(toneRange(115), greaterThan(toneRange(108)));
-            // Two points above the separator, less of the bright page shows
-            // through in dark mode. The title contrast is checked above.
-            final expectedLowerContrast = appearance == Brightness.dark
-                ? 140
-                : 162;
-            expect(toneRange(116), closeTo(expectedLowerContrast, 5));
-            double strokeContrast(int y) => detail(y) / toneRange(y);
-            expect(strokeContrast(98), greaterThan(strokeContrast(60) + 0.10));
-            expect(strokeContrast(98), lessThan(strokeContrast(115) - 0.15));
-            expect(detail(115), greaterThan(40));
-            expect(detail(122), 255);
-            // Crossing the controls' lower edge (12 pt above the separator)
-            // should change neither the tint slope nor the blur abruptly.
-            final above = toneRange(106) - toneRange(103);
-            final below = toneRange(109) - toneRange(106);
-            expect((above - below).abs(), lessThanOrEqualTo(8));
-            for (var row = 86 * scale + 1; row < 118 * scale - 1; row++) {
-              expect(
-                (stripeDetail(row) - stripeDetail(row - 1)).abs(),
-                lessThanOrEqualTo(8),
-                reason:
-                    'Stroke contrast jumped at row $row on a ${scale}x display',
-              );
-            }
-            // The crisp separator occupies only the last physical row.
-            final bottom = 118 * scale;
-            final line = pixel(12 * scale, bottom - 1);
-            if (appearance == Brightness.dark) {
-              expect(pixel(108 * scale, bottom - 1), 26);
-              expect(
-                line,
-                inExclusiveRange(pixel(12 * scale, bottom - 2), 255),
-              );
-            } else {
-              expect(pixel(108 * scale, bottom - 1), line);
-              expect((line - level(108, 122)).abs(), greaterThan(40));
-            }
-            expect(pixel(108 * scale, bottom - 2), level(108, 122));
-            expect(pixel(12 * scale, bottom), level(12, 122));
-          } finally {
-            image.dispose();
-          }
-        });
+        final pixel = await _capturePixels(tester, boundary, scale: scale);
+        int level(int x, int y) => pixel(x * scale, y * scale);
+        int toneRange(int y) => (level(12, y) - level(108, y)).abs();
+        int stripeDetail(int row) =>
+            (pixel(46 * scale, row) - pixel(50 * scale, row)).abs();
+        int detail(int y) => stripeDetail(y * scale);
+        // The solid fields measure tint. Normalizing the fine stripes by
+        // that contrast measures the blur independently of the tint.
+        expect(toneRange(60), closeTo(25.5, 2));
+        expect(detail(60), greaterThan(1));
+        expect(toneRange(108), greaterThan(toneRange(60) + 12));
+        expect(toneRange(115), greaterThan(toneRange(108)));
+        // Two points above the separator, less of the bright page shows
+        // through in dark mode. The title contrast is checked above.
+        final expectedLowerContrast = appearance == Brightness.dark ? 140 : 162;
+        expect(toneRange(116), closeTo(expectedLowerContrast, 5));
+        double strokeContrast(int y) => detail(y) / toneRange(y);
+        expect(strokeContrast(98), greaterThan(strokeContrast(60) + 0.10));
+        expect(strokeContrast(98), lessThan(strokeContrast(115) - 0.15));
+        expect(detail(115), greaterThan(40));
+        expect(detail(122), 255);
+        // Crossing the controls' lower edge (12 pt above the separator)
+        // should change neither the tint slope nor the blur abruptly.
+        final above = toneRange(106) - toneRange(103);
+        final below = toneRange(109) - toneRange(106);
+        expect((above - below).abs(), lessThanOrEqualTo(8));
+        for (var row = 86 * scale + 1; row < 118 * scale - 1; row++) {
+          expect(
+            (stripeDetail(row) - stripeDetail(row - 1)).abs(),
+            lessThanOrEqualTo(8),
+            reason: 'Stroke contrast jumped at row $row on a ${scale}x display',
+          );
+        }
+        // The crisp separator occupies only the last physical row.
+        final bottom = 118 * scale;
+        final line = pixel(12 * scale, bottom - 1);
+        if (appearance == Brightness.dark) {
+          expect(pixel(108 * scale, bottom - 1), 26);
+          expect(line, inExclusiveRange(pixel(12 * scale, bottom - 2), 255));
+        } else {
+          expect(pixel(108 * scale, bottom - 1), line);
+          expect((line - level(108, 122)).abs(), greaterThan(40));
+        }
+        expect(pixel(108 * scale, bottom - 2), level(108, 122));
+        expect(pixel(12 * scale, bottom), level(12, 122));
       },
       variant: pixelRatios,
     );
@@ -219,40 +225,30 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    await tester.runAsync(() async {
-      final image = await tester
-          .renderObject<RenderRepaintBoundary>(find.byKey(key))
-          .toImage(pixelRatio: scale.toDouble());
-      try {
-        final pixels = (await image.toByteData())!;
-        int channel(int x, int row, int c) =>
-            pixels.getUint8(4 * (row * image.width + x * scale) + c);
-        final edge = 118 * scale - 1;
-        for (final x in [25, 80, 135]) {
-          for (var c = 0; c < 3; c++) {
-            final page = channel(x, edge + 2, c);
-            final surfaceChannel = channel(25, edge + 2, c);
-            final title = channel(x, 60 * scale, c);
-            expect(title, closeTo(0.90 * surfaceChannel + 0.10 * page, 2));
-            if (x == 25) {
-              // A patch of bare scaffold keeps its color through the falloff.
-              for (var row = 76 * scale; row < edge; row++) {
-                expect(channel(x, row, c), closeTo(surfaceChannel, 2));
-              }
-            }
-            final backdrop = channel(x, edge - 1, c);
-            expect(
-              channel(x, edge, c),
-              closeTo(backdrop + 0.10 * (255 - backdrop), 2),
-            );
-            expect(channel(x, edge + 1, c), page);
+    final pixel = await _capturePixels(tester, key, scale: scale);
+    int channel(int x, int row, int c) => pixel(x * scale, row, c);
+    final edge = 118 * scale - 1;
+    for (final x in [25, 80, 135]) {
+      for (var c = 0; c < 3; c++) {
+        final page = channel(x, edge + 2, c);
+        final surfaceChannel = channel(25, edge + 2, c);
+        final title = channel(x, 60 * scale, c);
+        expect(title, closeTo(0.90 * surfaceChannel + 0.10 * page, 2));
+        if (x == 25) {
+          // A patch of bare scaffold keeps its color through the falloff.
+          for (var row = 76 * scale; row < edge; row++) {
+            expect(channel(x, row, c), closeTo(surfaceChannel, 2));
           }
-          expect(channel(x, edge - 1, 3), 255);
         }
-      } finally {
-        image.dispose();
+        final backdrop = channel(x, edge - 1, c);
+        expect(
+          channel(x, edge, c),
+          closeTo(backdrop + 0.10 * (255 - backdrop), 2),
+        );
+        expect(channel(x, edge + 1, c), page);
       }
-    });
+      expect(channel(x, edge - 1, 3), 255);
+    }
   }, variant: pixelRatios);
 
   for (final duo in [false, true]) {
@@ -468,15 +464,12 @@ void main() {
         final scroll = ScrollController(initialScrollOffset: 180);
         addTearDown(scroll.dispose);
         Future<void> check(
-          ThemeData theme,
+          CupertinoThemeData theme,
           Color expected, {
           Color? override,
         }) async {
           final page = CupertinoTheme(
-            data: CupertinoThemeData(
-              brightness: theme.brightness,
-              scaffoldBackgroundColor: theme.scaffoldBackgroundColor,
-            ),
+            data: theme,
             child: AdaptiveScaffold(
               backgroundColor: override,
               appBar: const AdaptiveAppBar(
@@ -500,44 +493,34 @@ void main() {
           );
           await tester.pumpAndSettle();
           expect(backdrop, findsOneWidget);
-          await tester.runAsync(() async {
-            final image = await tester
-                .renderObject<RenderRepaintBoundary>(find.byKey(boundary))
-                .toImage();
-            try {
-              final rgba = (await image.toByteData())!;
-              final offset = 4 * (60 * image.width + 290);
-              final tint = Color.alphaBlend(
-                expected.withValues(alpha: expected.a * 0.90),
-                content,
-              );
-              for (final (i, value) in [tint.r, tint.g, tint.b].indexed) {
-                expect(rgba.getUint8(offset + i), closeTo(value * 255, 2));
-              }
-              final line = 4 * (117 * image.width + 290);
-              final previous = line - 4 * image.width;
-              final separator = CupertinoColors.opaqueSeparator.color;
-              for (final (i, lightChannel) in [
-                separator.r,
-                separator.g,
-                separator.b,
-              ].indexed) {
-                final filtered = rgba.getUint8(previous + i);
-                final lineChannel = theme.brightness == Brightness.dark
-                    ? filtered + (255 - filtered) * 0.10
-                    : lightChannel * 255;
-                expect(rgba.getUint8(line + i), closeTo(lineChannel, 6));
-              }
-            } finally {
-              image.dispose();
-            }
-          });
+          final pixel = await _capturePixels(tester, boundary);
+          final tint = Color.alphaBlend(
+            expected.withValues(alpha: expected.a * 0.90),
+            content,
+          );
+          for (final (i, value) in [tint.r, tint.g, tint.b].indexed) {
+            expect(pixel(290, 60, i), closeTo(value * 255, 2));
+          }
+          final separator = CupertinoColors.opaqueSeparator.color;
+          for (final (i, lightChannel) in [
+            separator.r,
+            separator.g,
+            separator.b,
+          ].indexed) {
+            final filtered = pixel(290, 116, i);
+            final lineChannel = theme.brightness == Brightness.dark
+                ? filtered + (255 - filtered) * 0.10
+                : lightChannel * 255;
+            expect(pixel(290, 117, i), closeTo(lineChannel, 6));
+          }
         }
 
-        final dark = ThemeData.dark().copyWith(
+        const dark = CupertinoThemeData(
+          brightness: Brightness.dark,
           scaffoldBackgroundColor: darkPage,
         );
-        final light = ThemeData.light().copyWith(
+        const light = CupertinoThemeData(
+          brightness: Brightness.light,
           scaffoldBackgroundColor: lightPage,
         );
         await check(dark, darkPage);

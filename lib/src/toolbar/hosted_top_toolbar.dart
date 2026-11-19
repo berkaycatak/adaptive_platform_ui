@@ -114,16 +114,8 @@ class HostedTopToolbar extends StatelessWidget {
       (false, false) => null,
     };
 
-    final upperStyle = upper.isEmpty
-        ? AdaptiveScrollEdgeEffectStyle.none
-        : upperEntry!.backdropStyle;
-    final lowerStyle = lower.isEmpty
-        ? AdaptiveScrollEdgeEffectStyle.none
-        : lowerEntry!.backdropStyle;
-
-    final upperEdge = upperEntry?.hardEdge;
-    final lowerEdge = lowerEntry?.hardEdge;
-    final transition = blend.driver;
+    final upperBackdrop = _backdropFor(upperEntry, upper);
+    final lowerBackdrop = _backdropFor(lowerEntry, lower);
 
     return Align(
       alignment: Alignment.topCenter,
@@ -141,47 +133,21 @@ class HostedTopToolbar extends StatelessWidget {
               fit: StackFit.expand,
               clipBehavior: Clip.none,
               children: [
-                if (lowerStyle != upperStyle &&
-                    lowerStyle != AdaptiveScrollEdgeEffectStyle.none)
-                  FadeTransition(
-                    opacity: lowerOpacity,
-                    child: ToolbarBackdrop(
-                      style: lowerStyle,
-                      titleOnly: titleOnly,
-                      hardEdge: lowerEdge,
+                if (upperBackdrop != null &&
+                    lowerBackdrop != null &&
+                    upperBackdrop.style == lowerBackdrop.style)
+                  _sharedBackdrop(lowerBackdrop, upperBackdrop)
+                else ...[
+                  if (lowerBackdrop != null)
+                    FadeTransition(opacity: lowerOpacity, child: lowerBackdrop),
+                  if (upperBackdrop != null)
+                    FadeTransition(
+                      opacity: lowerEntry == null
+                          ? kAlwaysCompleteAnimation
+                          : upperOpacity,
+                      child: upperBackdrop,
                     ),
-                  ),
-                // Keep a single blur when two hard edges meet. Its surface
-                // color follows the route animation in either direction.
-                if (transition != null &&
-                    upperStyle == AdaptiveScrollEdgeEffectStyle.hard &&
-                    lowerStyle == upperStyle &&
-                    lowerEdge != null &&
-                    upperEdge != null &&
-                    lowerEdge != upperEdge)
-                  AnimatedBuilder(
-                    animation: transition,
-                    builder: (_, _) => ToolbarBackdrop(
-                      style: upperStyle,
-                      titleOnly: titleOnly,
-                      hardEdge: lerpHardEdge(
-                        lowerEdge,
-                        upperEdge,
-                        transition.value,
-                      ),
-                    ),
-                  )
-                else if (upperStyle != AdaptiveScrollEdgeEffectStyle.none)
-                  FadeTransition(
-                    opacity: lowerEntry == null || upperStyle == lowerStyle
-                        ? kAlwaysCompleteAnimation
-                        : upperOpacity,
-                    child: ToolbarBackdrop(
-                      style: upperStyle,
-                      titleOnly: titleOnly,
-                      hardEdge: upperEdge,
-                    ),
-                  ),
+                ],
                 if (lowerEntry != null && !lower.isEmpty)
                   _layer(
                     key: ValueKey<Object>(lowerEntry.id),
@@ -218,6 +184,42 @@ class HostedTopToolbar extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  ToolbarBackdrop? _backdropFor(
+    ToolbarEntry? entry,
+    TopToolbarContent content,
+  ) {
+    if (entry == null || content.isEmpty) return null;
+    final style = entry.backdropStyle;
+    if (style == AdaptiveScrollEdgeEffectStyle.none) return null;
+    return ToolbarBackdrop(
+      style: style,
+      titleOnly: titleOnly,
+      hardEdge: entry.hardEdge,
+    );
+  }
+
+  Widget _sharedBackdrop(ToolbarBackdrop lower, ToolbarBackdrop upper) {
+    final from = lower.hardEdge;
+    final to = upper.hardEdge;
+    if (upper.style != AdaptiveScrollEdgeEffectStyle.hard ||
+        from == null ||
+        to == null ||
+        from == to) {
+      return upper;
+    }
+    // A lower page exists only during a transition. Share the blur and run
+    // its color interpolation in step with a push, pop, or canceled swipe.
+    final transition = blend.driver!;
+    return AnimatedBuilder(
+      animation: transition,
+      builder: (_, _) => ToolbarBackdrop(
+        style: upper.style,
+        titleOnly: titleOnly,
+        hardEdge: lerpHardEdge(from, to, transition.value),
       ),
     );
   }
