@@ -37,6 +37,60 @@ Future<_ReadPixel> _capturePixels(
   return readPixel!;
 }
 
+Future<_ReadPixel> _renderStripes(
+  WidgetTester tester,
+  Brightness appearance,
+  AdaptiveScrollEdgeEffectStyle style, {
+  required int scale,
+  int stripeWidth = 4,
+  double barHeight = 106,
+}) async {
+  final ink = appearance == Brightness.light ? Colors.black : Colors.white;
+  final paper = appearance == Brightness.light ? Colors.white : Colors.black;
+  const boundary = Key('scrolling detail');
+  await tester.pumpWidget(
+    MaterialApp(
+      theme: ThemeData(brightness: appearance, scaffoldBackgroundColor: paper),
+      home: Align(
+        alignment: Alignment.topLeft,
+        child: RepaintBoundary(
+          key: boundary,
+          child: SizedBox(
+            width: 120,
+            height: barHeight + 52,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    SizedBox(width: 24, child: ColoredBox(color: ink)),
+                    for (var i = 0; i < 64 ~/ stripeWidth; i++)
+                      SizedBox(
+                        width: stripeWidth.toDouble(),
+                        child: ColoredBox(color: i.isEven ? paper : ink),
+                      ),
+                    Expanded(child: ColoredBox(color: paper)),
+                  ],
+                ),
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  top: 0,
+                  height: barHeight,
+                  child: ToolbarBackdrop(style: style, titleOnly: false),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+  await tester.pumpAndSettle();
+  return _capturePixels(tester, boundary, scale: scale);
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   setUp(() {
@@ -76,62 +130,54 @@ void main() {
   final pixelRatios = ValueVariant<int>({2, 3});
   for (final appearance in Brightness.values) {
     testWidgets(
+      'soft edge gradually blurs fine detail below the controls in ${appearance.name}',
+      (tester) async {
+        final scale = pixelRatios.currentValue!;
+        tester.view.devicePixelRatio = scale.toDouble();
+        tester.platformDispatcher.platformBrightnessTestValue = appearance;
+        addTearDown(tester.view.resetDevicePixelRatio);
+        addTearDown(tester.platformDispatcher.clearPlatformBrightnessTestValue);
+        // An inline toolbar below the status bar, and a compact horizontal bar.
+        for (final height in [106, 44]) {
+          final pixel = await _renderStripes(
+            tester,
+            appearance,
+            soft,
+            scale: scale,
+            stripeWidth: 2,
+            barHeight: height.toDouble(),
+          );
+          int contrast(int x1, int x2, int offset) {
+            final row = (height + offset) * scale;
+            return (pixel(x1 * scale, row) - pixel(x2 * scale, row)).abs();
+          }
+
+          // Normalize out the tint: tint alone leaves this ratio at one.
+          double detail(int offset) =>
+              contrast(45, 47, offset) / contrast(12, 108, offset);
+          expect(detail(-22), lessThan(0.18));
+          expect(detail(0), closeTo(0.50, 0.12));
+          expect(detail(10), closeTo(0.84, 0.10));
+          expect(detail(18), closeTo(1, 0.025));
+          expect(contrast(12, 108, 22), lessThan(255));
+          expect(contrast(12, 108, 45), 255);
+        }
+      },
+      variant: pixelRatios,
+    );
+
+    testWidgets(
       'hard edge progressively obscures detail in ${appearance.name}',
       (tester) async {
         final scale = pixelRatios.currentValue!;
         tester.view.devicePixelRatio = scale.toDouble();
         addTearDown(tester.view.resetDevicePixelRatio);
-        final ink = appearance == Brightness.light
-            ? Colors.black
-            : Colors.white;
-        final paper = appearance == Brightness.light
-            ? Colors.white
-            : Colors.black;
-        const boundary = Key('scrolling detail');
-        await tester.pumpWidget(
-          MaterialApp(
-            theme: ThemeData(
-              brightness: appearance,
-              scaffoldBackgroundColor: paper,
-            ),
-            home: Align(
-              alignment: Alignment.topLeft,
-              child: RepaintBoundary(
-                key: boundary,
-                child: SizedBox(
-                  width: 120,
-                  height: 140,
-                  child: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          SizedBox(width: 24, child: ColoredBox(color: ink)),
-                          for (var i = 0; i < 16; i++)
-                            SizedBox(
-                              width: 4,
-                              child: ColoredBox(color: i.isEven ? paper : ink),
-                            ),
-                          Expanded(child: ColoredBox(color: paper)),
-                        ],
-                      ),
-                      const Positioned(
-                        left: 0,
-                        right: 0,
-                        top: 0,
-                        height: 106,
-                        child: ToolbarBackdrop(style: hard, titleOnly: false),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
+        final pixel = await _renderStripes(
+          tester,
+          appearance,
+          hard,
+          scale: scale,
         );
-        await tester.pumpAndSettle();
-        final pixel = await _capturePixels(tester, boundary, scale: scale);
         int level(int x, int y) => pixel(x * scale, y * scale);
         int toneRange(int y) => (level(12, y) - level(108, y)).abs();
         int stripeDetail(int row) =>
@@ -331,6 +377,9 @@ void main() {
       style.value = soft;
       await tester.pumpAndSettle();
       expect(tester.widget<ToolbarBackdrop>(backdrop).style, soft);
+      await tester.tapAt(band.bottomCenter + const Offset(0, 10));
+      await tester.tapAt(band.bottomCenter + const Offset(0, 32));
+      expect(listTaps, 3);
       style.value = none;
       await tester.pumpAndSettle();
       expect(backdrop, findsNothing);

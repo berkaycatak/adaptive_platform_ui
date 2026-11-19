@@ -109,9 +109,9 @@ class _HardBackdrop extends StatelessWidget {
                     // this second pass gives a 2.4-point blur behind the title.
                     BackdropFilter(
                       filter: ImageFilter.blur(sigmaX: 2.34, sigmaY: 2.34),
-                      child: CustomPaint(painter: _HardEdgeGradient.blurMask),
+                      child: CustomPaint(painter: _EdgeGradient.hardBlurMask),
                     ),
-                    CustomPaint(painter: _HardEdgeGradient.tint(appearance)),
+                    CustomPaint(painter: _EdgeGradient.hardTint(appearance)),
                   ],
                 ),
               ),
@@ -123,14 +123,14 @@ class _HardBackdrop extends StatelessWidget {
   }
 }
 
-class _HardEdgeGradient extends CustomPainter {
-  const _HardEdgeGradient(this.gradient, this.blendMode);
+class _EdgeGradient extends CustomPainter {
+  const _EdgeGradient(this.gradient, this.blendMode, {this.falloffHeight = 32});
 
-  factory _HardEdgeGradient.tint(HardEdgeAppearance appearance) {
+  factory _EdgeGradient.hardTint(HardEdgeAppearance appearance) {
     // Native hard edges leave about 10% of the scrolling content visible at
     // title height. The tint gradually clears toward the separator.
     const titleOpacity = 0.90;
-    return _HardEdgeGradient(
+    return _EdgeGradient(
       _gradient(
         appearance.surface,
         (t) => titleOpacity + (appearance.edgeOpacity - titleOpacity) * t * t,
@@ -141,11 +141,11 @@ class _HardEdgeGradient extends CustomPainter {
 
   final LinearGradient gradient;
   final BlendMode blendMode;
-  static const _height = 32.0;
+  final double falloffHeight;
   static const _intervals = 16;
 
   // Applied inside the stronger blur layer so both blurs crossfade.
-  static final blurMask = _HardEdgeGradient(
+  static final hardBlurMask = _EdgeGradient(
     _gradient(const Color(0xFFFFFFFF), (t) => 1 - t * t * (3 - 2 * t)),
     BlendMode.dstIn,
   );
@@ -166,9 +166,9 @@ class _HardEdgeGradient extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final falloff = Rect.fromLTWH(
       0,
-      size.height - _height,
+      size.height - falloffHeight,
       size.width,
-      _height,
+      falloffHeight,
     );
     canvas.drawRect(
       Offset.zero & size,
@@ -179,42 +179,72 @@ class _HardEdgeGradient extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_HardEdgeGradient oldDelegate) =>
-      gradient != oldDelegate.gradient || blendMode != oldDelegate.blendMode;
+  bool shouldRepaint(_EdgeGradient oldDelegate) =>
+      gradient != oldDelegate.gradient ||
+      blendMode != oldDelegate.blendMode ||
+      falloffHeight != oldDelegate.falloffHeight;
 }
 
-/// The soft gradient that keeps the bar readable over scrolling content.
+/// The horizontal soft edge blurs scrolling detail before it reaches the bar.
 class _SoftBackdrop extends StatelessWidget {
   const _SoftBackdrop();
+
+  static final _blur = ImageFilter.blur(sigmaX: 1.5, sigmaY: 1.5);
+  // Fine detail clears from 24 points above the bottom of the toolbar to
+  // 16 below it. Measure the falloff from that edge in every orientation.
+  static const _blurMask = _EdgeGradient(
+    LinearGradient(
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
+      colors: [
+        Color(0xFFFFFFFF),
+        Color(0xE6FFFFFF),
+        Color(0xA8FFFFFF),
+        Color(0x52FFFFFF),
+        Color(0x00FFFFFF),
+      ],
+    ),
+    BlendMode.dstIn,
+    falloffHeight: 40,
+  );
 
   @override
   Widget build(BuildContext context) {
     final dark = MediaQuery.platformBrightnessOf(context) == Brightness.dark;
     final base = dark ? const Color(0xFF000000) : const Color(0xFFFFFFFF);
     return IgnorePointer(
-      child: OverflowBox(
-        alignment: Alignment.topCenter,
-        maxHeight: double.infinity,
-        child: Container(
-          // Runs on below the bar for a smooth fade into the content.
-          height:
-              MediaQuery.viewPaddingOf(context).top +
-              kToolbarContentHeight +
-              30,
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              stops: const [0.0, 0.4, 0.7, 1.0],
-              colors: [
-                base.withValues(alpha: 0.85),
-                base.withValues(alpha: 0.6),
-                base.withValues(alpha: 0.2),
-                base.withValues(alpha: 0.0),
-              ],
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Positioned.fill(
+            bottom: -16,
+            child: ClipRect(
+              child: BackdropFilter(
+                filter: _blur,
+                child: const CustomPaint(painter: _blurMask),
+              ),
             ),
           ),
-        ),
+          Positioned.fill(
+            bottom: -44,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  stops: const [0.0, 0.4, 0.7, 0.9, 1.0],
+                  colors: [
+                    base.withValues(alpha: 0.85),
+                    base.withValues(alpha: 0.6),
+                    base.withValues(alpha: 0.2),
+                    base.withValues(alpha: 0.025),
+                    base.withValues(alpha: 0.0),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

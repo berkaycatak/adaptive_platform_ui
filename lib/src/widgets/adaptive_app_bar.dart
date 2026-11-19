@@ -3,7 +3,7 @@ import 'adaptive_app_bar_action.dart';
 
 /// Backdrop behind a native iOS 26+ top toolbar, including the Duo title band.
 enum AdaptiveScrollEdgeEffectStyle {
-  /// Fade into the page below the toolbar.
+  /// Gradually blur and fade scrolling content near the toolbar.
   soft,
 
   /// When content scrolls under the toolbar, blur it and tint it toward the
