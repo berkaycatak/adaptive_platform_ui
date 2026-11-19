@@ -21,6 +21,7 @@ class ToolbarEntry {
     this.shownInPlace = true,
     this.scrolledUnder = false,
     this.hardEdge,
+    this.softEdgeSurface,
     this.tabBar,
     this.enclosingRoutes = const <ModalRoute<Object?>>[],
     this.titleOverlay,
@@ -38,6 +39,9 @@ class ToolbarEntry {
 
   /// The hard edge appearance, resolved in the page's own theme.
   final HardEdgeAppearance? hardEdge;
+
+  /// The horizontal soft edge fades into this page-resolved surface.
+  final Color? softEdgeSurface;
 
   AdaptiveScrollEdgeEffectStyle get backdropStyle => visibleToolbarBackdrop(
     appBar?.scrollEdgeEffectStyle ?? AdaptiveScrollEdgeEffectStyle.none,

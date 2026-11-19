@@ -114,8 +114,8 @@ class HostedTopToolbar extends StatelessWidget {
       (false, false) => null,
     };
 
-    final upperBackdrop = _backdropFor(upperEntry, upper);
-    final lowerBackdrop = _backdropFor(lowerEntry, lower);
+    final upperBackdrop = _backdropFor(context, upperEntry, upper);
+    final lowerBackdrop = _backdropFor(context, lowerEntry, lower);
 
     return Align(
       alignment: Alignment.topCenter,
@@ -189,6 +189,7 @@ class HostedTopToolbar extends StatelessWidget {
   }
 
   ToolbarBackdrop? _backdropFor(
+    BuildContext context,
     ToolbarEntry? entry,
     TopToolbarContent content,
   ) {
@@ -199,16 +200,16 @@ class HostedTopToolbar extends StatelessWidget {
       style: style,
       titleOnly: titleOnly,
       hardEdge: entry.hardEdge,
+      softEdgeSurface: style == AdaptiveScrollEdgeEffectStyle.soft && !titleOnly
+          ? entry.softEdgeSurface ?? resolveToolbarSurface(context, null)
+          : null,
     );
   }
 
   Widget _sharedBackdrop(ToolbarBackdrop lower, ToolbarBackdrop upper) {
     final from = lower.hardEdge;
     final to = upper.hardEdge;
-    if (upper.style != AdaptiveScrollEdgeEffectStyle.hard ||
-        from == null ||
-        to == null ||
-        from == to) {
+    if (from == to && lower.softEdgeSurface == upper.softEdgeSurface) {
       return upper;
     }
     // A lower page exists only during a transition. Share the blur and run
@@ -219,7 +220,14 @@ class HostedTopToolbar extends StatelessWidget {
       builder: (_, _) => ToolbarBackdrop(
         style: upper.style,
         titleOnly: titleOnly,
-        hardEdge: lerpHardEdge(from, to, transition.value),
+        hardEdge: from != null && to != null
+            ? lerpHardEdge(from, to, transition.value)
+            : to,
+        softEdgeSurface: Color.lerp(
+          lower.softEdgeSurface,
+          upper.softEdgeSurface,
+          transition.value,
+        ),
       ),
     );
   }
