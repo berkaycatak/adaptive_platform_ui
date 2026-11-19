@@ -9,6 +9,7 @@ import 'adaptive_badge.dart';
 import 'adaptive_bottom_navigation_bar.dart';
 import 'adaptive_button.dart';
 import 'ios26/ios26_scaffold.dart';
+import '../toolbar/toolbar_backdrop.dart';
 import '../toolbar/toolbar_chrome_scope.dart';
 import '../toolbar/toolbar_registry.dart';
 
@@ -256,6 +257,53 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
   /// [AdaptiveToolbarHost] is installed above the navigator.
   ToolbarRegistry? _toolbarRegistry;
 
+  // Remember the scrollable on layout so a newly selected hard style can
+  // read its current offset, even when the body uses its own controller.
+  WeakReference<ScrollableState>? _scrollable;
+  bool _scrolledUnder = false;
+  bool get _usesHardEdge =>
+      widget.appBar?.scrollEdgeEffectStyle ==
+      AdaptiveScrollEdgeEffectStyle.hard;
+
+  bool _contentUnderTop(ScrollMetrics metrics) =>
+      switch (metrics.axisDirection) {
+        AxisDirection.down => metrics.extentBefore > 0,
+        AxisDirection.up => metrics.extentAfter > 0,
+        _ => false,
+      };
+
+  bool _onScrollMetrics(ScrollMetricsNotification notification) {
+    if (notification.depth != 0 || notification.metrics.axis != Axis.vertical) {
+      return false;
+    }
+    final source = notification.context;
+    if (source.findAncestorStateOfType<_AdaptiveScaffoldState>() != this) {
+      return false;
+    }
+    final scrollable = source.findAncestorStateOfType<ScrollableState>();
+    _scrollable = scrollable == null ? null : WeakReference(scrollable);
+    if (_usesHardEdge) _updateScrolledUnder(notification.metrics);
+    return false;
+  }
+
+  bool _onScrollUpdate(ScrollUpdateNotification notification) {
+    if (notification.depth == 0 &&
+        notification.metrics.axis == Axis.vertical &&
+        notification.context
+                ?.findAncestorStateOfType<_AdaptiveScaffoldState>() ==
+            this) {
+      _updateScrolledUnder(notification.metrics);
+    }
+    return false;
+  }
+
+  void _updateScrolledUnder(ScrollMetrics metrics) {
+    final scrolledUnder = _contentUnderTop(metrics);
+    if (_scrolledUnder == scrolledUnder) return;
+    setState(() => _scrolledUnder = scrolledUnder);
+    _syncToolbarEntry();
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -265,6 +313,16 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
   @override
   void didUpdateWidget(AdaptiveScaffold oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.appBar?.scrollEdgeEffectStyle !=
+        widget.appBar?.scrollEdgeEffectStyle) {
+      final scrollable = _scrollable?.target;
+      _scrolledUnder =
+          _usesHardEdge &&
+          scrollable != null &&
+          scrollable.mounted &&
+          scrollable.position.hasContentDimensions &&
+          _contentUnderTop(scrollable.position);
+    }
     if (oldWidget.appBar != widget.appBar ||
         oldWidget.useFixedToolbar != widget.useFixedToolbar ||
         oldWidget.tabBarHidden != widget.tabBarHidden ||
@@ -344,6 +402,7 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
       ToolbarEntry(
         id: this,
         appBar: widget.appBar,
+        scrolledUnder: _scrolledUnder,
         route: ModalRoute.of(context),
         navigator: navigator,
         enclosingRoutes: enclosingRoutes,
@@ -432,7 +491,17 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
 
   @override
   Widget build(BuildContext context) {
-    final page = _buildPage(context);
+    Widget page = _buildPage(context);
+    if (widget.appBar?.useNativeToolbar == true &&
+        PlatformInfo.isIOS26OrHigher()) {
+      page = NotificationListener<ScrollMetricsNotification>(
+        onNotification: _onScrollMetrics,
+        child: NotificationListener<ScrollUpdateNotification>(
+          onNotification: _usesHardEdge ? _onScrollUpdate : null,
+          child: page,
+        ),
+      );
+    }
     final bg = widget.backgroundColor;
     if (bg == null || bg.a < 0.5) return page;
     // A page that sets its own background keeps the status bar legible
@@ -485,6 +554,10 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
           actions: widget.appBar?.actions,
           leading: widget.appBar?.leading,
           tintColor: widget.appBar?.tintColor,
+          backdropStyle: visibleToolbarBackdrop(
+            widget.appBar!.scrollEdgeEffectStyle,
+            scrolledUnder: _scrolledUnder,
+          ),
           titleWidget: _buildIOS26TitleOverlay(),
           minimizeBehavior: widget.minimizeBehavior,
           enableBlur: widget.enableBlur,

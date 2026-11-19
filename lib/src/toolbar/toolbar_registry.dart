@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 
 import '../widgets/adaptive_app_bar.dart';
 import '../widgets/adaptive_bottom_navigation_bar.dart';
+import 'toolbar_backdrop.dart';
 
 /// One page's contribution to the fixed toolbar chrome.
 ///
@@ -18,6 +19,7 @@ class ToolbarEntry {
     required this.navigator,
     required this.visible,
     this.shownInPlace = true,
+    this.scrolledUnder = false,
     this.tabBar,
     this.enclosingRoutes = const <ModalRoute<Object?>>[],
     this.titleOverlay,
@@ -30,6 +32,13 @@ class ToolbarEntry {
   /// A null entry still counts, so the chrome empties out instead of keeping
   /// the previous page's items on a page that has none.
   final AdaptiveAppBar? appBar;
+
+  final bool scrolledUnder;
+
+  AdaptiveScrollEdgeEffectStyle get backdropStyle => visibleToolbarBackdrop(
+    appBar?.scrollEdgeEffectStyle ?? AdaptiveScrollEdgeEffectStyle.none,
+    scrolledUnder: scrolledUnder,
+  );
 
   /// The page's title when it has to be drawn by Flutter (a custom widget, or
   /// a title with a subtitle), already styled for the page's theme. Null

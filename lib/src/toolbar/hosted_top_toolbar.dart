@@ -2,15 +2,17 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 
 import '../style/sf_symbol.dart';
+import '../widgets/adaptive_app_bar.dart';
 import '../widgets/adaptive_app_bar_action.dart';
 import '../widgets/adaptive_button.dart';
 import '../widgets/ios26/ios26_native_toolbar.dart';
 import 'duo_vertical_bar.dart';
+import 'toolbar_backdrop.dart';
 import 'toolbar_blend.dart';
 import 'toolbar_registry.dart';
 
 /// Height of the toolbar's content area, excluding the status bar.
-const double kHostedToolbarHeight = 44.0;
+const double kHostedToolbarHeight = kToolbarContentHeight;
 
 /// What one page contributes to the top toolbar.
 @immutable
@@ -112,20 +114,12 @@ class HostedTopToolbar extends StatelessWidget {
       (false, false) => null,
     };
 
-    // The bar's backdrop belongs to the chrome, not to a page: it only fades
-    // when the toolbar as a whole comes or goes.
-    final Animation<double> backdropOpacity = switch ((
-      upper.isEmpty,
-      lower.isEmpty,
-    )) {
-      (false, false) => kAlwaysCompleteAnimation,
-      (false, true) =>
-        blend.isBlending && lowerEntry != null
-            ? upperOpacity
-            : kAlwaysCompleteAnimation,
-      (true, false) => lowerOpacity,
-      (true, true) => kAlwaysDismissedAnimation,
-    };
+    final upperStyle = upper.isEmpty
+        ? AdaptiveScrollEdgeEffectStyle.none
+        : upperEntry!.backdropStyle;
+    final lowerStyle = lower.isEmpty
+        ? AdaptiveScrollEdgeEffectStyle.none
+        : lowerEntry!.backdropStyle;
 
     return Align(
       alignment: Alignment.topCenter,
@@ -143,13 +137,25 @@ class HostedTopToolbar extends StatelessWidget {
               fit: StackFit.expand,
               clipBehavior: Clip.none,
               children: [
-                FadeTransition(
-                  key: const ValueKey<String>('adaptive_toolbar_backdrop'),
-                  opacity: backdropOpacity,
-                  child: titleOnly
-                      ? const DuoTitleBackdrop()
-                      : const _Backdrop(),
-                ),
+                if (lowerStyle != upperStyle &&
+                    lowerStyle != AdaptiveScrollEdgeEffectStyle.none)
+                  FadeTransition(
+                    opacity: lowerOpacity,
+                    child: ToolbarBackdrop(
+                      style: lowerStyle,
+                      titleOnly: titleOnly,
+                    ),
+                  ),
+                if (upperStyle != AdaptiveScrollEdgeEffectStyle.none)
+                  FadeTransition(
+                    opacity: lowerEntry == null || upperStyle == lowerStyle
+                        ? kAlwaysCompleteAnimation
+                        : upperOpacity,
+                    child: ToolbarBackdrop(
+                      style: upperStyle,
+                      titleOnly: titleOnly,
+                    ),
+                  ),
                 if (lowerEntry != null && !lower.isEmpty)
                   _layer(
                     key: ValueKey<Object>(lowerEntry.id),
@@ -246,45 +252,6 @@ class HostedTopToolbar extends StatelessWidget {
         MediaQuery.sizeOf(context) * MediaQuery.devicePixelRatioOf(context);
     return (display.longestSide - viewport.longestSide).abs() > 1 ||
         (display.shortestSide - viewport.shortestSide).abs() > 1;
-  }
-}
-
-/// The soft gradient that keeps the bar readable over scrolling content.
-class _Backdrop extends StatelessWidget {
-  const _Backdrop();
-
-  @override
-  Widget build(BuildContext context) {
-    final dark = MediaQuery.platformBrightnessOf(context) == Brightness.dark;
-    final base = dark ? const Color(0xFF000000) : const Color(0xFFFFFFFF);
-    return IgnorePointer(
-      child: OverflowBox(
-        alignment: Alignment.topCenter,
-        maxHeight: double.infinity,
-        child: LayoutBuilder(
-          builder: (context, constraints) => Container(
-            // Runs on below the bar for a smooth fade into the content.
-            height:
-                MediaQuery.viewPaddingOf(context).top +
-                kHostedToolbarHeight +
-                30,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                stops: const [0.0, 0.4, 0.7, 1.0],
-                colors: [
-                  base.withValues(alpha: 0.85),
-                  base.withValues(alpha: 0.6),
-                  base.withValues(alpha: 0.2),
-                  base.withValues(alpha: 0.0),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
   }
 }
 
