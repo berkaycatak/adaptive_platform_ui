@@ -261,43 +261,58 @@ void main() {
     final scale = pixelRatios.currentValue!;
     tester.view.devicePixelRatio = scale.toDouble();
     addTearDown(tester.view.resetDevicePixelRatio);
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: ThemeData.dark().copyWith(scaffoldBackgroundColor: surface),
-        home: Align(
-          alignment: Alignment.topLeft,
-          child: RepaintBoundary(
-            key: key,
-            child: SizedBox(
-              width: 160,
-              height: 140,
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  const Row(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Expanded(child: ColoredBox(color: surface)),
-                      Expanded(child: ColoredBox(color: Color(0xff404040))),
-                      Expanded(child: ColoredBox(color: Color(0xff204060))),
-                    ],
-                  ),
-                  const Positioned(
-                    left: 0,
-                    right: 0,
-                    top: 0,
-                    height: 106,
-                    child: ToolbarBackdrop(style: hard, titleOnly: false),
-                  ),
-                ],
+    Future<_ReadPixel> render([HardEdgeAppearance? appearance]) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData.dark().copyWith(scaffoldBackgroundColor: surface),
+          home: Align(
+            alignment: Alignment.topLeft,
+            child: RepaintBoundary(
+              key: key,
+              child: SizedBox(
+                width: 160,
+                height: 140,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    const Row(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Expanded(child: ColoredBox(color: surface)),
+                        Expanded(child: ColoredBox(color: Color(0xff404040))),
+                        Expanded(child: ColoredBox(color: Color(0xff204060))),
+                      ],
+                    ),
+                    Positioned(
+                      left: 0,
+                      right: 0,
+                      top: 0,
+                      height: 106,
+                      child: ToolbarBackdrop(
+                        style: hard,
+                        titleOnly: false,
+                        hardEdge: appearance,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
         ),
-      ),
-    );
-    await tester.pumpAndSettle();
-    final pixel = await _capturePixels(tester, key, scale: scale);
+      );
+      await tester.pumpAndSettle();
+      return _capturePixels(tester, key, scale: scale);
+    }
+
+    final pixel = await render();
+    final appearance = resolveHardEdge(tester.element(backdrop), null);
+    final withoutSeparator = await render((
+      surface: appearance.surface,
+      edgeOpacity: appearance.edgeOpacity,
+      separator: Colors.transparent,
+    ));
+    const separatorAlpha = 0x1A / 255;
     int channel(int x, int row, int c) => pixel(x * scale, row, c);
     final edge = 118 * scale - 1;
     for (final x in [25, 80, 135]) {
@@ -312,10 +327,12 @@ void main() {
             expect(channel(x, row, c), closeTo(surfaceChannel, 2));
           }
         }
-        final backdrop = channel(x, edge - 1, c);
+        // Sample the same physical pixel in both renders. The row above it
+        // has a different tint, especially near the end of the gradient.
+        final base = withoutSeparator(x * scale, edge, c);
         expect(
           channel(x, edge, c),
-          closeTo(backdrop + 0.10 * (255 - backdrop), 2),
+          closeTo(base + separatorAlpha * (255 - base), 2),
         );
         expect(channel(x, edge + 1, c), page);
       }
