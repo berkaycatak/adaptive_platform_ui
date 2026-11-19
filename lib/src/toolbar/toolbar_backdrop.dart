@@ -22,17 +22,18 @@ typedef HardEdgeAppearance = ({
   double edgeOpacity,
 });
 
+// Both materials fade toward the background that CupertinoPageScaffold paints.
+Color resolveToolbarSurface(BuildContext context, Color? backgroundColor) =>
+    CupertinoDynamicColor.maybeResolve(backgroundColor, context) ??
+    CupertinoTheme.of(context).scaffoldBackgroundColor;
+
 HardEdgeAppearance resolveHardEdge(
   BuildContext context,
   Color? backgroundColor,
 ) {
   final dark = CupertinoTheme.brightnessOf(context) == Brightness.dark;
   return (
-    // Match CupertinoPageScaffold, even when the fixed host is outside the
-    // page's theme or the page overrides its background with a dynamic color.
-    surface:
-        CupertinoDynamicColor.maybeResolve(backgroundColor, context) ??
-        CupertinoTheme.of(context).scaffoldBackgroundColor,
+    surface: resolveToolbarSurface(context, backgroundColor),
     separator: dark
         ? const Color(0x1AFFFFFF)
         : CupertinoColors.opaqueSeparator.resolveFrom(context),
@@ -57,17 +58,23 @@ class ToolbarBackdrop extends StatelessWidget {
     required this.style,
     required this.titleOnly,
     this.hardEdge,
+    this.softEdgeSurface,
   });
 
   final AdaptiveScrollEdgeEffectStyle style;
   final bool titleOnly;
   final HardEdgeAppearance? hardEdge;
+  final Color? softEdgeSurface;
 
   @override
   Widget build(BuildContext context) => switch (style) {
     AdaptiveScrollEdgeEffectStyle.none => const SizedBox.shrink(),
     AdaptiveScrollEdgeEffectStyle.soft =>
-      titleOnly ? const DuoTitleBackdrop() : const _SoftBackdrop(),
+      titleOnly
+          ? const DuoTitleBackdrop()
+          : _SoftBackdrop(
+              surface: softEdgeSurface ?? resolveToolbarSurface(context, null),
+            ),
     AdaptiveScrollEdgeEffectStyle.hard => _HardBackdrop(
       appearance: hardEdge ?? resolveHardEdge(context, null),
     ),
@@ -125,6 +132,19 @@ class _HardBackdrop extends StatelessWidget {
 
 class _EdgeGradient extends CustomPainter {
   const _EdgeGradient(this.gradient, this.blendMode, {this.falloffHeight = 32});
+
+  factory _EdgeGradient.softTint(Color surface) {
+    // At inline-title height, scrolling letters retain about a quarter of
+    // their unfiltered ink before blur spreads it across adjacent pixels.
+    return _EdgeGradient(
+      _gradient(
+        surface,
+        (t) => 0.87 * (1 - t * t * (3 - 2 * t)) * (1 - 0.34 * t),
+      ),
+      BlendMode.srcOver,
+      falloffHeight: 81,
+    );
+  }
 
   factory _EdgeGradient.hardTint(HardEdgeAppearance appearance) {
     // Native hard edges leave about 10% of the scrolling content visible at
@@ -187,9 +207,11 @@ class _EdgeGradient extends CustomPainter {
 
 /// The horizontal soft edge blurs scrolling detail before it reaches the bar.
 class _SoftBackdrop extends StatelessWidget {
-  const _SoftBackdrop();
+  const _SoftBackdrop({required this.surface});
 
-  static final _blur = ImageFilter.blur(sigmaX: 1.5, sigmaY: 1.5);
+  final Color surface;
+
+  static final _blur = ImageFilter.blur(sigmaX: 1.9, sigmaY: 1.9);
   // Fine detail clears from 24 points above the bottom of the toolbar to
   // 16 below it. Measure the falloff from that edge in every orientation.
   static const _blurMask = _EdgeGradient(
@@ -210,8 +232,6 @@ class _SoftBackdrop extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dark = MediaQuery.platformBrightnessOf(context) == Brightness.dark;
-    final base = dark ? const Color(0xFF000000) : const Color(0xFFFFFFFF);
     return IgnorePointer(
       child: Stack(
         clipBehavior: Clip.none,
@@ -227,22 +247,7 @@ class _SoftBackdrop extends StatelessWidget {
           ),
           Positioned.fill(
             bottom: -44,
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  stops: const [0.0, 0.4, 0.7, 0.9, 1.0],
-                  colors: [
-                    base.withValues(alpha: 0.85),
-                    base.withValues(alpha: 0.6),
-                    base.withValues(alpha: 0.2),
-                    base.withValues(alpha: 0.025),
-                    base.withValues(alpha: 0.0),
-                  ],
-                ),
-              ),
-            ),
+            child: CustomPaint(painter: _EdgeGradient.softTint(surface)),
           ),
         ],
       ),

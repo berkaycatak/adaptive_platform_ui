@@ -404,6 +404,11 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
         id: this,
         appBar: widget.appBar,
         scrolledUnder: _scrolledUnder,
+        softEdgeSurface:
+            widget.appBar?.scrollEdgeEffectStyle ==
+                AdaptiveScrollEdgeEffectStyle.soft
+            ? resolveToolbarSurface(context, widget.backgroundColor)
+            : null,
         hardEdge: _usesHardEdge
             ? resolveHardEdge(context, widget.backgroundColor)
             : null,

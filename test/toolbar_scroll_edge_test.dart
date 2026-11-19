@@ -73,6 +73,26 @@ Future<_ReadPixel> _renderStripes(
                     Expanded(child: ColoredBox(color: paper)),
                   ],
                 ),
+                // A 12-point cap height and 2-point stems approximate a
+                // 17-point label without depending on the test runner's font.
+                if (style == AdaptiveScrollEdgeEffectStyle.soft)
+                  for (final offset in [-22, 4, 32])
+                    Positioned(
+                      left: 94,
+                      top: barHeight + offset - 6,
+                      child: Column(
+                        children: [
+                          ColoredBox(
+                            color: ink,
+                            child: const SizedBox(width: 10, height: 2),
+                          ),
+                          ColoredBox(
+                            color: ink,
+                            child: const SizedBox(width: 2, height: 10),
+                          ),
+                        ],
+                      ),
+                    ),
                 Positioned(
                   left: 0,
                   right: 0,
@@ -159,6 +179,12 @@ void main() {
           expect(detail(0), closeTo(0.50, 0.12));
           expect(detail(10), closeTo(0.84, 0.10));
           expect(detail(18), closeTo(1, 0.025));
+          // Absolute contrast through the glyph's stem catches a material
+          // that blurs thin stripes but still leaves list labels readable.
+          double stemContrast(int offset) => contrast(99, 115, offset) / 255;
+          expect(stemContrast(-22), inExclusiveRange(0.03, 0.20));
+          expect(stemContrast(4), inExclusiveRange(0.38, 0.72));
+          expect(stemContrast(32), greaterThan(0.93));
           expect(contrast(12, 108, 22), lessThan(255));
           expect(contrast(12, 108, 45), 255);
         }
@@ -443,10 +469,13 @@ void main() {
     expect(scroll.offset, 80);
   });
 
-  testWidgets('a back swipe blends the two hard scaffold colors', (
-    tester,
-  ) async {
+  final tintedStyles = ValueVariant<AdaptiveScrollEdgeEffectStyle>({
+    soft,
+    hard,
+  });
+  testWidgets('a back swipe blends the two scaffold colors', (tester) async {
     usePhone(tester);
+    final style = tintedStyles.currentValue!;
     const first = Color(0xff602040);
     const second = Color(0xff204060);
     final nav = GlobalKey<NavigatorState>();
@@ -456,14 +485,17 @@ void main() {
     addTearDown(detailScroll.dispose);
     Widget page(Color surface, ScrollController scroll) => AdaptiveScaffold(
       backgroundColor: surface,
-      appBar: const AdaptiveAppBar(title: 'Page', scrollEdgeEffectStyle: hard),
+      appBar: AdaptiveAppBar(title: 'Page', scrollEdgeEffectStyle: style),
       body: ListView(
         controller: scroll,
         children: const [SizedBox(height: 3000)],
       ),
     );
-    Color? color() =>
-        tester.widget<ToolbarBackdrop>(backdrop).hardEdge?.surface;
+    Color? color() {
+      final widget = tester.widget<ToolbarBackdrop>(backdrop);
+      return style == soft ? widget.softEdgeSurface : widget.hardEdge?.surface;
+    }
+
     await tester.pumpWidget(
       hostedApp(navigatorKey: nav, home: page(first, rootScroll)),
     );
@@ -491,11 +523,11 @@ void main() {
     nav.currentState!.pop();
     await tester.pumpAndSettle();
     expect(color(), first);
-  });
+  }, variant: tintedStyles);
 
   for (final hosted in [false, true]) {
     testWidgets(
-      'hard edge renders the page surface (hosted: $hosted)',
+      'toolbar edge renders the page surface (hosted: $hosted)',
       (tester) async {
         usePhone(tester);
         tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
@@ -516,14 +548,15 @@ void main() {
           CupertinoThemeData theme,
           Color expected, {
           Color? override,
+          AdaptiveScrollEdgeEffectStyle style = hard,
         }) async {
           final page = CupertinoTheme(
             data: theme,
             child: AdaptiveScaffold(
               backgroundColor: override,
-              appBar: const AdaptiveAppBar(
+              appBar: AdaptiveAppBar(
                 title: 'Page',
-                scrollEdgeEffectStyle: hard,
+                scrollEdgeEffectStyle: style,
               ),
               body: ListView(
                 padding: EdgeInsets.zero,
@@ -544,12 +577,15 @@ void main() {
           expect(backdrop, findsOneWidget);
           final pixel = await _capturePixels(tester, boundary);
           final tint = Color.alphaBlend(
-            expected.withValues(alpha: expected.a * 0.90),
+            expected.withValues(
+              alpha: expected.a * (style == soft ? 0.87 : 0.90),
+            ),
             content,
           );
           for (final (i, value) in [tint.r, tint.g, tint.b].indexed) {
             expect(pixel(290, 60, i), closeTo(value * 255, 2));
           }
+          if (style == soft) return;
           final separator = CupertinoColors.opaqueSeparator.color;
           for (final (i, lightChannel) in [
             separator.r,
@@ -579,6 +615,19 @@ void main() {
         await check(light, translucent, override: translucent);
         await check(light, Colors.transparent, override: Colors.transparent);
         await check(light, lightPage);
+        await check(dark, darkPage, style: soft);
+        await check(
+          light,
+          dynamicSurface.color,
+          override: dynamicSurface,
+          style: soft,
+        );
+        await check(
+          light,
+          Colors.transparent,
+          override: Colors.transparent,
+          style: soft,
+        );
       },
       variant: TargetPlatformVariant.only(TargetPlatform.iOS),
     );
