@@ -20,7 +20,10 @@ class _ListTileDemoPageState extends State<ListTileDemoPage> {
         : Theme.of(context).brightness == Brightness.dark;
 
     return AdaptiveScaffold(
-      appBar: AdaptiveAppBar(title: 'List Tile'),
+      appBar: AdaptiveAppBar(
+        title: 'List Tile',
+        scrollEdgeEffectStyle: AdaptiveScrollEdgeEffectStyle.hard,
+      ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
