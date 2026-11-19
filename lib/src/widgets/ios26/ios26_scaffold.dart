@@ -404,6 +404,11 @@ class _IOS26ScaffoldState extends State<IOS26Scaffold>
                   ToolbarBackdrop(
                     style: widget.backdropStyle,
                     titleOnly: duoVerticalPose,
+                    hardEdge:
+                        widget.backdropStyle ==
+                            AdaptiveScrollEdgeEffectStyle.hard
+                        ? resolveHardEdge(context, widget.backgroundColor)
+                        : null,
                   ),
                 if (duoVerticalPose)
                   DuoToolbarTitle(

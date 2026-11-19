@@ -324,6 +324,7 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
           _contentUnderTop(scrollable.position);
     }
     if (oldWidget.appBar != widget.appBar ||
+        oldWidget.backgroundColor != widget.backgroundColor ||
         oldWidget.useFixedToolbar != widget.useFixedToolbar ||
         oldWidget.tabBarHidden != widget.tabBarHidden ||
         oldWidget.bottomNavigationBar != widget.bottomNavigationBar) {
@@ -403,6 +404,9 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
         id: this,
         appBar: widget.appBar,
         scrolledUnder: _scrolledUnder,
+        hardEdge: _usesHardEdge
+            ? resolveHardEdge(context, widget.backgroundColor)
+            : null,
         route: ModalRoute.of(context),
         navigator: navigator,
         enclosingRoutes: enclosingRoutes,
