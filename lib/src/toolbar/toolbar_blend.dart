@@ -46,8 +46,7 @@ class ToolbarBlend extends ChangeNotifier {
   /// 0 while the owner is in front, 1 while a dialog or sheet covers it.
   final AnimationController _cover;
 
-  /// How far a bottom sheet has risen over the chrome: 0 while it is clear
-  /// of it, 1 once it covers it. Set by the sheet as it moves.
+  /// 0 with no sheet, 1 while a bottom sheet covers the toolbar.
   final AnimationController _sheetCover;
 
   Object? _ownerId;
@@ -73,16 +72,15 @@ class ToolbarBlend extends ChangeNotifier {
   /// must not react.
   bool get ownerIsCovered => owner?.isCovered ?? false;
 
-  /// Opacity of the whole chrome: full in front, dimmed while covered, and
-  /// gone while a bottom sheet rises over it.
+  /// Opacity of the whole chrome: full in front, dimmed while covered,
+  /// hidden under a bottom sheet.
   late final Animation<double> chromeOpacity = AnimationMin<double>(
     _cover.drive(Tween<double>(begin: 1, end: kToolbarCoveredOpacity)),
     _sheetCover.drive(Tween<double>(begin: 1, end: 0)),
   );
 
-  /// Reports how far a bottom sheet covers the chrome, from 0 (clear of it)
-  /// to 1 (over it). The chrome is drawn above every route, so a sheet that
-  /// reaches the top would otherwise sit under it.
+  /// Fades the chrome out as a bottom sheet covers it, from 0 (no sheet) to
+  /// 1 (hidden). Sheets report this through `ToolbarChromeScope.onSheetCover`.
   void setSheetCover(double value) {
     if (_disposed) return;
     _sheetCover.value = value.clamp(0.0, 1.0);

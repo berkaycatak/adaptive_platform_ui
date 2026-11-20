@@ -76,5 +76,26 @@ void main() {
         expect(platformCount, equals(1));
       }
     });
+
+    test('debug overrides force the platform and iOS version', () {
+      addTearDown(() {
+        PlatformInfo.debugIsIOSOverride = null;
+        PlatformInfo.debugIOSVersionOverride = null;
+      });
+
+      PlatformInfo.debugIsIOSOverride = true;
+      PlatformInfo.debugIOSVersionOverride = 26;
+      expect(PlatformInfo.isIOS, isTrue);
+      expect(PlatformInfo.isIOS26OrHigher(), isTrue);
+      expect(PlatformInfo.platformDescription, 'iOS 26');
+
+      PlatformInfo.debugIOSVersionOverride = 18;
+      expect(PlatformInfo.isIOS26OrHigher(), isFalse);
+      expect(PlatformInfo.isIOS18OrLower(), isTrue);
+
+      PlatformInfo.debugIsIOSOverride = false;
+      expect(PlatformInfo.isIOS, isFalse);
+      expect(PlatformInfo.iOSVersion, 0);
+    });
   });
 }

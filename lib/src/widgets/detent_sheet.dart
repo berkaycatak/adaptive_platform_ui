@@ -1,24 +1,25 @@
 import 'dart:math' as math;
 
-import 'package:flutter/cupertino.dart';
+import 'package:cupertino_ui/cupertino_ui.dart';
 
-/// A height a bottom sheet rests at, like `UISheetPresentationController.Detent`.
+/// A height an `AdaptiveBottomSheet` can rest at
 ///
-/// The fraction is of the height the sheet may take: the screen below the top
-/// safe area (and the keyboard, when it is up).
+/// Like UIKit's `UISheetPresentationController.Detent`: [medium] is half the
+/// available height, [large] is all of it, and [AdaptiveSheetDetent.fraction]
+/// is any share of it.
 @immutable
 class AdaptiveSheetDetent {
-  /// A detent at [fraction] of the available height, from just above 0 to 1.
+  /// A detent at [fraction] of the available height, in (0, 1]
   const AdaptiveSheetDetent.fraction(this.fraction)
     : assert(fraction > 0 && fraction <= 1);
 
-  /// About half the available height, like the system's `.medium` detent.
+  /// Half the available height
   static const AdaptiveSheetDetent medium = AdaptiveSheetDetent.fraction(0.5);
 
-  /// The full available height, like the system's `.large` detent.
+  /// The full available height
   static const AdaptiveSheetDetent large = AdaptiveSheetDetent.fraction(1.0);
 
-  /// The share of the available height the sheet takes at this detent.
+  /// Share of the available height, in (0, 1]
   final double fraction;
 
   @override
@@ -32,24 +33,16 @@ class AdaptiveSheetDetent {
   String toString() => 'AdaptiveSheetDetent(${fraction.toStringAsFixed(2)})';
 }
 
-/// Builds the surface around a sheet's contents for the current [extent], the
-/// fraction of the available height the sheet takes right now.
+/// Wraps the sheet's scroll view in its background, given the current extent
 typedef SheetChromeBuilder =
     Widget Function(BuildContext context, double extent, Widget child);
 
-/// The draggable part of every adaptive bottom sheet: it rests at [detents],
-/// snaps between them, and pops its route when dragged or flung away.
+/// A sheet that rests at [detents], snaps between them and, when
+/// [isDismissible], pops its route when dragged down past the smallest one
 ///
-/// The drag handle and the contents sit in one scroll view driven by a
-/// [DraggableScrollableSheet], so dragging anywhere outside a scrollable of
-/// the contents moves the sheet. A scrollable inside the contents scrolls on
-/// its own.
-///
-/// Below the smallest detent the contents keep that detent's height and are
-/// cut at the bottom, so the sheet looks like it slides away instead of
-/// squeezing its layout.
+/// Shared by the Material sheet and `IOSBottomSheetRoute`; each draws its own
+/// background with [chromeBuilder].
 class DetentSheet extends StatefulWidget {
-  /// Creates a sheet that rests at [detents].
   const DetentSheet({
     super.key,
     required this.detents,
@@ -60,25 +53,19 @@ class DetentSheet extends StatefulWidget {
     required this.builder,
   }) : assert(detents.length > 0);
 
-  /// The heights the sheet rests at, in any order.
   final List<AdaptiveSheetDetent> detents;
 
-  /// The detent the sheet opens at; the smallest one when null.
   final AdaptiveSheetDetent? initialDetent;
 
-  /// Whether dragging the sheet down past its smallest detent dismisses it.
   final bool isDismissible;
 
-  /// Drawn above the contents; dragging it moves the sheet.
   final Widget? dragHandle;
 
-  /// Wraps the drag handle and contents in the platform's surface.
   final SheetChromeBuilder chromeBuilder;
 
-  /// Builds the sheet's contents.
   final WidgetBuilder builder;
 
-  /// The detent fractions, ascending and without duplicates.
+  /// The detents' fractions, without duplicates, smallest first
   static List<double> sizesOf(List<AdaptiveSheetDetent> detents) =>
       detents.map((d) => d.fraction).toSet().toList()..sort();
 
@@ -109,9 +96,10 @@ class _DetentSheetState extends State<DetentSheet> {
 
   bool _handleExtent(DraggableScrollableNotification notification) {
     _extent.value = notification.extent;
+    // A dismissible sheet may be dragged down to 0; popping there, after the
+    // frame, closes it without a second animation from the route.
     if (widget.isDismissible && !_closing && notification.extent <= 0.001) {
       _closing = true;
-      // The notification can arrive mid-layout; pop once the frame is done.
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
         if (ModalRoute.of(context)?.isCurrent ?? false) {
@@ -136,8 +124,6 @@ class _DetentSheetState extends State<DetentSheet> {
             maxChildSize: sizes.last,
             snap: true,
             snapSizes: sizes,
-            // The sheet pops its own route; a Material bottom sheet around it
-            // must not close at the non-dismissible minimum.
             shouldCloseOnMinExtent: false,
             builder: (context, scrollController) {
               final scrollView = CustomScrollView(
@@ -146,13 +132,14 @@ class _DetentSheetState extends State<DetentSheet> {
                 slivers: [
                   if (widget.dragHandle != null)
                     SliverToBoxAdapter(child: widget.dragHandle),
+                  // The contents fill what the handle leaves of the sheet.
+                  // Below the smallest detent they keep that detent's height
+                  // and slide off screen instead of being squashed.
                   SliverLayoutBuilder(
                     builder: (context, sliver) {
                       final remaining =
                           sliver.viewportMainAxisExtent -
                           sliver.precedingScrollExtent;
-                      // Below the smallest detent, keep the height the
-                      // contents had there and cut them at the bottom.
                       final hidden =
                           math.max(0.0, sizes.first - _extent.value) *
                           constraints.maxHeight;
@@ -180,9 +167,8 @@ class _DetentSheetState extends State<DetentSheet> {
   }
 }
 
-/// The capsule at the top of an iOS sheet.
+/// The iOS sheet grabber: a short rounded bar at the top of the sheet
 class SheetGrabber extends StatelessWidget {
-  /// Creates the grabber of an iOS sheet.
   const SheetGrabber({super.key});
 
   @override

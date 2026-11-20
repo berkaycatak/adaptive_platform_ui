@@ -1,6 +1,6 @@
 import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
+import 'package:cupertino_ui/cupertino_ui.dart';
+import 'package:material_ui/material_ui.dart';
 
 class BottomSheetDemoPage extends StatefulWidget {
   const BottomSheetDemoPage({super.key});
@@ -56,8 +56,7 @@ class _BottomSheetDemoPageState extends State<BottomSheetDemoPage> {
           _buildSection(
             isDark,
             title: 'Full Height',
-            description:
-                'A single large detent: the page sheet on iOS 18 and below',
+            description: 'A single large detent: the system page sheet on iOS',
             child: AdaptiveButton(
               label: 'Show Full Height Sheet',
               style: AdaptiveButtonStyle.tinted,

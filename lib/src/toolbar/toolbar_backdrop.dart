@@ -1,6 +1,6 @@
 import 'dart:ui' show ImageFilter, lerpDouble;
 
-import 'package:flutter/cupertino.dart';
+import 'package:cupertino_ui/cupertino_ui.dart';
 
 import '../widgets/adaptive_app_bar.dart';
 import 'duo_vertical_bar.dart';
