@@ -7,8 +7,8 @@ screenshots:
     path: img/liquid-glass-demo.png
 
 environment:
-  sdk: ^3.9.2
-  flutter: ">=1.17.0"
+  sdk: ^3.14.0
+  flutter: ">=3.50.0"
 
 dependencies:
   flutter:
@@ -17,11 +17,13 @@ dependencies:
   # iOS size classes bridged to Dart. Used to place the iOS 26 toolbar on the
   # trailing edge on the Duo inner display.
   foldable: ^1.0.3
+  material_ui: ^1.9.0
+  cupertino_ui: ^1.1.5
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^5.0.0
+  flutter_lints: ^6.0.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

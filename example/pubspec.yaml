@@ -4,26 +4,24 @@ version: 0.1.0
 publish_to: 'none'
 
 environment:
-  sdk: ^3.9.2
-  flutter: ">=1.17.0"
-
+  sdk: ^3.14.0
+  flutter: ">=3.50.0"
 
 dependencies:
-  go_router: ^15.1.2
-  cupertino_icons: ^1.0.8
+  go_router: ^18.1.4
+  cupertino_icons: ^2.0.0
   intl: ^0.20.2
   adaptive_platform_ui:
     path: ../
   flutter:
     sdk: flutter
-  # cupertino: ^0.0.1
-  flutter_localizations:
-    sdk: flutter
+  material_ui: ^1.9.0
+  cupertino_ui: ^1.1.5
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^5.0.0
+  flutter_lints: ^6.0.0
 
 flutter:
   uses-material-design: true

@@ -36,3 +36,6 @@ migrate_working_dir/
 
 # Swift Package Manager build output
 ios/adaptive_platform_ui/.build/
+
+# FVM Version Cache
+.fvm/

@@ -1,6 +1,6 @@
-import 'package:flutter/cupertino.dart';
+import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 import 'adaptive_badge.dart';
 import 'adaptive_popup_menu_button.dart';
@@ -230,9 +230,9 @@ class AdaptiveAppBarAction {
   /// Convert action to map for native platform channel (iOS 26+ only)
   Map<String, dynamic> toNativeMap() {
     return {
-      if (iosSymbol != null) 'icon': iosSymbol!,
-      if (title != null) 'title': title!,
-      if (effectiveLabel != null) 'label': effectiveLabel!,
+      'icon': ?iosSymbol,
+      'title': ?title,
+      'label': ?effectiveLabel,
       'spacerAfter': spacerAfter.index, // 0=none, 1=fixed, 2=flexible
       if (prominent) 'prominent': true,
       if (tintColor != null) 'tint': tintColor!.toARGB32(),
