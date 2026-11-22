@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/cupertino.dart';
@@ -182,6 +183,7 @@ class IOS26GlassCapsule extends StatefulWidget {
     this.inset = 0,
     this.tint,
     this.showLabels = false,
+    this.expandOnLensDrag = false,
     this.native = true,
   });
 
@@ -203,6 +205,13 @@ class IOS26GlassCapsule extends StatefulWidget {
   /// [labeledTabsHeight] for it.
   final bool showLabels;
 
+  /// Whether the capsule grows while its lens is held, and shows each item's
+  /// label under its icon until it is let go, as the vertical tab bar of the
+  /// iPhone Duo does: wider ([labeledWidth]) and [lensItemGrowth] taller a
+  /// tab, around the place it has (what is beside it does not move). See
+  /// [lensExpandedSize].
+  final bool expandOnLensDrag;
+
   /// Whether the capsule is the native view. Off, it is drawn by Flutter with
   /// the same layout, for a moment when a native view would be wrong (under
   /// another route or a dimming overlay, in a hero flight).
@@ -219,6 +228,21 @@ class IOS26GlassCapsule extends StatefulWidget {
 
   /// Height of a tab capsule of [count] labeled tabs, with [tabsInset].
   static double labeledTabsHeight(int count) => tabsInset * 2 + count * 60.0;
+
+  /// How much taller each item gets while the lens is held
+  /// ([expandOnLensDrag]), for its label under the icon.
+  static const double lensItemGrowth = 6;
+
+  /// How long the capsule takes to grow, or to go back, around a held lens.
+  static const Duration lensExpandDuration = Duration(milliseconds: 320);
+
+  /// The size of a capsule of [count] items, [compact] at rest, while its lens
+  /// is held ([expandOnLensDrag]): as wide as a labeled capsule (never
+  /// narrower than it is) and [lensItemGrowth] taller a tab.
+  static Size lensExpandedSize(Size compact, int count) => Size(
+    math.max(compact.width, labeledWidth),
+    compact.height + count * lensItemGrowth,
+  );
 
   /// Width of every control in the trailing bar, as measured on the system's
   /// own bar.
@@ -239,6 +263,10 @@ class _IOS26GlassCapsuleState extends State<IOS26GlassCapsule> {
   MethodChannel? _channel;
   Map<String, dynamic>? _sent;
 
+  /// Whether the native view reports its lens held, so the capsule is grown
+  /// ([IOS26GlassCapsule.expandOnLensDrag]).
+  bool _lensHeld = false;
+
   bool get _isDark =>
       MediaQuery.platformBrightnessOf(context) == Brightness.dark;
 
@@ -251,6 +279,7 @@ class _IOS26GlassCapsuleState extends State<IOS26GlassCapsule> {
       if (widget.selectedIndex != null) 'selectedIndex': widget.selectedIndex,
       'inset': widget.inset,
       if (widget.showLabels) 'showLabels': true,
+      if (widget.expandOnLensDrag) 'expandOnLensDrag': true,
       'isDark': _isDark,
       if (tint != null) 'tint': tint.toARGB32(),
     };
@@ -259,6 +288,8 @@ class _IOS26GlassCapsuleState extends State<IOS26GlassCapsule> {
   @override
   void didUpdateWidget(IOS26GlassCapsule oldWidget) {
     super.didUpdateWidget(oldWidget);
+    // Without the native view (drawn by Flutter for a moment) no lens is held.
+    if (!widget.native || !widget.expandOnLensDrag) _lensHeld = false;
     _sync();
   }
 
@@ -301,6 +332,11 @@ class _IOS26GlassCapsuleState extends State<IOS26GlassCapsule> {
         } else if (call.method == 'onMenuItemTapped') {
           final id = (call.arguments as Map?)?['id'] as int?;
           if (id != null) widget.onMenuTap?.call(id);
+        } else if (call.method == 'onLensDrag') {
+          final held = (call.arguments as Map?)?['active'] == true;
+          if (mounted && widget.expandOnLensDrag && held != _lensHeld) {
+            setState(() => _lensHeld = held);
+          }
         }
       });
     // Catch up with anything that changed while the view was being created.
@@ -321,7 +357,9 @@ class _IOS26GlassCapsuleState extends State<IOS26GlassCapsule> {
       onPlatformViewCreated: _onCreated,
       hitTestBehavior: PlatformViewHitTestBehavior.opaque,
     );
-    if (widget.items.every((item) => item.canShowNatively)) return glass;
+    if (widget.items.every((item) => item.canShowNatively)) {
+      return _growingAroundLens(glass);
+    }
 
     // An item with only a Flutter icon (an IconData or a custom widget) has
     // nothing the native side can draw. The glass and the button stay native;
@@ -352,6 +390,41 @@ class _IOS26GlassCapsuleState extends State<IOS26GlassCapsule> {
           ),
         ),
       ],
+    );
+  }
+
+  /// [glass] grown to [IOS26GlassCapsule.lensExpandedSize] while the lens is
+  /// held, around the place it is given, which keeps its size: the native
+  /// view draws its labels in the room it gets. The touch that holds the lens
+  /// is already the native view's, so the room outside its place needs none.
+  Widget _growingAroundLens(Widget glass) {
+    if (!widget.expandOnLensDrag) return glass;
+    final duration = MediaQuery.disableAnimationsOf(context)
+        ? Duration.zero
+        : IOS26GlassCapsule.lensExpandDuration;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final compact = constraints.biggest;
+        if (!compact.isFinite) return glass;
+        final target = _lensHeld
+            ? IOS26GlassCapsule.lensExpandedSize(compact, widget.items.length)
+            : compact;
+        return OverflowBox(
+          minWidth: 0,
+          minHeight: 0,
+          maxWidth: double.infinity,
+          maxHeight: double.infinity,
+          child: TweenAnimationBuilder<Size?>(
+            tween: SizeTween(end: target),
+            duration: duration,
+            // Out quickly, with a touch of overshoot, as the glass does.
+            curve: _lensHeld ? Curves.easeOutBack : Curves.easeOutCubic,
+            builder: (context, size, child) =>
+                SizedBox.fromSize(size: size ?? compact, child: child),
+            child: glass,
+          ),
+        );
+      },
     );
   }
 

@@ -256,4 +256,98 @@ final class GlassCapsuleViewTests: XCTestCase {
         capsule.endLensDrag(committed: false)
         XCTAssertFalse(messenger.calls.contains { $0.method == "onItemTapped" })
     }
+
+    // MARK: Growing while the lens is held (iPhone Duo)
+
+    private var lensDragCalls: [Bool] {
+        messenger.calls
+            .filter { $0.method == "onLensDrag" }
+            .compactMap { ($0.arguments as? [String: Any])?["active"] as? Bool }
+    }
+
+    func testHoldingTheLensTellsDartAndShowsTheLabels() {
+        makeCapsule(["items": Self.tabs(5), "selectedIndex": 1, "expandOnLensDrag": true])
+        XCTAssertTrue(buttons.allSatisfy { $0.configuration?.attributedTitle == nil })
+
+        capsule.beginLensDrag()
+        XCTAssertEqual(lensDragCalls, [true])
+        XCTAssertTrue(buttons.allSatisfy { $0.configuration?.attributedTitle != nil })
+
+        capsule.endLensDrag(committed: false)
+        XCTAssertEqual(lensDragCalls, [true, false])
+        XCTAssertTrue(buttons.allSatisfy { $0.configuration?.attributedTitle == nil })
+    }
+
+    func testLettingGoOnAnotherTabReportsTheTabLast() {
+        makeCapsule(["items": Self.tabs(5), "selectedIndex": 1, "expandOnLensDrag": true])
+        capsule.beginLensDrag()
+        capsule.moveLensDrag(toY: capsule.tabCenterY(at: 3))
+        capsule.endLensDrag(committed: true)
+
+        XCTAssertEqual(lensDragCalls, [true, false])
+        XCTAssertEqual(messenger.calls.last?.method, "onItemTapped")
+    }
+
+    func testWithoutExpandOnLensDragNothingChanges() {
+        makeCapsule(["items": Self.tabs(5), "selectedIndex": 1])
+        capsule.beginLensDrag()
+        XCTAssertTrue(lensDragCalls.isEmpty)
+        XCTAssertTrue(buttons.allSatisfy { $0.configuration?.attributedTitle == nil })
+        capsule.endLensDrag(committed: false)
+        XCTAssertTrue(lensDragCalls.isEmpty)
+    }
+
+    func testAnUpdateWhileTheLensIsHeldKeepsItWhereItIs() {
+        makeCapsule(["items": Self.tabs(5), "selectedIndex": 1, "expandOnLensDrag": true])
+        capsule.beginLensDrag()
+        capsule.moveLensDrag(toY: capsule.tabCenterY(at: 3))
+
+        messenger.invoke("update", ["items": Self.tabs(5), "selectedIndex": 1], on: Self.channel)
+        capsule.view().layoutIfNeeded()
+
+        XCTAssertEqual(
+            capsule.selectionHighlight.center.y, capsule.tabCenterY(at: 3), accuracy: 0.5)
+        // Still showing the labels: the lens is still held.
+        XCTAssertTrue(buttons.allSatisfy { $0.configuration?.attributedTitle != nil })
+    }
+
+    func testLensAndHighlightFollowTheCapsuleAsItGrows() {
+        makeCapsule(["items": Self.tabs(5), "selectedIndex": 1, "expandOnLensDrag": true])
+        capsule.beginLensDrag()
+        capsule.moveLensDrag(toY: capsule.tabCenterY(at: 3))
+
+        // Flutter gives the view the larger frame, around the same place.
+        capsule.view().frame = CGRect(x: -4, y: -15, width: 72, height: 350)
+        capsule.view().layoutIfNeeded()
+
+        let width = capsule.view().bounds.width
+        XCTAssertEqual(capsule.selectionHighlight.bounds.width, width - 6, accuracy: 0.5)
+        XCTAssertEqual(capsule.selectionHighlight.center.x, width / 2, accuracy: 0.5)
+        XCTAssertGreaterThan(capsule.lensView.bounds.width, width)
+        XCTAssertEqual(capsule.lensView.center.x, width / 2, accuracy: 0.5)
+        // Over the same tab, which moved as the capsule grew.
+        XCTAssertEqual(
+            capsule.selectionHighlight.center.y, capsule.tabCenterY(at: 3), accuracy: 0.5)
+        XCTAssertEqual(capsule.lensView.center.y, capsule.tabCenterY(at: 3), accuracy: 0.5)
+    }
+
+    func testTheHighlightStaysOnTheTabLetGoOverWhileTheCapsuleShrinks() {
+        makeCapsule(["items": Self.tabs(5), "selectedIndex": 1, "expandOnLensDrag": true])
+        capsule.view().frame = CGRect(x: -4, y: -15, width: 72, height: 350)
+        capsule.view().layoutIfNeeded()
+        capsule.beginLensDrag()
+        capsule.moveLensDrag(toY: capsule.tabCenterY(at: 3))
+        capsule.endLensDrag(committed: true)
+
+        // Flutter takes the view back to its size before Dart selects tab 3.
+        capsule.view().frame = CGRect(x: 0, y: 0, width: 64, height: 320)
+        capsule.view().layoutIfNeeded()
+        XCTAssertEqual(
+            capsule.selectionHighlight.center.y, capsule.tabCenterY(at: 3), accuracy: 0.5)
+
+        messenger.invoke("update", ["items": Self.tabs(5), "selectedIndex": 3], on: Self.channel)
+        capsule.view().layoutIfNeeded()
+        XCTAssertEqual(
+            capsule.selectionHighlight.center.y, capsule.tabCenterY(at: 3), accuracy: 0.5)
+    }
 }

@@ -78,6 +78,16 @@ class iOS26GlassCapsuleView: NSObject, FlutterPlatformView {
     private var tint: UIColor?
     private var inset: CGFloat = 0
     private var showsLabels = false
+    // On the iPhone Duo the tab bar grows while its lens is held and shows the
+    // labels under the icons until it is let go. Flutter gives the view the
+    // larger frame (it is told through "onLensDrag"); the labels are drawn
+    // here, at once, with the lens.
+    private var expandsOnLensDrag = false
+    private var lensLabels = false
+    /// How far up the icon goes when its label shows under it, so a badge
+    /// stays on the icon's corner.
+    private static let labelIconLift: CGFloat = 8
+    private var badgeCenterYs: [NSLayoutConstraint] = []
     private var stackTop: NSLayoutConstraint?
     private var stackBottom: NSLayoutConstraint?
     private var imageCache: [String: UIImage] = [:]
@@ -94,6 +104,12 @@ class iOS26GlassCapsuleView: NSObject, FlutterPlatformView {
     private let lensFeedback = UISelectionFeedbackGenerator()
     private var lensDragging = false
     private var lensNearest: Int?
+    /// Where the held lens is along the tabs, 0 over the first and 1 over the
+    /// last, so it stays over the same spot while the capsule grows.
+    private var lensTrack: CGFloat = 0
+    /// The tab a lens was let go over and reported, which keeps the highlight
+    /// until Dart answers with the selection (or does not, see endLensDrag).
+    private var pendingSelection: Int?
 
     init(
         frame: CGRect,
@@ -160,8 +176,12 @@ class iOS26GlassCapsuleView: NSObject, FlutterPlatformView {
         ])
 
         container.onLayout = { [weak self] in
-            guard let self = self, !self.lensDragging else { return }
-            self.layoutChrome(animated: false)
+            guard let self = self else { return }
+            if self.lensDragging {
+                self.followLayoutWhileDragging()
+            } else {
+                self.layoutChrome(animated: false)
+            }
         }
 
         lensPan.addTarget(self, action: #selector(lensDragged(_:)))
@@ -213,9 +233,12 @@ class iOS26GlassCapsuleView: NSObject, FlutterPlatformView {
 
         if params.keys.contains("items") {
             showsLabels = params["showLabels"] as? Bool ?? false
+            expandsOnLensDrag = params["expandOnLensDrag"] as? Bool ?? false
         }
 
         let newSelected = (params["selectedIndex"] as? NSNumber)?.intValue
+        // Dart answered a tab reported from the lens.
+        pendingSelection = nil
         let selectionChanged = newSelected != selectedIndex
         selectedIndex = newSelected
 
@@ -228,6 +251,9 @@ class iOS26GlassCapsuleView: NSObject, FlutterPlatformView {
         }
         refreshAppearance()
         container.setNeedsLayout()
+        // A held lens keeps the highlight under the finger: it settles once
+        // it is let go.
+        guard !lensDragging else { return }
         layoutChrome(animated: selectionChanged && !buttons.isEmpty)
     }
 
@@ -239,6 +265,7 @@ class iOS26GlassCapsuleView: NSObject, FlutterPlatformView {
         buttons = []
         badges.values.forEach { $0.removeFromSuperview() }
         badges = [:]
+        badgeCenterYs = []
 
         for (index, item) in items.enumerated() {
             let button = UIButton(type: .system)
@@ -281,18 +308,32 @@ class iOS26GlassCapsuleView: NSObject, FlutterPlatformView {
                 container.addSubview(badge)
                 let width = badge.widthAnchor.constraint(
                     equalToConstant: max(18, badge.intrinsicContentSize.width + 8))
+                let centerY = badge.centerYAnchor.constraint(
+                    equalTo: button.centerYAnchor, constant: badgeOffsetY)
                 NSLayoutConstraint.activate([
                     badge.heightAnchor.constraint(equalToConstant: 18),
                     width,
                     badge.centerXAnchor.constraint(equalTo: button.centerXAnchor, constant: 11),
-                    badge.centerYAnchor.constraint(equalTo: button.centerYAnchor, constant: -12),
+                    centerY,
                 ])
                 badges[index] = badge
+                badgeCenterYs.append(centerY)
             }
         }
     }
 
+    /// Whether the labels show under the icons: always on a rail, and on the
+    /// iPhone Duo while the lens is held.
+    private var labelsShown: Bool { showsLabels || lensLabels }
+
+    /// Where a badge sits above its button's center: on the icon's corner,
+    /// which goes up while the lens shows the labels under the icons.
+    private var badgeOffsetY: CGFloat {
+        lensLabels ? -12 - Self.labelIconLift : -12
+    }
+
     private func refreshAppearance() {
+        badgeCenterYs.forEach { $0.constant = badgeOffsetY }
         for (index, button) in buttons.enumerated() {
             let item = items[index]
             let selected = index == selectedIndex
@@ -306,7 +347,7 @@ class iOS26GlassCapsuleView: NSObject, FlutterPlatformView {
             if let image = image(for: item, selected: selected, index: index) {
                 config.image = image
                 // A rail: the label under the icon, as the tab bar shows it.
-                if showsLabels, let label = item["label"] as? String {
+                if labelsShown, let label = item["label"] as? String {
                     var text = AttributedString(label)
                     text.font = .systemFont(ofSize: 10, weight: selected ? .semibold : .medium)
                     config.attributedTitle = text
@@ -408,21 +449,24 @@ class iOS26GlassCapsuleView: NSObject, FlutterPlatformView {
     private weak var selectionAnchor: UIButton?
 
     private func layoutChrome(animated: Bool) {
-        let width = container.bounds.width
-        if width > 0 {
-            effectView.layer.cornerRadius = width / 2
-            effectView.layer.cornerCurve = .continuous
-            selectionView.layer.cornerRadius = (width - 6) / 2
-            selectionView.layer.cornerCurve = .continuous
-        }
+        updateCornerRadii()
 
-        guard let selected = selectedIndex, selected < buttons.count else {
+        guard let selected = pendingSelection ?? selectedIndex, selected < buttons.count else {
             selectionView.isHidden = true
             return
         }
         let button = buttons[selected]
         guard selectionAnchor !== button else { return }
         anchorSelection(to: button, animated: animated)
+    }
+
+    private func updateCornerRadii() {
+        let width = container.bounds.width
+        guard width > 0 else { return }
+        effectView.layer.cornerRadius = width / 2
+        effectView.layer.cornerCurve = .continuous
+        selectionView.layer.cornerRadius = (width - 6) / 2
+        selectionView.layer.cornerCurve = .continuous
     }
 
     /// Ties the highlight to [button]. It follows it through constraints, so
@@ -487,6 +531,7 @@ class iOS26GlassCapsuleView: NSObject, FlutterPlatformView {
         lensDragging = true
         lensNearest = selectedIndex
         lensFeedback.prepare()
+        pendingSelection = nil
         // Free the highlight from its button and let it follow the finger.
         let frame = selectionView.frame
         NSLayoutConstraint.deactivate(selectionConstraints)
@@ -494,6 +539,12 @@ class iOS26GlassCapsuleView: NSObject, FlutterPlatformView {
         selectionAnchor = nil
         selectionView.translatesAutoresizingMaskIntoConstraints = true
         selectionView.frame = frame
+        lensTrack = trackPosition(atY: frame.midY)
+        if expandsOnLensDrag {
+            // Flutter grows the view around its place; the labels show now.
+            channel.invokeMethod("onLensDrag", arguments: ["active": true])
+            setLensLabels(true)
+        }
 
         guard #available(iOS 26.0, *) else {
             UIView.animate(
@@ -538,6 +589,7 @@ class iOS26GlassCapsuleView: NSObject, FlutterPlatformView {
         let clamped = min(max(y, tabCenterY(at: 0)), tabCenterY(at: buttons.count - 1))
         selectionView.center.y = clamped
         lensView.center.y = clamped
+        lensTrack = trackPosition(atY: clamped)
         let nearest = nearestButton(to: clamped)
         if nearest != lensNearest {
             lensNearest = nearest
@@ -548,25 +600,94 @@ class iOS26GlassCapsuleView: NSObject, FlutterPlatformView {
     /// Lets go of the lens. [committed] is false for a cancelled drag, which
     /// selects nothing.
     func endLensDrag(committed: Bool) {
+        // Where it was let go, before anything is laid out again.
+        let dropped = nearestButton(to: selectionView.center.y)
         lensDragging = false
-        guard let target = nearestButton(to: selectionView.center.y) else {
+        let reports = committed && dropped != nil && dropped != selectedIndex
+        // Until Dart answers, the highlight stays on the tab it was let go
+        // over, through the layout passes of the capsule going back.
+        pendingSelection = reports ? dropped : nil
+        defer {
+            // Whatever an update said meanwhile, what grew goes back.
+            if lensLabels {
+                // Back to its size before the tab is reported, which may
+                // replace the screen.
+                channel.invokeMethod("onLensDrag", arguments: ["active": false])
+                setLensLabels(false)
+            }
+            if reports, let dropped = dropped {
+                channel.invokeMethod("onItemTapped", arguments: ["index": dropped])
+            }
+        }
+        guard let target = dropped else {
             dissolveLens(atY: nil)
             return
         }
         // Settle on the tab it was let go over and report it, as a tap.
         anchorSelection(to: buttons[target], animated: true)
         dissolveLens(atY: tabCenterY(at: target))
-        if committed && target != selectedIndex {
-            channel.invokeMethod("onItemTapped", arguments: ["index": target])
+        if reports {
             // A tab that opens something else instead of being selected
             // leaves the selection where it was: go back to it.
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) { [weak self] in
                 guard let self = self, !self.lensDragging else { return }
+                self.pendingSelection = nil
                 self.layoutChrome(animated: true)
             }
         } else {
             layoutChrome(animated: true)
         }
+    }
+
+    /// Where [y] is along the tabs: 0 over the first, 1 over the last.
+    private func trackPosition(atY y: CGFloat) -> CGFloat {
+        guard buttons.count > 1 else { return 0 }
+        let first = tabCenterY(at: 0)
+        let span = tabCenterY(at: buttons.count - 1) - first
+        return span > 0 ? min(max((y - first) / span, 0), 1) : 0
+    }
+
+    /// The y of [track] along the tabs, as they are laid out now.
+    private func centerY(atTrack track: CGFloat) -> CGFloat {
+        guard !buttons.isEmpty else { return 0 }
+        let first = tabCenterY(at: 0)
+        return first + track * (tabCenterY(at: buttons.count - 1) - first)
+    }
+
+    /// Shows or hides the labels under the icons, as a quick cross-fade.
+    private func setLensLabels(_ shown: Bool) {
+        guard lensLabels != shown else { return }
+        lensLabels = shown
+        UIView.transition(
+            with: stack, duration: 0.2,
+            options: [.transitionCrossDissolve, .allowUserInteraction, .beginFromCurrentState],
+            animations: { self.refreshAppearance() })
+        UIView.animate(
+            withDuration: 0.2, delay: 0, options: [.beginFromCurrentState],
+            animations: { self.container.layoutIfNeeded() })
+    }
+
+    /// While the lens is held Flutter may resize the view (it grows on the
+    /// iPhone Duo): the highlight and the lens, which are laid out by hand
+    /// then, keep their place over the tabs and the capsule's width.
+    private func followLayoutWhileDragging() {
+        updateCornerRadii()
+        guard !buttons.isEmpty else { return }
+        // The tabs, nested deeper, take their new frames first.
+        effectView.contentView.layoutIfNeeded()
+        let width = container.bounds.width
+        let cell = buttons[0].bounds.height
+        let y = centerY(atTrack: lensTrack)
+
+        selectionView.bounds = CGRect(x: 0, y: 0, width: max(0, width - 6), height: cell)
+        selectionView.center = CGPoint(x: width / 2, y: y)
+
+        guard !lensView.isHidden else { return }
+        let overhang = Self.lensOverhang
+        let size = CGSize(width: width + 2 * overhang, height: cell + 2 * overhang)
+        lensView.bounds = CGRect(origin: .zero, size: size)
+        lensView.center = CGPoint(x: width / 2, y: y)
+        lensView.layer.cornerRadius = min(size.width, size.height) / 2
     }
 
     /// The lens melts back into the highlight, over the tab at [y].

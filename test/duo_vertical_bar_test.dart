@@ -1,6 +1,8 @@
 import 'package:adaptive_platform_ui/src/platform/system_vertical_bar.dart';
 import 'package:adaptive_platform_ui/src/toolbar/duo_vertical_bar.dart';
 import 'package:adaptive_platform_ui/src/widgets/adaptive_app_bar_action.dart';
+import 'package:adaptive_platform_ui/src/widgets/adaptive_bottom_navigation_bar.dart';
+import 'package:adaptive_platform_ui/src/widgets/adaptive_scaffold.dart';
 import 'package:adaptive_platform_ui/src/widgets/ios26/ios26_glass_capsule.dart';
 import 'package:adaptive_platform_ui/src/widgets/ios26/ios26_popup_menu_button.dart';
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
@@ -365,6 +367,28 @@ void main() {
         ),
       );
     }
+
+    testWidgets('its tab capsule grows while the lens is held', (tester) async {
+      await pumpBar(
+        tester,
+        DuoVerticalBar(
+          tabBar: AdaptiveBottomNavigationBar(
+            items: const [
+              AdaptiveNavigationDestination(icon: 'house', label: 'Home'),
+              AdaptiveNavigationDestination(icon: 'clock', label: 'History'),
+            ],
+            selectedIndex: 0,
+            onTap: (_) {},
+          ),
+        ),
+      );
+
+      final tabs = tester
+          .widgetList<IOS26GlassCapsule>(find.byType(IOS26GlassCapsule))
+          .where((capsule) => capsule.selectedIndex != null);
+      expect(tabs, hasLength(1));
+      expect(tabs.single.expandOnLensDrag, isTrue);
+    });
 
     testWidgets('orders back first, then actions, clear of the camera', (
       tester,
