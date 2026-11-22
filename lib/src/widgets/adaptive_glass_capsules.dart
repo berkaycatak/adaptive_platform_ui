@@ -44,6 +44,7 @@ class AdaptiveTabCapsule extends StatelessWidget {
     required this.selectedIndex,
     required this.onDestinationSelected,
     this.showLabels = false,
+    this.expandOnLensDrag = false,
     this.tint,
     this.native = true,
     this.destinationKeys,
@@ -65,6 +66,11 @@ class AdaptiveTabCapsule extends StatelessWidget {
 
   /// Whether each tab shows its label under its icon.
   final bool showLabels;
+
+  /// Whether the capsule grows, and shows the labels, while the selected tab's
+  /// lens is held, as the vertical tab bar of the iPhone Duo does (see
+  /// [IOS26GlassCapsule.expandOnLensDrag]). Its place keeps this size.
+  final bool expandOnLensDrag;
 
   /// Tint of the selected tab.
   final Color? tint;
@@ -117,6 +123,7 @@ class AdaptiveTabCapsule extends StatelessWidget {
           selectedIndex: selectedIndex,
           inset: IOS26GlassCapsule.tabsInset,
           showLabels: showLabels,
+          expandOnLensDrag: expandOnLensDrag,
           tint: tint,
           native: native,
           onTap: onDestinationSelected,
