@@ -71,6 +71,31 @@ Finder get backButton => inBar(find.byType(AdaptiveButton));
 
 void main() {
   group('HostedTopToolbar', () {
+    testWidgets(
+      'back button stays at left:16 on iPhone even when display size differs '
+      '(Display Zoom / iPhone mini scale-factor mismatch)',
+      (tester) async {
+        usePhone(tester);
+        // Simulate Display Zoom: native display bounds differ from the app's
+        // physical viewport — exactly what triggered the windowed-iPad branch
+        // on iPhone before the fix.
+        tester.view.display.size = const Size(500, 1080);
+        addTearDown(tester.view.display.resetSize);
+        final nav = GlobalKey<NavigatorState>();
+        await tester.pumpWidget(
+          hostedApp(navigatorKey: nav, home: page('Home')),
+        );
+        await tester.pump();
+        nav.currentState!.push(
+          MaterialPageRoute<void>(builder: (_) => page('Detail')),
+        );
+        await tester.pumpAndSettle();
+
+        // Must be at 16, not 78 (16 + 62).
+        expect(tester.getRect(backButton).left, 16);
+      },
+    );
+
     testWidgets('back fills the toolbar height and is tappable near its edge', (
       tester,
     ) async {

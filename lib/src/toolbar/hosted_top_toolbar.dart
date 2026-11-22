@@ -238,12 +238,20 @@ class HostedTopToolbar extends StatelessWidget {
     );
   }
 
-  /// Whether the app runs in a window smaller than the display (iPadOS),
-  /// where the system's window controls take the bar's leading corner.
+  /// Whether the app runs in a window smaller than the display (iPadOS
+  /// multitasking), where the system's window controls take the bar's leading
+  /// corner.
+  ///
+  /// iPhones are never windowed in this sense. Display Zoom and certain
+  /// iPhone mini scale factors can make [View.display.size] differ from
+  /// [logicalSize × DPR] even on a full-screen iPhone, so we gate the check
+  /// on the viewport's shortest side being at least 600 logical pixels — the
+  /// conventional Flutter threshold for iPad form factors.
   static bool _isWindowed(BuildContext context) {
+    final logicalSize = MediaQuery.sizeOf(context);
+    if (logicalSize.shortestSide < 600) return false;
     final display = View.of(context).display.size;
-    final viewport =
-        MediaQuery.sizeOf(context) * MediaQuery.devicePixelRatioOf(context);
+    final viewport = logicalSize * MediaQuery.devicePixelRatioOf(context);
     return (display.longestSide - viewport.longestSide).abs() > 1 ||
         (display.shortestSide - viewport.shortestSide).abs() > 1;
   }

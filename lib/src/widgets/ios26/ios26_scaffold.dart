@@ -174,22 +174,26 @@ class _IOS26ScaffoldState extends State<IOS26Scaffold>
     }
   }
 
-  /// Determines if the current window is in a windowed mode.
+  /// Whether the app runs in a windowed iPadOS mode (Stage Manager /
+  /// Slide Over / Split View), where the system's window controls offset the
+  /// back button.
   ///
-  /// This method compares the display size of the device with the viewport size
-  /// calculated from the logical size and device pixel ratio.
-  /// It returns true if the sizes do not match, indicating that the application is not in full-screen mode.
+  /// iPhones are never windowed in this sense. Display Zoom and certain
+  /// iPhone mini scale factors can make [View.display.size] differ from
+  /// [logicalSize × DPR] even on a full-screen iPhone, so we gate the check
+  /// on the viewport's shortest side being at least 600 logical pixels — the
+  /// conventional Flutter threshold for iPad form factors.
   bool _getIsWindowed() {
-    final displaySize = View.of(context).display.size;
     final logicalSize = MediaQuery.sizeOf(context);
+    if (logicalSize.shortestSide < 600) return false;
+    final displaySize = View.of(context).display.size;
     final devicePixelRatio = MediaQuery.devicePixelRatioOf(context);
     final viewportSize = Size(
       logicalSize.width * devicePixelRatio,
       logicalSize.height * devicePixelRatio,
     );
-
-    return (displaySize.longestSide != viewportSize.longestSide) ||
-        (displaySize.shortestSide != viewportSize.shortestSide);
+    return (displaySize.longestSide - viewportSize.longestSide).abs() > 1 ||
+        (displaySize.shortestSide - viewportSize.shortestSide).abs() > 1;
   }
 
   @override
