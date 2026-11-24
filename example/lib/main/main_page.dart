@@ -25,8 +25,11 @@ class _MainPageState extends State<MainPage> {
           body: widget.navigationShell,
           bottomNavigationBar:
               getMatchedLocation(
-                context,
-              ).contains(RouteConstants().badgeNavigation)
+                    context,
+                  ).contains(RouteConstants().badgeNavigation) ||
+                  getMatchedLocation(
+                    context,
+                  ).contains(RouteConstants().navigationRail)
               ? null
               : AdaptiveBottomNavigationBar(
                   selectedIndex: widget.navigationShell.currentIndex,

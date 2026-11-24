@@ -1,3 +1,6 @@
+import 'dart:math' as math;
+import 'dart:ui' show ImageFilter;
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -16,6 +19,7 @@ class GlassCapsuleItem {
     this.asset,
     this.file,
     this.network,
+    this.image,
     this.title,
     this.label,
     this.tint,
@@ -31,11 +35,13 @@ class GlassCapsuleItem {
     int menuIdBase = 0,
   }) => GlassCapsuleItem(
     symbol: action.iosSymbol,
+    image: action.iconImage,
     title: action.iosSymbol == null ? action.title : null,
     label: action.effectiveLabel,
     tint: action.tintColor,
     badge: action.badgeCount,
     fallback:
+        action.imageWidget ??
         action.iconWidget ??
         (action.icon != null ? Icon(action.icon, size: 22) : null),
     menu: action.hasMenu
@@ -53,7 +59,11 @@ class GlassCapsuleItem {
 
   /// A tab. The icon may be an SF Symbol name, an asset path, or an
   /// [AssetImage], [FileImage] or [NetworkImage] (shown as a round avatar).
-  factory GlassCapsuleItem.fromDestination(AdaptiveNavigationDestination d) {
+  /// [fallback] replaces the icon drawn where the capsule is not native.
+  factory GlassCapsuleItem.fromDestination(
+    AdaptiveNavigationDestination d, {
+    Widget? fallback,
+  }) {
     String? symbolOf(Object? icon) =>
         icon is String && !icon.contains('/') ? icon : null;
     ImageProvider? imageOf(Object? icon) => icon is ImageProvider
@@ -73,18 +83,20 @@ class GlassCapsuleItem {
       network: image is NetworkImage ? image.url : null,
       label: d.label,
       badge: d.badgeCount,
-      fallback: icon is IconData
-          ? Icon(icon, size: 22)
-          : image != null
-          ? ClipOval(
-              child: Image(
-                image: image,
-                width: 26,
-                height: 26,
-                fit: BoxFit.cover,
-              ),
-            )
-          : null,
+      fallback:
+          fallback ??
+          (icon is IconData
+              ? Icon(icon, size: 22)
+              : image != null
+              ? ClipOval(
+                  child: Image(
+                    image: image,
+                    width: 26,
+                    height: 26,
+                    fit: BoxFit.cover,
+                  ),
+                )
+              : null),
     );
   }
 
@@ -93,6 +105,9 @@ class GlassCapsuleItem {
   final String? asset;
   final String? file;
   final String? network;
+
+  /// PNG or JPEG bytes shown round, as an avatar, in place of [symbol].
+  final Uint8List? image;
   final String? title;
 
   /// Accessibility label.
@@ -113,6 +128,7 @@ class GlassCapsuleItem {
       asset != null ||
       file != null ||
       network != null ||
+      image != null ||
       title != null;
 
   Map<String, dynamic> toNativeMap() => <String, dynamic>{
@@ -121,6 +137,7 @@ class GlassCapsuleItem {
     if (asset != null) 'asset': asset,
     if (file != null) 'file': file,
     if (network != null) 'network': network,
+    if (image != null) 'image': image,
     if (title != null) 'title': title,
     if (label != null) 'label': label,
     if (tint != null) 'tint': tint!.toARGB32(),
@@ -165,6 +182,9 @@ class IOS26GlassCapsule extends StatefulWidget {
     this.selectedIndex,
     this.inset = 0,
     this.tint,
+    this.showLabels = false,
+    this.expandOnLensDrag = false,
+    this.native = true,
   });
 
   final List<GlassCapsuleItem> items;
@@ -179,6 +199,50 @@ class IOS26GlassCapsule extends StatefulWidget {
 
   /// Tint of a selected tab, or of every item when there is no selection.
   final Color? tint;
+
+  /// Whether each item shows its [GlassCapsuleItem.label] under its icon, as
+  /// a navigation rail does. Give the capsule [labeledWidth] and
+  /// [labeledTabsHeight] for it.
+  final bool showLabels;
+
+  /// Whether the capsule grows while its lens is held, and shows each item's
+  /// label under its icon until it is let go, as the vertical tab bar of the
+  /// iPhone Duo does: wider ([labeledWidth]) and [lensItemGrowth] taller a
+  /// tab, around the place it has (what is beside it does not move). See
+  /// [lensExpandedSize].
+  final bool expandOnLensDrag;
+
+  /// Whether the capsule is the native view. Off, it is drawn by Flutter with
+  /// the same layout, for a moment when a native view would be wrong (under
+  /// another route or a dimming overlay, in a hero flight).
+  final bool native;
+
+  /// On the selected item of the capsule drawn by Flutter.
+  @visibleForTesting
+  static const Key fallbackSelectionKey = ValueKey(
+    'ios26_glass_capsule_fallback_selection',
+  );
+
+  /// Width of a capsule that shows labels.
+  static const double labeledWidth = 72;
+
+  /// Height of a tab capsule of [count] labeled tabs, with [tabsInset].
+  static double labeledTabsHeight(int count) => tabsInset * 2 + count * 60.0;
+
+  /// How much taller each item gets while the lens is held
+  /// ([expandOnLensDrag]), for its label under the icon.
+  static const double lensItemGrowth = 6;
+
+  /// How long the capsule takes to grow, or to go back, around a held lens.
+  static const Duration lensExpandDuration = Duration(milliseconds: 320);
+
+  /// The size of a capsule of [count] items, [compact] at rest, while its lens
+  /// is held ([expandOnLensDrag]): as wide as a labeled capsule (never
+  /// narrower than it is) and [lensItemGrowth] taller a tab.
+  static Size lensExpandedSize(Size compact, int count) => Size(
+    math.max(compact.width, labeledWidth),
+    compact.height + count * lensItemGrowth,
+  );
 
   /// Width of every control in the trailing bar, as measured on the system's
   /// own bar.
@@ -199,6 +263,10 @@ class _IOS26GlassCapsuleState extends State<IOS26GlassCapsule> {
   MethodChannel? _channel;
   Map<String, dynamic>? _sent;
 
+  /// Whether the native view reports its lens held, so the capsule is grown
+  /// ([IOS26GlassCapsule.expandOnLensDrag]).
+  bool _lensHeld = false;
+
   bool get _isDark =>
       MediaQuery.platformBrightnessOf(context) == Brightness.dark;
 
@@ -210,6 +278,8 @@ class _IOS26GlassCapsuleState extends State<IOS26GlassCapsule> {
       'items': widget.items.map((i) => i.toNativeMap()).toList(),
       if (widget.selectedIndex != null) 'selectedIndex': widget.selectedIndex,
       'inset': widget.inset,
+      if (widget.showLabels) 'showLabels': true,
+      if (widget.expandOnLensDrag) 'expandOnLensDrag': true,
       'isDark': _isDark,
       if (tint != null) 'tint': tint.toARGB32(),
     };
@@ -218,6 +288,8 @@ class _IOS26GlassCapsuleState extends State<IOS26GlassCapsule> {
   @override
   void didUpdateWidget(IOS26GlassCapsule oldWidget) {
     super.didUpdateWidget(oldWidget);
+    // Without the native view (drawn by Flutter for a moment) no lens is held.
+    if (!widget.native || !widget.expandOnLensDrag) _lensHeld = false;
     _sync();
   }
 
@@ -260,6 +332,11 @@ class _IOS26GlassCapsuleState extends State<IOS26GlassCapsule> {
         } else if (call.method == 'onMenuItemTapped') {
           final id = (call.arguments as Map?)?['id'] as int?;
           if (id != null) widget.onMenuTap?.call(id);
+        } else if (call.method == 'onLensDrag') {
+          final held = (call.arguments as Map?)?['active'] == true;
+          if (mounted && widget.expandOnLensDrag && held != _lensHeld) {
+            setState(() => _lensHeld = held);
+          }
         }
       });
     // Catch up with anything that changed while the view was being created.
@@ -268,7 +345,9 @@ class _IOS26GlassCapsuleState extends State<IOS26GlassCapsule> {
 
   @override
   Widget build(BuildContext context) {
-    if (defaultTargetPlatform != TargetPlatform.iOS) return _buildFallback();
+    if (!widget.native || defaultTargetPlatform != TargetPlatform.iOS) {
+      return _buildFallback();
+    }
     final params = _params;
     _sent ??= params;
     final glass = UiKitView(
@@ -278,7 +357,9 @@ class _IOS26GlassCapsuleState extends State<IOS26GlassCapsule> {
       onPlatformViewCreated: _onCreated,
       hitTestBehavior: PlatformViewHitTestBehavior.opaque,
     );
-    if (widget.items.every((item) => item.canShowNatively)) return glass;
+    if (widget.items.every((item) => item.canShowNatively)) {
+      return _growingAroundLens(glass);
+    }
 
     // An item with only a Flutter icon (an IconData or a custom widget) has
     // nothing the native side can draw. The glass and the button stay native;
@@ -312,43 +393,199 @@ class _IOS26GlassCapsuleState extends State<IOS26GlassCapsule> {
     );
   }
 
+  /// [glass] grown to [IOS26GlassCapsule.lensExpandedSize] while the lens is
+  /// held, around the place it is given, which keeps its size: the native
+  /// view draws its labels in the room it gets. The touch that holds the lens
+  /// is already the native view's, so the room outside its place needs none.
+  Widget _growingAroundLens(Widget glass) {
+    if (!widget.expandOnLensDrag) return glass;
+    final duration = MediaQuery.disableAnimationsOf(context)
+        ? Duration.zero
+        : IOS26GlassCapsule.lensExpandDuration;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final compact = constraints.biggest;
+        if (!compact.isFinite) return glass;
+        final target = _lensHeld
+            ? IOS26GlassCapsule.lensExpandedSize(compact, widget.items.length)
+            : compact;
+        return OverflowBox(
+          minWidth: 0,
+          minHeight: 0,
+          maxWidth: double.infinity,
+          maxHeight: double.infinity,
+          child: TweenAnimationBuilder<Size?>(
+            tween: SizeTween(end: target),
+            duration: duration,
+            // Out quickly, with a touch of overshoot, as the glass does.
+            curve: _lensHeld ? Curves.easeOutBack : Curves.easeOutCubic,
+            builder: (context, size, child) =>
+                SizedBox.fromSize(size: size ?? compact, child: child),
+            child: glass,
+          ),
+        );
+      },
+    );
+  }
+
+  /// The capsule drawn by Flutter: a blurred, tinted pill with the same cells,
+  /// the selected one highlighted, as the native view lays them out.
   Widget _buildFallback() {
     final label = CupertinoColors.label.resolveFrom(context);
-    final tint = widget.tint ?? CupertinoTheme.of(context).primaryColor;
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: CupertinoColors.systemFill.resolveFrom(context),
-        borderRadius: BorderRadius.circular(IOS26GlassCapsule.width / 2),
-      ),
-      child: Padding(
-        padding: EdgeInsets.symmetric(vertical: widget.inset),
-        child: Column(
-          children: [
-            for (var i = 0; i < widget.items.length; i++)
-              Expanded(
-                child: GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onTap: () => widget.onTap(i),
-                  child: Center(
-                    child: IconTheme.merge(
-                      data: IconThemeData(
-                        color: i == widget.selectedIndex ? tint : label,
+    // The native capsule tints a selected tab system blue unless it is told
+    // otherwise, not with the app's primary color.
+    final tint = widget.tint ?? CupertinoColors.systemBlue.resolveFrom(context);
+    // With no selection (a capsule of actions) the native one leaves the
+    // controls in the label color unless told otherwise: blue is for a tab.
+    final restingTint = widget.tint ?? label;
+    final dark = CupertinoTheme.brightnessOf(context) == Brightness.dark;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final width = constraints.maxWidth.isFinite
+            ? constraints.maxWidth
+            : IOS26GlassCapsule.width;
+        final radius = BorderRadius.circular(width / 2);
+        return ClipRRect(
+          borderRadius: radius,
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: dark ? const Color(0x1FFFFFFF) : const Color(0xBFFFFFFF),
+                borderRadius: radius,
+                border: Border.all(
+                  color: dark
+                      ? const Color(0x2EFFFFFF)
+                      : const Color(0x14000000),
+                  width: 0.5,
+                ),
+              ),
+              child: Padding(
+                padding: EdgeInsets.symmetric(vertical: widget.inset),
+                child: Column(
+                  children: [
+                    for (var i = 0; i < widget.items.length; i++)
+                      Expanded(
+                        child: _fallbackCell(
+                          i,
+                          width,
+                          label,
+                          tint,
+                          restingTint,
+                        ),
                       ),
-                      child:
-                          widget.items[i].fallback ??
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _fallbackCell(
+    int i,
+    double width,
+    Color label,
+    Color tint,
+    Color restingTint,
+  ) {
+    final item = widget.items[i];
+    final selected = i == widget.selectedIndex;
+    final color = widget.selectedIndex == null
+        ? (item.tint ?? restingTint)
+        : (selected ? (item.tint ?? tint) : label);
+    final badge = item.badge;
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () => widget.onTap(i),
+      child: Stack(
+        clipBehavior: Clip.none,
+        alignment: Alignment.center,
+        children: [
+          Padding(
+            // As the native highlight: 6 narrower than the capsule.
+            padding: const EdgeInsets.symmetric(horizontal: 3),
+            child: DecoratedBox(
+              key: selected ? IOS26GlassCapsule.fallbackSelectionKey : null,
+              decoration: BoxDecoration(
+                color: selected ? label.withValues(alpha: 0.1) : null,
+                borderRadius: BorderRadius.circular(width / 2),
+              ),
+              child: Center(
+                child: IconTheme.merge(
+                  data: IconThemeData(color: color),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      item.fallback ??
                           Text(
-                            widget.items[i].title ??
-                                widget.items[i].symbol ??
-                                widget.items[i].label ??
-                                '',
+                            item.title ?? item.symbol ?? item.label ?? '',
                             style: TextStyle(fontSize: 10, color: label),
                             overflow: TextOverflow.ellipsis,
                           ),
-                    ),
+                      if (widget.showLabels && item.label != null)
+                        Text(
+                          item.label!,
+                          style: TextStyle(fontSize: 10, color: color),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                    ],
                   ),
                 ),
               ),
-          ],
+            ),
+          ),
+          if (badge != null && badge > 0)
+            // As the native badge: 11 to the right of the cell's center and 12
+            // above it, over the glass.
+            Transform.translate(
+              offset: const Offset(11, -12),
+              child: _FallbackBadge(count: badge),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+/// The count on an item of the capsule drawn by Flutter: the native one is a
+/// red pill, 18 tall, with the count capped at "99+".
+class _FallbackBadge extends StatelessWidget {
+  const _FallbackBadge({required this.count});
+
+  final int count;
+
+  @override
+  Widget build(BuildContext context) {
+    final text = count > 99 ? '99+' : '$count';
+    return IgnorePointer(
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: CupertinoColors.systemRed,
+          borderRadius: BorderRadius.circular(9),
+        ),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
+          child: Center(
+            widthFactor: 1,
+            heightFactor: 1,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: Text(
+                text,
+                style: const TextStyle(
+                  color: CupertinoColors.white,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  height: 1.1,
+                  decoration: TextDecoration.none,
+                ),
+              ),
+            ),
+          ),
         ),
       ),
     );

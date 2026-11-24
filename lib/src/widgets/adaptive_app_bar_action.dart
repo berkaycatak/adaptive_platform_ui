@@ -36,12 +36,15 @@ class AdaptiveAppBarAction {
     this.prominent = false,
     this.tintColor,
     this.badgeCount,
+    this.iconImage,
   }) : assert(
          iosSymbol != null ||
              icon != null ||
              iconWidget != null ||
+             iconImage != null ||
              title != null,
-         'At least one of iosSymbol, icon, iconWidget, or title must be provided',
+         'At least one of iosSymbol, icon, iconWidget, iconImage, or title '
+         'must be provided',
        ),
        assert(
          menuItems != null || !identical(onPressed, _noAction),
@@ -158,8 +161,8 @@ class AdaptiveAppBarAction {
   /// - **iOS 26+ (iPhone Duo vertical bar)**: Drawn by the native glass
   ///   capsule, the same badge the tabs use. Counts above 99 show as "99+".
   /// - **iOS <26, Android**: An [AdaptiveBadge] drawn on the icon.
-  /// - **iOS 26+ horizontal toolbar**: Ignored; `UIBarButtonItem` has no
-  ///   badge.
+  /// - **iOS 26+ horizontal toolbar**: The item's own `UIBarButtonItem.badge`
+  ///   (iOS 26 added it), which UIKit draws and caps.
   ///
   /// Null or 0 shows no badge.
   ///
@@ -173,6 +176,40 @@ class AdaptiveAppBarAction {
   /// )
   /// ```
   final int? badgeCount;
+
+  /// A picture shown in place of the symbol, such as a profile photo: PNG or
+  /// JPEG bytes.
+  ///
+  /// **Platform behavior:**
+  /// - **iOS 26+ horizontal toolbar**: UIKit draws it round, at the size of
+  ///   the other items, as it is (not tinted). Send small bytes (a few
+  ///   hundred pixels at most): they cross the platform channel on every
+  ///   change. If they do not decode, the item falls back to [iosSymbol].
+  /// - **Everywhere else**: A round [Image.memory] in place of [icon].
+  ///
+  /// Give the action a [label] too: it is what VoiceOver reads.
+  final Uint8List? iconImage;
+
+  /// [iconImage] as a round widget for the Flutter-rendered toolbars; null
+  /// when there is none.
+  Widget? get imageWidget {
+    final bytes = iconImage;
+    if (bytes == null) return null;
+    return ClipOval(
+      child: Image.memory(
+        bytes,
+        width: _imageSize,
+        height: _imageSize,
+        fit: BoxFit.cover,
+        gaplessPlayback: true,
+        excludeFromSemantics: true,
+        errorBuilder: (context, error, stackTrace) =>
+            const SizedBox(width: _imageSize, height: _imageSize),
+      ),
+    );
+  }
+
+  static const double _imageSize = 30;
 
   /// [child] with [badgeCount] drawn on it for the Flutter-rendered
   /// toolbars; [child] itself when there is no count to show.
@@ -194,6 +231,8 @@ class AdaptiveAppBarAction {
         other.prominent == prominent &&
         other.tintColor == tintColor &&
         other.badgeCount == badgeCount &&
+        (identical(other.iconImage, iconImage) ||
+            listEquals(other.iconImage, iconImage)) &&
         listEquals(_menuSignature, other._menuSignature);
   }
 
@@ -207,6 +246,7 @@ class AdaptiveAppBarAction {
     prominent,
     tintColor,
     badgeCount,
+    iconImage == null ? null : Object.hashAll(iconImage!),
     Object.hashAll(_menuSignature ?? const []),
   );
 
@@ -231,6 +271,8 @@ class AdaptiveAppBarAction {
   Map<String, dynamic> toNativeMap() {
     return {
       if (iosSymbol != null) 'icon': iosSymbol!,
+      if (iconImage != null) 'image': iconImage!,
+      if (badgeCount != null && badgeCount! > 0) 'badge': badgeCount!,
       if (title != null) 'title': title!,
       if (effectiveLabel != null) 'label': effectiveLabel!,
       'spacerAfter': spacerAfter.index, // 0=none, 1=fixed, 2=flexible

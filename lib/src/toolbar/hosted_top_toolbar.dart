@@ -346,9 +346,11 @@ class _FallbackBar extends StatelessWidget {
                   padding: EdgeInsets.zero,
                   onPressed: () =>
                       action.press(context, navigator: content.navigator),
-                  child: action.icon != null
-                      ? Icon(action.icon)
-                      : Text(action.title ?? ''),
+                  child:
+                      action.imageWidget ??
+                      (action.icon != null
+                          ? Icon(action.icon)
+                          : Text(action.title ?? '')),
                 ),
               ),
           ],

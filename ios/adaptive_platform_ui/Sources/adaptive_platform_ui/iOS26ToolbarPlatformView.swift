@@ -1,4 +1,5 @@
 import UIKit
+import ImageIO
 import Flutter
 
 // MARK: - Factory
@@ -208,6 +209,10 @@ class iOS26ToolbarPlatformView: NSObject, FlutterPlatformView {
         // Process actions
         var leftGroup: [UIBarButtonItem] = []
         var rightGroup: [UIBarButtonItem] = []
+        // Zero until the view is in a window: the bar is built before that
+        let displayScale = containerView.traitCollection.displayScale > 0
+            ? containerView.traitCollection.displayScale
+            : 3
 
         if let actions = params["actions"] as? [[String: Any]] {
             // First pass: check if any flexible spacer exists
@@ -221,20 +226,17 @@ class iOS26ToolbarPlatformView: NSObject, FlutterPlatformView {
 
                 if let menuEntries = action["menu"] as? [[String: Any]] {
                     let menu = makeMenu(menuEntries, actionIndex: index)
-                    if let icon = action["icon"] as? String {
-                        button = UIBarButtonItem(
-                            image: UIImage(systemName: icon) ?? UIImage(named: icon),
-                            menu: menu
-                        )
+                    if let image = Self.itemImage(for: action, scale: displayScale) {
+                        button = UIBarButtonItem(image: image, menu: menu)
                     } else {
                         button = UIBarButtonItem(
                             title: action["title"] as? String,
                             menu: menu
                         )
                     }
-                } else if let icon = action["icon"] as? String {
+                } else if let image = Self.itemImage(for: action, scale: displayScale) {
                     button = UIBarButtonItem(
-                        image: UIImage(systemName: icon) ?? UIImage(named: icon),
+                        image: image,
                         style: .plain,
                         target: self,
                         action: #selector(actionTapped(_:))
@@ -252,6 +254,17 @@ class iOS26ToolbarPlatformView: NSObject, FlutterPlatformView {
                     btn.tag = index
                     if let label = action["label"] as? String {
                         btn.accessibilityLabel = label
+                    }
+
+                    // Badge (iOS 26+): UIKit draws and caps the count itself.
+                    // The bar is built from the platform channel, on the main
+                    // thread; the badge API is main-actor isolated.
+                    if let count = action["badge"] as? Int, count > 0 {
+                        if #available(iOS 26.0, *) {
+                            MainActor.assumeIsolated {
+                                btn.badge = .count(count)
+                            }
+                        }
                     }
 
                     // Apply prominent style (iOS 26+)
@@ -412,6 +425,54 @@ class iOS26ToolbarPlatformView: NSObject, FlutterPlatformView {
         default:
             result(FlutterMethodNotImplemented)
         }
+    }
+
+    /// Side, in points, of a picture shown as a bar item (a profile photo): the
+    /// size of the glyph of the other items, with room to read as a face.
+    private static let pictureSize: CGFloat = 30
+
+    /// What an action shows: its picture when it sends one that decodes, its
+    /// SF Symbol (or an image of the app's assets) otherwise.
+    private static func itemImage(for action: [String: Any], scale: CGFloat) -> UIImage? {
+        if let data = (action["image"] as? FlutterStandardTypedData)?.data,
+           let picture = roundPicture(from: data, scale: scale) {
+            return picture
+        }
+        guard let icon = action["icon"] as? String else { return nil }
+        return UIImage(systemName: icon) ?? UIImage(named: icon)
+    }
+
+    /// [data] as a circle of [pictureSize], rendered as it is: the bar does
+    /// not tint it. Decoded at the size it is drawn, so a photo of a few
+    /// megabytes costs no more than a small one.
+    private static func roundPicture(from data: Data, scale: CGFloat) -> UIImage? {
+        let options: [CFString: Any] = [
+            kCGImageSourceCreateThumbnailFromImageAlways: true,
+            kCGImageSourceCreateThumbnailWithTransform: true,
+            kCGImageSourceThumbnailMaxPixelSize: pictureSize * scale,
+        ]
+        guard let source = CGImageSourceCreateWithData(data as CFData, nil),
+              let thumbnail = CGImageSourceCreateThumbnailAtIndex(
+                source, 0, options as CFDictionary
+              ) else { return nil }
+
+        let size = CGSize(width: pictureSize, height: pictureSize)
+        let format = UIGraphicsImageRendererFormat()
+        format.scale = scale
+        let rendered = UIGraphicsImageRenderer(size: size, format: format).image { _ in
+            UIBezierPath(ovalIn: CGRect(origin: .zero, size: size)).addClip()
+            // Fill the circle, centered, whatever the picture's proportions.
+            let picture = UIImage(cgImage: thumbnail, scale: scale, orientation: .up)
+            let ratio = max(size.width / picture.size.width, size.height / picture.size.height)
+            let drawn = CGSize(width: picture.size.width * ratio, height: picture.size.height * ratio)
+            picture.draw(in: CGRect(
+                x: (size.width - drawn.width) / 2,
+                y: (size.height - drawn.height) / 2,
+                width: drawn.width,
+                height: drawn.height
+            ))
+        }
+        return rendered.withRenderingMode(.alwaysOriginal)
     }
 
     private static func colorFromARGB(_ argb: Int) -> UIColor {
