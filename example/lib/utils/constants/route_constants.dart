@@ -20,6 +20,7 @@ class RouteConstants {
   String card = 'card';
   String badge = 'badge';
   String badgeNavigation = 'badge-navigation';
+  String navigationRail = 'navigation-rail';
   String tooltip = 'tooltip';
   String segmentedControl = 'segmented-control';
   String nativeSearchTab = 'native-search-tab';

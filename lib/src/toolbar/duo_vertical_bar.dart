@@ -437,6 +437,7 @@ class DuoVerticalBar extends StatelessWidget {
                     ],
                     selectedIndex: tabBar!.selectedIndex ?? 0,
                     inset: IOS26GlassCapsule.tabsInset,
+                    expandOnLensDrag: true,
                     tint:
                         tabBar!.selectedItemColor ??
                         CupertinoTheme.of(context).primaryColor,

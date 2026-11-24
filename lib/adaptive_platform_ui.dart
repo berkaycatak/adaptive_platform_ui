@@ -45,6 +45,8 @@ export 'src/toolbar/adaptive_toolbar_host.dart';
 export 'src/toolbar/toolbar_registry.dart';
 export 'src/widgets/adaptive_app_bar.dart';
 export 'src/widgets/adaptive_bottom_navigation_bar.dart';
+export 'src/widgets/adaptive_glass_capsules.dart';
+export 'src/widgets/adaptive_navigation_rail.dart';
 export 'src/widgets/adaptive_button.dart';
 export 'src/widgets/adaptive_switch.dart';
 export 'src/widgets/adaptive_checkbox.dart';

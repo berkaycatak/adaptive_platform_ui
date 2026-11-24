@@ -226,6 +226,15 @@ class _HomePageState extends State<HomePage> {
               ),
               _DemoItem(
                 icon: PlatformInfo.isIOS
+                    ? CupertinoIcons.sidebar_left
+                    : Icons.view_sidebar_outlined,
+                title: 'Navigation Rail',
+                description: 'A side bar for iPad and landscape',
+                routeName: RouterService.routes.navigationRail,
+                isNew: true,
+              ),
+              _DemoItem(
+                icon: PlatformInfo.isIOS
                     ? CupertinoIcons.info_circle
                     : Icons.info_outline,
                 title: 'Tooltip',
