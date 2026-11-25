@@ -2,8 +2,8 @@ import 'dart:convert';
 
 import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 import 'package:adaptive_platform_ui/src/widgets/ios26/ios26_glass_capsule.dart';
-import 'package:flutter/cupertino.dart' show CupertinoColors;
-import 'package:flutter/material.dart';
+import 'package:cupertino_ui/cupertino_ui.dart' show CupertinoColors;
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 // A 1x1 PNG.

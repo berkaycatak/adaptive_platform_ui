@@ -5,8 +5,8 @@ import 'package:adaptive_platform_ui/src/widgets/adaptive_bottom_navigation_bar.
 import 'package:adaptive_platform_ui/src/widgets/adaptive_scaffold.dart';
 import 'package:adaptive_platform_ui/src/widgets/ios26/ios26_glass_capsule.dart';
 import 'package:adaptive_platform_ui/src/widgets/ios26/ios26_popup_menu_button.dart';
-import 'package:flutter/cupertino.dart' show CupertinoIcons;
-import 'package:flutter/material.dart';
+import 'package:cupertino_ui/cupertino_ui.dart' show CupertinoIcons;
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:foldable/foldable.dart';
 
