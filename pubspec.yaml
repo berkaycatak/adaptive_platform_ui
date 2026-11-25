@@ -11,12 +11,14 @@ environment:
   flutter: ">=1.17.0"
 
 dependencies:
+  cupertino_ui: ^1.1.7
   flutter:
     sdk: flutter
   # iPhone Duo (foldable) support: hinge, fold posture, reserved regions and
   # iOS size classes bridged to Dart. Used to place the iOS 26 toolbar on the
   # trailing edge on the Duo inner display.
   foldable: ^1.0.3
+  material_ui: ^1.11.1
 
 dev_dependencies:
   flutter_test:
