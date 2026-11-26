@@ -11,6 +11,14 @@ export 'ios26/ios26_popup_menu_button.dart'
         PopupButtonStyle;
 
 /// An adaptive popup menu button that renders platform-specific styles
+///
+/// Every constructor takes `onOpened` and `onClosed`: called when the menu
+/// appears and when it goes away again, whether an entry was picked or not.
+/// A pick comes first, then `onClosed`, the order in which UIKit ends a
+/// native menu. On iOS 26+ they are the only way to learn about the menu, as
+/// the native `UIMenu` is no route that a [NavigatorObserver] or `ModalRoute`
+/// would see. There, `onClosed` does not come when the button is removed
+/// while its menu is open.
 class AdaptivePopupMenuButton<T> {
   AdaptivePopupMenuButton._();
 
@@ -25,6 +33,8 @@ class AdaptivePopupMenuButton<T> {
     double height = 32.0,
     bool shrinkWrap = false,
     PopupButtonStyle buttonStyle = PopupButtonStyle.plain,
+    VoidCallback? onOpened,
+    VoidCallback? onClosed,
   }) {
     // iOS 26+ - Use native iOS 26 popup menu button
     if (PlatformInfo.isIOS26OrHigher()) {
@@ -36,6 +46,8 @@ class AdaptivePopupMenuButton<T> {
         height: height,
         shrinkWrap: shrinkWrap,
         buttonStyle: buttonStyle,
+        onOpened: onOpened,
+        onClosed: onClosed,
       );
     }
 
@@ -47,6 +59,8 @@ class AdaptivePopupMenuButton<T> {
         onSelected: onSelected,
         tint: tint,
         height: height,
+        onOpened: onOpened,
+        onClosed: onClosed,
       );
     }
 
@@ -56,7 +70,14 @@ class AdaptivePopupMenuButton<T> {
         height: height,
         child: CupertinoButton(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-          onPressed: () => _showMenu<T>(context, label, items, onSelected),
+          onPressed: () => _showMenu<T>(
+            context,
+            label,
+            items,
+            onSelected,
+            onOpened: onOpened,
+            onClosed: onClosed,
+          ),
           child: Text(label),
         ),
       ),
@@ -73,6 +94,8 @@ class AdaptivePopupMenuButton<T> {
     PopupButtonStyle buttonStyle = PopupButtonStyle.plain,
     bool triggerOnLongPress = false,
     VoidCallback? onTap,
+    VoidCallback? onOpened,
+    VoidCallback? onClosed,
     required Widget child,
   }) {
     assert(
@@ -89,6 +112,8 @@ class AdaptivePopupMenuButton<T> {
         buttonStyle: buttonStyle,
         triggerOnLongPress: triggerOnLongPress,
         onTap: onTap,
+        onOpened: onOpened,
+        onClosed: onClosed,
         child: child,
       );
     }
@@ -99,6 +124,8 @@ class AdaptivePopupMenuButton<T> {
         items: items,
         onSelected: onSelected,
         tint: tint,
+        onOpened: onOpened,
+        onClosed: onClosed,
         child: child,
       );
     }
@@ -108,9 +135,23 @@ class AdaptivePopupMenuButton<T> {
       builder: (context) => GestureDetector(
         onTap: triggerOnLongPress
             ? onTap
-            : () => _showMenu<T>(context, null, items, onSelected),
+            : () => _showMenu<T>(
+                context,
+                null,
+                items,
+                onSelected,
+                onOpened: onOpened,
+                onClosed: onClosed,
+              ),
         onLongPress: triggerOnLongPress
-            ? () => _showMenu<T>(context, null, items, onSelected)
+            ? () => _showMenu<T>(
+                context,
+                null,
+                items,
+                onSelected,
+                onOpened: onOpened,
+                onClosed: onClosed,
+              )
             : null,
         child: child,
       ),
@@ -134,6 +175,8 @@ class AdaptivePopupMenuButton<T> {
     double size = 44.0,
     double? iconSize,
     PopupButtonStyle buttonStyle = PopupButtonStyle.glass,
+    VoidCallback? onOpened,
+    VoidCallback? onClosed,
   }) {
     // iOS 26+ - Use native iOS 26 popup menu button (expects String - SF Symbol)
     if (PlatformInfo.isIOS26OrHigher()) {
@@ -145,6 +188,8 @@ class AdaptivePopupMenuButton<T> {
         size: size,
         iconSize: iconSize,
         buttonStyle: buttonStyle,
+        onOpened: onOpened,
+        onClosed: onClosed,
       );
     }
 
@@ -157,6 +202,8 @@ class AdaptivePopupMenuButton<T> {
         tint: tint,
         size: size,
         iconSize: iconSize,
+        onOpened: onOpened,
+        onClosed: onClosed,
       );
     }
 
@@ -167,7 +214,14 @@ class AdaptivePopupMenuButton<T> {
         height: size,
         child: CupertinoButton(
           padding: const EdgeInsets.all(4),
-          onPressed: () => _showMenu<T>(context, null, items, onSelected),
+          onPressed: () => _showMenu<T>(
+            context,
+            null,
+            items,
+            onSelected,
+            onOpened: onOpened,
+            onClosed: onClosed,
+          ),
           child: Icon(
             icon is IconData ? icon : CupertinoIcons.ellipsis,
             size: iconSize,
@@ -353,8 +407,11 @@ class AdaptivePopupMenuButton<T> {
     BuildContext context,
     String? title,
     List<AdaptivePopupMenuEntry> items,
-    void Function(int index, AdaptivePopupMenuItem<T> entry) onSelected,
-  ) async {
+    void Function(int index, AdaptivePopupMenuItem<T> entry) onSelected, {
+    VoidCallback? onOpened,
+    VoidCallback? onClosed,
+  }) async {
+    onOpened?.call();
     final selected = await showCupertinoModalPopup<int>(
       context: context,
       builder: (ctx) {
@@ -393,6 +450,7 @@ class AdaptivePopupMenuButton<T> {
         onSelected(selected, selectedEntry);
       }
     }
+    onClosed?.call();
   }
 
   /// The gap between two groups in the action sheet, carrying the group's
@@ -448,6 +506,8 @@ class _MaterialPopupMenuButton<T> extends StatefulWidget {
     required this.onSelected,
     this.tint,
     this.height = 32.0,
+    this.onOpened,
+    this.onClosed,
   }) : icon = null,
        size = null,
        iconSize = null,
@@ -460,6 +520,8 @@ class _MaterialPopupMenuButton<T> extends StatefulWidget {
     this.tint,
     this.size = 44.0,
     this.iconSize,
+    this.onOpened,
+    this.onClosed,
   }) : label = null,
        height = null,
        child = null;
@@ -468,6 +530,8 @@ class _MaterialPopupMenuButton<T> extends StatefulWidget {
     required this.items,
     required this.onSelected,
     this.tint,
+    this.onOpened,
+    this.onClosed,
     required this.child,
   }) : label = null,
        icon = null,
@@ -484,6 +548,8 @@ class _MaterialPopupMenuButton<T> extends StatefulWidget {
   final double? height;
   final double? size;
   final double? iconSize;
+  final VoidCallback? onOpened;
+  final VoidCallback? onClosed;
 
   bool get isIconButton => icon != null;
   bool get isCustomWidget => child != null;
@@ -495,6 +561,15 @@ class _MaterialPopupMenuButton<T> extends StatefulWidget {
 
 class _MaterialPopupMenuButtonState<T>
     extends State<_MaterialPopupMenuButton<T>> {
+  /// A pick closes the menu too; [PopupMenuButton.onCanceled] covers the rest.
+  void _select(int index) {
+    final selectedEntry = widget.items[index];
+    if (selectedEntry is AdaptivePopupMenuItem<T>) {
+      widget.onSelected(index, selectedEntry);
+    }
+    widget.onClosed?.call();
+  }
+
   @override
   Widget build(BuildContext context) {
     final menuItems = AdaptivePopupMenuButton._materialMenuItems<T>(
@@ -505,14 +580,11 @@ class _MaterialPopupMenuButtonState<T>
     // Custom widget case
     if (widget.isCustomWidget) {
       return PopupMenuButton<int>(
-        child: widget.child!,
         itemBuilder: (context) => menuItems,
-        onSelected: (index) {
-          final selectedEntry = widget.items[index];
-          if (selectedEntry is AdaptivePopupMenuItem<T>) {
-            widget.onSelected(index, selectedEntry);
-          }
-        },
+        onOpened: widget.onOpened,
+        onCanceled: widget.onClosed,
+        onSelected: _select,
+        child: widget.child!,
       );
     }
 
@@ -527,12 +599,9 @@ class _MaterialPopupMenuButtonState<T>
             size: widget.iconSize,
           ),
           itemBuilder: (context) => menuItems,
-          onSelected: (index) {
-            final selectedEntry = widget.items[index];
-            if (selectedEntry is AdaptivePopupMenuItem<T>) {
-              widget.onSelected(index, selectedEntry);
-            }
-          },
+          onOpened: widget.onOpened,
+          onCanceled: widget.onClosed,
+          onSelected: _select,
         ),
       );
     }
@@ -542,6 +611,10 @@ class _MaterialPopupMenuButtonState<T>
       child: TextButton(
         onPressed: () {},
         child: PopupMenuButton<int>(
+          itemBuilder: (context) => menuItems,
+          onOpened: widget.onOpened,
+          onCanceled: widget.onClosed,
+          onSelected: _select,
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -550,13 +623,6 @@ class _MaterialPopupMenuButtonState<T>
               const Icon(Icons.arrow_drop_down, size: 20),
             ],
           ),
-          itemBuilder: (context) => menuItems,
-          onSelected: (index) {
-            final selectedEntry = widget.items[index];
-            if (selectedEntry is AdaptivePopupMenuItem<T>) {
-              widget.onSelected(index, selectedEntry);
-            }
-          },
         ),
       ),
     );

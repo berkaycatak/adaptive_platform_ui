@@ -97,6 +97,8 @@ class IOS26PopupMenuButton<T> extends StatefulWidget {
     this.height = 32.0,
     this.shrinkWrap = false,
     this.buttonStyle = PopupButtonStyle.plain,
+    this.onOpened,
+    this.onClosed,
   }) : buttonIcon = null,
        iconSize = null,
        child = null,
@@ -115,6 +117,8 @@ class IOS26PopupMenuButton<T> extends StatefulWidget {
     double size = 44.0,
     this.iconSize,
     this.buttonStyle = PopupButtonStyle.glass,
+    this.onOpened,
+    this.onClosed,
   }) : buttonLabel = null,
        child = null,
        round = true,
@@ -133,6 +137,8 @@ class IOS26PopupMenuButton<T> extends StatefulWidget {
     this.buttonStyle = PopupButtonStyle.plain,
     this.triggerOnLongPress = false,
     this.onTap,
+    this.onOpened,
+    this.onClosed,
     required this.child,
   }) : buttonLabel = null,
        buttonIcon = null,
@@ -179,6 +185,13 @@ class IOS26PopupMenuButton<T> extends StatefulWidget {
 
   /// Called with the selected index when the user makes a selection
   final void Function(int index, AdaptivePopupMenuItem<T> entry) onSelected;
+
+  /// Called when the menu appears.
+  final VoidCallback? onOpened;
+
+  /// Called when the menu goes away, whether an entry was picked or not;
+  /// after [onSelected].
+  final VoidCallback? onClosed;
 
   /// Tint color for the control
   final Color? tint;
@@ -522,7 +535,11 @@ class _IOS26PopupMenuButtonState<T> extends State<IOS26PopupMenuButton<T>> {
   }
 
   Future<dynamic> _onMethodCall(MethodCall call) async {
-    if (call.method == 'itemSelected') {
+    if (call.method == 'menuOpened') {
+      widget.onOpened?.call();
+    } else if (call.method == 'menuClosed') {
+      widget.onClosed?.call();
+    } else if (call.method == 'itemSelected') {
       final args = call.arguments as Map?;
       final idx = (args?['index'] as num?)?.toInt();
 
@@ -644,6 +661,7 @@ class _IOS26PopupMenuButtonState<T> extends State<IOS26PopupMenuButton<T>> {
     BuildContext context,
     Offset globalPosition,
   ) async {
+    widget.onOpened?.call();
     final selected = await showCupertinoModalPopup<int>(
       context: context,
       builder: (ctx) {
@@ -678,5 +696,6 @@ class _IOS26PopupMenuButtonState<T> extends State<IOS26PopupMenuButton<T>> {
         widget.onSelected(selected, selectedEntry);
       }
     }
+    widget.onClosed?.call();
   }
 }
