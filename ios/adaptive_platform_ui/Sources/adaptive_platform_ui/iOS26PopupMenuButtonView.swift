@@ -1,11 +1,31 @@
 import Flutter
 import UIKit
 
+/// A button that says when its menu appears and goes away.
+///
+/// A menu shown by a `UIButton` is no view controller, so nothing else in the
+/// app sees it. `UIControl` runs it through its own context menu interaction
+/// and exposes that interaction's delegate methods for subclasses.
+private class MenuReportingButton: UIButton {
+    var onMenuOpened: (() -> Void)?
+    var onMenuClosed: (() -> Void)?
+
+    override func contextMenuInteraction(_ interaction: UIContextMenuInteraction, willDisplayMenuFor configuration: UIContextMenuConfiguration, animator: UIContextMenuInteractionAnimating?) {
+        super.contextMenuInteraction(interaction, willDisplayMenuFor: configuration, animator: animator)
+        onMenuOpened?()
+    }
+
+    override func contextMenuInteraction(_ interaction: UIContextMenuInteraction, willEndFor configuration: UIContextMenuConfiguration, animator: UIContextMenuInteractionAnimating?) {
+        super.contextMenuInteraction(interaction, willEndFor: configuration, animator: animator)
+        onMenuClosed?()
+    }
+}
+
 /// Platform view for iOS 26 popup menu button
 class iOS26PopupMenuButtonView: NSObject, FlutterPlatformView {
     private let channel: FlutterMethodChannel
     private let container: UIView
-    private let button: UIButton
+    private let button: MenuReportingButton
     private var currentButtonStyle: String = "plain"
     private var isRoundButton: Bool = false
     private var labels: [String] = []
@@ -20,7 +40,7 @@ class iOS26PopupMenuButtonView: NSObject, FlutterPlatformView {
     init(frame: CGRect, viewId: Int64, args: Any?, messenger: FlutterBinaryMessenger) {
         self.channel = FlutterMethodChannel(name: "adaptive_platform_ui/ios26_popup_menu_button_\(viewId)", binaryMessenger: messenger)
         self.container = UIView(frame: frame)
-        self.button = UIButton(type: .system)
+        self.button = MenuReportingButton(type: .system)
 
         var title: String? = nil
         var iconName: String? = nil
@@ -115,6 +135,12 @@ class iOS26PopupMenuButtonView: NSObject, FlutterPlatformView {
 
         if #available(iOS 14.0, *) {
             button.showsMenuAsPrimaryAction = !triggerOnLongPress
+            button.onMenuOpened = { [weak self] in
+                self?.channel.invokeMethod("menuOpened", arguments: nil)
+            }
+            button.onMenuClosed = { [weak self] in
+                self?.channel.invokeMethod("menuClosed", arguments: nil)
+            }
         } else {
             button.addTarget(self, action: #selector(onButtonPressedLegacy(_:)), for: .touchUpInside)
         }
