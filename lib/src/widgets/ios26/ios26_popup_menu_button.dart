@@ -690,12 +690,16 @@ class _IOS26PopupMenuButtonState<T> extends State<IOS26PopupMenuButton<T>> {
       },
     );
 
-    if (selected != null) {
-      final selectedEntry = widget.items[selected];
-      if (selectedEntry is AdaptivePopupMenuItem<T>) {
-        widget.onSelected(selected, selectedEntry);
+    // Closed whatever the pick does, as in AdaptivePopupMenuButton.
+    try {
+      if (selected != null) {
+        final selectedEntry = widget.items[selected];
+        if (selectedEntry is AdaptivePopupMenuItem<T>) {
+          widget.onSelected(selected, selectedEntry);
+        }
       }
+    } finally {
+      widget.onClosed?.call();
     }
-    widget.onClosed?.call();
   }
 }

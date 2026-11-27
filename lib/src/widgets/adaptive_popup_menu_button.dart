@@ -444,13 +444,18 @@ class AdaptivePopupMenuButton<T> {
       },
     );
 
-    if (selected != null) {
-      final selectedEntry = items[selected];
-      if (selectedEntry is AdaptivePopupMenuItem<T>) {
-        onSelected(selected, selectedEntry);
+    // The menu is closed whatever the pick does: a caller that counts open
+    // menus must hear of it also when onSelected throws.
+    try {
+      if (selected != null) {
+        final selectedEntry = items[selected];
+        if (selectedEntry is AdaptivePopupMenuItem<T>) {
+          onSelected(selected, selectedEntry);
+        }
       }
+    } finally {
+      onClosed?.call();
     }
-    onClosed?.call();
   }
 
   /// The gap between two groups in the action sheet, carrying the group's
@@ -563,11 +568,14 @@ class _MaterialPopupMenuButtonState<T>
     extends State<_MaterialPopupMenuButton<T>> {
   /// A pick closes the menu too; [PopupMenuButton.onCanceled] covers the rest.
   void _select(int index) {
-    final selectedEntry = widget.items[index];
-    if (selectedEntry is AdaptivePopupMenuItem<T>) {
-      widget.onSelected(index, selectedEntry);
+    try {
+      final selectedEntry = widget.items[index];
+      if (selectedEntry is AdaptivePopupMenuItem<T>) {
+        widget.onSelected(index, selectedEntry);
+      }
+    } finally {
+      widget.onClosed?.call();
     }
-    widget.onClosed?.call();
   }
 
   @override

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -95,7 +96,10 @@ void main() {
       AdaptivePopupMenuItem<String>(label: 'Two', value: 'two'),
     ];
 
-    Future<List<String>> pumpButton(WidgetTester tester) async {
+    Future<List<String>> pumpButton(
+      WidgetTester tester, {
+      bool selectionThrows = false,
+    }) async {
       final events = <String>[];
       await tester.pumpWidget(
         MaterialApp(
@@ -103,7 +107,10 @@ void main() {
             child: AdaptivePopupMenuButton.text<String>(
               label: 'Menu',
               items: items,
-              onSelected: (index, entry) => events.add('selected $index'),
+              onSelected: (index, entry) {
+                events.add('selected $index');
+                if (selectionThrows) throw StateError('selection failed');
+              },
               onOpened: () => events.add('opened'),
               onClosed: () => events.add('closed'),
             ),
@@ -135,6 +142,24 @@ void main() {
       await tester.tap(find.text('Two'));
       await tester.pumpAndSettle();
 
+      expect(events, ['opened', 'selected 1', 'closed']);
+    });
+
+    testWidgets('report the close also when the pick throws', (tester) async {
+      final events = await pumpButton(tester, selectionThrows: true);
+      final errors = <Object>[];
+
+      // The menu's future starts with the tap that opens it; the pick's
+      // error surfaces in that zone.
+      await runZonedGuarded(
+        () => tester.tap(find.text('Menu')),
+        (error, stack) => errors.add(error),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Two'));
+      await tester.pumpAndSettle();
+
+      expect(errors, [isStateError]);
       expect(events, ['opened', 'selected 1', 'closed']);
     });
   });
